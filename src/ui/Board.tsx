@@ -31,12 +31,23 @@ import { MovingPeg, PEG_ANIM, Peg } from './Peg';
 
 /** How hard the board is tilted. 1 = seen from straight above. */
 export const BOARD_TILT = 0.5;
+/** Tilt used when the screen is tall enough to spend the height on the disc. */
+export const BOARD_TILT_TALL = 0.58;
 /** Breathing room between the disc and the edge of the box we were given. */
 const SIDE_MARGIN = 16;
 /** A board wider than this stops being a toy and starts being a table. */
-const MAX_BOARD = 700;
+export const MAX_BOARD = 700;
 /** Minimum touch target (PLAN.md section 4 asks for 52 where it can be had). */
 const TOUCH = 52;
+
+/**
+ * A tall screen (a phone in portrait) can afford the deeper 3/4 view: the disc
+ * gets its full width and spends the extra height on perspective. A squat one
+ * (iPad, a Stage Manager window) flattens back out so the board still fits.
+ */
+export function boardTiltFor(width: number, height: number): number {
+  return height / Math.max(1, width) >= 2.0 ? BOARD_TILT_TALL : BOARD_TILT;
+}
 
 export interface BoardProps {
   state: GameState;
@@ -48,6 +59,14 @@ export interface BoardProps {
   trayAnchors?: Record<string, { x: number; y: number }>;
   /** bumped once per resolved move, so the flight restarts cleanly */
   moveNonce?: number;
+  /**
+   * Disc diameter in points. The screen owns this number so it can lay the
+   * banner and the die out against the same geometry; leave it out and the
+   * board falls back to filling whatever box it is dropped in.
+   */
+  width?: number;
+  /** Vertical squash of the disc; see `boardTiltFor()`. */
+  tilt?: number;
 }
 
 interface Metrics {
@@ -73,18 +92,18 @@ interface Metrics {
 }
 
 /** Geometry of a board `width` points across holding `pegCount` pegs. */
-function metricsFor(pegCount: number, width: number): Metrics {
+function metricsFor(pegCount: number, width: number, tilt: number = BOARD_TILT): Metrics {
   const layout = roundLayout(pegCount, width);
   const pegWidth = pegWidthFor(layout.spacing);
   const holeSize = holeSizeFor(pegWidth);
-  const centre = boardCentre(width, BOARD_TILT);
+  const centre = boardCentre(width, tilt);
   const anchor = pegDollAnchor(pegWidth);
   const boxH = pegWidth * PEG_DOLL_ASPECT;
 
   let top = 0;
-  let bottom = boardHeight(width, BOARD_TILT);
+  let bottom = boardHeight(width, tilt);
   const raw = layout.positions.map((p) => {
-    const q = projectHole(p.x, p.y, BOARD_TILT);
+    const q = projectHole(p.x, p.y, tilt);
     const y = centre.y + q.y - anchor.y;
     top = Math.min(top, y);
     bottom = Math.max(bottom, y + boxH);
@@ -127,8 +146,15 @@ function metricsFor(pegCount: number, width: number): Metrics {
 }
 
 /** Height of the whole scene as a multiple of its width, for a peg count. */
-function heightRatio(pegCount: number): number {
-  return metricsFor(pegCount, 1000).height / 1000;
+const ratioCache = new Map<string, number>();
+export function boardHeightRatio(pegCount: number, tilt: number = BOARD_TILT): number {
+  const key = `${pegCount}:${tilt}`;
+  let r = ratioCache.get(key);
+  if (r == null) {
+    r = metricsFor(pegCount, 1000, tilt).height / 1000;
+    ratioCache.set(key, r);
+  }
+  return r;
 }
 
 export function Board({
@@ -138,6 +164,8 @@ export function Board({
   onPick,
   trayAnchors,
   moveNonce = 0,
+  width: fixedWidth,
+  tilt = BOARD_TILT,
 }: BoardProps) {
   const t = useTheme();
   const theme: ArtTheme = t.scheme;
@@ -163,14 +191,18 @@ export function Board({
   }, []);
 
   const width = useMemo(() => {
+    if (fixedWidth != null) return Math.max(0, Math.floor(fixedWidth));
     if (box.w <= 0 || box.h <= 0) return 0;
-    const ratio = heightRatio(pegCount);
+    const ratio = boardHeightRatio(pegCount, tilt);
     return Math.floor(
       Math.max(0, Math.min(box.w - SIDE_MARGIN * 2, box.h / ratio, MAX_BOARD)),
     );
-  }, [box.w, box.h, pegCount]);
+  }, [fixedWidth, box.w, box.h, pegCount, tilt]);
 
-  const m = useMemo(() => (width > 0 ? metricsFor(pegCount, width) : null), [pegCount, width]);
+  const m = useMemo(
+    () => (width > 0 ? metricsFor(pegCount, width, tilt) : null),
+    [pegCount, width, tilt],
+  );
 
   const holes = useMemo(
     () => m?.layout.positions.map((p) => ({ x: p.x, y: p.y })) ?? [],
@@ -179,7 +211,7 @@ export function Board({
 
   const reported = useRef('');
   if (m && width > 0) {
-    const line = `pegs=${pegCount} board=${width}x${Math.round(m.height)} spacing=${m.layout.spacing.toFixed(1)} pegWidth=${m.pegWidth.toFixed(1)} hit=${Math.round(m.hit.w)}x${Math.round(m.hit.h)} rowPitch=${(m.layout.spacing * 0.866 * BOARD_TILT).toFixed(1)} box=${Math.round(box.w)}x${Math.round(box.h)}`;
+    const line = `pegs=${pegCount} board=${width}x${Math.round(m.height)} tilt=${tilt} spacing=${m.layout.spacing.toFixed(1)} pegWidth=${m.pegWidth.toFixed(1)} hit=${Math.round(m.hit.w)}x${Math.round(m.hit.h)} rowPitch=${(m.layout.spacing * 0.866 * tilt).toFixed(1)} box=${Math.round(box.w)}x${Math.round(box.h)}`;
     if (reported.current !== line && __DEV__) {
       reported.current = line;
       // dev only: read back with the browser console when checking touch sizes
@@ -187,8 +219,10 @@ export function Board({
     }
   }
 
+  const wrap = fixedWidth != null ? styles.fixedWrap : styles.wrap;
+
   if (!m || width <= 0) {
-    return <View onLayout={onLayout} style={styles.wrap} />;
+    return <View onLayout={onLayout} style={wrap} />;
   }
 
   const anchor = pegDollAnchor(m.pegWidth);
@@ -208,7 +242,7 @@ export function Board({
   }
 
   return (
-    <View onLayout={onLayout} style={styles.wrap}>
+    <View onLayout={onLayout} style={wrap}>
       <View
         ref={boardRef}
         onLayout={onBoardLayout}
@@ -219,7 +253,7 @@ export function Board({
         <View style={{ position: 'absolute', left: 0, top: m.overhang }}>
           <PerspectiveBoard
             width={width}
-            yScale={BOARD_TILT}
+            yScale={tilt}
             holes={holes}
             holeSize={m.holeSize}
             theme={theme}
@@ -234,8 +268,7 @@ export function Board({
           return (
             <View
               key={peg.index}
-              pointerEvents="none"
-              style={{ position: 'absolute', left: slot.left, top: slot.top }}
+              style={{ position: 'absolute', left: slot.left, top: slot.top, pointerEvents: 'none' }}
             >
               <Peg
                 width={m.pegWidth}
@@ -288,10 +321,7 @@ export function Board({
 
         {/* the peg being played, above everything else */}
         {move && movingPeg && movingAt ? (
-          <View
-            pointerEvents="none"
-            style={{ position: 'absolute', left: movingAt.left, top: movingAt.top }}
-          >
+          <View style={{ position: 'absolute', left: movingAt.left, top: movingAt.top, pointerEvents: 'none' }}>
             <MovingPeg
               key={`${move.pegIndex}-${moveNonce}`}
               width={m.pegWidth}
@@ -311,6 +341,8 @@ export function Board({
 
 const styles = StyleSheet.create({
   wrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  /** when the screen sizes the disc, the board is exactly as tall as it draws */
+  fixedWrap: { alignItems: 'center', justifyContent: 'center' },
 });
 
 export default Board;

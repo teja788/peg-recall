@@ -28,6 +28,8 @@ export interface PlayerTrayProps {
   /** tap to cycle the avatar (home / setup only) */
   onPress?: () => void;
   size?: number;
+  /** grows the card with the board on an iPad (see BOARD_CHROME_SCALE) */
+  scale?: number;
   /** reports the tray centre in window coordinates, for the capture flight */
   onAnchor?: (id: string, point: { x: number; y: number }) => void;
 }
@@ -88,9 +90,21 @@ export function PlayerTray({
   maxPegs = 8,
   onPress,
   size = 44,
+  scale = 1,
   onAnchor,
 }: PlayerTrayProps) {
   const t = useTheme();
+  const px = (n: number) => Math.round(n * scale);
+  const captionType = {
+    ...t.type.caption,
+    fontSize: px(t.type.caption.fontSize),
+    lineHeight: px(t.type.caption.lineHeight),
+  };
+  const heading = {
+    ...t.type.heading,
+    fontSize: px(t.type.heading.fontSize),
+    lineHeight: px(t.type.heading.lineHeight),
+  };
   const glow = useSharedValue(active ? 1 : 0);
   const ref = useRef<View>(null);
   const pegWidth = Math.max(10, Math.round(size * 0.3));
@@ -118,27 +132,24 @@ export function PlayerTray({
         styles.card,
         {
           backgroundColor: t.c.card,
-          borderRadius: t.radii.md,
-          paddingVertical: t.spacing.sm,
-          paddingHorizontal: t.spacing.md,
+          borderRadius: px(t.radii.md),
+          paddingVertical: px(t.spacing.sm),
+          paddingHorizontal: px(t.spacing.md),
           shadowColor: t.c.accent,
         },
         animated,
       ]}
     >
       <Avatar id={spec.avatar} size={size} />
-      <View style={{ marginLeft: t.spacing.sm }}>
-        <Text
-          numberOfLines={1}
-          style={{ ...t.type.caption, color: active ? t.c.accent : t.c.textDim }}
-        >
+      <View style={{ marginLeft: px(t.spacing.sm) }}>
+        <Text numberOfLines={1} style={{ ...captionType, color: active ? t.c.accent : t.c.textDim }}>
           {playerName(spec)}
           {spec.kind === 'ai' ? ' 🤖' : ''}
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexShrink: 1 }}>
-          <Text style={{ ...t.type.heading, color: t.c.text }}>{caption ?? score}</Text>
+          <Text style={{ ...heading, color: t.c.text }}>{caption ?? score}</Text>
           {captured && captured.length > 0 ? (
-            <View style={{ marginLeft: t.spacing.sm }}>
+            <View style={{ marginLeft: px(t.spacing.sm) }}>
               <CapturedRow
                 colors={captured}
                 max={maxPegs}

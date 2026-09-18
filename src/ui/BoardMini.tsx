@@ -63,7 +63,7 @@ export function BoardMini({ width, colors, theme }: BoardMiniProps) {
   }, [colors.length, width]);
 
   return (
-    <View pointerEvents="none" style={{ width, height: m.height }}>
+    <View style={{ width, height: m.height, pointerEvents: 'none' }}>
       <View style={{ position: 'absolute', left: 0, top: m.overhang }}>
         <PerspectiveBoard
           width={width}

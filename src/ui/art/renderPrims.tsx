@@ -17,6 +17,9 @@ import Svg, {
 } from 'react-native-svg';
 import type { Drawing, Grad, Prim } from './svgModel';
 
+/** Art never takes a tap; the board's own Pressables sit above it. */
+const NO_TOUCH = { pointerEvents: 'none' } as const;
+
 function gradient(g: Grad) {
   const stops = g.stops.map((s, i) => (
     <Stop key={i} offset={s.offset} stopColor={s.color} stopOpacity={s.opacity ?? 1} />
@@ -65,7 +68,7 @@ export function SvgDrawing({ drawing, width, height }: SvgDrawingProps) {
       width={width ?? s}
       height={height ?? s}
       viewBox={`0 0 ${s} ${s}`}
-      pointerEvents="none"
+      style={NO_TOUCH}
     >
       {drawing.grads.length > 0 ? <Defs>{drawing.grads.map(gradient)}</Defs> : null}
       {drawing.prims.map(prim)}

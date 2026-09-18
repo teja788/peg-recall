@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Text, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '../src/store/game';
 import { useSettings, type GameMode } from '../src/store/settings';
 import { PEG_PAINT, useTheme } from '../src/theme';
-import { Board } from '../src/ui/Board';
+import { Board, MAX_BOARD, boardHeightRatio, boardTiltFor } from '../src/ui/Board';
 import { Die } from '../src/ui/Die';
 import { GameOverSheet } from '../src/ui/GameOverSheet';
 import { PlayerTray, playerName } from '../src/ui/PlayerTray';
@@ -23,6 +23,34 @@ import type { PegColor } from '../src/engine/types';
 function isMode(v: unknown): v is GameMode {
   return v === 'ai' || v === '2p' || v === '3p';
 }
+
+/* ------------------------------------------------------------- proportions */
+
+/**
+ * The screen is one table: the banner sits just above the disc, the die just
+ * below it, and the three of them are centred as a single block in whatever
+ * height is left between the trays and the bottom controls (PLAN.md section 2).
+ *
+ * All of the chrome is sized off the disc, so an iPad board twice the size of
+ * the phone's does not end up ringed by phone-sized furniture.
+ */
+
+/** How much of the screen width the disc may take. */
+const BOARD_OF_WIDTH = 0.92;
+/** Board width the chrome below was drawn against (a 390 pt phone). */
+const CHROME_BASE = 360;
+/** Chrome never shrinks below the phone size, and stops growing at 1.6x. */
+const CHROME_MAX = 1.6;
+/** Gap between the banner and the top of the disc, at scale 1. */
+const BANNER_GAP = 12;
+/** Gap between the bottom of the disc and the die, at scale 1. */
+const DIE_GAP = 16;
+/** Die width at scale 1; the art is 0.9 as tall as it is wide. */
+const DIE_SIZE = 104;
+/** Room kept for the "Tap the die" hint, at scale 1, so nothing jumps. */
+const HINT_H = 24;
+/** Banner line box at scale 1. */
+const BANNER_H = 28;
 
 /** Confetti in the peg palette, so the win still reads as this game. */
 const CONFETTI = [
@@ -60,14 +88,22 @@ export default function GameScreen() {
   const [trayAnchors, setTrayAnchors] = useState<Record<string, { x: number; y: number }>>({});
   const started = useRef(false);
   const chime = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** measured height of the box the banner + board + die share */
+  const [tableH, setTableH] = useState(0);
 
   /* ------------------------------------------------- lifecycle */
 
+  // `started` guards against starting a second game on every render. Fast
+  // Refresh keeps the ref but runs the cleanup below, which nulls the store —
+  // so an empty store always means "no game running", whatever the ref says.
+  const hasState = state != null;
   useEffect(() => {
-    if (!hydrated || started.current) return;
+    if (!hydrated) return;
+    if (!hasState) started.current = false;
+    if (started.current) return;
     started.current = true;
     start(mode, useSettings.getState());
-  }, [hydrated, mode, start]);
+  }, [hydrated, hasState, mode, start]);
 
   useEffect(
     () => () => {
@@ -124,6 +160,48 @@ export default function GameScreen() {
   const onPick = useCallback((pegIndex: number) => dispatch({ type: 'PICK', pegIndex }), [dispatch]);
   const onRoll = useCallback(() => dispatch({ type: 'ROLL' }), [dispatch]);
 
+  /* ----------------------------------------------- composition */
+
+  const onTableLayout = useCallback((e: LayoutChangeEvent) => {
+    const h = e.nativeEvent.layout.height;
+    setTableH((cur) => (Math.abs(cur - h) < 0.5 ? cur : h));
+  }, []);
+
+  const pegCount = state?.spec.pegs ?? 25;
+  const L = useMemo(() => {
+    const cap = Math.min(win.width * BOARD_OF_WIDTH, MAX_BOARD);
+    const scale = Math.min(CHROME_MAX, Math.max(1, cap / CHROME_BASE));
+    const px = (n: number) => Math.round(n * scale);
+    const bannerH = px(BANNER_H);
+    const tilt = boardTiltFor(win.width, win.height);
+    const ratio = boardHeightRatio(pegCount, tilt);
+
+    // until the first layout lands, guess the middle box so nothing jumps far
+    const box =
+      tableH > 0 ? tableH : win.height - insets.top - insets.bottom - px(69) - px(52);
+
+    // 1. size the disc against the smallest the chrome can be
+    let die = px(DIE_SIZE);
+    let bannerGap = px(BANNER_GAP);
+    let dieGap = px(DIE_GAP);
+    const room = box - bannerH - bannerGap - dieGap - Math.round(die * 0.9) - px(HINT_H);
+    const width = Math.max(0, Math.floor(Math.min(cap, room / ratio)));
+
+    // 2. a tall phone leaves height over once the disc has hit its width cap.
+    //    Spend some of it on a bigger die and a little more air around the
+    //    disc — the rest stays as the margin the block is centred in, so the
+    //    banner, the board and the die still read as one object.
+    const spare = Math.max(0, room - width * ratio);
+    const grow = Math.min(spare * 0.25, die * 0.35);
+    die = Math.round(die + grow);
+    const left = spare - grow * 0.9;
+    bannerGap += Math.round(Math.min(left * 0.1, px(8)));
+    dieGap += Math.round(Math.min(left * 0.15, px(12)));
+
+    const dieBlock = Math.round(die * 0.9) + px(HINT_H);
+    return { scale, px, die, dieBlock, bannerGap, dieGap, bannerH, tilt, width };
+  }, [win.width, win.height, insets.top, insets.bottom, tableH, pegCount]);
+
   if (!state) {
     return (
       <View style={{ flex: 1, backgroundColor: t.c.page }} accessibilityLabel="Loading game" />
@@ -155,6 +233,8 @@ export default function GameScreen() {
     banner = active.kind === 'ai' ? `${playerName(active)} is thinking…` : `${playerName(active)}'s turn`;
   }
 
+  const trayCount = state.config.players.length;
+
   return (
     <View style={{ flex: 1, backgroundColor: t.c.page, paddingTop: insets.top }}>
       {/* trays */}
@@ -163,16 +243,22 @@ export default function GameScreen() {
           flexDirection: 'row',
           alignItems: 'center',
           paddingHorizontal: t.spacing.md,
+          paddingTop: L.px(t.spacing.xs),
           gap: t.spacing.sm,
         }}
       >
-        <IconButton glyph="‹" label="Leave game and go home" onPress={goHome} />
+        <IconButton
+          glyph="‹"
+          label="Leave game and go home"
+          onPress={goHome}
+          size={L.px(48)}
+        />
         <View
           style={{
             flex: 1,
             flexDirection: 'row',
             justifyContent: 'flex-end',
-            gap: t.spacing.sm,
+            gap: L.px(t.spacing.sm),
             flexShrink: 1,
           }}
         >
@@ -182,81 +268,115 @@ export default function GameScreen() {
               spec={p}
               score={state.scores[p.id] ?? 0}
               captured={captured[p.id]}
-              maxPegs={state.config.players.length > 2 ? 2 : 4}
+              maxPegs={trayCount > 2 ? 2 : 4}
               active={i === state.activePlayer && state.phase !== 'gameOver'}
-              size={state.config.players.length > 2 ? 30 : 36}
+              size={L.px(trayCount > 2 ? 30 : 36)}
+              scale={L.scale}
               onAnchor={onAnchor}
             />
           ))}
         </View>
       </View>
 
-      <View style={{ paddingVertical: t.spacing.sm }}>
-        <TurnBanner text={banner} tone={tone} />
-      </View>
+      {/* the table: banner, disc and die read as one block, centred together */}
+      <View
+        onLayout={onTableLayout}
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+        }}
+      >
+        <TurnBanner text={banner} tone={tone} scale={L.scale} />
 
-      <View style={{ flex: 1, paddingHorizontal: t.spacing.md }}>
+        <View style={{ height: L.bannerGap }} />
+
         <Board
           state={state}
+          width={L.width}
+          tilt={L.tilt}
           showShapes={showShapes}
           disabled={!canPick}
           onPick={onPick}
           trayAnchors={trayAnchors}
           moveNonce={state.turn}
         />
+
+        <View style={{ height: L.dieGap }} />
+
+        {/* die / countdown, directly under the disc */}
+        <View style={{ height: L.dieBlock, alignItems: 'center' }}>
+          <View
+            style={{
+              height: Math.round(L.die * 0.9),
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {state.phase === 'reveal' ? (
+              <RevealCountdown
+                size={L.px(64)}
+                durationMs={revealDurationMs(state)}
+                onDone={() => dispatch({ type: 'REVEAL_DONE' })}
+              />
+            ) : (
+              <Die
+                dieColor={state.dieColor}
+                colors={availableColors(state)}
+                rerolls={state.dieRerolls ?? 0}
+                canRoll={canRoll}
+                showShapes={showShapes}
+                size={L.die}
+                onRoll={onRoll}
+                onTumbleSound={() => play('roll')}
+              />
+            )}
+          </View>
+          {state.phase === 'roll' && human ? (
+            <Text
+              style={{
+                ...t.type.caption,
+                fontSize: L.px(t.type.caption.fontSize),
+                lineHeight: L.px(t.type.caption.lineHeight),
+                color: t.c.textDim,
+                marginTop: L.px(4),
+              }}
+            >
+              Tap the die
+            </Text>
+          ) : null}
+        </View>
       </View>
 
-      {/* die / countdown */}
+      {/* bottom controls */}
       <View
         style={{
-          minHeight: 132,
+          flexDirection: 'row',
           alignItems: 'center',
-          justifyContent: 'center',
-          paddingBottom: insets.bottom + t.spacing.md,
-          paddingTop: t.spacing.md,
-        }}
-      >
-        {state.phase === 'reveal' ? (
-          <RevealCountdown
-            durationMs={revealDurationMs(state)}
-            onDone={() => dispatch({ type: 'REVEAL_DONE' })}
-          />
-        ) : (
-          <Die
-            dieColor={state.dieColor}
-            colors={availableColors(state)}
-            rerolls={state.dieRerolls ?? 0}
-            canRoll={canRoll}
-            showShapes={showShapes}
-            size={112}
-            onRoll={onRoll}
-            onTumbleSound={() => play('roll')}
-          />
-        )}
-        {state.phase === 'roll' && human ? (
-          <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: t.spacing.sm }}>
-            Tap the die
-          </Text>
-        ) : null}
-      </View>
-
-      <View
-        style={{
-          position: 'absolute',
-          left: t.spacing.md,
-          bottom: insets.bottom + t.spacing.md,
+          paddingHorizontal: t.spacing.md,
+          paddingBottom: insets.bottom + t.spacing.xs,
         }}
       >
         <IconButton
           glyph={soundOn ? '🔊' : '🔇'}
           label={soundOn ? 'Sound on. Turn sound off' : 'Sound off. Turn sound on'}
           onPress={() => toggleSetting('soundOn')}
-          size={44}
+          size={L.px(44)}
         />
       </View>
 
       {state.phase === 'gameOver' && humanWon && !reduced ? (
-        <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+        <View
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+            pointerEvents: 'none',
+          }}
+        >
           <ConfettiCannon
             count={120}
             origin={{ x: win.width / 2, y: -20 }}

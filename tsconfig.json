@@ -4,11 +4,22 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@engine": ["./src/engine"],
-      "@art": ["./src/ui/art"],
-      "@sounds": ["./src/ui/sounds"]
+      "@engine": [
+        "./src/engine"
+      ],
+      "@art": [
+        "./src/ui/art"
+      ],
+      "@sounds": [
+        "./src/ui/sounds"
+      ]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

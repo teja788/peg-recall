@@ -18,6 +18,9 @@ import Svg, {
 } from 'react-native-svg';
 import type { Grad, Prim, Scene } from './perspectiveModel';
 
+/** Art never takes a tap; the board's own Pressables sit above it. */
+const NO_TOUCH = { pointerEvents: 'none' } as const;
+
 function gradient(g: Grad) {
   const stops = g.stops.map((s, i) => (
     <Stop key={i} offset={s.offset} stopColor={s.color} stopOpacity={s.opacity ?? 1} />
@@ -66,7 +69,7 @@ export function SvgScene({ scene, width, height }: SvgSceneProps) {
       width={width ?? scene.w}
       height={height ?? scene.h}
       viewBox={`0 0 ${scene.w} ${scene.h}`}
-      pointerEvents="none"
+      style={NO_TOUCH}
     >
       {scene.grads.length > 0 ? <Defs>{scene.grads.map(gradient)}</Defs> : null}
       {scene.prims.map(prim)}

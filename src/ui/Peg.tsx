@@ -164,7 +164,7 @@ function PegImpl({
   });
 
   return (
-    <Animated.View pointerEvents="none" style={[{ width, height: boxH }, body]}>
+    <Animated.View style={[{ width, height: boxH, pointerEvents: 'none' }, body]}>
       <Faces
         width={width}
         color={color}
@@ -283,12 +283,12 @@ function MovingPegImpl({
   }));
 
   return (
-    <View pointerEvents="none" style={{ width, height: boxH }}>
+    <View style={{ width, height: boxH, pointerEvents: 'none' }}>
       {reduced ? null : (
         <Animated.View
-          pointerEvents="none"
           style={[
             {
+              pointerEvents: 'none',
               position: 'absolute',
               left: width / 2 - shadowW / 2,
               top: width * 1.775 - shadowW * 0.13,

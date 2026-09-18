@@ -12,7 +12,16 @@ import Animated, {
 import { useTheme } from '../theme';
 
 /** One line of text that slides in whenever it changes. */
-export function TurnBanner({ text, tone }: { text: string; tone?: 'normal' | 'accent' }) {
+export function TurnBanner({
+  text,
+  tone,
+  scale = 1,
+}: {
+  text: string;
+  tone?: 'normal' | 'accent';
+  /** grows the line with the board on an iPad (see BOARD_CHROME_SCALE) */
+  scale?: number;
+}) {
   const t = useTheme();
   const reduced = useReducedMotion();
   const [shown, setShown] = useState(text);
@@ -58,14 +67,26 @@ export function TurnBanner({ text, tone }: { text: string; tone?: 'normal' | 'ac
 
   return (
     <Animated.View
-      style={[{ alignItems: 'center', justifyContent: 'center', minHeight: 32 }, animated]}
+      style={[
+        {
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: Math.round(28 * scale),
+        },
+        animated,
+      ]}
       accessibilityLiveRegion="polite"
       accessible
       accessibilityLabel={shown}
     >
       <Text
         numberOfLines={1}
-        style={{ ...t.type.heading, color: tone === 'accent' ? t.c.accent : t.c.text }}
+        style={{
+          ...t.type.heading,
+          fontSize: Math.round(t.type.heading.fontSize * scale),
+          lineHeight: Math.round(t.type.heading.lineHeight * scale),
+          color: tone === 'accent' ? t.c.accent : t.c.text,
+        }}
       >
         {shown}
       </Text>
