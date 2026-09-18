@@ -141,7 +141,7 @@ Estimates assume Claude writes the code and you test on the simulator.
 | 2. Modes | ✅ vs Computer (Bunny/Fox/Owl), 2P, 3P, avatars, 4 board sizes — built with Phase 1 | done |
 | 3. Polish | Palette, dark mode, sound, haptics, Reduce Motion, VoiceOver done with Phase 1. Game-screen composition + iPad chrome scaling in progress (2026-09-18) | in progress |
 | 4. Persist | ✅ Settings + rules toggles persisted (sqlite kv-store). Stats screen still TODO | mostly done |
-| 5. Ship prep | ✅ Icon, splash, privacy + support pages live, listing copy (store-assets/), EAS linked (@seeker88/pegrecall), eas.json, .easignore, OTA channels. TODO: simulator run, screenshots, first EAS build (user runs it), TestFlight | half done |
+| 5. Ship prep | ✅ Icon, splash, privacy + support pages live, listing copy (store-assets/), EAS linked (@seeker88/pegrecall), eas.json, .easignore, OTA channels. ✅ Runs in Expo Go 55 on the iOS 16.2 simulator (home + game verified 2026-09-18). TODO: store screenshots, first EAS build (user runs it), TestFlight | mostly done |
 | 6. Submit | EAS build → eas submit → review (24–48 h) | 1 h + wait |
 
 Realistic: playable on simulator in 2 days, submitted within a week of enrollment.
