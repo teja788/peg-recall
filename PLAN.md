@@ -139,9 +139,9 @@ Estimates assume Claude writes the code and you test on the simulator.
 | 0. Clocks | Already have: Apple Developer account (Team 9WU98AXT3W), Expo account seeker88. Repo github.com/teja788/peg-recall (public, needed for free GitHub Pages). Pages: https://teja788.github.io/peg-recall/ → privacy.html + support.html served from /docs | you: 10 min |
 | 1. Core | ✅ 2026-09-18: engine (40 tests), round layout (13 tests), art (peg dolls, perspective board, wooden die, icon, sounds), screens. Integration of round board + animations in progress | done |
 | 2. Modes | ✅ vs Computer (Bunny/Fox/Owl), 2P, 3P, avatars, 4 board sizes — built with Phase 1 | done |
-| 3. Polish | Palette, dark mode, sound, haptics, Reduce Motion, VoiceOver, iPad layout | 1 day |
-| 4. Persist | Settings, stats (wins per tier, streaks), rules toggles | 2 h |
-| 5. Ship prep | Icon, splash, privacy + support pages, screenshots (6.5"), App Store listing, TestFlight | 1 day |
+| 3. Polish | Palette, dark mode, sound, haptics, Reduce Motion, VoiceOver done with Phase 1. Game-screen composition + iPad chrome scaling in progress (2026-09-18) | in progress |
+| 4. Persist | ✅ Settings + rules toggles persisted (sqlite kv-store). Stats screen still TODO | mostly done |
+| 5. Ship prep | ✅ Icon, splash, privacy + support pages live, listing copy (store-assets/), EAS linked (@seeker88/pegrecall), eas.json, .easignore, OTA channels. TODO: simulator run, screenshots, first EAS build (user runs it), TestFlight | half done |
 | 6. Submit | EAS build → eas submit → review (24–48 h) | 1 h + wait |
 
 Realistic: playable on simulator in 2 days, submitted within a week of enrollment.
