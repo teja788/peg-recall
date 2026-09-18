@@ -1,18 +1,35 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import Svg, { Rect } from 'react-native-svg';
 
 import { useTheme } from '../theme';
 
-/** 44 pt round button holding one glyph (speaker, gear, back…). */
+/** The two bars of a pause button. Drawn, not typed: ⏸ renders as a colour
+ *  emoji on some platforms and as nothing at all on others. */
+export function PauseGlyph({ size, color }: { size: number; color: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Rect x={7.4} y={4.5} width={3.6} height={15} rx={1.6} fill={color} />
+      <Rect x={13} y={4.5} width={3.6} height={15} rx={1.6} fill={color} />
+    </Svg>
+  );
+}
+
+/** 44 pt round button holding one glyph (speaker, gear, back…) or drawn icon. */
 export function IconButton({
   glyph,
+  icon,
   label,
+  hint,
   onPress,
   size = 48,
   tone = 'plain',
 }: {
-  glyph: string;
+  glyph?: string;
+  /** drawn icon, used instead of `glyph` */
+  icon?: React.ReactNode;
   label: string;
+  hint?: string;
   onPress: () => void;
   size?: number;
   tone?: 'plain' | 'filled';
@@ -22,6 +39,7 @@ export function IconButton({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityHint={hint}
       onPress={onPress}
       hitSlop={8}
       style={({ pressed }) => ({
@@ -36,9 +54,14 @@ export function IconButton({
         opacity: pressed ? 0.6 : 1,
       })}
     >
-      <Text allowFontScaling={false} style={{ fontSize: Math.round(size * 0.46) }}>
-        {glyph}
-      </Text>
+      {icon ?? (
+        <Text
+          allowFontScaling={false}
+          style={{ fontSize: Math.round(size * 0.46), color: t.c.text }}
+        >
+          {glyph}
+        </Text>
+      )}
     </Pressable>
   );
 }
@@ -72,7 +95,9 @@ export function Chip({
         borderRadius: t.radii.pill,
         backgroundColor: selected ? t.c.accent : t.c.card,
         borderWidth: 2,
-        borderColor: selected ? t.c.accent : t.c.line,
+        // a cream ring keeps the selected (accent-blue) chip from melting into
+        // the teal backdrop it sits on
+        borderColor: selected ? t.c.card : t.c.line,
         opacity: pressed ? 0.75 : 1,
       })}
     >

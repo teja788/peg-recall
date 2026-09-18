@@ -41,6 +41,18 @@ export function shapeInkFor(color: PegColor): string {
 
 export interface Surfaces {
   page: string;
+  /** Table backdrop: top of the vertical gradient (see src/ui/Backdrop.tsx). */
+  backdropTop: string;
+  /** Table backdrop: bottom of the vertical gradient. */
+  backdropBottom: string;
+  /** Argyle lattice drawn over the backdrop, at BACKDROP_PATTERN_OPACITY. */
+  backdropPattern: string;
+  /** Ink the vignette darkens the backdrop's edges with. */
+  backdropVignette: string;
+  /** Primary text sitting directly on the backdrop (>= 4.5:1 on backdropTop). */
+  onBackdrop: string;
+  /** Secondary text on the backdrop (still >= 4.5:1 — see the note below). */
+  onBackdropMuted: string;
   board: string;
   card: string;
   pegDown: string;
@@ -54,8 +66,21 @@ export interface Surfaces {
   scrim: string;
 }
 
+/**
+ * The backdrop is a painted table, not a flat page (user feedback 2026-09-19:
+ * "background is too dull"). It is deliberately a deeper teal than the Toy
+ * Theater reference board: white body text has to clear WCAG AA (4.5:1) sitting
+ * straight on it, and the reference blue (#3E9BC9) only reaches 3.1:1. At
+ * #2A7399 pure white is 5.2:1 and the 90%-white secondary ink is 4.6:1.
+ */
 export const LIGHT: Surfaces = {
   page: '#F6F1E8',
+  backdropTop: '#2A7399',
+  backdropBottom: '#1B5478',
+  backdropPattern: '#FFFFFF',
+  backdropVignette: '#0B3550',
+  onBackdrop: '#FFFFFF',
+  onBackdropMuted: 'rgba(255,255,255,0.90)',
   board: '#FFFDF8',
   card: '#FFFDF8',
   pegDown: '#D9D0C3',
@@ -71,6 +96,12 @@ export const LIGHT: Surfaces = {
 
 export const DARK: Surfaces = {
   page: '#1E1B18',
+  backdropTop: '#16324A',
+  backdropBottom: '#0E2233',
+  backdropPattern: '#8FC3E3',
+  backdropVignette: '#000000',
+  onBackdrop: 'rgba(255,255,255,0.92)',
+  onBackdropMuted: 'rgba(255,255,255,0.72)',
   board: '#2A2622',
   card: '#2A2622',
   pegDown: '#3A342E',

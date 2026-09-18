@@ -10,6 +10,7 @@ import {
   type GameMode,
 } from '../src/store/settings';
 import { useTheme } from '../src/theme';
+import { Backdrop } from '../src/ui/Backdrop';
 import { BoardMini } from '../src/ui/BoardMini';
 import { Chip, IconButton, ModeCard } from '../src/ui/controls';
 import { PEG_PAINT } from '../src/theme/tokens';
@@ -42,7 +43,7 @@ export default function Home() {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.c.page }}>
+    <Backdrop>
       <View
         style={{
           flexDirection: 'row',
@@ -57,11 +58,13 @@ export default function Home() {
           glyph={soundOn ? '🔊' : '🔇'}
           label={soundOn ? 'Sound on. Turn sound off' : 'Sound off. Turn sound on'}
           onPress={() => toggle('soundOn')}
+          tone="filled"
         />
         <IconButton
           glyph="⚙️"
           label="Settings"
           onPress={() => router.push('/settings')}
+          tone="filled"
         />
       </View>
 
@@ -75,10 +78,19 @@ export default function Home() {
         }}
       >
         <View style={{ marginBottom: t.spacing.lg }}>
-          <Text accessibilityRole="header" style={{ ...t.type.display, color: t.c.text }}>
+          <Text
+            accessibilityRole="header"
+            style={{
+              ...t.type.display,
+              color: t.c.onBackdrop,
+              textShadowColor: 'rgba(0,0,0,0.28)',
+              textShadowOffset: { width: 0, height: 2 },
+              textShadowRadius: 6,
+            }}
+          >
             Peg Recall
           </Text>
-          <Text style={{ ...t.type.body, color: t.c.textDim, marginTop: t.spacing.xs }}>
+          <Text style={{ ...t.type.body, color: t.c.onBackdropMuted, marginTop: t.spacing.xs }}>
             Roll a colour. Remember where it was.
           </Text>
         </View>
@@ -117,6 +129,6 @@ export default function Home() {
           />
         </View>
       </ScrollView>
-    </View>
+    </Backdrop>
   );
 }

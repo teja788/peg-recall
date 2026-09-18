@@ -72,6 +72,18 @@ export function TurnBanner({
           alignItems: 'center',
           justifyContent: 'center',
           minHeight: Math.round(28 * scale),
+          // a cream pill, so the line stays legible on the teal table backdrop
+          alignSelf: 'center',
+          maxWidth: '94%',
+          paddingHorizontal: Math.round(t.spacing.lg * scale),
+          paddingVertical: Math.round(t.spacing.xs * scale),
+          borderRadius: t.radii.pill,
+          backgroundColor: t.c.card,
+          shadowColor: t.c.shadow,
+          shadowOpacity: 0.18,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 3 },
+          elevation: 2,
         },
         animated,
       ]}

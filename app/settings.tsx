@@ -11,6 +11,7 @@ import {
   useSettings,
 } from '../src/store/settings';
 import { useTheme } from '../src/theme';
+import { Backdrop } from '../src/ui/Backdrop';
 import { Chip, IconButton, ToggleRow } from '../src/ui/controls';
 import { PlayerTray } from '../src/ui/PlayerTray';
 import type { Difficulty } from '../src/engine/types';
@@ -25,7 +26,8 @@ export default function SettingsScreen() {
   const s = useSettings();
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.c.page, paddingTop: insets.top }}>
+    <Backdrop>
+      <View style={{ paddingTop: insets.top }} />
       <View
         style={{
           flexDirection: 'row',
@@ -38,8 +40,12 @@ export default function SettingsScreen() {
           glyph="‹"
           label="Close settings"
           onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+          tone="filled"
         />
-        <Text accessibilityRole="header" style={{ ...t.type.title, color: t.c.text, marginLeft: 4 }}>
+        <Text
+          accessibilityRole="header"
+          style={{ ...t.type.title, color: t.c.onBackdrop, marginLeft: t.spacing.sm }}
+        >
           Settings
         </Text>
       </View>
@@ -76,7 +82,7 @@ export default function SettingsScreen() {
           onToggle={() => s.toggle('kidMode')}
         />
 
-        <Text style={{ ...t.type.label, color: t.c.textDim, marginTop: t.spacing.md }}>
+        <Text style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}>
           Board size
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.sm }}>
@@ -90,7 +96,7 @@ export default function SettingsScreen() {
           ))}
         </View>
 
-        <Text style={{ ...t.type.label, color: t.c.textDim, marginTop: t.spacing.md }}>
+        <Text style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}>
           Computer opponent
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.sm }}>
@@ -105,14 +111,14 @@ export default function SettingsScreen() {
             />
           ))}
         </View>
-        <Text style={{ ...t.type.caption, color: t.c.textDim }}>
+        <Text style={{ ...t.type.caption, color: t.c.onBackdropMuted }}>
           {DIFFICULTY_HINT[s.difficulty]}
         </Text>
 
-        <Text style={{ ...t.type.label, color: t.c.textDim, marginTop: t.spacing.md }}>
+        <Text style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}>
           Players
         </Text>
-        <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: -t.spacing.xs }}>
+        <Text style={{ ...t.type.caption, color: t.c.onBackdropMuted, marginTop: -t.spacing.xs }}>
           Tap an animal to change it. The computer always wears its own face.
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.sm }}>
@@ -128,7 +134,7 @@ export default function SettingsScreen() {
           ))}
         </View>
 
-        <Text style={{ ...t.type.label, color: t.c.textDim, marginTop: t.spacing.md }}>Stats</Text>
+        <Text style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}>Stats</Text>
         <View
           style={{
             padding: t.spacing.lg,
@@ -143,6 +149,6 @@ export default function SettingsScreen() {
           </Text>
         </View>
       </ScrollView>
-    </View>
+    </Backdrop>
   );
 }

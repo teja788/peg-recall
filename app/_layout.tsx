@@ -16,7 +16,9 @@ export default function RootLayout() {
     void hydrate();
   }, [hydrate]);
 
-  const page = scheme === 'dark' ? DARK.page : LIGHT.page;
+  // the colour behind the screens during a transition — matching the table
+  // backdrop keeps a cream flash from showing between Home and Game
+  const page = scheme === 'dark' ? DARK.backdropBottom : LIGHT.backdropBottom;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

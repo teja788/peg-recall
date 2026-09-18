@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Text, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
+import { Platform, Text, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,13 +8,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '../src/store/game';
 import { useSettings, type GameMode } from '../src/store/settings';
 import { PEG_PAINT, useTheme } from '../src/theme';
+import { Backdrop } from '../src/ui/Backdrop';
 import { Board, MAX_BOARD, boardHeightRatio, boardTiltFor } from '../src/ui/Board';
 import { Die } from '../src/ui/Die';
 import { GameOverSheet } from '../src/ui/GameOverSheet';
+import { PauseSheet } from '../src/ui/PauseSheet';
 import { PlayerTray, playerName } from '../src/ui/PlayerTray';
 import { RevealCountdown } from '../src/ui/RevealCountdown';
 import { TurnBanner } from '../src/ui/TurnBanner';
-import { IconButton } from '../src/ui/controls';
+import { IconButton, PauseGlyph } from '../src/ui/controls';
 import { activePlayerSpec, availableColors, isHumanTurn, revealDurationMs } from '../src/ui/engine';
 import { hapticFlip, hapticMatch, useSounds } from '../src/ui/feedback';
 
@@ -79,9 +81,12 @@ export default function GameScreen() {
   const state = useGame((s) => s.state);
   const busy = useGame((s) => s.busy);
   const feedback = useGame((s) => s.feedback);
+  const paused = useGame((s) => s.paused);
   const start = useGame((s) => s.start);
   const dispatch = useGame((s) => s.dispatch);
   const rematch = useGame((s) => s.rematch);
+  const pause = useGame((s) => s.pause);
+  const resume = useGame((s) => s.resume);
   const teardown = useGame((s) => s.teardown);
 
   const play = useSounds();
@@ -139,11 +144,43 @@ export default function GameScreen() {
     );
   }, []);
 
-  /** Back to Home, whether we were pushed from it or deep-linked straight here. */
+  /** Back to Home, whether we were pushed from it or deep-linked straight here.
+   *  `resume` first so the paused flag never outlives the screen. */
   const goHome = useCallback(() => {
+    resume();
     if (router.canGoBack()) router.back();
     else router.replace('/');
-  }, [router]);
+  }, [router, resume]);
+
+  const openPause = useCallback(() => {
+    if (useGame.getState().state?.phase === 'gameOver') return;
+    pause();
+  }, [pause]);
+
+  /** Restart from the pause menu: a new seed, and the board running again. */
+  const restart = useCallback(() => {
+    rematch();
+  }, [rematch]);
+
+  /* -------------------------------------------------- web: Esc key */
+
+  // Esc opens the menu and closes it again — the keyboard equivalent of the
+  // pause button. (Browser Back is deliberately left alone: expo-router owns
+  // `popstate`, and a history guard fights it rather than trapping it. Back
+  // already does the sane thing and leaves the game.)
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const w = globalThis.window as Window | undefined;
+    if (!w) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      const g = useGame.getState();
+      if (g.paused) g.resume();
+      else if (g.state && g.state.phase !== 'gameOver') g.pause();
+    };
+    w.addEventListener('keydown', onKey);
+    return () => w.removeEventListener('keydown', onKey);
+  }, []);
 
   /** pegs each player has taken, oldest first — the little row in their tray */
   const pegs = state?.pegs;
@@ -204,14 +241,16 @@ export default function GameScreen() {
 
   if (!state) {
     return (
-      <View style={{ flex: 1, backgroundColor: t.c.page }} accessibilityLabel="Loading game" />
+      <Backdrop>
+        <View style={{ flex: 1 }} accessibilityLabel="Loading game" />
+      </Backdrop>
     );
   }
 
   const human = isHumanTurn(state);
   const active = activePlayerSpec(state);
-  const canRoll = state.phase === 'roll' && human && !busy;
-  const canPick = state.phase === 'pick' && human && !busy;
+  const canRoll = state.phase === 'roll' && human && !busy && !paused;
+  const canPick = state.phase === 'pick' && human && !busy && !paused;
   const humanWon =
     state.phase === 'gameOver' &&
     state.config.players.some((p) => p.kind === 'human' && state.winnerIds.includes(p.id));
@@ -236,7 +275,8 @@ export default function GameScreen() {
   const trayCount = state.config.players.length;
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.c.page, paddingTop: insets.top }}>
+    <Backdrop>
+    <View style={{ flex: 1, paddingTop: insets.top }}>
       {/* trays */}
       <View
         style={{
@@ -248,10 +288,12 @@ export default function GameScreen() {
         }}
       >
         <IconButton
-          glyph="‹"
-          label="Leave game and go home"
-          onPress={goHome}
+          icon={<PauseGlyph size={Math.round(L.px(48) * 0.5)} color={t.c.text} />}
+          label="Pause"
+          hint="Stops the game and opens the menu"
+          onPress={openPause}
           size={L.px(48)}
+          tone="filled"
         />
         <View
           style={{
@@ -318,6 +360,7 @@ export default function GameScreen() {
               <RevealCountdown
                 size={L.px(64)}
                 durationMs={revealDurationMs(state)}
+                paused={paused}
                 onDone={() => dispatch({ type: 'REVEAL_DONE' })}
               />
             ) : (
@@ -339,7 +382,7 @@ export default function GameScreen() {
                 ...t.type.caption,
                 fontSize: L.px(t.type.caption.fontSize),
                 lineHeight: L.px(t.type.caption.lineHeight),
-                color: t.c.textDim,
+                color: t.c.onBackdropMuted,
                 marginTop: L.px(4),
               }}
             >
@@ -363,6 +406,7 @@ export default function GameScreen() {
           label={soundOn ? 'Sound on. Turn sound off' : 'Sound off. Turn sound on'}
           onPress={() => toggleSetting('soundOn')}
           size={L.px(44)}
+          tone="filled"
         />
       </View>
 
@@ -392,6 +436,11 @@ export default function GameScreen() {
       {state.phase === 'gameOver' ? (
         <GameOverSheet state={state} onRematch={rematch} onHome={goHome} />
       ) : null}
+
+      {paused && state.phase !== 'gameOver' ? (
+        <PauseSheet onResume={resume} onRestart={restart} onHome={goHome} />
+      ) : null}
     </View>
+    </Backdrop>
   );
 }

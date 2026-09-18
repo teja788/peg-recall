@@ -27,21 +27,66 @@ import { AVATAR_CYCLE, type GameMode, type Settings } from './settings';
 /* ---------------------------------------------------------------- timers */
 
 let generation = 0;
-let timers = new Set<ReturnType<typeof setTimeout>>();
 
-function clearTimers() {
-  timers.forEach(clearTimeout);
-  timers = new Set();
+/** A scheduled step of the game, kept so the pause menu can freeze it mid-flight. */
+interface Pending {
+  fn: () => void;
+  /** which game this belongs to — a stale one never runs */
+  gen: number;
+  /** wall-clock time it should fire at; shifted forward by however long we paused */
+  due: number;
+  handle: ReturnType<typeof setTimeout> | null;
 }
 
-/** setTimeout that is cancelled by teardown/restart and ignores stale runs. */
+let timers = new Map<number, Pending>();
+let nextTimerId = 1;
+/** non-null while the game is paused: when we stopped the clock */
+let pausedAt: number | null = null;
+
+function clearTimers() {
+  timers.forEach((p) => {
+    if (p.handle) clearTimeout(p.handle);
+  });
+  timers = new Map();
+  pausedAt = null;
+}
+
+function arm(id: number, p: Pending, ms: number) {
+  p.handle = setTimeout(() => {
+    timers.delete(id);
+    if (p.gen === generation) p.fn();
+  }, Math.max(0, ms));
+}
+
+/** setTimeout that is cancelled by teardown/restart, frozen by pause, and
+ *  ignores stale runs. */
 function later(fn: () => void, ms: number) {
-  const g = generation;
-  const t = setTimeout(() => {
-    timers.delete(t);
-    if (g === generation) fn();
-  }, ms);
-  timers.add(t);
+  const id = nextTimerId++;
+  const p: Pending = { fn, gen: generation, due: Date.now() + ms, handle: null };
+  timers.set(id, p);
+  if (pausedAt == null) arm(id, p, ms);
+}
+
+/** Stop the clock. Every pending step keeps the time it had left. */
+function pauseTimers() {
+  if (pausedAt != null) return;
+  pausedAt = Date.now();
+  timers.forEach((p) => {
+    if (p.handle) clearTimeout(p.handle);
+    p.handle = null;
+  });
+}
+
+/** Start it again, each step picking up exactly where it was interrupted. */
+function resumeTimers() {
+  if (pausedAt == null) return;
+  const slept = Date.now() - pausedAt;
+  pausedAt = null;
+  const now = Date.now();
+  timers.forEach((p, id) => {
+    p.due += slept;
+    arm(id, p, p.due - now);
+  });
 }
 
 /* ------------------------------------------------------------ player setup */
@@ -95,11 +140,15 @@ interface GameStore {
   busy: boolean;
   /** last resolved move, for sound/haptics/animation triggers */
   feedback: MoveFeedback;
+  /** the pause menu is up: no AI timers fire and no move is accepted */
+  paused: boolean;
   mode: GameMode;
 
   start: (mode: GameMode, settings: Settings, seed?: number) => void;
   dispatch: (action: GameAction) => void;
   rematch: () => void;
+  pause: () => void;
+  resume: () => void;
   teardown: () => void;
 }
 
@@ -109,8 +158,8 @@ let nonce = 0;
 export const useGame = create<GameStore>((setState, getState) => {
   /** Decide what the machine should do next, once nothing is animating. */
   function schedule() {
-    const { state, busy } = getState();
-    if (!state || busy) return;
+    const { state, busy, paused } = getState();
+    if (!state || busy || paused) return;
     if (state.phase === 'roll' && !isHumanTurn(state)) {
       later(() => getState().dispatch({ type: 'ROLL' }), timing.aiRollDelay);
       return;
@@ -174,6 +223,7 @@ export const useGame = create<GameStore>((setState, getState) => {
     ais: {},
     busy: false,
     feedback: null,
+    paused: false,
     mode: 'ai',
 
     start: (mode, settings, seed) => {
@@ -187,12 +237,16 @@ export const useGame = create<GameStore>((setState, getState) => {
       }
       // the opening reveal: every AI gets its look at the whole board
       ais = observeOpening(state, ais);
-      setState({ state, ais, busy: false, feedback: null, mode });
+      setState({ state, ais, busy: false, feedback: null, paused: false, mode });
     },
 
     dispatch: (action) => {
-      const prev = getState().state;
+      const { state: prev, paused } = getState();
       if (!prev) return;
+      // While the pause menu is up the board is frozen: no rolls, no picks, and
+      // no countdown/animation callbacks land either. RESTART is the one action
+      // that gets through, because that is how the menu starts a fresh game.
+      if (paused && action.type !== 'RESTART') return;
       const next = reduce(prev, action);
       if (next === prev) return;
       setState({ state: next });
@@ -239,14 +293,29 @@ export const useGame = create<GameStore>((setState, getState) => {
     rematch: () => {
       generation += 1;
       clearTimers();
-      setState({ busy: false, feedback: null });
+      setState({ busy: false, feedback: null, paused: false });
       getState().dispatch({ type: 'RESTART', seed: Date.now() });
+    },
+
+    pause: () => {
+      const { state, paused } = getState();
+      if (!state || paused) return;
+      pauseTimers();
+      setState({ paused: true });
+    },
+
+    resume: () => {
+      if (!getState().paused) return;
+      setState({ paused: false });
+      // every pending step was kept, so the AI turn / match animation carries on
+      // from where it was — re-scheduling here would arm a second, duplicate one
+      resumeTimers();
     },
 
     teardown: () => {
       generation += 1;
       clearTimers();
-      setState({ state: null, ais: {}, busy: false, feedback: null });
+      setState({ state: null, ais: {}, busy: false, feedback: null, paused: false });
     },
   };
 });
