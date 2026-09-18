@@ -30,6 +30,7 @@ const C = {
   grain: '#B5906A',
   holeDeep: '#8E6C48',
   hole: '#B78F63',
+  holeLip: '#F2E3CA',
   pegCap: '#D9C3A5',    // natural, face-down peg
   pegCapRim: '#AE8E67',
   pegBody: '#B9986F',
@@ -40,86 +41,176 @@ const C = {
   green: '#009E73', greenRim: '#00795A', greenDark: '#004F3B',
 };
 
-// Board centred in the 1024 canvas.
-const CX = 512, CY = 512, R = 420;
+// ---------------------------------------------------------------- geometry
+// The mark is the game object as the game now draws it (PLAN.md section 2):
+// a ROUND wooden board seen from a 3/4 angle with upright peg dolls standing
+// in it. Proportions mirror src/ui/art/perspectiveModel.ts exactly, so the
+// icon and the board on screen are the same object.
+
+const YS = 0.55;                 // vertical squash of the disc (PLAN: 0.55-0.6)
+const R = 420;                   // disc radius on the long axis
+const RY = R * YS;
+const EDGE = 2 * R * 0.09;       // visible wooden side (BOARD_EDGE_RATIO)
+const CX = 512;
+const CY = 544;                  // tuned so the whole mark is centred in 1024
+
 // 7 pegs: centre + hex ring. radiusUnits = 1 + 0.5 + 0.25 (roundLayout pads).
 const SPACING = R / 1.75;
-const PEG = SPACING * 0.9;
-const RING = [0, 1, 2, 3, 4, 5].map((i) => {
-  const a = (Math.PI / 3) * i - Math.PI / 2; // start at 12 o'clock
-  return { x: CX + SPACING * Math.cos(a), y: CY + SPACING * Math.sin(a) };
-});
-const HOLES = [{ x: CX, y: CY }, ...RING];
+const PW = SPACING * 0.64;       // PEG_WIDTH_OF_SPACING
+const HOLE = PW * 0.78;          // holeSizeFor()
+
+/** Peg doll proportions, as multiples of the peg width (perspectiveModel P). */
+const P = {
+  aspect: 1.9, capRx: 0.5, capEqY: 0.5, capTopY: 0.09, capUnderRy: 0.13,
+  bodyRx: 0.36, bodyTopY: 0.42, baseY: 1.775, baseRy: 0.115, bandY: 0.94,
+};
+
+// circle-space hole centres, then squashed onto the ellipse
+const HOLES = [{ x: 0, y: 0 }].concat(
+  [0, 1, 2, 3, 4, 5].map((i) => {
+    const a = (Math.PI / 3) * i - Math.PI / 2; // start at 12 o'clock
+    return { x: SPACING * Math.cos(a), y: SPACING * Math.sin(a) };
+  }),
+);
 // index into HOLES -> face-up colour. 0 = centre.
 const FACE_UP = { 0: 'blue', 1: 'orange', 3: 'green' };
 
 const n = (v) => Math.round(v * 100) / 100;
 
-/** One peg: contact shadow, cylinder body, cap, cap edge, highlight. */
-function peg(cx, cy, key, mono) {
-  const rx = PEG * 0.42, ry = PEG * 0.27;
-  const capY = cy - PEG / 2 + PEG * 0.4;
-  const botY = capY + PEG * 0.24;
-  if (mono) {
-    return key
-      ? `    <ellipse cx="${n(cx)}" cy="${n(capY)}" rx="${n(rx)}" ry="${n(ry)}" fill="#FFFFFF"/>`
-      : `    <ellipse cx="${n(cx)}" cy="${n(capY)}" rx="${n(rx - 11)}" ry="${n(ry - 11)}" fill="none" stroke="#FFFFFF" stroke-width="22"/>`;
-  }
-  const cap = key ? C[key] : C.pegCap;
-  const body = key ? C[key + 'Rim'] : C.pegBody;
-  const dark = key ? C[key + 'Dark'] : C.pegBodyDark;
-  const rim = key ? C[key + 'Rim'] : C.pegCapRim;
-  const gloss = key ? 0.36 : 0.3;
-  const id = `pg${Math.round(cx)}_${Math.round(cy)}`;
-  return [
-    `    <linearGradient id="${id}" x1="0.18" y1="0" x2="0.86" y2="1">`,
-    `      <stop offset="0" stop-color="${body}"/><stop offset="1" stop-color="${dark}"/>`,
-    `    </linearGradient>`,
-    `    <ellipse cx="${n(cx + 3)}" cy="${n(botY + PEG * 0.1)}" rx="${n(rx * 0.98)}" ry="${n(ry * 0.42)}" fill="${C.shadow}" opacity="0.22"/>`,
-    `    <path d="M ${n(cx - rx)} ${n(capY)} L ${n(cx - rx)} ${n(botY)} A ${n(rx)} ${n(ry)} 0 0 0 ${n(cx + rx)} ${n(botY)} L ${n(cx + rx)} ${n(capY)} Z" fill="url(#${id})"/>`,
-    `    <ellipse cx="${n(cx)}" cy="${n(capY)}" rx="${n(rx)}" ry="${n(ry)}" fill="${cap}"/>`,
-    `    <ellipse cx="${n(cx)}" cy="${n(capY)}" rx="${n(rx * 0.985)}" ry="${n(ry * 0.975)}" fill="none" stroke="${rim}" stroke-width="${n(PEG * 0.03)}" opacity="0.75"/>`,
-    `    <ellipse cx="${n(cx - rx * 0.26)}" cy="${n(capY - ry * 0.32)}" rx="${n(rx * 0.46)}" ry="${n(ry * 0.4)}" fill="#FFFFFF" opacity="${gloss}"/>`,
-  ].join('\n');
+/** Shift #rrggbb towards black (amount < 0) or white (amount > 0). */
+function shade(hex, amount) {
+  const v = parseInt(hex.slice(1), 16);
+  const target = amount < 0 ? 0 : 255;
+  const k = Math.abs(amount);
+  const mix = (c) => Math.round(c + (target - c) * k);
+  const r = mix((v >> 16) & 0xff), g = mix((v >> 8) & 0xff), b = mix(v & 0xff);
+  return '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1).toUpperCase();
 }
+
+/** Screen position of a hole centre. */
+const at = (h) => ({ x: CX + h.x, y: CY + h.y * YS });
+
+/**
+ * One upright peg doll standing with its base on (bx, by): contact shadow,
+ * turned body, colour band, domed cap, highlight.
+ */
+function peg(bx, by, key, mono) {
+  const w = PW;
+  const u = (k) => w * k;
+  const top = by - u(P.baseY);
+  const bodyRx = u(P.bodyRx);
+  const baseRy = u(P.baseRy);
+  const capRx = u(P.capRx);
+  const capEqY = top + u(P.capEqY);
+
+  if (mono) {
+    // white silhouette: stem + dome, one flat shape per peg
+    return [
+      `    <path d="M ${n(bx - bodyRx)} ${n(top + u(P.bodyTopY))} L ${n(bx - bodyRx)} ${n(by)} A ${n(bodyRx)} ${n(baseRy)} 0 0 0 ${n(bx + bodyRx)} ${n(by)} L ${n(bx + bodyRx)} ${n(top + u(P.bodyTopY))} Z" fill="#FFFFFF"/>`,
+      `    <path d="M ${n(bx - capRx)} ${n(capEqY)} A ${n(capRx)} ${n(capEqY - top - u(P.capTopY))} 0 0 1 ${n(bx + capRx)} ${n(capEqY)} A ${n(capRx)} ${n(u(P.capUnderRy))} 0 0 1 ${n(bx - capRx)} ${n(capEqY)} Z" fill="#FFFFFF"/>`,
+    ].join('\n');
+  }
+
+  const cap = key ? C[key] : C.pegCap;
+  const capDark = key ? C[key + 'Dark'] : C.pegCapRim;
+  const band = key ? C[key + 'Rim'] : null;
+  const body = C.pegBody;
+  const gloss = key ? 0.4 : 0.3;
+  const id = `pg${Math.round(bx)}_${Math.round(by)}`;
+  const stem = (topY, botY, ry) =>
+    `M ${n(bx - bodyRx)} ${n(topY)} L ${n(bx - bodyRx)} ${n(botY)} ` +
+    `A ${n(bodyRx)} ${n(ry)} 0 0 0 ${n(bx + bodyRx)} ${n(botY)} L ${n(bx + bodyRx)} ${n(topY)} Z`;
+
+  const out = [
+    `    <linearGradient id="${id}b" x1="0" y1="0" x2="1" y2="0">`,
+    `      <stop offset="0" stop-color="${shade(body, 0.1)}"/><stop offset="0.3" stop-color="${shade(body, 0.26)}"/>`,
+    `      <stop offset="0.78" stop-color="${shade(body, -0.24)}"/><stop offset="1" stop-color="${shade(body, -0.06)}"/>`,
+    `    </linearGradient>`,
+    `    <radialGradient id="${id}c" cx="0.34" cy="0.26" r="0.86">`,
+    `      <stop offset="0" stop-color="${shade(cap, 0.3)}"/><stop offset="0.55" stop-color="${cap}"/><stop offset="1" stop-color="${shade(cap, -0.22)}"/>`,
+    `    </radialGradient>`,
+    `    <ellipse cx="${n(bx + u(0.03))}" cy="${n(by + u(0.035))}" rx="${n(bodyRx * 1.18)}" ry="${n(baseRy * 0.8)}" fill="${C.shadow}" opacity="0.2"/>`,
+    `    <path d="${stem(top + u(P.bodyTopY), by, baseRy)}" fill="url(#${id}b)"/>`,
+  ];
+  if (band) {
+    out.push(
+      `    <linearGradient id="${id}n" x1="0" y1="0" x2="1" y2="0">`,
+      `      <stop offset="0" stop-color="${shade(band, 0.2)}"/><stop offset="0.34" stop-color="${band}"/><stop offset="1" stop-color="${shade(band, -0.3)}"/>`,
+      `    </linearGradient>`,
+      `    <path d="${stem(top + u(P.bodyTopY), top + u(P.bandY), bodyRx * 0.34)}" fill="url(#${id}n)"/>`,
+    );
+  }
+  out.push(
+    `    <path d="M ${n(bx - capRx)} ${n(capEqY)} A ${n(capRx)} ${n(capEqY - top - u(P.capTopY))} 0 0 1 ${n(bx + capRx)} ${n(capEqY)} A ${n(capRx)} ${n(u(P.capUnderRy))} 0 0 1 ${n(bx - capRx)} ${n(capEqY)} Z" fill="url(#${id}c)" stroke="${shade(capDark, -0.14)}" stroke-width="${n(Math.max(1, u(0.018)))}"/>`,
+    `    <ellipse cx="${n(bx - capRx * 0.38)}" cy="${n(capEqY - u(0.24))}" rx="${n(capRx * 0.26)}" ry="${n(u(0.13))}" fill="#FFFFFF" opacity="${gloss}" transform="rotate(-24 ${n(bx - capRx * 0.38)} ${n(capEqY - u(0.24))})"/>`,
+  );
+  return out.join('\n');
+}
+
+/** Pegs painted back to front, so near rows overlap far ones. */
+const SORTED = HOLES
+  .map((h, i) => ({ h, i }))
+  .sort((a, b) => a.h.y - b.h.y || a.h.x - b.h.x);
 
 function art(mono) {
   if (mono) {
     return [
-      `    <circle cx="${CX}" cy="${CY}" r="${R - 14}" fill="none" stroke="#FFFFFF" stroke-width="28"/>`,
-      ...HOLES.map((h, i) => peg(h.x, h.y, FACE_UP[i], true)),
+      `    <ellipse cx="${CX}" cy="${CY}" rx="${n(R - 14)}" ry="${n(RY - 8)}" fill="none" stroke="#FFFFFF" stroke-width="26"/>`,
+      ...SORTED.map(({ h, i }) => { const p = at(h); return peg(p.x, p.y, FACE_UP[i], true); }),
     ].join('\n');
   }
-  const rf = R * 0.932;
+
+  const hrx = HOLE / 2;
+  const hry = hrx * YS;
+  const rf = R * 0.915;
   const out = [
-    `    <radialGradient id="face" cx="0.5" cy="0.4" r="0.72">`,
+    `    <radialGradient id="face" cx="0.46" cy="0.34" r="0.76">`,
     `      <stop offset="0" stop-color="${C.faceLit}"/><stop offset="1" stop-color="${C.face}"/>`,
     `    </radialGradient>`,
+    `    <linearGradient id="side" x1="0" y1="0" x2="1" y2="0">`,
+    `      <stop offset="0" stop-color="${shade(C.rim, -0.34)}"/><stop offset="0.34" stop-color="${C.rim}"/>`,
+    `      <stop offset="0.72" stop-color="${shade(C.rim, -0.16)}"/><stop offset="1" stop-color="${shade(C.rim, -0.44)}"/>`,
+    `    </linearGradient>`,
     `    <linearGradient id="hole" x1="0.5" y1="0" x2="0.5" y2="1">`,
     `      <stop offset="0" stop-color="${C.holeDeep}"/><stop offset="1" stop-color="${C.hole}"/>`,
     `    </linearGradient>`,
-    // drop shadow: three stacked ellipses, faintest and widest first
-    `    <ellipse cx="${CX}" cy="${CY + 22}" rx="${R}" ry="${n(R * 0.985)}" fill="${C.shadow}" opacity="0.07"/>`,
-    `    <ellipse cx="${CX}" cy="${CY + 22}" rx="${n(R * 0.975)}" ry="${n(R * 0.96)}" fill="${C.shadow}" opacity="0.11"/>`,
-    `    <ellipse cx="${CX}" cy="${CY + 22}" rx="${n(R * 0.945)}" ry="${n(R * 0.93)}" fill="${C.shadow}" opacity="0.16"/>`,
-    `    <circle cx="${CX}" cy="${CY}" r="${R}" fill="${C.rim}"/>`,
-    `    <circle cx="${CX}" cy="${CY}" r="${n(R * 0.955)}" fill="${C.bevel}"/>`,
-    `    <circle cx="${CX}" cy="${CY}" r="${n(rf)}" fill="url(#face)"/>`,
-    `    <circle cx="${CX}" cy="${CY}" r="${n(rf * 0.995)}" fill="none" stroke="#FFFFFF" stroke-width="4" opacity="0.22"/>`,
   ];
-  // grain: quadratic arcs whose control point is inside the face circle
-  for (const [k, bow] of [[-0.62, 0.1], [-0.24, -0.08], [0.22, 0.09], [0.6, -0.07]]) {
-    const y = CY + k * rf;
-    const half = Math.sqrt(Math.max(0, rf * rf - (k * rf) * (k * rf))) * 0.94;
+  // ground shadow: three stacked ellipses, widest and faintest first
+  for (const [k, op] of [[1, 0.07], [0.96, 0.11], [0.9, 0.16]]) {
     out.push(
-      `    <path d="M ${n(CX - half)} ${n(y)} Q ${CX} ${n(y + bow * rf)} ${n(CX + half)} ${n(y)}" fill="none" stroke="${C.grain}" stroke-width="5" opacity="0.18" stroke-linecap="round"/>`
+      `    <ellipse cx="${n(CX + 5)}" cy="${n(CY + EDGE + 10)}" rx="${n(R * k)}" ry="${n(RY * k * 0.62)}" fill="${C.shadow}" opacity="${op}"/>`,
     );
   }
-  // drilled holes, then the pegs standing in them
-  for (const h of HOLES) {
-    out.push(`    <circle cx="${n(h.x)}" cy="${n(h.y)}" r="${n((PEG * 0.9) / 2)}" fill="url(#hole)"/>`);
+  // wooden side wall
+  out.push(
+    `    <path d="M ${n(CX - R)} ${CY} L ${n(CX - R)} ${n(CY + EDGE)} A ${R} ${n(RY)} 0 0 0 ${n(CX + R)} ${n(CY + EDGE)} L ${n(CX + R)} ${CY} A ${R} ${n(RY)} 0 0 1 ${n(CX - R)} ${CY} Z" fill="url(#side)"/>`,
+    `    <ellipse cx="${CX}" cy="${CY}" rx="${R}" ry="${n(RY)}" fill="${C.rim}"/>`,
+    `    <ellipse cx="${CX}" cy="${CY}" rx="${n(R * 0.94)}" ry="${n(R * 0.94 * YS)}" fill="${C.bevel}"/>`,
+    `    <ellipse cx="${CX}" cy="${CY}" rx="${n(rf)}" ry="${n(rf * YS)}" fill="url(#face)"/>`,
+    `    <ellipse cx="${CX}" cy="${CY}" rx="${n(rf * 0.996)}" ry="${n(rf * YS * 0.996)}" fill="none" stroke="#FFFFFF" stroke-width="4" opacity="0.24"/>`,
+  );
+  // grain arcs across the (squashed) face
+  for (const [k, bow] of [[-0.6, 0.08], [-0.2, -0.07], [0.24, 0.08], [0.58, -0.06]]) {
+    const y = CY + k * rf * YS;
+    const half = Math.sqrt(Math.max(0, 1 - k * k)) * rf * 0.94;
+    out.push(
+      `    <path d="M ${n(CX - half)} ${n(y)} Q ${CX} ${n(y + bow * rf * YS)} ${n(CX + half)} ${n(y)}" fill="none" stroke="${C.grain}" stroke-width="5" opacity="0.16" stroke-linecap="round"/>`,
+    );
   }
-  HOLES.forEach((h, i) => out.push(peg(h.x, h.y, FACE_UP[i], false)));
+  // drilled holes with a lit lip along the near inside edge
+  for (const h of HOLES) {
+    const p = at(h);
+    out.push(`    <ellipse cx="${n(p.x)}" cy="${n(p.y)}" rx="${n(hrx)}" ry="${n(hry)}" fill="url(#hole)"/>`);
+    const lx = hrx * 0.82, ly = hry * 0.82, a0 = Math.PI * 0.14, a1 = Math.PI * 0.86;
+    out.push(
+      `    <path d="M ${n(p.x + lx * Math.cos(a0))} ${n(p.y + ly * Math.sin(a0))} A ${n(lx)} ${n(ly)} 0 0 0 ${n(p.x + lx * Math.cos(a1))} ${n(p.y + ly * Math.sin(a1))}" fill="none" stroke="${C.holeLip}" stroke-width="${n(Math.max(2, hry * 0.3))}" opacity="0.45" stroke-linecap="round"/>`,
+    );
+  }
+  // the pegs, back row first
+  for (const { h, i } of SORTED) {
+    const p = at(h);
+    out.push(peg(p.x, p.y, FACE_UP[i], false));
+  }
   return out.join('\n');
 }
 

@@ -1,9 +1,10 @@
-import { Avatar, AVATAR_NAMES } from '@art';
+import { Avatar, AVATAR_NAMES, TRAY_PEG_ASPECT, TrayPeg } from '@art';
+import { MotiView } from 'moti';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-import type { PlayerSpec } from '../engine/types';
+import type { PegColor, PlayerSpec } from '../engine/types';
 import { useTheme } from '../theme';
 
 /** Display names live with the art, so a new avatar only lands in one place. */
@@ -20,6 +21,10 @@ export interface PlayerTrayProps {
   /** replaces the score line — used by the setup picker ("Player 1") */
   caption?: string;
   active: boolean;
+  /** colours of the pegs this player has taken, oldest first */
+  captured?: PegColor[];
+  /** how many pegs to stand in the tray before collapsing to "+n" */
+  maxPegs?: number;
   /** tap to cycle the avatar (home / setup only) */
   onPress?: () => void;
   size?: number;
@@ -27,11 +32,60 @@ export interface PlayerTrayProps {
   onAnchor?: (id: string, point: { x: number; y: number }) => void;
 }
 
+/** The row of captured pegs standing in a player's tray. */
+function CapturedRow({
+  colors,
+  max,
+  width,
+  theme,
+  ink,
+}: {
+  colors: PegColor[];
+  max: number;
+  width: number;
+  theme: 'light' | 'dark';
+  ink: string;
+}) {
+  const shown = colors.slice(-max);
+  const extra = colors.length - shown.length;
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'flex-end', minHeight: width * TRAY_PEG_ASPECT }}>
+      {shown.map((c, i) => (
+        <MotiView
+          key={`${i}-${c}`}
+          from={{ opacity: 0, translateY: -6, scale: 0.7 }}
+          animate={{ opacity: 1, translateY: 0, scale: 1 }}
+          transition={{ type: 'spring', damping: 13, stiffness: 180 }}
+          style={{ marginRight: -width * 0.18 }}
+        >
+          <TrayPeg width={width} color={c} theme={theme} />
+        </MotiView>
+      ))}
+      {extra > 0 ? (
+        <Text
+          allowFontScaling={false}
+          style={{
+            fontSize: Math.max(10, Math.round(width * 0.9)),
+            fontWeight: '700',
+            marginLeft: 6,
+            marginBottom: 2,
+            color: ink,
+          }}
+        >
+          +{extra}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 export function PlayerTray({
   spec,
   score = 0,
   caption,
   active,
+  captured,
+  maxPegs = 8,
   onPress,
   size = 44,
   onAnchor,
@@ -39,6 +93,7 @@ export function PlayerTray({
   const t = useTheme();
   const glow = useSharedValue(active ? 1 : 0);
   const ref = useRef<View>(null);
+  const pegWidth = Math.max(10, Math.round(size * 0.3));
 
   useEffect(() => {
     glow.value = withTiming(active ? 1 : 0, { duration: 220 });
@@ -80,7 +135,20 @@ export function PlayerTray({
           {playerName(spec)}
           {spec.kind === 'ai' ? ' 🤖' : ''}
         </Text>
-        <Text style={{ ...t.type.heading, color: t.c.text }}>{caption ?? score}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexShrink: 1 }}>
+          <Text style={{ ...t.type.heading, color: t.c.text }}>{caption ?? score}</Text>
+          {captured && captured.length > 0 ? (
+            <View style={{ marginLeft: t.spacing.sm }}>
+              <CapturedRow
+                colors={captured}
+                max={maxPegs}
+                width={pegWidth}
+                theme={t.scheme}
+                ink={t.c.textDim}
+              />
+            </View>
+          ) : null}
+        </View>
       </View>
     </Animated.View>
   );

@@ -1,6 +1,8 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import ConfettiCannon from 'react-native-confetti-cannon';
+import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useGame } from '../src/store/game';
@@ -16,14 +18,28 @@ import { IconButton } from '../src/ui/controls';
 import { activePlayerSpec, availableColors, isHumanTurn, revealDurationMs } from '../src/ui/engine';
 import { hapticFlip, hapticMatch, useSounds } from '../src/ui/feedback';
 
+import type { PegColor } from '../src/engine/types';
+
 function isMode(v: unknown): v is GameMode {
   return v === 'ai' || v === '2p' || v === '3p';
 }
+
+/** Confetti in the peg palette, so the win still reads as this game. */
+const CONFETTI = [
+  PEG_PAINT.orange.fill,
+  PEG_PAINT.sky.fill,
+  PEG_PAINT.blue.fill,
+  PEG_PAINT.green.fill,
+  PEG_PAINT.yellow.fill,
+  PEG_PAINT.purple.fill,
+];
 
 export default function GameScreen() {
   const t = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const win = useWindowDimensions();
+  const reduced = useReducedMotion();
   const params = useLocalSearchParams<{ mode?: string }>();
   const mode: GameMode = isMode(params.mode) ? params.mode : 'ai';
 
@@ -93,6 +109,18 @@ export default function GameScreen() {
     else router.replace('/');
   }, [router]);
 
+  /** pegs each player has taken, oldest first — the little row in their tray */
+  const pegs = state?.pegs;
+  const captured = useMemo(() => {
+    const by: Record<string, PegColor[]> = {};
+    for (const p of pegs ?? []) {
+      if (p.state === 'captured' && p.capturedBy) {
+        (by[p.capturedBy] ??= []).push(p.color);
+      }
+    }
+    return by;
+  }, [pegs]);
+
   const onPick = useCallback((pegIndex: number) => dispatch({ type: 'PICK', pegIndex }), [dispatch]);
   const onRoll = useCallback(() => dispatch({ type: 'ROLL' }), [dispatch]);
 
@@ -106,6 +134,9 @@ export default function GameScreen() {
   const active = activePlayerSpec(state);
   const canRoll = state.phase === 'roll' && human && !busy;
   const canPick = state.phase === 'pick' && human && !busy;
+  const humanWon =
+    state.phase === 'gameOver' &&
+    state.config.players.some((p) => p.kind === 'human' && state.winnerIds.includes(p.id));
 
   let banner = '';
   let tone: 'normal' | 'accent' = 'normal';
@@ -142,6 +173,7 @@ export default function GameScreen() {
             flexDirection: 'row',
             justifyContent: 'flex-end',
             gap: t.spacing.sm,
+            flexShrink: 1,
           }}
         >
           {state.config.players.map((p, i) => (
@@ -149,8 +181,10 @@ export default function GameScreen() {
               key={p.id}
               spec={p}
               score={state.scores[p.id] ?? 0}
+              captured={captured[p.id]}
+              maxPegs={state.config.players.length > 2 ? 2 : 4}
               active={i === state.activePlayer && state.phase !== 'gameOver'}
-              size={state.config.players.length > 2 ? 32 : 40}
+              size={state.config.players.length > 2 ? 30 : 36}
               onAnchor={onAnchor}
             />
           ))}
@@ -168,6 +202,7 @@ export default function GameScreen() {
           disabled={!canPick}
           onPick={onPick}
           trayAnchors={trayAnchors}
+          moveNonce={state.turn}
         />
       </View>
 
@@ -190,8 +225,10 @@ export default function GameScreen() {
           <Die
             dieColor={state.dieColor}
             colors={availableColors(state)}
+            rerolls={state.dieRerolls ?? 0}
             canRoll={canRoll}
             showShapes={showShapes}
+            size={112}
             onRoll={onRoll}
             onTumbleSound={() => play('roll')}
           />
@@ -217,6 +254,20 @@ export default function GameScreen() {
           size={44}
         />
       </View>
+
+      {state.phase === 'gameOver' && humanWon && !reduced ? (
+        <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+          <ConfettiCannon
+            count={120}
+            origin={{ x: win.width / 2, y: -20 }}
+            fadeOut
+            autoStart
+            explosionSpeed={320}
+            fallSpeed={2600}
+            colors={CONFETTI}
+          />
+        </View>
+      ) : null}
 
       {state.phase === 'gameOver' ? (
         <GameOverSheet state={state} onRematch={rematch} onHome={goHome} />

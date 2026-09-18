@@ -210,8 +210,9 @@ export const useGame = create<GameStore>((setState, getState) => {
       }
 
       if (action.type === 'ROLL') {
-        // 600 ms of die tumble before anyone may touch a peg
-        busyFor(timing.dieTumble);
+        // 600 ms of die tumble before anyone may touch a peg, plus the 300 ms
+        // the die spends rolling past each dead colour (PLAN.md section 2)
+        busyFor(timing.dieTumble + 300 * (next.dieRerolls ?? 0));
         return;
       }
 

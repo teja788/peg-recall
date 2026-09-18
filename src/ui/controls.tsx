@@ -87,6 +87,7 @@ export function ModeCard({
   subtitle,
   glyph,
   accent,
+  art,
   onPress,
   style,
 }: {
@@ -94,6 +95,8 @@ export function ModeCard({
   subtitle: string;
   glyph: string;
   accent: string;
+  /** a little board thumbnail, drawn instead of the coloured glyph disc */
+  art?: React.ReactNode;
   onPress: () => void;
   style?: ViewStyle;
 }) {
@@ -116,20 +119,24 @@ export function ModeCard({
         style,
       ]}
     >
-      <View
-        style={{
-          width: 56,
-          height: 56,
-          borderRadius: 28,
-          backgroundColor: accent,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Text allowFontScaling={false} style={{ fontSize: 28 }}>
-          {glyph}
-        </Text>
-      </View>
+      {art ? (
+        <View style={{ width: 72, alignItems: 'center', justifyContent: 'center' }}>{art}</View>
+      ) : (
+        <View
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            backgroundColor: accent,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Text allowFontScaling={false} style={{ fontSize: 28 }}>
+            {glyph}
+          </Text>
+        </View>
+      )}
       <View style={{ flex: 1, marginLeft: t.spacing.lg }}>
         <Text style={{ ...t.type.heading, color: t.c.text }}>{title}</Text>
         <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: 2 }}>{subtitle}</Text>

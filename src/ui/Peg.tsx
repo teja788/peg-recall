@@ -11,7 +11,7 @@
  * Reduce Motion: cross-fades only. No rise, no bob, no lift, no arc.
  */
 import { PEG_DOLL_ASPECT, PegDoll, type ArtTheme } from '@art';
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
@@ -121,10 +121,15 @@ function PegImpl({
     up.value = withDelay(riseDelay, withSpring(1, { damping: 11, stiffness: 150, mass: 0.7 }));
   }, [rising, riseDelay, reduced, up]);
 
+  // the stagger only matters at the instant the cap turns over, so it is read
+  // through a ref — a changing `fallDelay` must never restart a live fade
+  const fallRef = useRef(fallDelay);
+  fallRef.current = fallDelay;
+
   // cap colour on / off, with a little press-down bob on the way down
   useEffect(() => {
     const down = !faceUp;
-    const delay = down ? fallDelay : 0;
+    const delay = down ? fallRef.current : 0;
     colour.value = withDelay(
       delay,
       withTiming(faceUp ? 1 : 0, {
@@ -141,7 +146,7 @@ function PegImpl({
         ),
       );
     }
-  }, [faceUp, fallDelay, reduced, colour, bob]);
+  }, [faceUp, reduced, colour, bob]);
 
   useEffect(() => {
     vis.value = ghost ? 0 : withTiming(1, { duration: 120 });

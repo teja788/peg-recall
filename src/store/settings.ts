@@ -30,11 +30,12 @@ export const DEFAULT_SETTINGS: Settings = {
 
 export const AVATAR_CYCLE: AvatarId[] = ['fox', 'owl', 'bear', 'frog', 'bunny', 'cat'];
 export const BOARD_CYCLE: BoardSize[] = ['small', 'classic', 'big', 'huge'];
+/** The board is a disc, so sizes are named by peg count, not by rows x cols. */
 export const BOARD_LABEL: Record<BoardSize, string> = {
-  small: 'Small · 4×4',
-  classic: 'Classic · 5×5',
-  big: 'Big · 6×6',
-  huge: 'Huge · 5×8',
+  small: 'Small · 16 pegs',
+  classic: 'Classic · 25 pegs',
+  big: 'Big · 36 pegs',
+  huge: 'Huge · 40 pegs',
 };
 export const DIFFICULTY_LABEL: Record<Difficulty, string> = {
   bunny: 'Bunny',

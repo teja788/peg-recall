@@ -1,24 +1,45 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+/**
+ * Peg Recall — the wooden colour die (PLAN.md section 2).
+ *
+ * Drawn in the same 3/4 view as the board, so the die reads as a cube sitting
+ * on the same table. A roll is 600 ms of wobble with the colours flicking past
+ * every 70 ms (plus 300 ms for each dead colour the engine had to reroll past),
+ * then it lands on the rolled colour with a short bounce.
+ */
+import { WoodDie, type ArtTheme } from '@art';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Pressable } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withRepeat,
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
 
-import { DieFace } from '@art';
-
 import { PEG_COLORS, type PegColor } from '../engine/types';
 import { PEG_PAINT, useTheme } from '../theme';
+
+/** Height of the die art as a multiple of its width (see woodDieScene). */
+const DIE_ASPECT = 0.9;
+/** How far it wobbles while it tumbles. */
+const WOBBLE_DEG = 25;
+/** Colour flicker interval while tumbling. */
+const FLICKER = 70;
+/** Extra tumble per dead colour the engine rolled past. */
+const REROLL_MS = 300;
+/** Apple's minimum is 44; the die is the one control everybody taps. */
+const TAP_MIN = 64;
 
 export interface DieProps {
   /** the colour the engine rolled, or null before the roll */
   dieColor: PegColor | null;
   /** colours still on the board — the tumble only shows reachable colours */
   colors?: PegColor[];
+  /** how many dead colours the engine rerolled past on this roll */
+  rerolls?: number;
   canRoll: boolean;
   showShapes: boolean;
   size?: number;
@@ -29,35 +50,42 @@ export interface DieProps {
 export function Die({
   dieColor,
   colors,
+  rerolls = 0,
   canRoll,
   showShapes,
-  size = 92,
+  size = 96,
   onRoll,
   onTumbleSound,
 }: DieProps) {
   const t = useTheme();
+  const theme: ArtTheme = t.scheme;
   const reduced = useReducedMotion();
   const pool = colors && colors.length > 0 ? colors : [...PEG_COLORS];
   const [face, setFace] = useState<PegColor | null>(dieColor);
   const [tumbling, setTumbling] = useState(false);
-  const spin = useSharedValue(0);
-  const pop = useSharedValue(1);
-  const interval = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const wobble = useSharedValue(0);
+  const scale = useSharedValue(1);
+  const flicker = useRef<ReturnType<typeof setInterval> | null>(null);
   const settle = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prev = useRef<PegColor | null>(dieColor);
+  const poolRef = useRef(pool);
+  poolRef.current = pool;
 
-  useEffect(
-    () => () => {
-      if (interval.current) clearInterval(interval.current);
-      if (settle.current) clearTimeout(settle.current);
-    },
-    [],
-  );
+  const stop = useCallback(() => {
+    if (flicker.current) clearInterval(flicker.current);
+    if (settle.current) clearTimeout(settle.current);
+    flicker.current = null;
+    settle.current = null;
+  }, []);
+
+  useEffect(() => stop, [stop]);
 
   useEffect(() => {
     const was = prev.current;
     prev.current = dieColor;
     if (dieColor == null) {
+      stop();
       setFace(null);
       setTumbling(false);
       return;
@@ -66,117 +94,89 @@ export function Die({
       setFace(dieColor);
       return;
     }
-    // a fresh roll: 600 ms of colours going past, then it lands
+
+    const total = t.timing.dieTumble + REROLL_MS * Math.max(0, rerolls);
     setTumbling(true);
     onTumbleSound?.();
+    stop();
+
+    // colours flick past, only ones still reachable on the board
     let i = 0;
-    if (interval.current) clearInterval(interval.current);
-    interval.current = setInterval(() => {
+    flicker.current = setInterval(() => {
       i += 1;
-      setFace(pool[i % pool.length]);
-    }, 70);
+      const p = poolRef.current;
+      setFace(p[i % p.length]);
+    }, FLICKER);
+
     if (!reduced) {
-      spin.value = withTiming(1, { duration: t.timing.dieTumble, easing: Easing.out(Easing.cubic) });
+      const seg = 150;
+      const reps = Math.max(1, Math.round((total - 120) / (seg * 2)));
+      wobble.value = withSequence(
+        withRepeat(
+          withSequence(
+            withTiming(1, { duration: seg, easing: Easing.inOut(Easing.quad) }),
+            withTiming(-1, { duration: seg, easing: Easing.inOut(Easing.quad) }),
+          ),
+          reps,
+          false,
+        ),
+        withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) }),
+      );
+      scale.value = withSequence(
+        withTiming(0.9, { duration: 110, easing: Easing.out(Easing.quad) }),
+        withTiming(1.05, { duration: Math.max(120, total - 220), easing: Easing.inOut(Easing.quad) }),
+        withTiming(1, { duration: 110, easing: Easing.out(Easing.quad) }),
+        // the landing bounce
+        withTiming(1.1, { duration: 90, easing: Easing.out(Easing.quad) }),
+        withTiming(1, { duration: 160, easing: Easing.out(Easing.back(2.2)) }),
+      );
     }
-    if (settle.current) clearTimeout(settle.current);
+
     settle.current = setTimeout(() => {
-      if (interval.current) clearInterval(interval.current);
-      interval.current = null;
+      stop();
       setFace(dieColor);
       setTumbling(false);
-      spin.value = 0;
-      pop.value = withSequence(
-        withTiming(1.12, { duration: 90 }),
-        withTiming(1, { duration: 140 }),
-      );
-    }, t.timing.dieTumble);
+    }, total);
+    // one run per rolled colour
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dieColor]);
 
-  const animated = useAnimatedStyle(() => ({
-    transform: [
-      { perspective: 700 },
-      { rotateX: `${spin.value * 720}deg` },
-      { scale: pop.value },
-    ],
-  }));
+  const animated = useAnimatedStyle(() =>
+    reduced
+      ? { transform: [] }
+      : { transform: [{ rotate: `${wobble.value * WOBBLE_DEG}deg` }, { scale: scale.value }] },
+  );
 
   const paint = face ? PEG_PAINT[face] : null;
   const disabled = !canRoll || tumbling;
+  const h = size * DIE_ASPECT;
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={
-        tumbling
-          ? 'Die rolling'
-          : paint
-            ? `Die shows ${paint.label}`
-            : 'Roll the die'
+        tumbling ? 'Die rolling' : paint ? `Die shows ${paint.label}` : 'Roll the die'
       }
       accessibilityHint={canRoll ? 'Rolls the colour you must find' : undefined}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onRoll}
-      hitSlop={12}
-      style={{ opacity: canRoll || paint ? 1 : 0.55 }}
+      hitSlop={16}
+      style={{
+        minWidth: TAP_MIN,
+        minHeight: TAP_MIN,
+        width: Math.max(TAP_MIN, size),
+        height: Math.max(TAP_MIN, h),
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: canRoll || paint ? 1 : 0.6,
+      }}
     >
-      <Animated.View
-        style={[
-          styles.die,
-          {
-            width: size,
-            height: size,
-            borderRadius: size * 0.26,
-            shadowColor: t.c.shadow,
-          },
-          animated,
-        ]}
-      >
-        {face ? (
-          <DieFace color={face} size={size} showShape={showShapes} />
-        ) : (
-          // the art layer's neutral face is cream, which glares in dark mode —
-          // the un-rolled die is drawn from the theme instead
-          <View
-            style={[
-              styles.blank,
-              {
-                width: size,
-                height: size,
-                borderRadius: size * 0.22,
-                backgroundColor: t.c.pegDown,
-                borderColor: t.c.line,
-              },
-            ]}
-          >
-            <Text
-              allowFontScaling={false}
-              style={{ fontSize: Math.round(size * 0.42), color: t.c.textDim, fontWeight: '700' }}
-            >
-              ?
-            </Text>
-          </View>
-        )}
+      <Animated.View style={[{ width: size, height: h }, animated]}>
+        <WoodDie size={size} color={face} showShape={showShapes} theme={theme} />
       </Animated.View>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  blank: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-  },
-  die: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowOpacity: 0.18,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-});
 
 export default Die;

@@ -10,8 +10,17 @@ import {
   type GameMode,
 } from '../src/store/settings';
 import { useTheme } from '../src/theme';
+import { BoardMini } from '../src/ui/BoardMini';
 import { Chip, IconButton, ModeCard } from '../src/ui/controls';
 import { PEG_PAINT } from '../src/theme/tokens';
+import type { PegColor } from '../src/engine/types';
+
+/** Seven pegs each, so every card shows the board in a different mood. */
+const PREVIEWS: Record<'ai' | '2p' | '3p', (PegColor | null)[]> = {
+  ai: ['sky', null, 'blue', null, 'sky', null, 'orange'],
+  '2p': ['green', 'orange', null, 'green', null, 'purple', null],
+  '3p': ['orange', 'purple', 'yellow', null, 'sky', 'green', null],
+};
 
 export default function Home() {
   const t = useTheme();
@@ -79,6 +88,7 @@ export default function Home() {
           subtitle={`Opponent: ${DIFFICULTY_LABEL[difficulty]}`}
           glyph="🤖"
           accent={PEG_PAINT.sky.fill}
+          art={<BoardMini width={68} colors={PREVIEWS.ai} theme={t.scheme} />}
           onPress={() => play('ai')}
         />
         <ModeCard
@@ -86,6 +96,7 @@ export default function Home() {
           subtitle="Pass and play on one device"
           glyph="✌️"
           accent={PEG_PAINT.green.fill}
+          art={<BoardMini width={68} colors={PREVIEWS['2p']} theme={t.scheme} />}
           onPress={() => play('2p')}
         />
         <ModeCard
@@ -93,6 +104,7 @@ export default function Home() {
           subtitle="Take turns around the table"
           glyph="🎉"
           accent={PEG_PAINT.orange.fill}
+          art={<BoardMini width={68} colors={PREVIEWS['3p']} theme={t.scheme} />}
           onPress={() => play('3p')}
         />
 

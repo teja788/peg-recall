@@ -1,13 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <title>Peg Recall</title>
   <g transform="translate(184.32 184.32) scale(0.64)">
-    <circle cx="512" cy="512" r="406" fill="none" stroke="#FFFFFF" stroke-width="28"/>
-    <ellipse cx="512" cy="490.4" rx="90.72" ry="58.32" fill="#FFFFFF"/>
-    <ellipse cx="512" cy="250.4" rx="90.72" ry="58.32" fill="#FFFFFF"/>
-    <ellipse cx="719.85" cy="370.4" rx="79.72" ry="47.32" fill="none" stroke="#FFFFFF" stroke-width="22"/>
-    <ellipse cx="719.85" cy="610.4" rx="90.72" ry="58.32" fill="#FFFFFF"/>
-    <ellipse cx="512" cy="730.4" rx="79.72" ry="47.32" fill="none" stroke="#FFFFFF" stroke-width="22"/>
-    <ellipse cx="304.15" cy="610.4" rx="79.72" ry="47.32" fill="none" stroke="#FFFFFF" stroke-width="22"/>
-    <ellipse cx="304.15" cy="370.4" rx="79.72" ry="47.32" fill="none" stroke="#FFFFFF" stroke-width="22"/>
+    <ellipse cx="512" cy="544" rx="406" ry="223" fill="none" stroke="#FFFFFF" stroke-width="26"/>
+    <path d="M 456.7 203.87 L 456.7 412 A 55.3 17.66 0 0 0 567.3 412 L 567.3 203.87 Z" fill="#FFFFFF"/>
+    <path d="M 435.2 216.16 A 76.8 62.98 0 0 1 588.8 216.16 A 76.8 19.97 0 0 1 435.2 216.16 Z" fill="#FFFFFF"/>
+    <path d="M 664.55 269.87 L 664.55 478 A 55.3 17.66 0 0 0 775.14 478 L 775.14 269.87 Z" fill="#FFFFFF"/>
+    <path d="M 643.05 282.16 A 76.8 62.98 0 0 1 796.65 282.16 A 76.8 19.97 0 0 1 643.05 282.16 Z" fill="#FFFFFF"/>
+    <path d="M 248.86 269.87 L 248.86 478 A 55.3 17.66 0 0 0 359.45 478 L 359.45 269.87 Z" fill="#FFFFFF"/>
+    <path d="M 227.35 282.16 A 76.8 62.98 0 0 1 380.95 282.16 A 76.8 19.97 0 0 1 227.35 282.16 Z" fill="#FFFFFF"/>
+    <path d="M 456.7 335.87 L 456.7 544 A 55.3 17.66 0 0 0 567.3 544 L 567.3 335.87 Z" fill="#FFFFFF"/>
+    <path d="M 435.2 348.16 A 76.8 62.98 0 0 1 588.8 348.16 A 76.8 19.97 0 0 1 435.2 348.16 Z" fill="#FFFFFF"/>
+    <path d="M 664.55 401.87 L 664.55 610 A 55.3 17.66 0 0 0 775.14 610 L 775.14 401.87 Z" fill="#FFFFFF"/>
+    <path d="M 643.05 414.16 A 76.8 62.98 0 0 1 796.65 414.16 A 76.8 19.97 0 0 1 643.05 414.16 Z" fill="#FFFFFF"/>
+    <path d="M 248.86 401.87 L 248.86 610 A 55.3 17.66 0 0 0 359.45 610 L 359.45 401.87 Z" fill="#FFFFFF"/>
+    <path d="M 227.35 414.16 A 76.8 62.98 0 0 1 380.95 414.16 A 76.8 19.97 0 0 1 227.35 414.16 Z" fill="#FFFFFF"/>
+    <path d="M 456.7 467.87 L 456.7 676 A 55.3 17.66 0 0 0 567.3 676 L 567.3 467.87 Z" fill="#FFFFFF"/>
+    <path d="M 435.2 480.16 A 76.8 62.98 0 0 1 588.8 480.16 A 76.8 19.97 0 0 1 435.2 480.16 Z" fill="#FFFFFF"/>
   </g>
 </svg>
