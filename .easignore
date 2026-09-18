@@ -1,0 +1,14 @@
+node_modules/
+.expo/
+dist/
+web-build/
+.git/
+.claude/
+docs/
+store-assets/
+assets/source/
+src/engine/__tests__/
+src/layout/__tests__/
+PLAN.md
+*.md
+!README.md
