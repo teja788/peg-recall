@@ -1,4 +1,4 @@
-# Peg Recall engine
+# Color Catch engine
 
 Pure TypeScript. No React, no React Native, no Node built-ins — safe to import
 from anywhere (UI, tests, a future server). Every state is a plain

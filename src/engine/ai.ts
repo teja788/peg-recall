@@ -1,5 +1,5 @@
 /**
- * Peg Recall — "belief memory" computer opponent (PLAN.md section 3).
+ * Color Catch — "belief memory" computer opponent (PLAN.md section 3).
  *
  * The AI records each peg it has seen together with the turn it saw it. On its
  * turn with die colour c, each remembered peg of colour c is recalled with

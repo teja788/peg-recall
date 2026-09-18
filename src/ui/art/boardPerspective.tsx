@@ -1,5 +1,5 @@
 /**
- * Peg Recall — the round board seen from a 3/4 angle (PLAN.md section 2).
+ * Color Catch — the round board seen from a 3/4 angle (PLAN.md section 2).
  *
  * The board is a disc lying on a table: an ellipse with a visible wooden side
  * below it, a flat rim, a soft radial light on the face, a few grain arcs and

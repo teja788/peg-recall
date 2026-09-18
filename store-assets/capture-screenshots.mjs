@@ -1,5 +1,5 @@
 /**
- * App Store screenshot capture for Peg Recall.
+ * App Store screenshot capture for Color Catch.
  *
  * Drives the Expo *web* build in headless Chromium (Playwright) and writes the
  * six shots of store-assets/screenshots-plan.md at both required sizes.

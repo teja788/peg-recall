@@ -1,5 +1,5 @@
 /**
- * Peg Recall — react-native-svg renderer for the rectangular `Scene`s in
+ * Color Catch — react-native-svg renderer for the rectangular `Scene`s in
  * perspectiveModel.ts.
  *
  * Same idea as renderPrims.tsx (which draws square `Drawing`s), but the box is

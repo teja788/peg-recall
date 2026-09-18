@@ -1,5 +1,5 @@
 /**
- * Peg Recall — design tokens.
+ * Color Catch — design tokens.
  * Values come straight from PLAN.md section 4 (Okabe-Ito peg palette, warm
  * neutral surfaces, no pure white / pure black).
  */

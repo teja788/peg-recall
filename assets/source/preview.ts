@@ -1,5 +1,5 @@
 /**
- * Peg Recall — visual check page for the art layer.
+ * Color Catch — visual check page for the art layer.
  *
  *   npx tsx assets/source/preview.ts && open assets/source/preview.html
  *
@@ -152,7 +152,7 @@ const dieRow = [
 
 const html = `<!doctype html>
 <meta charset="utf-8">
-<title>Peg Recall — art preview</title>
+<title>Color Catch — art preview</title>
 <style>
   body { margin: 0; padding: 24px 32px 64px; font: 14px/1.5 -apple-system, system-ui, sans-serif;
          background: ${NEUTRAL.page}; color: ${NEUTRAL.ink}; }
@@ -165,7 +165,7 @@ const html = `<!doctype html>
   .card { background: #FFFDF8; border-radius: 18px; padding: 18px; }
   svg { display: block; }
 </style>
-<h1>Peg Recall — art preview</h1>
+<h1>Color Catch — art preview</h1>
 <p class="note">board ${classic.boardNodes} nodes at 25 pegs (11 fixed + 2/hole) ·
 peg ${nodes(pegDrawing(96, 'orange', true, 'light'))} nodes ·
 die ${nodes(dieCubeDrawing(96, 'orange', true))} nodes ·

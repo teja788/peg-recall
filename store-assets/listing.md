@@ -1,4 +1,4 @@
-# Peg Recall - App Store Connect listing copy (v1.0)
+# Color Catch - App Store Connect listing copy (v1.0)
 
 Everything below is ready to paste into App Store Connect. Placeholders in `{{ }}` are the
 only things you must fill in yourself. Character counts were measured, not estimated.
@@ -11,35 +11,38 @@ app does not ship: no online play, no stats screen, no purchases.
 ## 1. App name (30 max)
 
 ```
-Peg Recall - Memory Chess
+Color Catch - Memory Chess
 ```
-**25 / 30 characters.**
+**26 / 30 characters.**
 
-Fallback if App Store Connect rejects the compound name (duplicate-name or "keyword stuffing"
-push-back): use `Peg Recall` (10) as the name and `Memory Chess` (12) as the subtitle, then move
-the freed subtitle words into the keyword field (see the alternate keyword string below).
+Checked available in App Store Connect on 2026-09-19 - this is the name we ship.
+
+Fallback, kept only in case ASC later pushes back (duplicate-name or "keyword stuffing"): use
+`Color Catch` (11) as the name and `Memory Chess` (12) as the subtitle, then move the freed
+subtitle words into the keyword field (see the alternate keyword string below).
 
 ## 2. Subtitle (30 max)
 
 ```
-Color Dice Match Game, Family
+Dice Match Board Game, Family
 ```
 **29 / 30 characters.**
 
-No word repeats the name, so every character buys new search coverage: *color*, *dice*, *match*,
-*game*, *family*. Combined with the name this already ranks for "memory game", "peg game",
-"dice color game", "color match game", "family memory game", "memory chess".
+No word repeats the name, so every character buys new search coverage: *dice*, *match*, *board*,
+*game*, *family*. ("Color" moved into the name with the Color Catch rename, so it was dropped
+here - a repeated word would buy nothing.) Combined with the name this already ranks for
+"memory game", "color match game", "dice color game", "family board game", "memory chess".
 
 Alternates (same rules, pick one and stay with it):
-- `Color Dice Match for Families` - 29
-- `Color Dice Match, Family Fun` - 28
+- `Dice Match Game for Families` - 28
+- `Dice Match Board Game, Kids` - 27
 
 ## 3. Keyword field (100 max, comma-separated, no spaces)
 
 ```
-brain,training,kid,toddler,preschool,board,pair,concentration,pass,play,player,puzzle,2,3,offline
+brain,training,kid,toddler,preschool,pair,concentration,pass,play,player,puzzle,wooden,2,3,offline
 ```
-**97 / 100 characters.**
+**98 / 100 characters.**
 
 Rules applied: no spaces after commas, singular forms only (Apple indexes plurals), nothing
 repeated from the name or subtitle, no app name, no "app", no "free", no competitor brands.
@@ -58,11 +61,12 @@ What the combinations cover (Apple builds phrases across name + subtitle + keywo
 | pass and play, 2 player game, 3 player game | keywords |
 | offline game, puzzle game | keywords + subtitle |
 
-If you use the fallback name `Peg Recall` + subtitle `Memory Chess`, swap in this keyword
-string instead (**100 / 100**), which re-adds the colour and dice terms lost from the subtitle:
+If you use the fallback name `Color Catch` + subtitle `Memory Chess`, swap in this keyword
+string instead (**98 / 100**), which re-adds the dice and match terms lost from the subtitle
+("colour" stays out - it is already in the name):
 
 ```
-color,dice,match,family,brain,kid,toddler,board,pair,concentration,pass,play,player,2,3,offline,game
+dice,match,family,brain,kid,toddler,board,pair,concentration,pass,play,player,toy,2,3,offline,game
 ```
 
 ## 4. Promotional text (170 max - editable any time, no review needed)
@@ -77,7 +81,7 @@ Free, and free of everything else too: no ads, no sign-in, no data collected. Ju
 ```
 Look at the board. Remember what you saw. Then find it again.
 
-Peg Recall is the old wooden peg memory game, brought to your iPhone and iPad. Colored pegs stand on a round board. You get a few seconds to look, then every peg turns face-down. Roll the die, it lands on a color, and tap the peg you think is that color. Match it and the peg walks over to your tray. Miss, and it shows its color for a moment before flipping back - so everyone at the table learns something. When the board is empty, the biggest tray wins.
+Color Catch is the old wooden peg memory game, brought to your iPhone and iPad. Colored pegs stand on a round board. You get a few seconds to look, then every peg turns face-down. Roll the die, it lands on a color, and tap the peg you think is that color. Match it and the peg walks over to your tray. Miss, and it shows its color for a moment before flipping back - so everyone at the table learns something. When the board is empty, the biggest tray wins.
 
 A game takes three or four minutes, and you are two taps from your first move.
 
@@ -113,7 +117,7 @@ second paragraph, so the hook and the "what is this" sentence are both above the
 ## 6. What's New (version 1.0)
 
 ```
-The first release of Peg Recall.
+The first release of Color Catch.
 
 - Play the computer at three levels: Bunny, Fox, Owl.
 - 2 and 3 player pass-and-play on one device.
@@ -159,7 +163,7 @@ Answer **None / No to every question**. Expected result: **4+**.
 
 ## 9. App Privacy
 
-- **Privacy Policy URL:** `https://teja788.github.io/peg-recall/pegrecall/privacy.html` - must be live before you submit.
+- **Privacy Policy URL:** `https://teja788.github.io/peg-recall/privacy.html` - must be live before you submit.
 - **Data Collection:** select **"No, we do not collect data from this app"** -> the whole
   questionnaire collapses to **Data Not Collected**.
 - **Tracking:** none. No ATT prompt, no `NSUserTrackingUsageDescription`.
@@ -185,7 +189,7 @@ records stored only in the app's own on-device storage (`expo-sqlite/kv-store`).
 **Review notes (paste as-is):**
 
 ```
-Peg Recall is a single-binary offline memory game. There is no login, no account, no server and no network access of any kind - the app never makes a network request, and it collects no data (App Privacy: Data Not Collected). No demo account is required.
+Color Catch is a single-binary offline memory game. There is no login, no account, no server and no network access of any kind - the app never makes a network request, and it collects no data (App Privacy: Data Not Collected). No demo account is required.
 
 How to reach everything quickly from a cold launch:
 
@@ -212,7 +216,7 @@ Example format: `2026 Raviteja Endigeri`. No "(c)" symbol - App Store Connect ad
 |---|---|
 | Support URL (required) | `https://teja788.github.io/peg-recall/pegrecall/support.html` |
 | Marketing URL (optional) | `https://teja788.github.io/peg-recall/pegrecall/index.html` |
-| Privacy Policy URL (required) | `https://teja788.github.io/peg-recall/pegrecall/privacy.html` |
+| Privacy Policy URL (required) | `https://teja788.github.io/peg-recall/privacy.html` |
 
 `https://teja788.github.io/peg-recall` = the same static host used for the previous app (PLAN item 14). Deploy the three
 files in `store-assets/site/` there and check each URL loads over HTTPS on a phone before

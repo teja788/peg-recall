@@ -1,5 +1,5 @@
 /**
- * Peg Recall — the animated peg doll that stands in a hole on the round board.
+ * Color Catch — the animated peg doll that stands in a hole on the round board.
  *
  * The drawing itself lives in the art layer (`PegDoll`); everything here is
  * movement. A peg is drawn twice, wood under colour, and the colour layer's

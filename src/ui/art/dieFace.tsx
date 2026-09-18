@@ -1,5 +1,5 @@
 /**
- * Peg Recall — the die.
+ * Color Catch — the die.
  *
  * A rounded square in the rolled peg colour, optionally carrying that colour's
  * shape glyph. Before the roll (and mid-tumble) `color` is null and the die

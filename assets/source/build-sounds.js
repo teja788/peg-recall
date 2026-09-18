@@ -1,5 +1,5 @@
 /**
- * Peg Recall — sound generator. Pure node, no deps.
+ * Color Catch — sound generator. Pure node, no deps.
  * 44.1 kHz mono 16-bit WAV, peak normalised to -6 dBFS.
  */
 const fs = require('fs');

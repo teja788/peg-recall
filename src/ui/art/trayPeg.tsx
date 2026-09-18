@@ -1,5 +1,5 @@
 /**
- * Peg Recall — a captured peg standing in a player's tray.
+ * Color Catch — a captured peg standing in a player's tray.
  *
  * Same peg doll as on the board, always face-up and never wearing a shape
  * glyph: a tray peg is a score counter, so its colour is the whole message and

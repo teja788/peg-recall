@@ -1,5 +1,5 @@
 /**
- * Peg Recall — 3/4-view geometry: the tilted round board, the upright peg
+ * Color Catch — 3/4-view geometry: the tilted round board, the upright peg
  * dolls that stand in it, and the wooden colour die.
  *
  * Pure TypeScript. No React, no react-native-svg, so `npx tsx` can import this

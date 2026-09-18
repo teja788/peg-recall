@@ -1,4 +1,4 @@
-# Peg Recall (Memory Chess)
+# Color Catch (Memory Chess)
 
 A calm memory peg game for iPhone and iPad. Roll the colour die, find the matching peg on the round wooden board, keep it. Play against the computer (Bunny / Fox / Owl) or pass-and-play with 2 or 3 players.
 

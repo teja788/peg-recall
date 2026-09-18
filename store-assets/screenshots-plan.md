@@ -1,4 +1,4 @@
-# Peg Recall - screenshot plan (v1.0)
+# Color Catch - screenshot plan (v1.0)
 
 Six screenshots, captured twice: once on a 6.5" iPhone and once on a 12.9" iPad. Same story in
 the same order on both devices, so the App Store page reads consistently when a shopper switches

@@ -1,5 +1,5 @@
 /**
- * Peg Recall — public engine API.
+ * Color Catch — public engine API.
  *
  * The UI imports ONLY from here:
  *   import { createGame, reduce, ai, rng, type GameState } from '../engine';

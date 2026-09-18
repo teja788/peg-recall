@@ -1,5 +1,5 @@
 /**
- * Peg Recall — the round board, seen from a 3/4 angle (PLAN.md section 2).
+ * Color Catch — the round board, seen from a 3/4 angle (PLAN.md section 2).
  *
  * A wooden disc lying on the table with peg dolls standing in drilled holes.
  * Layout comes from `roundLayout()` (peg index i ↔ positions[i]); the art layer

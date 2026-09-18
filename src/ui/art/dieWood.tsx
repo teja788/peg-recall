@@ -1,5 +1,5 @@
 /**
- * Peg Recall — the wooden colour die (PLAN.md section 2, "The die is a wooden
+ * Color Catch — the wooden colour die (PLAN.md section 2, "The die is a wooden
  * cube with coloured dots").
  *
  * Drawn in the same 3/4 view as the board: a rounded block of light wood whose

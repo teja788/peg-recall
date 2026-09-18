@@ -1,5 +1,5 @@
 /**
- * Peg Recall — the pause menu.
+ * Color Catch — the pause menu.
  *
  * Same scrim + slide-up as GameOverSheet, so stopping mid-game and finishing a
  * game feel like the same piece of furniture. Three targets only: carry on,

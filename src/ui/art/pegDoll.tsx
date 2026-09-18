@@ -1,5 +1,5 @@
 /**
- * Peg Recall — the upright peg doll (PLAN.md section 2, "Peg style").
+ * Color Catch — the upright peg doll (PLAN.md section 2, "Peg style").
  *
  * A turned wooden stem with a domed cap on top, like the physical toy: light
  * wood on the left, shaded on the right, a colour band running down under the

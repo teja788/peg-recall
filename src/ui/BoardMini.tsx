@@ -1,5 +1,5 @@
 /**
- * Peg Recall — a thumbnail of the real board: the same tilted disc, the same
+ * Color Catch — a thumbnail of the real board: the same tilted disc, the same
  * peg dolls, seven pegs. Static (no state, no animation) so it costs nothing to
  * put one on every card on Home, and so the very first screen already looks
  * like the game.

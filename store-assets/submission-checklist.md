@@ -1,4 +1,4 @@
-# Peg Recall - App Store submission checklist
+# Color Catch - App Store submission checklist
 
 Ordered. The sequence matters: it comes from the `ship-ios-app` playbook (proven end to end on
 Vivekananda Archive, July 2026) and each step exists because skipping it cost hours last time.
@@ -85,12 +85,12 @@ Copy comes from `store-assets/listing.md`. **Save section by section and reload 
 values persisted** - ASC silently discards programmatic input and a later Save can wipe fields that
 only look filled (it once wiped hand-typed contact info).
 
-- [ ] **App Information:** name `Peg Recall - Memory Chess`, subtitle `Color Dice Match Game, Family`,
+- [ ] **App Information:** name `Color Catch - Memory Chess` (checked available 2026-09-19), subtitle `Dice Match Board Game, Family`,
       primary category **Games > Board**, secondary **Games > Family**, content rights = no
       third-party content, Made for Kids = **No**.
 - [ ] **Age rating questionnaire:** every answer None/No -> result **4+**.
 - [ ] **Version page (1.0.0 - change it, ASC defaults to "1.0"):** promotional text, description,
-      keyword field (97/100 string), support URL, marketing URL, copyright.
+      keyword field (98/100 string), support URL, marketing URL, copyright.
 - [ ] **Screenshots:** drag the two sets in from Finder (native file dialog - user action).
 - [ ] **App Privacy:** privacy policy URL, "we do not collect data" -> **Data Not Collected**, then
       press **Publish**. An unpublished privacy card blocks submission.
@@ -112,7 +112,7 @@ only look filled (it once wiped hand-typed contact info).
 Free apps regularly get an automated "how does this app make money?" question. Boilerplate answer:
 
 ```
-Peg Recall 1.0 is completely free. It contains no advertising, no in-app purchases, no
+Color Catch 1.0 is completely free. It contains no advertising, no in-app purchases, no
 subscriptions, no paid unlocks and no external payment links. There is no revenue associated
 with this version.
 

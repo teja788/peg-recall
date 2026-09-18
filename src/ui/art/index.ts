@@ -1,4 +1,4 @@
-/** Peg Recall — art layer. Everything visual that is drawn rather than laid out. */
+/** Color Catch — art layer. Everything visual that is drawn rather than laid out. */
 export { Avatar, AVATAR_NAMES, AVATAR_ACCENT, AVATAR_IDS } from './avatars';
 export type { AvatarProps } from './avatars';
 export { Shape, SHAPE_PATHS, SHAPE_VIEWBOX } from './shapes';

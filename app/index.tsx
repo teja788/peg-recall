@@ -111,7 +111,7 @@ export default function Home() {
               textShadowRadius: 6,
             }}
           >
-            Peg Recall
+            Color Catch
           </Text>
           {compact ? null : (
             <Text style={{ ...t.type.body, color: t.c.onBackdropMuted, marginTop: t.spacing.xs }}>

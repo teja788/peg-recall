@@ -1,5 +1,5 @@
 /**
- * Peg Recall — the round wooden board (PLAN.md section 2, "Board is ROUND").
+ * Color Catch — the round wooden board (PLAN.md section 2, "Board is ROUND").
  *
  * A circular board like the physical toy: warm wood face with a soft radial
  * light, a darker bevel ring inside the rim, four faint grain arcs, a low drop

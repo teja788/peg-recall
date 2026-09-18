@@ -1,5 +1,5 @@
 /**
- * Peg Recall — geometry of the round board, the pegs and the die.
+ * Color Catch — geometry of the round board, the pegs and the die.
  *
  * Pure TypeScript: no React, no react-native-svg. Every piece of art is
  * described as a small list of primitives (`Prim`) plus the gradients it

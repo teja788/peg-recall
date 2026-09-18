@@ -1,5 +1,5 @@
 /**
- * Peg Recall — peg shape glyphs.
+ * Color Catch — peg shape glyphs.
  *
  * One glyph per peg colour so the board stays readable with "Differentiate
  * Without Colour" on, or for anyone whose colour vision makes two pegs blur

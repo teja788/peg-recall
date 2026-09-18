@@ -1,5 +1,5 @@
 /**
- * Peg Recall — the wooden colour die (PLAN.md section 2).
+ * Color Catch — the wooden colour die (PLAN.md section 2).
  *
  * Drawn in the same 3/4 view as the board, so the die reads as a cube sitting
  * on the same table. A roll is 600 ms of wobble with the colours flicking past

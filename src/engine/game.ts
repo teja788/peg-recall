@@ -1,5 +1,5 @@
 /**
- * Peg Recall — pure rules engine.
+ * Color Catch — pure rules engine.
  *
  * `createGame(config)` builds a state; `reduce(state, action)` is a pure
  * reducer. Every state is a plain, JSON-serialisable object (the RNG included)

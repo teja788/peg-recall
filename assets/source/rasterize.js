@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Peg Recall — SVG -> PNG pipeline, end to end.
+ * Color Catch — SVG -> PNG pipeline, end to end.
  *
  *   node assets/source/build-svg.js && node assets/source/rasterize.js
  *

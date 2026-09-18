@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Peg Recall — icon source generator.
+ * Color Catch — icon source generator.
  * Emits every SVG variant of the app mark from one shared description so the
  * icon, splash, Android foreground and monochrome mark can never drift apart.
  *
@@ -223,7 +223,7 @@ function art(mono) {
 function svg({ bg, scale, mono }) {
   const t = scale === 1 ? '' : ` transform="translate(${((1 - scale) * 1024) / 2} ${((1 - scale) * 1024) / 2}) scale(${scale})"`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <title>Peg Recall</title>
+  <title>Color Catch</title>
 ${bg ? `  <rect x="0" y="0" width="1024" height="1024" fill="${bg}"/>\n` : ''}  <g${t}>
 ${art(mono)}
   </g>

@@ -1,5 +1,5 @@
 /**
- * Peg Recall — deterministic, purely functional RNG.
+ * Color Catch — deterministic, purely functional RNG.
  *
  * mulberry32 mixing over a counter-based state so that {seed, counter} is a
  * plain serialisable object: the same {seed, counter} always yields the same

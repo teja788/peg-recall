@@ -1,5 +1,5 @@
 /**
- * Peg Recall — peg shape glyph paths.
+ * Color Catch — peg shape glyph paths.
  *
  * Split out of shapes.tsx so that pure modules (svgModel.ts, and the node
  * preview script that imports it) can read the paths without pulling in

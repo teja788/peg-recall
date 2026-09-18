@@ -1,5 +1,5 @@
 /**
- * Peg Recall — react-native-svg renderer for the drawings in svgModel.ts.
+ * Color Catch — react-native-svg renderer for the drawings in svgModel.ts.
  *
  * Deliberately dumb: one `Drawing` in, one `<Svg>` out, no layout, no state.
  * Everything clever lives in svgModel.ts, which the browser preview renders

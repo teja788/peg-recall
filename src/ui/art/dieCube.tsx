@@ -1,5 +1,5 @@
 /**
- * Peg Recall — the die as a chunky isometric cube.
+ * Color Catch — the die as a chunky isometric cube.
  *
  * `dieFace.tsx` (flat rounded square) stays the right choice for small inline
  * badges, e.g. "Owl rolled blue" in a banner. This one is the object you tap:

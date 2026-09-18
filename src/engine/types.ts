@@ -1,5 +1,5 @@
 /**
- * Peg Recall — shared engine contract.
+ * Color Catch — shared engine contract.
  * Pure TypeScript. No React Native imports allowed in src/engine/**.
  * The UI layer (src/ui, app/) consumes ONLY these types and the functions
  * exported from src/engine/index.ts.

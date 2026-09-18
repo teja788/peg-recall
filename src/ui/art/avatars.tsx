@@ -1,5 +1,5 @@
 /**
- * Peg Recall — player avatars.
+ * Color Catch — player avatars.
  *
  * Six flat animal faces, each on its own muted accent disc so a player is
  * identifiable by colour at a glance and by silhouette when the tray is small.

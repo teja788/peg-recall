@@ -1,5 +1,5 @@
 /**
- * Peg Recall — art-layer colour constants.
+ * Color Catch — art-layer colour constants.
  *
  * Self-contained on purpose: src/ui/art/** must be usable by any screen without
  * reaching into the wider theme, and the engine layer must stay free of colour.

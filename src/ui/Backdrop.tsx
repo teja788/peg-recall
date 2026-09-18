@@ -1,5 +1,5 @@
 /**
- * Peg Recall — the table the whole game sits on.
+ * Color Catch — the table the whole game sits on.
  *
  * One shared backdrop for Home, Game and Settings: a vertical teal gradient,
  * a faint argyle lattice so the surface has some weave to it, and a vignette

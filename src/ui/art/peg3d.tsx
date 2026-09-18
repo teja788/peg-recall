@@ -1,5 +1,5 @@
 /**
- * Peg Recall — a peg, drawn pseudo-3D.
+ * Color Catch — a peg, drawn pseudo-3D.
  *
  * Viewed from slightly above: an elliptical top cap over a short cylinder with
  * a diagonal gradient down its body, plus a soft contact shadow so it looks

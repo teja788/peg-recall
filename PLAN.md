@@ -1,6 +1,6 @@
 # Peg Memory Game — iPhone + iPad Plan
 
-App name: **Peg Recall** (App Store subtitle: "Memory Chess"). Store name "Peg Recall - Memory Chess" (25 chars) if Apple allows; fallback keep "Memory Chess" in subtitle + keywords.
+App name: **Color Catch** (App Store subtitle: "Memory Chess"). Store name "Color Catch - Memory Chess" (26 chars) - name confirmed available in App Store Connect 2026-09-19, so this is the one we ship. Fallback (only if ASC later pushes back on the compound name): name "Color Catch", subtitle "Memory Chess", alternate keyword string in `store-assets/listing.md` section 3.
 Date: 2026-09-18. Status: decisions made (section 9), Phase 1 in progress.
 
 ---
@@ -176,7 +176,7 @@ Product
 7. Monetization: **free for v1**. Ads + paid unlock come later. Consequence: do NOT opt into Kids Category (it forbids third-party ad SDKs); ship 4+ rating. Plan an ad-free "unlock" IAP behind a parental gate when ads arrive.
 8. Kids Category: **no**. 4+ rating only.
 9. **iPhone + iPad together in v1.**
-10. App name: **Peg Recall**, subtitle "Memory Chess".
+10. App name: **Color Catch**, subtitle "Memory Chess". (Renamed from "Peg Recall" 2026-09-19; bundle id, slug and the github.io/peg-recall privacy URL deliberately keep the old identifier - the ASC app record 6813625311 is welded to `com.raviteja.pegrecall`.)
 
 Assets
 11. Do you want me to generate the art (SVG pegs, avatars, icon) or will you supply it? **I generate.**
