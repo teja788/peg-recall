@@ -23,19 +23,19 @@ const OUT = __dirname;
 
 const C = {
   page: '#E9DECB',      // warm sand, full-bleed
-  faceLit: '#EFD9B8',   // board face, lit centre
-  face: '#E3C9A4',      // board face, outer
-  rim: '#C9A77C',
-  bevel: '#B8926A',
-  grain: '#B5906A',
-  holeDeep: '#8E6C48',
-  hole: '#B78F63',
-  holeLip: '#F2E3CA',
-  pegCap: '#D9C3A5',    // natural, face-down peg
-  pegCapRim: '#AE8E67',
-  pegBody: '#B9986F',
-  pegBodyDark: '#82694E',
-  shadow: '#3A2A1B',
+  faceLit: '#ECC788',   // board face, lit centre (see src/ui/art/palette.ts)
+  face: '#CE9F60',      // board face, outer
+  rim: '#B8875A',
+  bevel: '#A9794C',
+  grain: '#9A6E42',
+  holeDeep: '#5E4326',
+  hole: '#7A5A3A',
+  holeLip: '#F3DCB0',
+  pegCap: '#E6C68F',    // natural, face-down peg
+  pegCapRim: '#BE9260',
+  pegBody: '#DEBA82',
+  pegBodyDark: '#A07A4C',
+  shadow: '#3A2612',
   orange: '#E69F00', orangeRim: '#B87E00', orangeDark: '#79520D',
   blue: '#0072B2', blueRim: '#005688', blueDark: '#00385A',
   green: '#009E73', greenRim: '#00795A', greenDark: '#004F3B',

@@ -2,13 +2,15 @@
  * Peg Recall — the wooden colour die (PLAN.md section 2, "The die is a wooden
  * cube with coloured dots").
  *
- * Drawn in the same 3/4 view as the board: a lit top face carrying the rolled
- * colour as a big pip, two darker side faces each carrying a small pip, and a
- * soft contact shadow. Before the first roll it is plain wood with a faint "?".
+ * Drawn in the same 3/4 view as the board: a rounded block of light wood whose
+ * lit top face carries the rolled colour as one big glossy pip, with a smaller
+ * pip in another palette colour on each of the two visible side faces, and a
+ * soft contact shadow. Before the first roll it is plain wood with an engraved
+ * "?" on the top face.
  *
- * Node budget: 9 prims.
+ * Node budget: 15 prims (9 before the first roll).
  */
-import React, { useMemo } from 'react';
+import React, { useId, useMemo } from 'react';
 import type { PegColor } from '../../engine/types';
 import type { ArtTheme } from './palette';
 import { woodDieScene } from './perspectiveModel';
@@ -27,9 +29,11 @@ export interface WoodDieProps {
 }
 
 export function WoodDie({ size, color, showShape = false, theme = 'light' }: WoodDieProps) {
+  // Unique per mounted die, so two dice cannot share gradient ids.
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   const scene = useMemo(
-    () => woodDieScene(size, color, showShape, theme),
-    [size, color, showShape, theme],
+    () => woodDieScene(size, color, showShape, theme, uid),
+    [size, color, showShape, theme, uid],
   );
   return <SvgScene scene={scene} />;
 }

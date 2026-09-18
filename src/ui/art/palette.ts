@@ -54,9 +54,12 @@ export const NEUTRAL = {
 export type ArtTheme = 'light' | 'dark';
 
 /**
- * Wood tones for the round board and the pegs standing in it.
- * Warm and low-contrast on purpose (PLAN.md section 4, "easy on the eyes"):
- * the board is furniture, the peg colours are the information.
+ * Wood tones for the round board, the pegs standing in it and the die.
+ *
+ * Honey/golden rather than beige: sampled from the reference toy and from the
+ * reference game's board (see assets/source/ART-NOTES.md). The board is still
+ * furniture and the peg colours are still the information, but furniture made
+ * of real oiled beech, not of cardboard.
  */
 export interface WoodTones {
   /** Board face, centre of the radial gradient (lit). */
@@ -65,8 +68,12 @@ export interface WoodTones {
   face: string;
   /** Outer rim of the board. */
   rim: string;
+  /** Darkest tone of the side wall, at its bottom edge. */
+  rimDeep: string;
   /** Bevel ring between rim and face. */
   bevel: string;
+  /** Thin turned groove cut into the face just inside the bevel. */
+  groove: string;
   /** Grain arcs across the face. */
   grain: string;
   /** Deepest part of a peg hole (its upper inner wall). */
@@ -87,40 +94,64 @@ export interface WoodTones {
   pegBody: string;
   /** Strength of the white highlight on a cap. */
   gloss: number;
+  /** Die: the lit top face. */
+  dieTop: string;
+  /** Die: the front-left face. */
+  dieFront: string;
+  /** Die: the right face, turned furthest from the light. */
+  dieRight: string;
+  /** Die: the line where two faces meet. */
+  dieEdge: string;
+  /** Die: grain streaks and the engraved "?" of the un-rolled die. */
+  dieGrain: string;
 }
 
 export const WOOD: Record<ArtTheme, WoodTones> = {
   light: {
-    faceLit: '#EFD9B8',
-    face: '#E3C9A4',
-    rim: '#C9A77C',
-    bevel: '#B8926A',
-    grain: '#B5906A',
-    holeDeep: '#8E6C48',
-    hole: '#B78F63',
-    holeLip: '#F2E3CA',
-    shadow: '#3A2A1B',
-    shadowOpacity: 0.16,
-    pegCap: '#D9C3A5',
-    pegCapRim: '#B9986F',
-    pegBody: '#B9986F',
-    gloss: 0.3,
+    faceLit: '#ECC788',
+    face: '#CE9F60',
+    rim: '#B8875A',
+    rimDeep: '#8F6238',
+    bevel: '#A9794C',
+    groove: '#9A6C40',
+    grain: '#9A6E42',
+    holeDeep: '#5E4326',
+    hole: '#7A5A3A',
+    holeLip: '#F3DCB0',
+    shadow: '#3A2612',
+    shadowOpacity: 0.2,
+    pegCap: '#E6C68F',
+    pegCapRim: '#BE9260',
+    pegBody: '#DEBA82',
+    gloss: 0.34,
+    dieTop: '#F0D3A0',
+    dieFront: '#D6B37E',
+    dieRight: '#BC9159',
+    dieEdge: '#9A7448',
+    dieGrain: '#8A6534',
   },
   dark: {
-    faceLit: '#7B5B40',
-    face: '#6B4F36',
-    rim: '#4E3826',
-    bevel: '#3E2C1D',
-    grain: '#805F42',
-    holeDeep: '#241A10',
-    hole: '#42301F',
-    holeLip: '#8E6E4C',
+    faceLit: '#A67940',
+    face: '#8A6031',
+    rim: '#6E4C29',
+    rimDeep: '#4A3218',
+    bevel: '#5A3D20',
+    groove: '#4E3419',
+    grain: '#C0955C',
+    holeDeep: '#2A1C0C',
+    hole: '#453014',
+    holeLip: '#B08B58',
     shadow: '#000000',
-    shadowOpacity: 0.34,
-    pegCap: '#C0A382',
-    pegCapRim: '#9C7C56',
-    pegBody: '#9C7C56',
-    gloss: 0.2,
+    shadowOpacity: 0.4,
+    pegCap: '#D5AC73',
+    pegCapRim: '#A37A47',
+    pegBody: '#BE945B',
+    gloss: 0.26,
+    dieTop: '#B98D55',
+    dieFront: '#9C7340',
+    dieRight: '#80592D',
+    dieEdge: '#5C3F20',
+    dieGrain: '#5A3E1D',
   },
 };
 

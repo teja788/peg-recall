@@ -14,7 +14,7 @@
  *   left = c.x + q.x - a.x;
  *   top  = c.y + q.y - a.y;
  *
- * Node budget: 11 fixed prims + 2 per hole (a 40-peg board is ~91 nodes).
+ * Node budget: 17 fixed prims + 2 per hole (a 40-peg board is ~97 nodes).
  */
 import React, { useId, useMemo } from 'react';
 import type { ArtTheme } from './palette';

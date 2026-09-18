@@ -113,13 +113,16 @@ function boardScene(width: number, { theme, showShapes }: SceneOpts): { svg: str
   const top = Math.ceil(Math.max(0, anchor.y - (c.y + minY)));
   const boardH = boardHeight(width, yScale);
   const dieSize = width * 0.16;
-  const die = woodDieScene(dieSize, 'sky', showShapes, theme);
+  // Every gradient id on the page has to be unique: these SVGs share one HTML
+  // document, and `url(#id)` resolves across the whole of it.
+  const tag = `${theme}${showShapes ? 's' : ''}`;
+  const die = woodDieScene(dieSize, 'sky', showShapes, theme, `bd${tag}`);
   const canvasH = top + boardH + die.h + width * 0.03;
 
   const defs: string[] = [];
   const body: string[] = [];
 
-  const board = perspectiveBoardScene(width, layout.positions, holeSize, theme, yScale);
+  const board = perspectiveBoardScene(width, layout.positions, holeSize, theme, yScale, undefined, tag);
   const bp = place(board, 0, top);
   defs.push(bp.defs);
   body.push(bp.body);
@@ -136,7 +139,7 @@ function boardScene(width: number, { theme, showShapes }: SceneOpts): { svg: str
   for (const p of order) {
     if (gone.has(p.index)) continue;
     const q = projectHole(p.x, p.y, yScale);
-    const peg = pegDollScene(pegW, colors[p.index], up[p.index], showShapes, theme, `x${p.index}`);
+    const peg = pegDollScene(pegW, colors[p.index], up[p.index], showShapes, theme, `x${tag}${p.index}`);
     const pp = place(peg, c.x + q.x - anchor.x, top + c.y + q.y - anchor.y);
     defs.push(pp.defs);
     body.push(pp.body);
@@ -179,13 +182,15 @@ function dieRow(size: number, theme: ArtTheme, showShapes: boolean): string {
   const gap = size * 1.15;
   const items: (PegColor | null)[] = [null, ...PEG_COLORS];
   const w = gap * items.length;
-  const one = woodDieScene(size, null, false, theme);
-  const body = items
-    .map((c, i) => place(woodDieScene(size, c, showShapes, theme), i * gap, 0).body)
-    .join('');
+  const tag = `${theme}${showShapes ? 's' : ''}`;
+  const one = woodDieScene(size, null, false, theme, `r${tag}0`);
+  const parts = items.map((c, i) =>
+    place(woodDieScene(size, c, showShapes, theme, `r${tag}${i}`), i * gap, 0),
+  );
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${Math.ceil(w)}" height="${Math.ceil(one.h)}" ` +
-    `viewBox="0 0 ${Math.ceil(w)} ${Math.ceil(one.h)}">${body}</svg>`
+    `viewBox="0 0 ${Math.ceil(w)} ${Math.ceil(one.h)}">` +
+    `<defs>${parts.map((p) => p.defs).join('')}</defs>${parts.map((p) => p.body).join('')}</svg>`
   );
 }
 
