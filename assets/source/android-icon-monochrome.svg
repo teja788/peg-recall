@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <title>Peg Recall</title>
+  <g transform="translate(184.32 184.32) scale(0.64)">
+    <circle cx="512" cy="512" r="406" fill="none" stroke="#FFFFFF" stroke-width="28"/>
+    <ellipse cx="512" cy="490.4" rx="90.72" ry="58.32" fill="#FFFFFF"/>
+    <ellipse cx="512" cy="250.4" rx="90.72" ry="58.32" fill="#FFFFFF"/>
+    <ellipse cx="719.85" cy="370.4" rx="79.72" ry="47.32" fill="none" stroke="#FFFFFF" stroke-width="22"/>
+    <ellipse cx="719.85" cy="610.4" rx="90.72" ry="58.32" fill="#FFFFFF"/>
+    <ellipse cx="512" cy="730.4" rx="79.72" ry="47.32" fill="none" stroke="#FFFFFF" stroke-width="22"/>
+    <ellipse cx="304.15" cy="610.4" rx="79.72" ry="47.32" fill="none" stroke="#FFFFFF" stroke-width="22"/>
+    <ellipse cx="304.15" cy="370.4" rx="79.72" ry="47.32" fill="none" stroke="#FFFFFF" stroke-width="22"/>
+  </g>
+</svg>
