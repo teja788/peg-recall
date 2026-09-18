@@ -1,20 +1,23 @@
+import { Avatar } from '@art';
 import { useRouter } from 'expo-router';
 import React, { useCallback } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  BOARD_LABEL,
+  BOARD_CYCLE,
+  BOARD_NAME,
   DIFFICULTY_LABEL,
+  DIFFICULTY_TIER,
   useSettings,
   type GameMode,
 } from '../src/store/settings';
 import { useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
-import { BoardMini } from '../src/ui/BoardMini';
-import { Chip, IconButton, ModeCard } from '../src/ui/controls';
+import { BoardGlyph, BoardMini } from '../src/ui/BoardMini';
+import { IconButton, ModeCard, OptionPill } from '../src/ui/controls';
 import { PEG_PAINT } from '../src/theme/tokens';
-import type { PegColor } from '../src/engine/types';
+import { BOARD_SPECS, type Difficulty, type PegColor } from '../src/engine/types';
 
 /** Seven pegs each, so every card shows the board in a different mood. */
 const PREVIEWS: Record<'ai' | '2p' | '3p', (PegColor | null)[]> = {
@@ -23,15 +26,25 @@ const PREVIEWS: Record<'ai' | '2p' | '3p', (PegColor | null)[]> = {
   '3p': ['orange', 'purple', 'yellow', null, 'sky', 'green', null],
 };
 
+/** Easiest first, so the row reads left-to-right as "gets harder". */
+const OPPONENTS: Difficulty[] = ['bunny', 'fox', 'owl'];
+
+/** A short phone (iPhone SE / 8) has no room for the tagline, and the cards
+ *  give up four points each, so the option rows never push Home into a scroll. */
+const SHORT_SCREEN = 700;
+/** Tablets: the column stops growing and sits in the middle. */
+const MAX_COLUMN = 560;
+
 export default function Home() {
   const t = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
+  const compact = height < SHORT_SCREEN;
   const soundOn = useSettings((s) => s.soundOn);
   const boardSize = useSettings((s) => s.boardSize);
   const difficulty = useSettings((s) => s.difficulty);
   const toggle = useSettings((s) => s.toggle);
-  const cycleBoardSize = useSettings((s) => s.cycleBoardSize);
   const setSetting = useSettings((s) => s.set);
 
   const play = useCallback(
@@ -41,6 +54,13 @@ export default function Home() {
     },
     [router, setSetting],
   );
+
+  const cardStyle = compact ? { minHeight: 84 } : undefined;
+  const cardArt = compact ? 56 : 68;
+  const gap = compact ? t.spacing.sm : t.spacing.md;
+  const glyphSize = compact ? 22 : 26;
+  const avatarSize = compact ? 28 : 32;
+  const rowLabel = { ...t.type.label, color: t.c.onBackdropMuted, marginBottom: t.spacing.xs };
 
   return (
     <Backdrop>
@@ -71,13 +91,16 @@ export default function Home() {
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: t.spacing.xl,
-          paddingBottom: insets.bottom + t.spacing.xl,
-          gap: t.spacing.md,
+          paddingBottom: insets.bottom + t.spacing.lg,
+          gap,
           flexGrow: 1,
           justifyContent: 'center',
+          width: '100%',
+          maxWidth: MAX_COLUMN + t.spacing.xl * 2,
+          alignSelf: 'center',
         }}
       >
-        <View style={{ marginBottom: t.spacing.lg }}>
+        <View style={{ marginBottom: compact ? 0 : t.spacing.sm }}>
           <Text
             accessibilityRole="header"
             style={{
@@ -90,9 +113,11 @@ export default function Home() {
           >
             Peg Recall
           </Text>
-          <Text style={{ ...t.type.body, color: t.c.onBackdropMuted, marginTop: t.spacing.xs }}>
-            Roll a colour. Remember where it was.
-          </Text>
+          {compact ? null : (
+            <Text style={{ ...t.type.body, color: t.c.onBackdropMuted, marginTop: t.spacing.xs }}>
+              Roll a colour. Remember where it was.
+            </Text>
+          )}
         </View>
 
         <ModeCard
@@ -100,33 +125,72 @@ export default function Home() {
           subtitle={`Opponent: ${DIFFICULTY_LABEL[difficulty]}`}
           glyph="🤖"
           accent={PEG_PAINT.sky.fill}
-          art={<BoardMini width={68} colors={PREVIEWS.ai} theme={t.scheme} />}
+          art={<BoardMini width={cardArt} colors={PREVIEWS.ai} theme={t.scheme} />}
           onPress={() => play('ai')}
+          style={cardStyle}
         />
         <ModeCard
           title="2 Players"
           subtitle="Pass and play on one device"
           glyph="✌️"
           accent={PEG_PAINT.green.fill}
-          art={<BoardMini width={68} colors={PREVIEWS['2p']} theme={t.scheme} />}
+          art={<BoardMini width={cardArt} colors={PREVIEWS['2p']} theme={t.scheme} />}
           onPress={() => play('2p')}
+          style={cardStyle}
         />
         <ModeCard
           title="3 Players"
           subtitle="Take turns around the table"
           glyph="🎉"
           accent={PEG_PAINT.orange.fill}
-          art={<BoardMini width={68} colors={PREVIEWS['3p']} theme={t.scheme} />}
+          art={<BoardMini width={cardArt} colors={PREVIEWS['3p']} theme={t.scheme} />}
           onPress={() => play('3p')}
+          style={cardStyle}
         />
 
-        <View style={{ flexDirection: 'row', marginTop: t.spacing.lg }}>
-          <Chip
-            text={BOARD_LABEL[boardSize]}
-            label={`Board size, ${BOARD_LABEL[boardSize]}`}
-            hint="Changes the board size"
-            onPress={cycleBoardSize}
-          />
+        <View>
+          <Text style={rowLabel}>Board</Text>
+          <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>
+            {BOARD_CYCLE.map((b) => {
+              const pegs = BOARD_SPECS[b].pegs;
+              const on = boardSize === b;
+              return (
+                <OptionPill
+                  key={b}
+                  selected={on}
+                  title={BOARD_NAME[b]}
+                  hint={`${pegs} pegs`}
+                  label={`${BOARD_NAME[b]} board, ${pegs} pegs`}
+                  onPress={() => setSetting('boardSize', b)}
+                  art={
+                    <BoardGlyph
+                      size={glyphSize}
+                      pegs={pegs}
+                      color={on ? t.c.accent : t.c.onBackdrop}
+                      rim={on ? t.c.pegDown : 'rgba(255,255,255,0.35)'}
+                    />
+                  }
+                />
+              );
+            })}
+          </View>
+        </View>
+
+        <View>
+          <Text style={rowLabel}>Opponent</Text>
+          <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>
+            {OPPONENTS.map((d) => (
+              <OptionPill
+                key={d}
+                selected={difficulty === d}
+                title={DIFFICULTY_LABEL[d]}
+                hint={DIFFICULTY_TIER[d]}
+                label={`${DIFFICULTY_LABEL[d]} opponent, ${DIFFICULTY_TIER[d]}`}
+                onPress={() => setSetting('difficulty', d)}
+                art={<Avatar id={d} size={avatarSize} />}
+              />
+            ))}
+          </View>
         </View>
       </ScrollView>
     </Backdrop>

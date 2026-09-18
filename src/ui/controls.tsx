@@ -1,5 +1,12 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import Svg, { Rect } from 'react-native-svg';
 
 import { useTheme } from '../theme';
@@ -102,6 +109,103 @@ export function Chip({
       })}
     >
       <Text style={{ ...t.type.label, color: selected ? t.c.accentInk : t.c.text }}>{text}</Text>
+    </Pressable>
+  );
+}
+
+/**
+ * One choice in a segmented row (board size, computer opponent).
+ *
+ * Laid out as a column — a picture, a name, a one-word hint — so four of them
+ * still fit across a 375 pt phone. Unselected pills are translucent white so
+ * the whole row reads as *options* sitting on the table; the chosen one lifts
+ * onto a card surface. Nothing here is required to start a game: the row is
+ * there to be noticed, not to be filled in.
+ */
+export function OptionPill({
+  art,
+  title,
+  hint,
+  selected,
+  label,
+  onPress,
+}: {
+  /** small drawing above the label — a board glyph or an avatar */
+  art: React.ReactNode;
+  title: string;
+  hint?: string;
+  selected: boolean;
+  /** spoken name; falls back to "title, hint" */
+  label?: string;
+  onPress: () => void;
+}) {
+  const t = useTheme();
+  const reduced = useReducedMotion();
+  const scale = useSharedValue(1);
+  const was = useRef(selected);
+
+  // A small dip-and-settle the moment a pill becomes the chosen one. Only on
+  // the transition — a pill that is merely already selected must not twitch on
+  // every re-render.
+  useEffect(() => {
+    if (selected && !was.current && !reduced) {
+      scale.value = withSequence(
+        withTiming(0.96, { duration: 0 }),
+        withTiming(1, { duration: 150 }),
+      );
+    }
+    was.current = selected;
+  }, [selected, reduced, scale]);
+
+  const animated = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label ?? (hint ? `${title}, ${hint}` : title)}
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.75 : 1 })}
+    >
+      <Animated.View
+        style={[
+          styles.pill,
+          {
+            borderRadius: t.radii.md,
+            paddingVertical: t.spacing.sm,
+            paddingHorizontal: t.spacing.xs,
+            backgroundColor: selected ? t.c.card : 'rgba(255,255,255,0.14)',
+            borderColor: selected ? t.c.accent : 'rgba(255,255,255,0.22)',
+          },
+          animated,
+        ]}
+      >
+        {art}
+        <Text
+          numberOfLines={1}
+          style={{
+            ...t.type.caption,
+            marginTop: 3,
+            color: selected ? t.c.text : t.c.onBackdrop,
+          }}
+        >
+          {title}
+        </Text>
+        {hint ? (
+          <Text
+            numberOfLines={1}
+            allowFontScaling={false}
+            style={{
+              fontSize: 11,
+              lineHeight: 14,
+              fontWeight: '600',
+              color: selected ? t.c.textDim : t.c.onBackdropMuted,
+            }}
+          >
+            {hint}
+          </Text>
+        ) : null}
+      </Animated.View>
     </Pressable>
   );
 }
@@ -245,4 +349,10 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   row: { flexDirection: 'row', alignItems: 'center' },
+  pill: {
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+  },
 });

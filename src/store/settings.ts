@@ -37,10 +37,23 @@ export const BOARD_LABEL: Record<BoardSize, string> = {
   big: 'Big · 36 pegs',
   huge: 'Huge · 40 pegs',
 };
+/** Just the name, for places too narrow for the peg count (the Home picker). */
+export const BOARD_NAME: Record<BoardSize, string> = {
+  small: 'Small',
+  classic: 'Classic',
+  big: 'Big',
+  huge: 'Huge',
+};
 export const DIFFICULTY_LABEL: Record<Difficulty, string> = {
   bunny: 'Bunny',
   fox: 'Fox',
   owl: 'Owl',
+};
+/** One word under each opponent in the Home picker. */
+export const DIFFICULTY_TIER: Record<Difficulty, string> = {
+  bunny: 'Easy',
+  fox: 'Medium',
+  owl: 'Hard',
 };
 export const DIFFICULTY_HINT: Record<Difficulty, string> = {
   bunny: 'Forgets a lot. Good for little players.',
