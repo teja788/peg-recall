@@ -75,34 +75,57 @@ function roundPoly(pts: readonly Pt[], r: number): string {
 
 /**
  * Peg doll proportions, as multiples of the peg's width. The width is the
- * widest point (the cap); the body is narrower so the cap reads as a mushroom
- * sitting on a turned stem.
+ * widest point (the head); the stem is only a little narrower, so the peg
+ * reads as a slim turned pin rather than a mushroom.
+ *
+ * Measured off the reference toy (see assets/source/ART-NOTES.md, "Board
+ * readability"): head 35 px wide on a 29 px stem (1.21x), head as tall as it
+ * is wide, stem 1.46 head-widths long, whole peg 2.5 head-widths tall. The
+ * numbers below are those, trimmed a few percent so a peg is 1.2 lattice
+ * spacings tall instead of 1.18 — close enough to read the same, short enough
+ * that the row two shells back still shows its base above this one's head.
  */
 const P = {
   /** total height / width */
-  aspect: 1.9,
-  /** dome half-width = half the box */
+  aspect: 2.35,
+  /** head half-width = half the box */
   capRx: 0.5,
-  /** y of the dome's widest line */
-  capEqY: 0.5,
-  /** y of the top of the dome */
-  capTopY: 0.09,
-  /** how far the dome's underside bulges below its widest line */
-  capUnderRy: 0.13,
-  /** body half-width */
-  bodyRx: 0.36,
-  /** body top, tucked under the dome */
-  bodyTopY: 0.42,
+  /** y of the head's widest line */
+  capEqY: 0.54,
+  /** y of the top of the head */
+  capTopY: 0.06,
+  /** how far the head's underside bulges below its widest line */
+  capUnderRy: 0.36,
+  /** stem half-width — 1.19x narrower than the head, as on the real toy */
+  bodyRx: 0.42,
+  /** stem top, tucked under the head */
+  bodyTopY: 0.6,
   /** y of the base centre — the point that lands on a hole */
-  baseY: 1.775,
+  baseY: 2.2,
   /** half-height of the base ellipse (the board-level foreshortening) */
-  baseRy: 0.115,
-  /** bottom of the coloured band on the body, face-up only */
-  bandY: 0.94,
+  baseRy: 0.1,
+  /** bottom of the coloured band on the stem, face-up only */
+  bandY: 1.24,
 } as const;
 
 /** Height / width of the box `pegDollScene()` draws into. */
 export const PEG_DOLL_ASPECT = P.aspect;
+
+/** y of the base centre inside the box, as a fraction of the peg's width. */
+export const PEG_DOLL_BASE_Y = P.baseY;
+
+/** y of the very top of the head, as a fraction of the peg's width. */
+export const PEG_DOLL_CAP_TOP_Y = P.capTopY;
+
+/**
+ * Height of the head alone, in peg widths. Keep this below the projected row
+ * pitch (`spacing * 0.866 * yScale`) or a peg's head swallows the base of the
+ * peg standing behind it and the grid stops reading as rows.
+ */
+export const PEG_DOLL_CAP_HEIGHT = P.capEqY + P.capUnderRy - P.capTopY;
+
+/** Height of the peg above its base, in peg widths. */
+export const PEG_DOLL_STAND_HEIGHT = P.baseY - P.capTopY;
 
 /**
  * Where the base centre of a peg sits inside its own box, in points.
@@ -175,15 +198,26 @@ export function pegDollScene(
     `L ${r2(cx + bodyRx)} ${r2(topY)} Z`;
 
   const prims: Prim[] = [
-    // Contact shadow, pooled a touch to the right of the base.
+    // Contact shadow: two stacked ellipses, the wider one faint, so the peg
+    // sits *in* the board instead of floating over it. Pooled a touch to the
+    // right of the base, away from the light.
+    {
+      t: 'ellipse',
+      cx: r2(cx + u(0.04)),
+      cy: r2(baseY + u(0.045)),
+      rx: r2(bodyRx * 1.65),
+      ry: r2(baseRy * 1.05),
+      fill: w.shadow,
+      opacity: theme === 'light' ? 0.13 : 0.24,
+    },
     {
       t: 'ellipse',
       cx: r2(cx + u(0.03)),
-      cy: r2(baseY + u(0.035)),
-      rx: r2(bodyRx * 1.18),
-      ry: r2(baseRy * 0.8),
+      cy: r2(baseY + u(0.03)),
+      rx: r2(bodyRx * 1.12),
+      ry: r2(baseRy * 0.78),
       fill: w.shadow,
-      opacity: theme === 'light' ? 0.2 : 0.36,
+      opacity: theme === 'light' ? 0.22 : 0.38,
     },
     // Turned body.
     { t: 'path', d: stem(u(P.bodyTopY), baseY, baseRy), fill: `url(#${bodyId})` },
@@ -211,16 +245,17 @@ export function pegDollScene(
     opacity: 1,
   });
 
-  // Specular highlight, upper left of the dome.
+  // Specular highlight, upper left of the head.
+  const hlY = capEqY - u(0.27);
   prims.push({
     t: 'ellipse',
-    cx: r2(cx - capRx * 0.38),
-    cy: r2(capEqY - u(0.24)),
-    rx: r2(capRx * 0.26),
-    ry: r2(u(0.13)),
+    cx: r2(cx - capRx * 0.4),
+    cy: r2(hlY),
+    rx: r2(capRx * 0.27),
+    ry: r2(u(0.12)),
     fill: '#FFFFFF',
     opacity: t.gloss,
-    transform: `rotate(-24 ${r2(cx - capRx * 0.38)} ${r2(capEqY - u(0.24))})`,
+    transform: `rotate(-24 ${r2(cx - capRx * 0.4)} ${r2(hlY)})`,
   });
 
   // Shape glyph, small, on the front of the cap.
@@ -291,10 +326,22 @@ export function pegDollScene(
 
 /* ================================================================= board == */
 
-/** Default vertical squash of the board ellipse (PLAN.md: 0.55–0.6). */
-export const BOARD_Y_SCALE = 0.58;
-/** Default thickness of the visible wooden side, as a fraction of the width. */
-export const BOARD_EDGE_RATIO = 0.09;
+/**
+ * Default vertical squash of the board ellipse.
+ *
+ * Measured off the reference toy: its disc is 511 x 311 px, i.e. 0.61, with
+ * the peg rings sitting on an ellipse of exactly that ratio. We sit a little
+ * flatter still (0.66) because our hex lattice packs rows 0.866 spacings
+ * apart where the reference's shells are 1.27 apart — the extra squash back
+ * would put a peg's head over the base of the peg two shells behind it.
+ */
+export const BOARD_Y_SCALE = 0.66;
+/**
+ * Default thickness of the visible wooden side, as a fraction of the width.
+ * The reference uses 0.055; a hair more keeps it reading as a chunky toy disc
+ * now that the flatter ellipse shows more of the top face.
+ */
+export const BOARD_EDGE_RATIO = 0.065;
 /** Room left under the wooden side for the ground shadow. */
 const BOARD_SHADOW_PAD = 0.03;
 
@@ -307,16 +354,22 @@ const BOARD_SHADOW_PAD = 0.03;
  * between them, as on the physical toy. The touch target stays generous
  * because the peg is `PEG_DOLL_ASPECT` times as tall as it is wide.
  */
-export const PEG_WIDTH_OF_SPACING = 0.64;
+export const PEG_WIDTH_OF_SPACING = 0.5;
 
 /** Drawn peg width for a board laid out with this lattice `spacing`. */
 export function pegWidthFor(spacing: number): number {
   return spacing * PEG_WIDTH_OF_SPACING;
 }
 
-/** Recommended hole diameter for a peg of width `pegWidth`. */
+/**
+ * Recommended hole diameter for a peg of width `pegWidth`.
+ *
+ * Wider than the peg's *stem* (0.84 x pegWidth) on purpose: the drilled rim
+ * has to stay visible all the way round the base, or a peg reads as sitting
+ * on the board rather than in it — and an empty hole has to read as a hole.
+ */
 export function holeSizeFor(pegWidth: number): number {
-  return pegWidth * 0.78;
+  return pegWidth * 1.06;
 }
 
 /** Squash a circle-space offset from the board centre onto the tilted ellipse. */
@@ -352,7 +405,7 @@ export interface PerspectiveHole {
  * the flat rim, the gradient top face, a few grain arcs, and one shallow
  * drilled hole per position.
  *
- * 17 fixed prims + 2 per hole.
+ * 17 fixed prims + one faint row-guide groove per shell + 2 per hole.
  */
 export function perspectiveBoardScene(
   width: number,
@@ -451,6 +504,29 @@ export function perspectiveBoardScene(
     sw: r2(Math.max(0.8, width * 0.0055)),
     opacity: theme === 'light' ? 0.42 : 0.5,
   });
+
+  // Row guides: one faint groove under each shell of holes. Barely there on
+  // purpose — enough for the eye to follow a ring round the board and see
+  // which pegs belong to it, not enough to read as decoration.
+  const radii: number[] = [];
+  for (const h of holes) {
+    const r = Math.hypot(h.x, h.y);
+    if (r < 1) continue;
+    if (!radii.some((q) => Math.abs(q - r) < Math.max(1, width * 0.006))) radii.push(r);
+  }
+  for (const r of radii) {
+    prims.push({
+      t: 'ellipse',
+      cx: r2(cx),
+      cy: r2(cy),
+      rx: r2(r),
+      ry: r2(r * yScale),
+      fill: 'none',
+      stroke: w.groove,
+      sw: r2(Math.max(0.7, width * 0.004)),
+      opacity: theme === 'light' ? 0.07 : 0.09,
+    });
+  }
 
   // Grain: shallow arcs across the face, squashed with everything else.
   for (const [k, bow] of [

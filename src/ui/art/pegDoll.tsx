@@ -16,10 +16,28 @@
 import React, { useId, useMemo } from 'react';
 import type { PegColor } from '../../engine/types';
 import type { ArtTheme } from './palette';
-import { PEG_DOLL_ANCHOR, PEG_DOLL_ASPECT, pegDollAnchor, pegDollScene } from './perspectiveModel';
+import {
+  PEG_DOLL_ANCHOR,
+  PEG_DOLL_ASPECT,
+  PEG_DOLL_BASE_Y,
+  PEG_DOLL_CAP_HEIGHT,
+  PEG_DOLL_CAP_TOP_Y,
+  PEG_DOLL_STAND_HEIGHT,
+  pegDollAnchor,
+  pegDollScene,
+} from './perspectiveModel';
 import { SvgScene } from './scene3d';
 
-export { PEG_DOLL_ASPECT, PEG_DOLL_ANCHOR, pegDollAnchor, pegDollScene };
+export {
+  PEG_DOLL_ASPECT,
+  PEG_DOLL_ANCHOR,
+  PEG_DOLL_BASE_Y,
+  PEG_DOLL_CAP_HEIGHT,
+  PEG_DOLL_CAP_TOP_Y,
+  PEG_DOLL_STAND_HEIGHT,
+  pegDollAnchor,
+  pegDollScene,
+};
 
 export interface PegDollProps {
   /** Width of the cap — the widest point of the peg. */

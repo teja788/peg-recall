@@ -47,22 +47,22 @@ const C = {
 // in it. Proportions mirror src/ui/art/perspectiveModel.ts exactly, so the
 // icon and the board on screen are the same object.
 
-const YS = 0.55;                 // vertical squash of the disc (PLAN: 0.55-0.6)
+const YS = 0.66;                 // vertical squash of the disc (BOARD_Y_SCALE)
 const R = 420;                   // disc radius on the long axis
 const RY = R * YS;
-const EDGE = 2 * R * 0.09;       // visible wooden side (BOARD_EDGE_RATIO)
+const EDGE = 2 * R * 0.065;      // visible wooden side (BOARD_EDGE_RATIO)
 const CX = 512;
 const CY = 544;                  // tuned so the whole mark is centred in 1024
 
 // 7 pegs: centre + hex ring. radiusUnits = 1 + 0.5 + 0.25 (roundLayout pads).
 const SPACING = R / 1.75;
-const PW = SPACING * 0.64;       // PEG_WIDTH_OF_SPACING
-const HOLE = PW * 0.78;          // holeSizeFor()
+const PW = SPACING * 0.5;        // PEG_WIDTH_OF_SPACING
+const HOLE = PW * 1.06;          // holeSizeFor()
 
 /** Peg doll proportions, as multiples of the peg width (perspectiveModel P). */
 const P = {
-  aspect: 1.9, capRx: 0.5, capEqY: 0.5, capTopY: 0.09, capUnderRy: 0.13,
-  bodyRx: 0.36, bodyTopY: 0.42, baseY: 1.775, baseRy: 0.115, bandY: 0.94,
+  aspect: 2.35, capRx: 0.5, capEqY: 0.54, capTopY: 0.06, capUnderRy: 0.36,
+  bodyRx: 0.42, bodyTopY: 0.6, baseY: 2.2, baseRy: 0.1, bandY: 1.24,
 };
 
 // circle-space hole centres, then squashed onto the ellipse

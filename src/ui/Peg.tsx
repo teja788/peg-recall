@@ -10,7 +10,7 @@
  *
  * Reduce Motion: cross-fades only. No rise, no bob, no lift, no arc.
  */
-import { PEG_DOLL_ASPECT, PegDoll, type ArtTheme } from '@art';
+import { PEG_DOLL_ASPECT, PEG_DOLL_BASE_Y, PegDoll, type ArtTheme } from '@art';
 import React, { memo, useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
@@ -28,12 +28,12 @@ import Animated, {
 import type { PegColor } from '../engine/types';
 
 /** Fraction of the peg's height it sinks into the hole before the reveal. */
-const SUNK = 0.4;
+const SUNK = 0.34;
 /** Fraction of the peg's height it lifts when picked. */
-const LIFT = 0.18;
+const LIFT = 0.16;
 const LIFT_SCALE = 1.08;
 /** Base offset from the box centre, in peg widths — lets us scale about the base. */
-const BASE_OFFSET = 1.775 - PEG_DOLL_ASPECT / 2;
+const BASE_OFFSET = PEG_DOLL_BASE_Y - PEG_DOLL_ASPECT / 2;
 
 export const PEG_ANIM = {
   riseRingStagger: 60,
@@ -256,7 +256,7 @@ function MovingPegImpl({
   const boxH = width * PEG_DOLL_ASPECT;
   const fx = flyTo?.x ?? 0;
   const fy = flyTo?.y ?? -boxH * 2;
-  const shadowW = width * 0.9;
+  const shadowW = width * 1.0;
 
   const body = useAnimatedStyle(() => {
     if (reduced) return { opacity: 1 - fly.value, transform: [] };
@@ -291,7 +291,7 @@ function MovingPegImpl({
               pointerEvents: 'none',
               position: 'absolute',
               left: width / 2 - shadowW / 2,
-              top: width * 1.775 - shadowW * 0.13,
+              top: width * PEG_DOLL_BASE_Y - shadowW * 0.13,
               width: shadowW,
               height: shadowW * 0.26,
               borderRadius: shadowW / 2,

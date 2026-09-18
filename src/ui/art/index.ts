@@ -39,6 +39,10 @@ export {
   woodDieScene,
   PEG_DOLL_ASPECT,
   PEG_DOLL_ANCHOR,
+  PEG_DOLL_BASE_Y,
+  PEG_DOLL_CAP_HEIGHT,
+  PEG_DOLL_CAP_TOP_Y,
+  PEG_DOLL_STAND_HEIGHT,
 } from './perspectiveModel';
 export type { Scene } from './perspectiveModel';
 export { PegDoll } from './pegDoll';

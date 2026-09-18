@@ -22,8 +22,8 @@ import { View } from 'react-native';
 import type { PegColor } from '../engine/types';
 import { roundLayout } from '../layout/roundLayout';
 
-/** Same tilt as the game board. */
-const TILT = 0.5;
+/** Same tilt as the game board's squat branch (`BOARD_TILT`). */
+const TILT = 0.62;
 
 export interface BoardMiniProps {
   /** Width of the disc in points. The view is ~0.82x that tall. */

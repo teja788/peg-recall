@@ -12,6 +12,8 @@
  */
 import {
   PEG_DOLL_ASPECT,
+  PEG_DOLL_CAP_HEIGHT,
+  PEG_DOLL_STAND_HEIGHT,
   PerspectiveBoard,
   boardCentre,
   boardHeight,
@@ -29,10 +31,19 @@ import { roundLayout, type RoundLayout } from '../layout/roundLayout';
 import { PEG_PAINT, useTheme } from '../theme';
 import { MovingPeg, PEG_ANIM, Peg } from './Peg';
 
-/** How hard the board is tilted. 1 = seen from straight above. */
-export const BOARD_TILT = 0.5;
+/**
+ * How hard the board is tilted. 1 = seen from straight above.
+ *
+ * Both numbers come from the readability pass (assets/source/ART-NOTES.md):
+ * the reference toy sits at 0.61 and reads instantly, our old 0.50 / 0.58 did
+ * not, because the squashed rows put every peg's head over the base of the
+ * peg behind it. The invariant to keep when touching these: the head height
+ * (`PEG_DOLL_CAP_HEIGHT * pegWidth`) must stay below the projected row pitch
+ * (`spacing * 0.866 * tilt`) — `metricsFor()` logs both in dev.
+ */
+export const BOARD_TILT = 0.62;
 /** Tilt used when the screen is tall enough to spend the height on the disc. */
-export const BOARD_TILT_TALL = 0.58;
+export const BOARD_TILT_TALL = 0.66;
 /** Breathing room between the disc and the edge of the box we were given. */
 const SIDE_MARGIN = 16;
 /** A board wider than this stops being a toy and starts being a table. */
@@ -131,11 +142,11 @@ function metricsFor(pegCount: number, width: number, tilt: number = BOARD_TILT):
     }))
     .sort((a, b) => a.depth - b.depth || a.left - b.left);
 
-  // The touch cell sits over the cap, not over the hole: on a tilted board the
-  // cap is a full peg-height above the hole it stands in, and players tap what
-  // they can see. Cells overlap (rows are only spacing*0.43 apart once the
+  // The touch cell sits over the peg, not over the hole: on a tilted board the
+  // head is a full peg-height above the hole it stands in, and players tap what
+  // they can see. Cells overlap (rows are only spacing*0.57 apart once the
   // board is squashed) and the nearer peg, painted and mounted later, wins.
-  const capTop = pegWidth * 1.685;
+  const capTop = pegWidth * PEG_DOLL_STAND_HEIGHT;
   const hit = {
     w: Math.max(TOUCH, layout.spacing),
     h: Math.max(TOUCH, capTop),
@@ -211,7 +222,15 @@ export function Board({
 
   const reported = useRef('');
   if (m && width > 0) {
-    const line = `pegs=${pegCount} board=${width}x${Math.round(m.height)} tilt=${tilt} spacing=${m.layout.spacing.toFixed(1)} pegWidth=${m.pegWidth.toFixed(1)} hit=${Math.round(m.hit.w)}x${Math.round(m.hit.h)} rowPitch=${(m.layout.spacing * 0.866 * tilt).toFixed(1)} box=${Math.round(box.w)}x${Math.round(box.h)}`;
+    const rowPitch = m.layout.spacing * 0.866 * tilt;
+    const capH = m.pegWidth * PEG_DOLL_CAP_HEIGHT;
+    const line =
+      `pegs=${pegCount} board=${width}x${Math.round(m.height)} tilt=${tilt}` +
+      ` spacing=${m.layout.spacing.toFixed(1)} pegWidth=${m.pegWidth.toFixed(1)}` +
+      ` hit=${Math.round(m.hit.w)}x${Math.round(m.hit.h)}` +
+      ` rowPitch=${rowPitch.toFixed(1)} capH=${capH.toFixed(1)}` +
+      ` clear=${capH < rowPitch ? 'yes' : 'NO'}` +
+      ` box=${Math.round(box.w)}x${Math.round(box.h)}`;
     if (reported.current !== line && __DEV__) {
       reported.current = line;
       // dev only: read back with the browser console when checking touch sizes
