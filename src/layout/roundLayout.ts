@@ -2,10 +2,9 @@
  * Round-board peg layout.
  * Pure TypeScript, no React Native imports. Deterministic for a given peg count.
  *
- * Pegs sit on a hexagonal lattice. We take complete concentric "shells"
- * (grouped by distance from the centre) until the next shell would overflow,
- * then fill the remainder of that shell with evenly spaced points by angle,
- * so 16 / 25 / 36 / 40 pegs all form a tidy disc.
+ * Pegs sit on concentric circles (rings), like the wooden toy: e.g. 25 pegs =
+ * 1 centre + 8 + 16. Rings are spaced ≥ 1 unit apart and pegs on a ring are
+ * ≥ 1 unit apart, so nothing touches. Ring 0 is innermost.
  */
 
 export interface PegPosition {
@@ -31,62 +30,64 @@ export interface RoundLayout {
   positions: PegPosition[];
 }
 
-interface UnitPoint { x: number; y: number; dist: number; angle: number }
+interface UnitPoint { x: number; y: number; dist: number; angle: number; ring: number }
 
-/** Hex-lattice points with unit spacing, out to a generous radius. */
-function latticePoints(maxRadiusUnits: number): UnitPoint[] {
-  const pts: UnitPoint[] = [];
-  const rowH = Math.sqrt(3) / 2;
-  const rows = Math.ceil(maxRadiusUnits / rowH) + 1;
-  for (let r = -rows; r <= rows; r++) {
-    const y = r * rowH;
-    const offset = (r & 1) ? 0.5 : 0;
-    const cols = Math.ceil(maxRadiusUnits) + 1;
-    for (let c = -cols; c <= cols; c++) {
-      const x = c + offset;
-      const dist = Math.hypot(x, y);
-      if (dist <= maxRadiusUnits + 1e-9) {
-        pts.push({ x, y, dist, angle: Math.atan2(y, x) });
-      }
-    }
+/**
+ * Ring plans: pegs per concentric circle, inner → outer. Chosen so every ring
+ * looks like a circle (like the wooden toy) and adjacent pegs never touch.
+ * Unknown counts fall back to a generated plan.
+ */
+export const RING_PLANS: Record<number, number[]> = {
+  9: [1, 8],
+  16: [4, 12],
+  19: [1, 6, 12],
+  24: [8, 16],
+  25: [1, 8, 16],
+  36: [6, 12, 18],
+  40: [8, 14, 18],
+};
+
+function fallbackPlan(n: number): number[] {
+  const plan: number[] = [];
+  let left = n;
+  let k = 0;
+  while (left > 0) {
+    const cap = k === 0 ? 1 : 6 * k;
+    const take = Math.min(cap, left);
+    plan.push(take);
+    left -= take;
+    k++;
   }
-  return pts;
+  return plan;
 }
 
-/** Group lattice points into shells by distance (rounded to 3 decimals). */
-function shells(pts: UnitPoint[]): UnitPoint[][] {
-  const map = new Map<number, UnitPoint[]>();
-  for (const p of pts) {
-    const key = Math.round(p.dist * 1000);
-    const arr = map.get(key) ?? [];
-    arr.push(p);
-    map.set(key, arr);
-  }
-  return [...map.entries()]
-    .sort((a, b) => a[0] - b[0])
-    .map(([, arr]) => arr.sort((a, b) => a.angle - b.angle));
+/** Minimum ring radius (in spacing units) so neighbours on that ring are ≥ 1 apart. */
+function ringRadiusFor(count: number, prevRadius: number, hasPrev: boolean): number {
+  if (count <= 1) return 0;
+  const chord = 1 / (2 * Math.sin(Math.PI / count));
+  return Math.max(chord, hasPrev ? prevRadius + 1 : 0);
 }
 
-/** Choose `n` unit-lattice points forming a round cluster. */
+/** Choose `n` unit-spaced points on concentric circles. */
 export function unitCluster(n: number): UnitPoint[] {
   if (n <= 0) return [];
-  const all = shells(latticePoints(Math.sqrt(n) + 2));
+  const plan = RING_PLANS[n] ?? fallbackPlan(n);
   const out: UnitPoint[] = [];
-  for (const shell of all) {
-    const need = n - out.length;
-    if (need <= 0) break;
-    if (shell.length <= need) {
-      out.push(...shell);
-    } else {
-      // Partial shell: pick `need` points evenly spaced by angle.
-      const m = shell.length;
-      const picked = new Set<number>();
-      for (let i = 0; i < need; i++) picked.add(Math.floor((i * m) / need));
-      // Rotate so the gap pattern is symmetric about the vertical axis.
-      const chosen = [...picked].map((i) => shell[i]);
-      out.push(...chosen);
+  let prev = 0;
+  let hasPrev = false;
+  plan.forEach((count, ring) => {
+    const r = ringRadiusFor(count, prev, hasPrev);
+    // Stagger alternate rings by half a step; start at 12 o'clock.
+    const offset = ring % 2 === 1 ? Math.PI / count : 0;
+    for (let i = 0; i < count; i++) {
+      const t = -Math.PI / 2 + offset + (i * 2 * Math.PI) / count;
+      const x = r * Math.cos(t);
+      const y = r * Math.sin(t);
+      out.push({ x, y, dist: r, angle: Math.atan2(y, x), ring });
     }
-  }
+    if (count > 1) { prev = r; hasPrev = true; }
+    else { prev = 0; hasPrev = true; }
+  });
   return out;
 }
 
@@ -109,43 +110,28 @@ export function roundLayout(
   const spacing = diameter / 2 / radiusUnits;
   const pegSize = spacing * (1 - gapRatio);
 
-  // Stable index order: by ring, then by angle starting at 12 o'clock clockwise.
-  const ringOf = new Map<number, number>();
-  let ring = 0;
-  let lastKey = -1;
-  const sorted = [...cluster].sort((a, b) => a.dist - b.dist || a.angle - b.angle);
-  for (const p of sorted) {
-    const key = Math.round(p.dist * 1000);
-    if (key !== lastKey) { if (lastKey !== -1) ring++; lastKey = key; }
-    ringOf.set(p.x * 1000 + p.y, ring);
-  }
   const clockwiseFromTop = (a: UnitPoint) => {
-    // screen y grows downward; convert to angle from top, clockwise.
     const t = Math.atan2(a.x, -a.y);
     return t < 0 ? t + Math.PI * 2 : t;
   };
-  const ordered = [...cluster].sort((a, b) => {
-    const ra = ringOf.get(a.x * 1000 + a.y)!;
-    const rb = ringOf.get(b.x * 1000 + b.y)!;
-    return ra - rb || clockwiseFromTop(a) - clockwiseFromTop(b);
-  });
+  const ordered = [...cluster].sort((a, b) => a.ring - b.ring || clockwiseFromTop(a) - clockwiseFromTop(b));
 
   const positions: PegPosition[] = ordered.map((p, index) => ({
     index,
     x: p.x * spacing,
     y: p.y * spacing,
     angle: p.angle,
-    ring: ringOf.get(p.x * 1000 + p.y)!,
+    ring: p.ring,
   }));
 
   return { diameter, radius: diameter / 2, pegSize, spacing, positions };
 }
 
-/** Orthogonal-ish neighbours on the round board (lattice distance ≈ 1). */
+/** Neighbouring pegs (centre distance ≤ ~1.5 spacings). */
 export function neighbours(layout: RoundLayout, index: number): number[] {
   const p = layout.positions[index];
   const s = layout.spacing;
   return layout.positions
-    .filter((q) => q.index !== index && Math.hypot(q.x - p.x, q.y - p.y) <= s * 1.05)
+    .filter((q) => q.index !== index && Math.hypot(q.x - p.x, q.y - p.y) <= s * 1.5)
     .map((q) => q.index);
 }
