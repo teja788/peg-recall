@@ -1,192 +1,314 @@
-import React, { memo, useEffect, useRef } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+/**
+ * Peg Recall — the animated peg doll that stands in a hole on the round board.
+ *
+ * The drawing itself lives in the art layer (`PegDoll`); everything here is
+ * movement. A peg is drawn twice, wood under colour, and the colour layer's
+ * opacity is what "turns the cap over" — a tilted wooden peg has no back face
+ * to flip, so a 250 ms cross-fade is both truer to the toy and cheaper than a
+ * rotateY. Positions come from the board, so this component only ever moves
+ * relative to its own resting place.
+ *
+ * Reduce Motion: cross-fades only. No rise, no bob, no lift, no arc.
+ */
+import { PEG_DOLL_ASPECT, PegDoll, type ArtTheme } from '@art';
+import React, { memo, useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
   withDelay,
+  withSequence,
+  withSpring,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
 
-import { Shape } from '@art';
+import type { PegColor } from '../engine/types';
 
-import type { Peg as PegModel } from '../engine/types';
-import { PEG_PAINT, shapeInkFor, useTheme } from '../theme';
+/** Fraction of the peg's height it sinks into the hole before the reveal. */
+const SUNK = 0.4;
+/** Fraction of the peg's height it lifts when picked. */
+const LIFT = 0.18;
+const LIFT_SCALE = 1.08;
+/** Base offset from the box centre, in peg widths — lets us scale about the base. */
+const BASE_OFFSET = 1.775 - PEG_DOLL_ASPECT / 2;
 
-export interface PegProps {
-  peg: PegModel;
-  size: number;
-  row: number;
-  col: number;
-  /** face-up = reveal phase, a peg just picked, or a peg mid-capture */
-  faceUp: boolean;
+export const PEG_ANIM = {
+  riseRingStagger: 60,
+  riseAngleStagger: 8,
+  /** cap colour -> wood when the reveal ends */
+  fall: 250,
+  fallStagger: 12,
+  /** the pick lift */
+  lift: 180,
+  /** how long a matched peg sits lifted before it flies */
+  matchHold: 200,
+  fly: 400,
+  /** how long a missed peg stays up so everyone can see it */
+  missHold: 900,
+  settle: 250,
+} as const;
+
+/* ------------------------------------------------------------------ shared */
+
+interface DollProps {
+  width: number;
+  color: PegColor;
   showShapes: boolean;
-  disabled: boolean;
-  /** stagger for the flip-down wave (ms) */
-  delay?: number;
-  /** board-local vector to the winner's tray, for the capture flight */
-  flyTo?: { x: number; y: number } | null;
-  onPress?: (index: number) => void;
+  theme: ArtTheme;
+}
+
+/** Wood doll with the coloured doll cross-faded on top. */
+function Faces({
+  width,
+  color,
+  showShapes,
+  theme,
+  colour,
+}: DollProps & { colour: SharedValue<number> }) {
+  const colourStyle = useAnimatedStyle(() => ({ opacity: colour.value }));
+  return (
+    <>
+      <PegDoll width={width} color={null} faceUp={false} theme={theme} />
+      <Animated.View style={[StyleSheet.absoluteFill, colourStyle]}>
+        <PegDoll width={width} color={color} faceUp showShape={showShapes} theme={theme} />
+      </Animated.View>
+    </>
+  );
+}
+
+/* --------------------------------------------------------------- board peg */
+
+export interface PegProps extends DollProps {
+  /** colour showing (reveal, or a peg that was just picked) */
+  faceUp: boolean;
+  /** the opening reveal is running: the peg rises out of its hole */
+  rising: boolean;
+  /** ms before this peg rises */
+  riseDelay: number;
+  /** ms before this peg's cap fades back to wood */
+  fallDelay: number;
+  /** an overlay clone is playing this peg's move — keep the hole clear */
+  ghost: boolean;
 }
 
 function PegImpl({
-  peg,
-  size,
-  row,
-  col,
-  faceUp,
+  width,
+  color,
   showShapes,
-  disabled,
-  delay = 0,
-  flyTo,
-  onPress,
+  theme,
+  faceUp,
+  rising,
+  riseDelay,
+  fallDelay,
+  ghost,
 }: PegProps) {
-  const t = useTheme();
   const reduced = useReducedMotion();
-  const paint = PEG_PAINT[peg.color];
-  const captured = peg.state === 'captured';
+  const up = useSharedValue(rising && !reduced ? 0 : 1);
+  const colour = useSharedValue(faceUp ? 1 : 0);
+  const bob = useSharedValue(0);
+  const vis = useSharedValue(ghost ? 0 : 1);
 
-  const flip = useSharedValue(faceUp ? 1 : 0);
-  const fly = useSharedValue(captured ? 1 : 0);
-  const press = useSharedValue(0);
-
-  // the stagger only matters at the instant the peg turns over, so it is read
-  // through a ref — a changing `delay` prop must never restart a live flip
-  const delayRef = useRef(delay);
-  delayRef.current = delay;
-
+  // rise out of the hole when the reveal starts
   useEffect(() => {
-    flip.value = withDelay(
-      delayRef.current,
+    if (!rising || reduced) {
+      up.value = 1;
+      return;
+    }
+    up.value = 0;
+    up.value = withDelay(riseDelay, withSpring(1, { damping: 11, stiffness: 150, mass: 0.7 }));
+  }, [rising, riseDelay, reduced, up]);
+
+  // cap colour on / off, with a little press-down bob on the way down
+  useEffect(() => {
+    const down = !faceUp;
+    const delay = down ? fallDelay : 0;
+    colour.value = withDelay(
+      delay,
       withTiming(faceUp ? 1 : 0, {
-        duration: reduced ? 180 : t.timing.flip,
-        easing: Easing.inOut(Easing.cubic),
+        duration: reduced ? 160 : PEG_ANIM.fall,
+        easing: Easing.inOut(Easing.quad),
       }),
     );
-  }, [faceUp, reduced, flip, t.timing.flip]);
+    if (down && !reduced) {
+      bob.value = withDelay(
+        delay,
+        withSequence(
+          withTiming(1, { duration: 110, easing: Easing.out(Easing.quad) }),
+          withTiming(0, { duration: 140, easing: Easing.out(Easing.quad) }),
+        ),
+      );
+    }
+  }, [faceUp, fallDelay, reduced, colour, bob]);
 
   useEffect(() => {
-    if (!captured) return;
-    // flip (250) finishes, then the peg flies to the tray (400)
-    fly.value = withDelay(
-      reduced ? 250 : t.timing.flip,
-      withTiming(1, { duration: 400, easing: Easing.in(Easing.quad) }),
-    );
-  }, [captured, reduced, fly, t.timing.flip]);
+    vis.value = ghost ? 0 : withTiming(1, { duration: 120 });
+  }, [ghost, vis]);
 
-  const outer = useAnimatedStyle(() => {
-    const f = fly.value;
-    const dx = (flyTo?.x ?? 0) * f;
-    const dy = (flyTo?.y ?? -120) * f;
+  const boxH = width * PEG_DOLL_ASPECT;
+
+  const body = useAnimatedStyle(() => {
+    if (reduced) return { opacity: vis.value, transform: [] };
+    const dy = (1 - up.value) * SUNK * boxH + bob.value * 0.06 * boxH;
     return {
-      opacity: 1 - f,
+      opacity: vis.value * Math.min(1, 0.1 + 1.1 * up.value),
+      transform: [{ translateY: dy }],
+    };
+  });
+
+  return (
+    <Animated.View pointerEvents="none" style={[{ width, height: boxH }, body]}>
+      <Faces
+        width={width}
+        color={color}
+        showShapes={showShapes}
+        theme={theme}
+        colour={colour}
+      />
+    </Animated.View>
+  );
+}
+
+export const Peg = memo(PegImpl);
+
+/* ------------------------------------------------------------- moving peg */
+
+export interface MovingPegProps extends DollProps {
+  /** true: lift, hold, then fly to the tray. false: lift, hold, settle back. */
+  matched: boolean;
+  /** board-local vector from this peg's resting place to the tray centre */
+  flyTo: { x: number; y: number } | null;
+  /** changes per move so the timeline always restarts */
+  nonce: number;
+}
+
+/**
+ * The peg the active player just picked, drawn as an overlay above every other
+ * peg so the lift is never hidden behind the row standing in front of it.
+ *
+ * Match (850 ms budget):  lift 180 · hold 200 · fly 400  = 780
+ * Miss  (1400 ms budget): lift 180 · hold 900 · settle 250 = 1330
+ */
+function MovingPegImpl({
+  width,
+  color,
+  showShapes,
+  theme,
+  matched,
+  flyTo,
+  nonce,
+}: MovingPegProps) {
+  const reduced = useReducedMotion();
+  const lift = useSharedValue(0);
+  const colour = useSharedValue(0);
+  const fly = useSharedValue(0);
+
+  useEffect(() => {
+    const rise = { duration: PEG_ANIM.lift, easing: Easing.out(Easing.cubic) } as const;
+    const back = { duration: PEG_ANIM.settle, easing: Easing.inOut(Easing.quad) } as const;
+
+    if (reduced) {
+      // crossfade only: colour in, then out again (a match fades with the flight)
+      colour.value = withSequence(
+        withTiming(1, { duration: 160 }),
+        withDelay(
+          matched ? PEG_ANIM.matchHold : PEG_ANIM.missHold,
+          withTiming(0, { duration: matched ? PEG_ANIM.fly : PEG_ANIM.settle }),
+        ),
+      );
+      if (matched) {
+        fly.value = withDelay(
+          PEG_ANIM.lift + PEG_ANIM.matchHold,
+          withTiming(1, { duration: PEG_ANIM.fly }),
+        );
+      }
+      return;
+    }
+
+    lift.value = withTiming(1, rise);
+    if (matched) {
+      colour.value = withTiming(1, rise);
+      fly.value = withDelay(
+        PEG_ANIM.lift + PEG_ANIM.matchHold,
+        withTiming(1, { duration: PEG_ANIM.fly, easing: Easing.inOut(Easing.quad) }),
+      );
+    } else {
+      lift.value = withSequence(
+        withTiming(1, rise),
+        withDelay(PEG_ANIM.missHold, withTiming(0, back)),
+      );
+      colour.value = withSequence(
+        withTiming(1, rise),
+        withDelay(PEG_ANIM.missHold, withTiming(0, back)),
+      );
+    }
+    // the timeline is owned by `nonce`: exactly one run per move
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce]);
+
+  const boxH = width * PEG_DOLL_ASPECT;
+  const fx = flyTo?.x ?? 0;
+  const fy = flyTo?.y ?? -boxH * 2;
+  const shadowW = width * 0.9;
+
+  const body = useAnimatedStyle(() => {
+    if (reduced) return { opacity: 1 - fly.value, transform: [] };
+    const f = fly.value;
+    const s = (1 + (LIFT_SCALE - 1) * lift.value) * (1 - 0.5 * f);
+    // a slight arc: out of the board first, then down into the tray
+    const arc = -Math.sin(Math.PI * f) * boxH * 0.45;
+    return {
+      opacity: f > 0.82 ? (1 - f) / 0.18 : 1,
       transform: [
-        { translateX: dx },
-        { translateY: dy },
-        { scale: (1 - 0.55 * f) * (1 - 0.06 * press.value) },
+        { translateX: fx * f },
+        {
+          translateY:
+            -lift.value * LIFT * boxH + (s - 1) * BASE_OFFSET * width + fy * f + arc,
+        },
+        { scale: s },
       ],
     };
   });
 
-  const back = useAnimatedStyle(() =>
-    reduced
-      ? { opacity: 1 - flip.value }
-      : {
-          opacity: 1,
-          transform: [{ perspective: 600 }, { rotateY: `${flip.value * 180}deg` }],
-        },
-  );
-
-  const front = useAnimatedStyle(() =>
-    reduced
-      ? { opacity: flip.value }
-      : {
-          opacity: 1,
-          transform: [{ perspective: 600 }, { rotateY: `${180 + flip.value * 180}deg` }],
-        },
-  );
-
-  const label = captured
-    ? 'taken'
-    : faceUp
-      ? paint.label
-      : 'hidden';
-
-  const glyph = Math.max(12, Math.round(size * 0.42));
+  const shadowStyle = useAnimatedStyle(() => ({
+    opacity: (theme === 'dark' ? 0.42 : 0.26) * lift.value * (1 - fly.value),
+    transform: [{ scale: 1 + 0.3 * lift.value }],
+  }));
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`Row ${row + 1} column ${col + 1}, ${label}`}
-      accessibilityState={{ disabled: disabled || captured }}
-      disabled={disabled || captured}
-      onPressIn={() => {
-        press.value = withTiming(1, { duration: 80 });
-      }}
-      onPressOut={() => {
-        press.value = withTiming(0, { duration: 120 });
-      }}
-      onPress={() => onPress?.(peg.index)}
-      style={{ width: size, height: size }}
-      hitSlop={size < 44 ? Math.ceil((44 - size) / 2) : 0}
-    >
-      {/* the hole the peg sits in — visible once the peg is gone */}
-      <Animated.View
-        style={[
-          StyleSheet.absoluteFill,
-          {
-            borderRadius: size / 2,
-            backgroundColor: t.c.pegHole,
-            borderWidth: 1,
-            borderColor: t.scheme === 'dark' ? 'rgba(0,0,0,0.5)' : 'rgba(43,38,34,0.08)',
-          },
-        ]}
-      />
-      <Animated.View style={[StyleSheet.absoluteFill, outer]} pointerEvents="none">
-        {/* face down */}
+    <View pointerEvents="none" style={{ width, height: boxH }}>
+      {reduced ? null : (
         <Animated.View
+          pointerEvents="none"
           style={[
-            StyleSheet.absoluteFill,
-            styles.face,
             {
-              borderRadius: size / 2,
-              backgroundColor: t.c.pegDown,
-              borderColor: t.scheme === 'dark' ? '#4A4239' : '#C6BBAA',
+              position: 'absolute',
+              left: width / 2 - shadowW / 2,
+              top: width * 1.775 - shadowW * 0.13,
+              width: shadowW,
+              height: shadowW * 0.26,
+              borderRadius: shadowW / 2,
+              backgroundColor: theme === 'dark' ? '#000000' : '#3A2A1B',
             },
-            back,
+            shadowStyle,
           ]}
         />
-        {/* face up */}
-        <Animated.View
-          style={[
-            StyleSheet.absoluteFill,
-            styles.face,
-            {
-              borderRadius: size / 2,
-              backgroundColor: paint.fill,
-              borderColor: paint.rim,
-            },
-            front,
-          ]}
-        >
-          {showShapes ? (
-            <Shape color={peg.color} size={glyph} fill={shapeInkFor(peg.color)} />
-          ) : null}
-        </Animated.View>
+      )}
+      <Animated.View style={[StyleSheet.absoluteFill, body]}>
+        <Faces
+          width={width}
+          color={color}
+          showShapes={showShapes}
+          theme={theme}
+          colour={colour}
+        />
       </Animated.View>
-    </Pressable>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  face: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    backfaceVisibility: 'hidden',
-  },
-});
+export const MovingPeg = memo(MovingPegImpl);
 
-export const Peg = memo(PegImpl);
 export default Peg;

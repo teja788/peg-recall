@@ -136,7 +136,7 @@ Estimates assume Claude writes the code and you test on the simulator.
 
 | Phase | Deliverable | Time |
 |---|---|---|
-| 0. Clocks | Already have: Apple Developer account (Team 9WU98AXT3W), Expo account seeker88. Need: a privacy + support web page for Peg Recall (host TBD) | you: 10 min |
+| 0. Clocks | Already have: Apple Developer account (Team 9WU98AXT3W), Expo account seeker88. Repo github.com/teja788/peg-recall (public, needed for free GitHub Pages). Pages: https://teja788.github.io/peg-recall/ → privacy.html + support.html served from /docs | you: 10 min |
 | 1. Core | ✅ 2026-09-18: engine (40 tests), round layout (13 tests), art (peg dolls, perspective board, wooden die, icon, sounds), screens. Integration of round board + animations in progress | done |
 | 2. Modes | ✅ vs Computer (Bunny/Fox/Owl), 2P, 3P, avatars, 4 board sizes — built with Phase 1 | done |
 | 3. Polish | Palette, dark mode, sound, haptics, Reduce Motion, VoiceOver, iPad layout | 1 day |
