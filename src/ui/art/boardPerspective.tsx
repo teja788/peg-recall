@@ -14,7 +14,9 @@
  *   left = c.x + q.x - a.x;
  *   top  = c.y + q.y - a.y;
  *
- * Node budget: 17 fixed prims + 2 per hole (a 40-peg board is ~97 nodes).
+ * Node budget: 17 fixed prims, one faint row-guide groove per shell of holes,
+ * and 2 per hole, over 5 gradients — 51 prims at 16 pegs and 100 at 40. Counted
+ * in src/ui/art/__tests__/nodeBudget.test.ts, along with the whole board.
  */
 import React, { useId, useMemo } from 'react';
 import type { ArtTheme } from './palette';
@@ -34,7 +36,6 @@ import { SvgScene } from './scene3d';
 
 export {
   BOARD_Y_SCALE,
-  BOARD_EDGE_RATIO,
   boardCentre,
   boardHeight,
   holeSizeFor,

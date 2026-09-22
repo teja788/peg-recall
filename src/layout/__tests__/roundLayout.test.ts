@@ -40,6 +40,21 @@ test('peg sizes on an iPhone SE width (343pt board) are reasonable', () => {
   console.log('peg sizes @343pt:', sizes);
 });
 
+test('every peg count 1..45 keeps pegs a full unit apart (no coincident pegs)', () => {
+  for (let n = 1; n <= 45; n++) {
+    const pts = unitCluster(n);
+    assert.equal(pts.length, n, `unitCluster(${n}) returned ${pts.length} points`);
+    if (n < 2) continue;
+    let min = Infinity;
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) {
+        min = Math.min(min, Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y));
+      }
+    }
+    assert.ok(min >= 0.99, `unitCluster(${n}) min spacing ${min.toFixed(4)}`);
+  }
+});
+
 test('neighbours returns 2..6 pegs on the lattice', () => {
   const L = roundLayout(25, 300);
   const nb = neighbours(L, 0);

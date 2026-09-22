@@ -29,15 +29,37 @@ export const PEG_RIM: Record<PegColor, string> = {
 
 /**
  * Glyph colour to draw on top of a peg of this colour.
- * Yellow is too light for white, so it gets the dark rim instead.
+ *
+ * The glyph is the colour-blind cue (PLAN.md section 4), so it has to be
+ * legible on every cap, not merely present. Only `blue` is dark enough for
+ * white ink; every other Okabe-Ito fill is a mid or light tone, and white on it
+ * fails badly (orange 2.25:1, sky 2.31:1, purple 3.06:1, green 3.42:1) — worse
+ * still because the cap is drawn with a radial gradient running 30% lighter at
+ * its centre, which is exactly where the glyph sits.
+ *
+ * So the five light caps take a dark ink of their own hue — `shade(PEG_RIM[c],
+ * -0.6)` for orange/sky, `-0.7` for green/purple, `-0.5` for yellow — written
+ * out as literals here so the palette stays one flat table. WCAG contrast of
+ * ink against the flat fill, and against the darkest and lightest stop of the
+ * cap gradient (`shade(fill, -0.22)` / `shade(fill, +0.3)`):
+ *
+ *   orange #4A3200 on #E69F00   5.34 : 1   (3.32 dark stop, 7.15 lit stop)
+ *   sky    #193A4D on #56B4E9   5.19 : 1   (3.23 dark stop, 6.94 lit stop)
+ *   blue   #FFFFFF on #0072B2   5.19 : 1   (7.50 dark stop, 3.04 lit stop)
+ *   green  #00241B on #009E73   4.84 : 1   (3.14 dark stop, 6.73 lit stop)
+ *   yellow #5C5400 on #F0E442   5.83 : 1   (3.50 dark stop, 6.31 lit stop)
+ *   purple #321C28 on #CC79A7   5.15 : 1   (3.30 dark stop, 6.82 lit stop)
+ *
+ * Every one clears 3:1 (WCAG 2.1 SC 1.4.11, non-text contrast) on all three.
+ * src/ui/art/__tests__/nodeBudget.test.ts recomputes these from the palette.
  */
 export const PEG_GLYPH_ON: Record<PegColor, string> = {
-  orange: '#FFFFFF',
-  sky: '#FFFFFF',
+  orange: '#4A3200',
+  sky: '#193A4D',
   blue: '#FFFFFF',
-  green: '#FFFFFF',
-  yellow: '#6B6200',
-  purple: '#FFFFFF',
+  green: '#00241B',
+  yellow: '#5C5400',
+  purple: '#321C28',
 };
 
 /** Warm neutrals shared by the art layer. */
@@ -104,6 +126,12 @@ export interface WoodTones {
   dieEdge: string;
   /** Die: grain streaks and the engraved "?" of the un-rolled die. */
   dieGrain: string;
+  /** Die: the lit bevel running round the top face. */
+  dieBevel: string;
+  /** Die: the vertical corner where the two side faces meet, catching light. */
+  dieCorner: string;
+  /** Die: the lit lower wall of the "?" groove, just below the cut. */
+  dieCut: string;
 }
 
 export const WOOD: Record<ArtTheme, WoodTones> = {
@@ -129,6 +157,9 @@ export const WOOD: Record<ArtTheme, WoodTones> = {
     dieRight: '#BC9159',
     dieEdge: '#9A7448',
     dieGrain: '#8A6534',
+    dieBevel: '#FFF1D4',
+    dieCorner: '#FFEFD2',
+    dieCut: '#FFF6E4',
   },
   dark: {
     faceLit: '#A67940',
@@ -152,6 +183,9 @@ export const WOOD: Record<ArtTheme, WoodTones> = {
     dieRight: '#80592D',
     dieEdge: '#5C3F20',
     dieGrain: '#5A3E1D',
+    dieBevel: '#D2AC78',
+    dieCorner: '#C49A64',
+    dieCut: '#D3B084',
   },
 };
 

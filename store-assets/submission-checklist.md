@@ -18,11 +18,15 @@ Legend: **[you]** = must be done by the user (Apple ID, 2FA, payments, Finder di
 
 ## 1. Web pages live before anything else
 
-- [ ] Deploy `store-assets/site/index.html`, `privacy.html`, `support.html` to the same static host
-      as the previous app (PLAN item 14).
-- [ ] Open all three URLs over **HTTPS on a phone** and check they render and the links between
-      them work. Apple clicks the privacy and support URLs during review; a 404 is a rejection.
-- [ ] Paste the final URLs into `store-assets/listing.md` section 13, replacing `https://teja788.github.io/peg-recall`.
+- [x] Deployed: `store-assets/site/index.html`, `privacy.html`, `support.html` are live at
+      `https://teja788.github.io/peg-recall/` (verified with `curl -sI` on 2026-09-22, all three
+      return `HTTP/2 200`). Note: the deployed copies predate the 2026-09-22 privacy-policy wording
+      fix for the Expo update check (A5) — redeploy `store-assets/site/` before submitting so the
+      live pages match the repo.
+- [ ] Open all three URLs on a phone browser once more after redeploying, and check the links
+      between them work. Apple clicks the privacy and support URLs during review; a 404 is a rejection.
+- [x] Final URLs are in `store-assets/listing.md` section 13 (the doubled `peg-recall/pegrecall/`
+      path in the Support/Marketing URLs was a bug, fixed 2026-09-22).
 
 ## 2. Repo prep before the first cloud build
 
@@ -63,6 +67,11 @@ Legend: **[you]** = must be done by the user (Apple ID, 2FA, payments, Finder di
 
 ## 5. Screenshots
 
+- [ ] **OPEN ITEM (2026-09-22):** `store-assets/screenshots/iphone-6.5/` has only 2 of the 6 required
+      shots (`01-home.png`, `02-reveal.png`) and there is no `iphone-6.5` full set beyond those two.
+      There is no iPad screenshot set at all - `store-assets/screenshots/` has no 12.9"/2048×2732
+      folder. Both must be captured before submission; App Store Connect requires the full 6.5"
+      iPhone set and, since this app supports iPad, an iPad set too.
 - [ ] Follow `store-assets/screenshots-plan.md`: six shots, 6.5" iPhone **1284 x 2778** and 12.9"
       iPad **2048 x 2732**, portrait.
 - [ ] Capture via simulator + `simctl openurl` deep links (`exp://.../--/game?mode=ai|2p|3p`,
@@ -72,9 +81,10 @@ Legend: **[you]** = must be done by the user (Apple ID, 2FA, payments, Finder di
 
 ## 6. Create the App Store Connect record
 
-- [ ] **[you]** `npx eas-cli submit --platform ios --latest` - the first run is interactive and
-      creates the ASC app record. Apple then processes the binary for 15-30 minutes until
-      TestFlight shows "Ready to Submit".
+- [x] The ASC app record already exists - id `6813625311`, on file in `eas.json` under
+      `submit.production.ios.ascAppId` (welded to `com.raviteja.pegrecall`, PLAN decision 10).
+- [ ] **[you]** `npx eas-cli submit --platform ios --latest` - uploads the binary to that existing
+      record. Apple then processes it for 15-30 minutes until TestFlight shows "Ready to Submit".
 - [ ] While waiting: install the TestFlight build on a device if one is available, or smoke-test the
       simulator build once more (all three modes, settings toggles, dark mode, a full game to the
       confetti screen).
@@ -117,8 +127,10 @@ subscriptions, no paid unlocks and no external payment links. There is no revenu
 with this version.
 
 The app is a self-contained offline board game. It has no accounts, no login, no server
-component, no network requests, and no third-party SDKs of any kind (no analytics, no ads, no
-attribution). It collects no data from users, which is why App Privacy is declared as "Data Not
+component, and no third-party SDKs of any kind (no analytics, no ads, no attribution). Playing
+the game makes no network requests; on launch the app may contact Expo's update service
+(u.expo.dev) to check for an app update, a request that carries no personal data and no
+gameplay data. It collects no data from users, which is why App Privacy is declared as "Data Not
 Collected".
 
 The app is published as a personal project. If a future version introduces advertising or an

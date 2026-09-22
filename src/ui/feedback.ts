@@ -21,8 +21,6 @@ let audioModeSet = false;
  * sound setting. Mount this once, in the game screen.
  */
 export function useSounds() {
-  const soundOn = useSettings((s) => s.soundOn);
-
   const flip = useAudioPlayer(SOURCES.flip);
   const match = useAudioPlayer(SOURCES.match);
   const roll = useAudioPlayer(SOURCES.roll);
@@ -45,9 +43,13 @@ export function useSounds() {
     });
   }, []);
 
+  // `play` is deliberately identity-stable for the life of the screen: the
+  // game screen fires sounds from effects keyed on game state, and a `play`
+  // that changed whenever the mute switch moved would re-run those effects and
+  // replay the win chime / flip haptics. The setting is read at call time.
   return useCallback(
     (name: SoundName) => {
-      if (!soundOn) return;
+      if (!useSettings.getState().soundOn) return;
       try {
         const p = players.current[name];
         if (!p) return;
@@ -64,7 +66,7 @@ export function useSounds() {
         /* a silent game is still a playable game */
       }
     },
-    [soundOn],
+    [],
   );
 }
 

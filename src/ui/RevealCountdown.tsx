@@ -19,6 +19,13 @@ export interface RevealCountdownProps {
   size?: number;
   /** pause menu is up: the ring holds still and keeps the time it had left */
   paused?: boolean;
+  /**
+   * Identity of the board being memorised. Restarting from the pause menu
+   * deals a new board that is *also* in the reveal phase, so this component is
+   * never unmounted and `durationMs` does not change — without a value that
+   * moves per board, the fresh reveal would inherit the half-drained ring.
+   */
+  boardId?: number | string;
 }
 
 /** A ring that empties over the reveal, then hands control back to the game. */
@@ -27,6 +34,7 @@ export function RevealCountdown({
   onDone,
   size = 64,
   paused = false,
+  boardId = 0,
 }: RevealCountdownProps) {
   const t = useTheme();
   const stroke = 6;
@@ -42,13 +50,13 @@ export function RevealCountdown({
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
-  // a new reveal (or a new board size) refills the ring
+  // a new reveal (a new board, or a new board size) refills the ring
   useEffect(() => {
     done.current = false;
     left.current = durationMs;
     setSecondsLeft(Math.ceil(durationMs / 1000));
     progress.value = 1;
-  }, [durationMs, progress]);
+  }, [durationMs, boardId, progress]);
 
   // unmounting is final, whatever the pause state says
   useEffect(() => () => {
@@ -89,7 +97,11 @@ export function RevealCountdown({
       left.current = Math.max(0, total - (Date.now() - started));
       cancelAnimation(progress);
     };
-  }, [paused, durationMs, progress]);
+    // `boardId` is in here as well as in the refill effect above: React runs
+    // every cleanup before every setup, so the refill lands between this
+    // effect's teardown (which banks the time left) and its restart (which
+    // reads it) — the new board therefore starts from a full ring.
+  }, [paused, durationMs, boardId, progress]);
 
   const animatedProps = useAnimatedProps(() => ({
     strokeDashoffset: circumference * (1 - progress.value),

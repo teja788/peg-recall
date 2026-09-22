@@ -3,9 +3,9 @@
  *
  * The AI records each peg it has seen together with the turn it saw it. On its
  * turn with die colour c, each remembered peg of colour c is recalled with
- * probability `p0 * d^turnsSince`; a failed recall DELETES the entry (no sudden
- * re-remembering). It occasionally "slips" to an orthogonally adjacent peg so
- * it feels human.
+ * probability `p0 * d^roundsSince`; a failed recall DELETES the entry (no sudden
+ * re-remembering). It occasionally "slips" to a peg next to the intended one
+ * (on the round board as drawn) so it feels human.
  *
  * Everything here is pure: functions take an RngState and return the advanced
  * one, so an AI turn is fully reproducible from a seed.
@@ -21,8 +21,8 @@ import type {
   PegColor,
   RngState,
 } from './types';
-import { adjacentIndices } from './game';
-import { chance, nextInt } from './rng';
+import { neighbours as ringNeighbours, roundLayout } from '../layout/roundLayout';
+import { chance, createRng, nextInt, shuffle } from './rng';
 
 export const AI_PARAMS: Record<Difficulty, AiParams> = {
   bunny: {
@@ -58,24 +58,36 @@ export function createAi(difficulty: Difficulty): AiState {
   return { difficulty, memory: {}, knownWrong: {} };
 }
 
-export function aiParams(ai: AiState): AiParams {
+function aiParams(ai: AiState): AiParams {
   return AI_PARAMS[ai.difficulty] ?? AI_PARAMS.bunny;
 }
 
-/** Drop the oldest entries until at most maxTracked remain (ties: low index). */
-function evict(memory: AiState['memory'], maxTracked: number): AiState['memory'] {
-  const keys = Object.keys(memory);
+/**
+ * Drop the oldest entries until at most maxTracked remain.
+ *
+ * Entries seen on the same turn are a tie — and the whole opening reveal is
+ * turn 0, so a tie broken by peg index would hand every small-memory AI the
+ * same corner of the board every game. Shuffle first, then sort by age: the
+ * sort is stable, so ties keep the shuffled (random, seed-reproducible) order.
+ */
+function evict(
+  memory: AiState['memory'],
+  maxTracked: number,
+  rng: RngState,
+): AiState['memory'] {
+  const keys = Object.keys(memory).map(Number);
   if (!Number.isFinite(maxTracked) || keys.length <= maxTracked) return memory;
-  const ordered = keys
-    .map((k) => Number(k))
-    .sort((a, b) => {
-      const d = memory[a].lastSeenTurn - memory[b].lastSeenTurn;
-      return d !== 0 ? d : a - b;
-    });
+  const [shuffled] = shuffle(rng, keys);
+  const ordered = shuffled.sort((a, b) => memory[a].lastSeenTurn - memory[b].lastSeenTurn);
   const drop = ordered.slice(0, ordered.length - maxTracked);
   const out = { ...memory };
   for (const k of drop) delete out[k];
   return out;
+}
+
+/** Stand-in rng for `observe` calls that have none to give (see below). */
+function rngForObservation(obs: AiObservation): RngState {
+  return createRng((Math.imul(obs.turn + 1, 0x9e3779b1) ^ (obs.pegIndex + 1)) >>> 0 || 1);
 }
 
 /**
@@ -83,8 +95,12 @@ function evict(memory: AiState['memory'], maxTracked: number): AiState['memory']
  * reveal (via `observeInitialReveal`, which applies the memorisation roll) and
  * every revealed/captured peg thereafter. Captured pegs leave the board and are
  * deleted from memory.
+ *
+ * `rng` only ever decides which of several equally-old entries is evicted; it
+ * is not returned, so a caller with no rng to hand may omit it and get a
+ * stand-in derived from the observation itself (still fully deterministic).
  */
-export function observe(ai: AiState, obs: AiObservation): AiState {
+export function observe(ai: AiState, obs: AiObservation, rng?: RngState): AiState {
   if (obs.captured) {
     if (!(obs.pegIndex in ai.memory) && !(obs.pegIndex in ai.knownWrong)) return ai;
     const memory = { ...ai.memory };
@@ -97,6 +113,7 @@ export function observe(ai: AiState, obs: AiObservation): AiState {
   const memory = evict(
     { ...ai.memory, [obs.pegIndex]: { color: obs.color, lastSeenTurn: obs.turn } },
     params.maxTracked,
+    rng ?? rngForObservation(obs),
   );
   // Seeing the real colour supersedes any stale "not this colour" note.
   let knownWrong = ai.knownWrong;
@@ -124,9 +141,44 @@ export function observeInitialReveal(
     if (peg.state === 'captured') continue;
     const [memorised, r1] = chance(r, params.memorizeInitial);
     r = r1;
-    if (memorised) next = observe(next, { turn, pegIndex: peg.index, color: peg.color });
+    if (memorised) next = observe(next, { turn, pegIndex: peg.index, color: peg.color }, r);
   }
   return { ai: next, rng: r };
+}
+
+/**
+ * Who sits next to whom on the board as it is actually drawn: concentric rings
+ * (src/layout/roundLayout), not the row-major grid of BoardSpec.cols/rows. The
+ * layout module is plain TypeScript, so the engine stays free of anything
+ * React. Cached per peg count — it is deterministic, and there are only a
+ * handful of board sizes.
+ */
+const NEIGHBOUR_CACHE = new Map<number, number[][]>();
+
+function neighbourTable(pegCount: number): number[][] {
+  const cached = NEIGHBOUR_CACHE.get(pegCount);
+  if (cached) return cached;
+  // Any diameter will do: `neighbours` compares distances against the spacing.
+  const layout = roundLayout(pegCount, 1000);
+  const table = layout.positions.map((p) => ringNeighbours(layout, p.index));
+  NEIGHBOUR_CACHE.set(pegCount, table);
+  return table;
+}
+
+/** Pegs touching `index` on the round board of `pegCount` pegs. */
+export function boardNeighbours(index: number, pegCount: number): number[] {
+  return neighbourTable(pegCount)[index] ?? [];
+}
+
+/**
+ * Age of a memory in ROUNDS rather than in picks. `state.turn` counts every
+ * player's pick, so measuring decay against it would quietly weaken every tier
+ * as more seats join: with three players the die comes back round to this AI a
+ * third as often, yet its memory would have decayed three times as far.
+ */
+function roundsSince(state: GameState, lastSeenTurn: number): number {
+  const seats = state.activeSeats?.length || state.config.players.length || 1;
+  return Math.max(0, state.turn - lastSeenTurn) / seats;
 }
 
 function hiddenIndices(state: GameState): number[] {
@@ -189,8 +241,8 @@ export function chooseMove(
       });
 
     for (const index of candidates) {
-      const turnsSince = Math.max(0, state.turn - memory[index].lastSeenTurn);
-      const p = params.recallP0 * Math.pow(params.decayPerTurn, turnsSince);
+      const age = roundsSince(state, memory[index].lastSeenTurn);
+      const p = params.recallP0 * Math.pow(params.decayPerTurn, age);
       const [recalled, r1] = chance(r, p);
       r = r1;
       if (recalled) {
@@ -201,11 +253,11 @@ export function chooseMove(
     }
 
     if (target >= 0) {
-      // Human-feeling slip to an orthogonal neighbour.
+      // Human-feeling slip to a peg sitting right next to the intended one.
       const [slips, r1] = chance(r, params.slip);
       r = r1;
       if (slips) {
-        const neighbours = adjacentIndices(target, state.spec).filter((i) => hiddenSet.has(i));
+        const neighbours = boardNeighbours(target, state.spec.pegs).filter((i) => hiddenSet.has(i));
         if (neighbours.length > 0) {
           const [j, r2] = nextInt(r, neighbours.length);
           r = r2;

@@ -2,9 +2,10 @@
  * Color Catch — react-native-svg renderer for the rectangular `Scene`s in
  * perspectiveModel.ts.
  *
- * Same idea as renderPrims.tsx (which draws square `Drawing`s), but the box is
- * `w` x `h`: a tilted board is wide and flat, a peg doll is tall and thin.
- * Deliberately dumb — no layout, no state, all the geometry lives in the model.
+ * One `Scene` in, one `<Svg>` out, in a box `w` x `h`: a tilted board is wide
+ * and flat, a peg doll is tall and thin. Deliberately dumb — no layout, no
+ * state, all the geometry lives in the model, which the browser preview
+ * (assets/source/build-peg-preview.ts) renders with the same numbers.
  */
 import React from 'react';
 import Svg, {

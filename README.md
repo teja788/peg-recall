@@ -1,4 +1,6 @@
-# Color Catch (Memory Chess)
+# Color Catch
+
+### Memory Chess
 
 A calm memory peg game for iPhone and iPad. Roll the colour die, find the matching peg on the round wooden board, keep it. Play against the computer (Bunny / Fox / Owl) or pass-and-play with 2 or 3 players.
 
@@ -15,7 +17,7 @@ npx expo start --web      # browser smoke test
 ## Test
 
 ```bash
-npx tsx --test src/engine/__tests__/*.test.ts src/layout/__tests__/*.test.ts
+npx tsx --test src/engine/__tests__/*.test.ts src/layout/__tests__/*.test.ts src/store/__tests__/*.test.ts src/ui/art/__tests__/*.test.ts
 npx tsc --noEmit -p .
 ```
 

@@ -10,6 +10,14 @@ import { useTheme } from '../theme';
 /** Display names live with the art, so a new avatar only lands in one place. */
 export const AVATAR_NAME = AVATAR_NAMES;
 
+/**
+ * The tray text scales with Dynamic Type, but only so far: three trays share
+ * one row above the board, and past ~1.4x the score stops fitting beside the
+ * captured pegs. Capping beats switching scaling off — the score is the whole
+ * point of the tray, so it has to grow for people who need it to.
+ */
+const MAX_TEXT_SCALE = 1.4;
+
 export function playerName(spec: PlayerSpec): string {
   return spec.name ?? AVATAR_NAME[spec.avatar] ?? 'Player';
 }
@@ -52,9 +60,12 @@ function CapturedRow({
   const extra = colors.length - shown.length;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-end', minHeight: width * TRAY_PEG_ASPECT }}>
+      {/* keyed by the peg's absolute position in `colors`, not by its slot in
+          the window: keying by slot makes every peg in the row a "new" peg on
+          each capture, so the whole row replays the drop-in animation */}
       {shown.map((c, i) => (
         <MotiView
-          key={`${i}-${c}`}
+          key={colors.length - shown.length + i}
           from={{ opacity: 0, translateY: -6, scale: 0.7 }}
           animate={{ opacity: 1, translateY: 0, scale: 1 }}
           transition={{ type: 'spring', damping: 13, stiffness: 180 }}
@@ -65,7 +76,7 @@ function CapturedRow({
       ))}
       {extra > 0 ? (
         <Text
-          allowFontScaling={false}
+          maxFontSizeMultiplier={MAX_TEXT_SCALE}
           style={{
             fontSize: Math.max(10, Math.round(width * 0.9)),
             fontWeight: '700',
@@ -142,12 +153,18 @@ export function PlayerTray({
     >
       <Avatar id={spec.avatar} size={size} />
       <View style={{ marginLeft: px(t.spacing.sm) }}>
-        <Text numberOfLines={1} style={{ ...captionType, color: active ? t.c.accent : t.c.textDim }}>
+        <Text
+          numberOfLines={1}
+          maxFontSizeMultiplier={MAX_TEXT_SCALE}
+          style={{ ...captionType, color: active ? t.c.accent : t.c.textDim }}
+        >
           {playerName(spec)}
           {spec.kind === 'ai' ? ' 🤖' : ''}
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexShrink: 1 }}>
-          <Text style={{ ...heading, color: t.c.text }}>{caption ?? score}</Text>
+          <Text maxFontSizeMultiplier={MAX_TEXT_SCALE} style={{ ...heading, color: t.c.text }}>
+            {caption ?? score}
+          </Text>
           {captured && captured.length > 0 ? (
             <View style={{ marginLeft: px(t.spacing.sm) }}>
               <CapturedRow
@@ -172,7 +189,13 @@ export function PlayerTray({
 
   if (!onPress) {
     return (
-      <View ref={ref} onLayout={onLayout} accessible accessibilityLabel={label}>
+      <View
+        ref={ref}
+        onLayout={onLayout}
+        accessible
+        accessibilityLabel={label}
+        style={{ flexShrink: 1 }}
+      >
         {body}
       </View>
     );

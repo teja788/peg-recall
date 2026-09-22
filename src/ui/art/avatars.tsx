@@ -24,7 +24,7 @@ export const AVATAR_NAMES: Record<AvatarId, string> = {
 };
 
 /** Muted disc behind each face. Distinct in hue, all low-chroma and warm-safe. */
-export const AVATAR_ACCENT: Record<AvatarId, string> = {
+const AVATAR_ACCENT: Record<AvatarId, string> = {
   fox: '#F6D3B0',
   owl: '#C3D2E6',
   bear: '#E6D6BC',
@@ -32,9 +32,6 @@ export const AVATAR_ACCENT: Record<AvatarId, string> = {
   bunny: '#F0D6E0',
   cat: '#D9D2E9',
 };
-
-/** Display order used by avatar pickers. */
-export const AVATAR_IDS: readonly AvatarId[] = ['fox', 'owl', 'bear', 'frog', 'bunny', 'cat'];
 
 const INK = '#3A2E26';
 

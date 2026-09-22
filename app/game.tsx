@@ -1,6 +1,16 @@
+import { usePreventRemove } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, Text, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
+import {
+  AppState,
+  BackHandler,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+  type LayoutChangeEvent,
+} from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,7 +19,7 @@ import { useGame } from '../src/store/game';
 import { useSettings, type GameMode } from '../src/store/settings';
 import { PEG_PAINT, useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
-import { Board, MAX_BOARD, boardHeightRatio, boardTiltFor } from '../src/ui/Board';
+import { Board, MAX_BOARD, MIN_BOARD, boardHeightRatio, boardTiltFor } from '../src/ui/Board';
 import { Die } from '../src/ui/Die';
 import { GameOverSheet } from '../src/ui/GameOverSheet';
 import { PauseSheet } from '../src/ui/PauseSheet';
@@ -91,6 +101,8 @@ export default function GameScreen() {
 
   const play = useSounds();
   const [trayAnchors, setTrayAnchors] = useState<Record<string, { x: number; y: number }>>({});
+  /** set by the pause menu's Home button: stops the leave guard below */
+  const [leaving, setLeaving] = useState(false);
   const started = useRef(false);
   const chime = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** measured height of the box the banner + board + die share */
@@ -145,12 +157,21 @@ export default function GameScreen() {
   }, []);
 
   /** Back to Home, whether we were pushed from it or deep-linked straight here.
-   *  `resume` first so the paused flag never outlives the screen. */
+   *  `resume` first so the paused flag never outlives the screen.
+   *
+   *  The leave is a two-step: `leaving` has to be committed before the router
+   *  call, or the guard below (which only sees rendered state) would catch our
+   *  own navigation and re-open the pause menu instead of letting us out. */
   const goHome = useCallback(() => {
     resume();
+    setLeaving(true);
+  }, [resume]);
+
+  useEffect(() => {
+    if (!leaving) return;
     if (router.canGoBack()) router.back();
     else router.replace('/');
-  }, [router, resume]);
+  }, [leaving, router]);
 
   const openPause = useCallback(() => {
     if (useGame.getState().state?.phase === 'gameOver') return;
@@ -161,6 +182,48 @@ export default function GameScreen() {
   const restart = useCallback(() => {
     rematch();
   }, [rematch]);
+
+  /* ------------------------------------------- leaving the game */
+
+  // Backgrounding the app is not a pause the player asked for, but leaving a
+  // live board on screen behind the app switcher (and letting the AI's timers
+  // keep firing into a screen nobody is looking at) is worse. Store state is
+  // read fresh inside, so this listener is mounted once and never goes stale.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (next) => {
+      if (next === 'active') return;
+      const g = useGame.getState();
+      if (!g.state || g.paused || g.state.phase === 'gameOver') return;
+      g.pause();
+    });
+    return () => sub.remove();
+  }, []);
+
+  // Android hardware back: open the menu rather than dropping the game. From
+  // the menu it closes the menu; only the menu's Home button actually leaves.
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      const g = useGame.getState();
+      if (!g.state || g.state.phase === 'gameOver') return false;
+      if (g.paused) g.resume();
+      else g.pause();
+      return true;
+    });
+    return () => sub.remove();
+  }, []);
+
+  // …and the same for every other way off this screen: the iOS swipe-back
+  // gesture, a header back, `router.back()`. `usePreventRemove` blocks the
+  // native dismissal too, which a plain `beforeRemove` listener cannot.
+  // Game over is not guarded — there is nothing left to interrupt — and nor is
+  // a leave we started ourselves (`leaving`). Web is left out on purpose: the
+  // browser's Back owns the history entry (see the Esc handler below), and a
+  // guard there fights `popstate` instead of trapping it.
+  usePreventRemove(
+    Platform.OS !== 'web' && !leaving && state != null && state.phase !== 'gameOver',
+    openPause,
+  );
 
   /* -------------------------------------------------- web: Esc key */
 
@@ -209,7 +272,6 @@ export default function GameScreen() {
     const cap = Math.min(win.width * BOARD_OF_WIDTH, MAX_BOARD);
     const scale = Math.min(CHROME_MAX, Math.max(1, cap / CHROME_BASE));
     const px = (n: number) => Math.round(n * scale);
-    const bannerH = px(BANNER_H);
     const tilt = boardTiltFor(win.width, win.height);
     const ratio = boardHeightRatio(pegCount, tilt);
 
@@ -219,10 +281,34 @@ export default function GameScreen() {
 
     // 1. size the disc against the smallest the chrome can be
     let die = px(DIE_SIZE);
+    let bannerH = px(BANNER_H);
     let bannerGap = px(BANNER_GAP);
     let dieGap = px(DIE_GAP);
-    const room = box - bannerH - bannerGap - dieGap - Math.round(die * 0.9) - px(HINT_H);
-    const width = Math.max(0, Math.floor(Math.min(cap, room / ratio)));
+    let hintH = px(HINT_H);
+    const chromeH = () =>
+      bannerH + bannerGap + dieGap + Math.round(die * 0.9) + hintH;
+
+    // 1a. A wide, short window (landscape phone, a Stage Manager sliver) has
+    //     no height left for the disc once the chrome has taken its share, and
+    //     the fit-to-height maths then comes out at or below zero — a blank
+    //     screen. The disc is the game, so the chrome gives way first: shrink
+    //     it by whatever factor buys the board its floor. If even that is not
+    //     enough the disc keeps MIN_BOARD and overflows (the table box clips).
+    const floor = Math.min(cap, MIN_BOARD);
+    let squeeze = 1;
+    if (box - chromeH() < floor * ratio) {
+      squeeze = Math.max(0.5, Math.min(1, (box - floor * ratio) / Math.max(1, chromeH())));
+      die = Math.max(40, Math.round(die * squeeze));
+      bannerH = Math.max(16, Math.round(bannerH * squeeze));
+      bannerGap = Math.round(bannerGap * squeeze);
+      dieGap = Math.round(dieGap * squeeze);
+      hintH = Math.round(hintH * squeeze);
+    }
+    /** type scale for the banner + hint: shrinks with the chrome, never grows */
+    const chromeScale = scale * squeeze;
+
+    const room = box - chromeH();
+    const width = Math.max(floor, Math.floor(Math.min(cap, room / ratio)));
 
     // 2. a tall phone leaves height over once the disc has hit its width cap.
     //    Spend some of it on a bigger die and a little more air around the
@@ -235,8 +321,20 @@ export default function GameScreen() {
     bannerGap += Math.round(Math.min(left * 0.1, px(8)));
     dieGap += Math.round(Math.min(left * 0.15, px(12)));
 
-    const dieBlock = Math.round(die * 0.9) + px(HINT_H);
-    return { scale, px, die, dieBlock, bannerGap, dieGap, bannerH, tilt, width };
+    const dieBlock = Math.round(die * 0.9) + hintH;
+    return {
+      scale,
+      chromeScale,
+      px,
+      die,
+      dieBlock,
+      bannerGap,
+      dieGap,
+      bannerH,
+      hintH,
+      tilt,
+      width,
+    };
   }, [win.width, win.height, insets.top, insets.bottom, tableH, pegCount]);
 
   if (!state) {
@@ -295,12 +393,17 @@ export default function GameScreen() {
           size={L.px(48)}
           tone="filled"
         />
+        {/* wraps rather than clipping: at the larger Dynamic Type sizes three
+            trays no longer fit across a phone on one line */}
         <View
           style={{
             flex: 1,
             flexDirection: 'row',
+            flexWrap: 'wrap',
             justifyContent: 'flex-end',
-            gap: L.px(t.spacing.sm),
+            alignItems: 'center',
+            columnGap: L.px(t.spacing.sm),
+            rowGap: L.px(t.spacing.xs),
             flexShrink: 1,
           }}
         >
@@ -330,7 +433,7 @@ export default function GameScreen() {
           overflow: 'hidden',
         }}
       >
-        <TurnBanner text={banner} tone={tone} scale={L.scale} />
+        <TurnBanner text={banner} tone={tone} scale={L.chromeScale} />
 
         <View style={{ height: L.bannerGap }} />
 
@@ -358,9 +461,10 @@ export default function GameScreen() {
           >
             {state.phase === 'reveal' ? (
               <RevealCountdown
-                size={L.px(64)}
+                size={Math.round(64 * L.chromeScale)}
                 durationMs={revealDurationMs(state)}
                 paused={paused}
+                boardId={state.config.seed}
                 onDone={() => dispatch({ type: 'REVEAL_DONE' })}
               />
             ) : (
@@ -378,12 +482,13 @@ export default function GameScreen() {
           </View>
           {state.phase === 'roll' && human ? (
             <Text
+              numberOfLines={1}
               style={{
                 ...t.type.caption,
-                fontSize: L.px(t.type.caption.fontSize),
-                lineHeight: L.px(t.type.caption.lineHeight),
+                fontSize: Math.round(t.type.caption.fontSize * L.chromeScale),
+                lineHeight: Math.round(t.type.caption.lineHeight * L.chromeScale),
                 color: t.c.onBackdropMuted,
-                marginTop: L.px(4),
+                marginTop: Math.round(4 * L.chromeScale),
               }}
             >
               Tap the die
@@ -409,38 +514,33 @@ export default function GameScreen() {
           tone="filled"
         />
       </View>
-
-      {state.phase === 'gameOver' && humanWon && !reduced ? (
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-            pointerEvents: 'none',
-          }}
-        >
-          <ConfettiCannon
-            count={120}
-            origin={{ x: win.width / 2, y: -20 }}
-            fadeOut
-            autoStart
-            explosionSpeed={320}
-            fallSpeed={2600}
-            colors={CONFETTI}
-          />
-        </View>
-      ) : null}
-
-      {state.phase === 'gameOver' ? (
-        <GameOverSheet state={state} onRematch={rematch} onHome={goHome} />
-      ) : null}
-
-      {paused && state.phase !== 'gameOver' ? (
-        <PauseSheet onResume={resume} onRestart={restart} onHome={goHome} />
-      ) : null}
     </View>
+
+    {/* Overlays are siblings of the inset-padded column, not children of it:
+        a scrim laid out inside that column starts below the status bar and
+        leaves a live strip of board showing above it — which during the
+        reveal is a strip of face-up pegs the pause menu is meant to hide. */}
+    {state.phase === 'gameOver' && humanWon && !reduced ? (
+      <View style={{ ...StyleSheet.absoluteFillObject, pointerEvents: 'none' }}>
+        <ConfettiCannon
+          count={120}
+          origin={{ x: win.width / 2, y: -20 }}
+          fadeOut
+          autoStart
+          explosionSpeed={320}
+          fallSpeed={2600}
+          colors={CONFETTI}
+        />
+      </View>
+    ) : null}
+
+    {state.phase === 'gameOver' ? (
+      <GameOverSheet state={state} onRematch={rematch} onHome={goHome} />
+    ) : null}
+
+    {paused && state.phase !== 'gameOver' ? (
+      <PauseSheet onResume={resume} onRestart={restart} onHome={goHome} />
+    ) : null}
     </Backdrop>
   );
 }

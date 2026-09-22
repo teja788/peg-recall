@@ -3,6 +3,8 @@
  * Values come straight from PLAN.md section 4 (Okabe-Ito peg palette, warm
  * neutral surfaces, no pure white / pure black).
  */
+import { PEG_HEX, PEG_RIM } from '../ui/art/palette';
+
 import type { PegColor } from '../engine/types';
 
 /** Okabe-Ito peg palette + the glyph shown when "shapes on pegs" is on. */
@@ -13,31 +15,20 @@ export interface PegPaint {
   label: string;
 }
 
-/** Fills are PLAN.md section 4 verbatim; rims match src/ui/art/palette.ts so
- *  the drawn art and the laid-out UI never disagree by a shade. */
+/**
+ * Fill and rim are *taken from* src/ui/art/palette.ts rather than repeated
+ * here: the art layer is the one place a peg colour is defined, so the drawn
+ * peg and the UI that frames it can never drift apart by a shade. Only the
+ * spoken label and the shape glyph belong to this layer.
+ */
 export const PEG_PAINT: Record<PegColor, PegPaint> = {
-  orange: { fill: '#E69F00', rim: '#B87E00', shape: '●', label: 'Orange' },
-  sky: { fill: '#56B4E9', rim: '#3F92C0', shape: '▲', label: 'Sky blue' },
-  blue: { fill: '#0072B2', rim: '#005688', shape: '■', label: 'Blue' },
-  green: { fill: '#009E73', rim: '#00795A', shape: '★', label: 'Green' },
-  yellow: { fill: '#F0E442', rim: '#B8A800', shape: '♥', label: 'Yellow' },
-  purple: { fill: '#CC79A7', rim: '#A65D86', shape: '◆', label: 'Purple' },
+  orange: { fill: PEG_HEX.orange, rim: PEG_RIM.orange, shape: '●', label: 'Orange' },
+  sky: { fill: PEG_HEX.sky, rim: PEG_RIM.sky, shape: '▲', label: 'Sky blue' },
+  blue: { fill: PEG_HEX.blue, rim: PEG_RIM.blue, shape: '■', label: 'Blue' },
+  green: { fill: PEG_HEX.green, rim: PEG_RIM.green, shape: '★', label: 'Green' },
+  yellow: { fill: PEG_HEX.yellow, rim: PEG_RIM.yellow, shape: '♥', label: 'Yellow' },
+  purple: { fill: PEG_HEX.purple, rim: PEG_RIM.purple, shape: '◆', label: 'Purple' },
 };
-
-/** Shorthand map requested by the spec: colour -> shape glyph (●▲■★♥◆). */
-export const PEG_SHAPES: Record<PegColor, string> = {
-  orange: '●',
-  sky: '▲',
-  blue: '■',
-  green: '★',
-  yellow: '♥',
-  purple: '◆',
-};
-
-/** A glyph dark enough to read on the yellow peg, light enough on the blue one. */
-export function shapeInkFor(color: PegColor): string {
-  return color === 'yellow' ? '#6B6200' : '#FFFFFF';
-}
 
 export interface Surfaces {
   page: string;
@@ -139,15 +130,6 @@ export const type = {
   body: { fontSize: 17, lineHeight: 23, fontWeight: '500' },
   label: { fontSize: 15, lineHeight: 20, fontWeight: '600' },
   caption: { fontSize: 13, lineHeight: 18, fontWeight: '600' },
-} as const;
-
-/** Layout constants used by the board + touch-target rules. */
-export const layout = {
-  pegGap: 6,
-  pegMax: 96,
-  pegMinComfort: 52,
-  pegMinKid: 56,
-  tapMin: 44,
 } as const;
 
 /** Animation durations (PLAN.md section 2). */

@@ -10,7 +10,7 @@ import {
   observe,
   observeInitialReveal,
   reduce,
-} from '../ui/engine';
+} from '../engine';
 import type {
   AiState,
   AvatarId,
@@ -22,9 +22,32 @@ import type {
   RngState,
 } from '../engine/types';
 import { timing } from '../theme/tokens';
-import { AVATAR_CYCLE, type GameMode, type Settings } from './settings';
+import { AVATAR_CYCLE, type GameMode, type Settings } from './settingsModel';
 
 /* ---------------------------------------------------------------- timers */
+
+/**
+ * The clock the store schedules against. Real timers in the app; a fake one in
+ * the tests, which is the only reason this is injectable.
+ */
+export interface GameScheduler {
+  now: () => number;
+  setTimeout: (fn: () => void, ms: number) => unknown;
+  clearTimeout: (handle: unknown) => void;
+}
+
+const REAL_SCHEDULER: GameScheduler = {
+  now: () => Date.now(),
+  setTimeout: (fn, ms) => setTimeout(fn, ms),
+  clearTimeout: (h) => clearTimeout(h as ReturnType<typeof setTimeout>),
+};
+
+let clock: GameScheduler = REAL_SCHEDULER;
+
+/** Test seam. Pass null to go back to real timers. */
+export function setGameScheduler(s: GameScheduler | null) {
+  clock = s ?? REAL_SCHEDULER;
+}
 
 let generation = 0;
 
@@ -35,7 +58,7 @@ interface Pending {
   gen: number;
   /** wall-clock time it should fire at; shifted forward by however long we paused */
   due: number;
-  handle: ReturnType<typeof setTimeout> | null;
+  handle: unknown;
 }
 
 let timers = new Map<number, Pending>();
@@ -45,14 +68,14 @@ let pausedAt: number | null = null;
 
 function clearTimers() {
   timers.forEach((p) => {
-    if (p.handle) clearTimeout(p.handle);
+    if (p.handle != null) clock.clearTimeout(p.handle);
   });
   timers = new Map();
   pausedAt = null;
 }
 
 function arm(id: number, p: Pending, ms: number) {
-  p.handle = setTimeout(() => {
+  p.handle = clock.setTimeout(() => {
     timers.delete(id);
     if (p.gen === generation) p.fn();
   }, Math.max(0, ms));
@@ -62,7 +85,12 @@ function arm(id: number, p: Pending, ms: number) {
  *  ignores stale runs. */
 function later(fn: () => void, ms: number) {
   const id = nextTimerId++;
-  const p: Pending = { fn, gen: generation, due: Date.now() + ms, handle: null };
+  // While paused the clock is stopped at `pausedAt`, and resumeTimers pushes
+  // every due date forward by however long the pause lasted. Stamping this one
+  // from the live clock instead would have that shift added on top of the wait
+  // it has not even started yet.
+  const from = pausedAt ?? clock.now();
+  const p: Pending = { fn, gen: generation, due: from + ms, handle: null };
   timers.set(id, p);
   if (pausedAt == null) arm(id, p, ms);
 }
@@ -70,9 +98,9 @@ function later(fn: () => void, ms: number) {
 /** Stop the clock. Every pending step keeps the time it had left. */
 function pauseTimers() {
   if (pausedAt != null) return;
-  pausedAt = Date.now();
+  pausedAt = clock.now();
   timers.forEach((p) => {
-    if (p.handle) clearTimeout(p.handle);
+    if (p.handle != null) clock.clearTimeout(p.handle);
     p.handle = null;
   });
 }
@@ -80,9 +108,9 @@ function pauseTimers() {
 /** Start it again, each step picking up exactly where it was interrupted. */
 function resumeTimers() {
   if (pausedAt == null) return;
-  const slept = Date.now() - pausedAt;
+  const now = clock.now();
+  const slept = now - pausedAt;
   pausedAt = null;
-  const now = Date.now();
   timers.forEach((p, id) => {
     p.due += slept;
     arm(id, p, p.due - now);
@@ -121,12 +149,28 @@ export function configFor(mode: GameMode, s: Settings, seed = Date.now()): GameC
     players: seatsFor(mode, s),
     rules: {
       bonusTurnOnMatch: s.bonusTurnOnMatch,
-      deadColor: 'reroll',
       tieBreak: s.kidMode ? 'shared' : 'suddenDeath',
       kidMode: s.kidMode,
     },
     seed,
   };
+}
+
+/**
+ * The AI's rng is a separate stream from the board's, so that a game replayed
+ * from an explicit seed does not have the opponent's dice riding on the very
+ * numbers that laid the board out. Mixed, not equal.
+ */
+function aiSeedFor(gameSeed: number): number {
+  return (((gameSeed ^ 0x9e3779b9) >>> 0) & 0x7fffffff) || 1;
+}
+
+/** How long the die is allowed to tumble, dead-colour rerolls included. */
+export function tumbleMs(rerolls: number): number {
+  // The roll rerolls internally until it finds a live colour — up to 64 times
+  // near the end of a board. Showing all of them would freeze the screen for
+  // twenty seconds, so the animation only ever acts out the first three.
+  return timing.dieTumble + 300 * Math.min(Math.max(0, rerolls), 3);
 }
 
 /* ------------------------------------------------------------------ store */
@@ -142,7 +186,6 @@ interface GameStore {
   feedback: MoveFeedback;
   /** the pause menu is up: no AI timers fire and no move is accepted */
   paused: boolean;
-  mode: GameMode;
 
   start: (mode: GameMode, settings: Settings, seed?: number) => void;
   dispatch: (action: GameAction) => void;
@@ -152,7 +195,7 @@ interface GameStore {
   teardown: () => void;
 }
 
-let rng: RngState = { seed: (Date.now() & 0x7fffffff) || 1, counter: 0 };
+let rng: RngState = { seed: aiSeedFor(Date.now()), counter: 0 };
 let nonce = 0;
 
 export const useGame = create<GameStore>((setState, getState) => {
@@ -195,27 +238,38 @@ export const useGame = create<GameStore>((setState, getState) => {
   }
 
   /** Every AI sees the peg that was just turned face up — everyone was looking. */
-  function observeReveal(state: GameState, pegIndex: number, ais: Record<string, AiState>) {
+  function observeReveal(state: GameState, pegIndex: number, captured: boolean) {
+    const ais = getState().ais;
     if (Object.keys(ais).length === 0) return;
     const peg = state.pegs[pegIndex];
     if (!peg) return;
     const next: Record<string, AiState> = {};
     for (const [id, ai] of Object.entries(ais)) {
-      next[id] = observe(ai, { turn: state.turn, pegIndex, color: peg.color });
+      // A captured peg leaves the board: the AI must DROP it, not file it away
+      // as somewhere worth tapping again.
+      next[id] = observe(ai, { turn: state.turn, pegIndex, color: peg.color, captured });
     }
     setState({ ais: next });
   }
 
-  /** The opening reveal: each AI memorises pegs at its own difficulty's rate. */
-  function observeOpening(state: GameState, ais: Record<string, AiState>) {
-    if (Object.keys(ais).length === 0) return ais;
-    const next: Record<string, AiState> = {};
-    for (const [id, ai] of Object.entries(ais)) {
-      const res = observeInitialReveal(ai, state.pegs, rng, 0);
+  /**
+   * Fresh brains for a board, each memorising the opening reveal at its own
+   * difficulty's rate. Every new board gets new brains — memory is indexed by
+   * peg index, so a sudden-death mini board would otherwise be played with
+   * confident, entirely wrong memories of the board it replaced.
+   */
+  function freshBrains(state: GameState): Record<string, AiState> {
+    const ais: Record<string, AiState> = {};
+    for (const p of state.config.players) {
+      if (p.kind !== 'ai') continue;
+      // `state.turn` keeps counting across a sudden-death board, so the reveal
+      // must be stamped with it — stamping turn 0 would leave the AI's fresh
+      // memories looking decades old and every tier near-blind.
+      const res = observeInitialReveal(createAi(p.difficulty ?? 'fox'), state.pegs, rng, state.turn);
       rng = res.rng;
-      next[id] = res.ai;
+      ais[p.id] = res.ai;
     }
-    return next;
+    return ais;
   }
 
   return {
@@ -224,20 +278,16 @@ export const useGame = create<GameStore>((setState, getState) => {
     busy: false,
     feedback: null,
     paused: false,
-    mode: 'ai',
 
     start: (mode, settings, seed) => {
       generation += 1;
       clearTimers();
-      rng = { seed: ((seed ?? Date.now()) & 0x7fffffff) || 1, counter: 0 };
-      const state = createGame(configFor(mode, settings, seed ?? Date.now()));
-      let ais: Record<string, AiState> = {};
-      for (const p of state.config.players) {
-        if (p.kind === 'ai') ais[p.id] = createAi(p.difficulty ?? 'fox');
-      }
-      // the opening reveal: every AI gets its look at the whole board
-      ais = observeOpening(state, ais);
-      setState({ state, ais, busy: false, feedback: null, paused: false, mode });
+      // one reading of the clock: two would seed the board and the AI from
+      // different milliseconds and make a "same seed" replay impossible
+      const gameSeed = seed ?? clock.now();
+      rng = { seed: aiSeedFor(gameSeed), counter: 0 };
+      const state = createGame(configFor(mode, settings, gameSeed));
+      setState({ state, ais: freshBrains(state), busy: false, feedback: null, paused: false });
     },
 
     dispatch: (action) => {
@@ -254,30 +304,25 @@ export const useGame = create<GameStore>((setState, getState) => {
       if (action.type === 'RESTART') {
         generation += 1;
         clearTimers();
-        let ais: Record<string, AiState> = {};
-        for (const p of next.config.players) {
-          if (p.kind === 'ai') ais[p.id] = createAi(p.difficulty ?? 'fox');
-        }
-        ais = observeOpening(next, ais);
-        setState({ ais, busy: false, feedback: null });
+        // RESTART is reachable from the pause menu, so it has to lift the pause
+        // as well — otherwise the new board opens frozen.
+        setState({ ais: freshBrains(next), busy: false, feedback: null, paused: false });
         return;
       }
 
       if (action.type === 'ROLL') {
-        // 600 ms of die tumble before anyone may touch a peg, plus the 300 ms
-        // the die spends rolling past each dead colour (PLAN.md section 2)
-        busyFor(timing.dieTumble + 300 * (next.dieRerolls ?? 0));
+        busyFor(tumbleMs(next.dieRerolls ?? 0));
         return;
       }
 
-      // a sudden-death mini-board opens with its own reveal
+      // a sudden-death mini-board is a new board: new pegs, new brains
       if (next.phase === 'reveal' && prev.phase !== 'reveal') {
-        setState({ ais: observeOpening(next, getState().ais) });
+        setState({ ais: freshBrains(next) });
       }
 
       if (action.type === 'PICK' && next.lastMove) {
         const move = next.lastMove;
-        observeReveal(next, move.pegIndex, getState().ais);
+        observeReveal(next, move.pegIndex, move.matched);
         nonce += 1;
         setState({ feedback: { kind: move.matched ? 'match' : 'miss', pegIndex: move.pegIndex, nonce } });
         busyFor(move.matched ? timing.matchTotal : timing.missTotal, () => {
@@ -294,7 +339,7 @@ export const useGame = create<GameStore>((setState, getState) => {
       generation += 1;
       clearTimers();
       setState({ busy: false, feedback: null, paused: false });
-      getState().dispatch({ type: 'RESTART', seed: Date.now() });
+      getState().dispatch({ type: 'RESTART', seed: clock.now() });
     },
 
     pause: () => {

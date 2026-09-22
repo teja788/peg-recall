@@ -53,6 +53,28 @@ test('maxTracked evicts the oldest entries', () => {
   assert.equal(Object.keys(owlAi.memory).length, 40);
 });
 
+test('same-turn ties are evicted at random, not by peg index', () => {
+  // The opening reveal is all one turn, so eviction is deciding between equals.
+  // Breaking that tie by index used to hand Bunny the high-numbered pegs every
+  // single game; over many seeds each peg should now show up sometimes.
+  const state = createGame(makeConfig({ seed: 7, boardSize: 'huge' })); // 40 pegs
+  const kept = new Set<number>();
+  let rng = createRng(4242);
+  for (let i = 0; i < 60; i++) {
+    const res = observeInitialReveal(createAi('bunny'), state.pegs, rng); // maxTracked 4
+    rng = res.rng;
+    for (const k of Object.keys(res.ai.memory)) kept.add(Number(k));
+  }
+  assert.ok(kept.size > 20, `only ${kept.size} of 40 pegs were ever kept`);
+  const low = [...kept].filter((i) => i < 20).length;
+  assert.ok(low > 5, `memory still skews to high indices (${low} of ${kept.size} below 20)`);
+
+  // Still deterministic: the same rng gives the same survivors.
+  const a = observeInitialReveal(createAi('bunny'), state.pegs, createRng(99));
+  const b = observeInitialReveal(createAi('bunny'), state.pegs, createRng(99));
+  assert.deepEqual(a.ai.memory, b.ai.memory);
+});
+
 test('observeInitialReveal memorises roughly the tier probability', () => {
   const state = createGame(makeConfig({ seed: 5, boardSize: 'huge' })); // 40 pegs
   let total = 0;

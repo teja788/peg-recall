@@ -3,9 +3,12 @@
 Pure TypeScript. No React, no React Native, no Node built-ins — safe to import
 from anywhere (UI, tests, a future server). Every state is a plain
 JSON-serialisable object, the RNG included, so a game can be stored and replayed.
+The one import outside `src/engine` is `src/layout/roundLayout.ts`, which is
+itself plain TypeScript: the AI needs to know which pegs sit next to which on
+the board as it is actually drawn.
 
 ```ts
-import { createGame, reduce, DEFAULT_RULES, ai, type GameState } from '../engine';
+import { createGame, reduce, DEFAULT_RULES, chooseMove, type GameState } from '../engine';
 ```
 
 ## Test + typecheck
@@ -13,12 +16,12 @@ import { createGame, reduce, DEFAULT_RULES, ai, type GameState } from '../engine
 `package.json` is owned by another agent, so run the commands directly:
 
 ```sh
-npx tsx --test src/engine/__tests__/*.test.ts     # unit tests (~4 s)
+npx tsx --test src/engine/__tests__/*.test.ts src/layout/__tests__/*.test.ts src/store/__tests__/*.test.ts
 npx tsc --noEmit -p .                             # typecheck
 ```
 
 (The intended script, once someone may edit package.json:
-`"test": "tsx --test src/engine/__tests__/*.test.ts"`.)
+`"test": "tsx --test src/**/__tests__/*.test.ts"`.)
 
 ## State machine
 
@@ -75,21 +78,21 @@ dimensions by `state.spec` — always read the grid from `state.spec`, not from
 | `availableColors(state)` | colours the die can still show |
 | `isHumanTurn(state)` | active seat is a human |
 | `activePlayerSpec(state)` | the active `PlayerSpec` |
-| `activeSeats(state)` | seat indices in the rotation |
 | `revealDurationMs(state)` | reveal countdown, kid mode x1.5 |
-| `boardSpec(size)` | `BOARD_SPECS[size]` |
-| `adjacentIndices(i, spec)` | orthogonal neighbours |
+| `adjacentIndices(i, spec)` | orthogonal neighbours on the row-major grid |
+| `boardNeighbours(i, pegCount)` | neighbours on the round board **as drawn** |
 
 ## AI (`ai.ts`)
 
 ```ts
-let brain = ai.createAi('fox');
+let brain = createAi('fox');
 // 1. opening reveal: every peg is shown, each memorised with p = memorizeInitial
-({ ai: brain, rng } = ai.observeInitialReveal(brain, state.pegs, rng));
+//    `state.turn` matters: a sudden-death board opens mid-game, not at turn 0
+({ ai: brain, rng } = observeInitialReveal(brain, state.pegs, rng, state.turn));
 // 2. its turn (phase 'pick', dieColor set)
-const move = ai.chooseMove(brain, state, rng);   // { pegIndex, ai, rng }
+const move = chooseMove(brain, state, rng);   // { pegIndex, ai, rng }
 // 3. after EVERY pick by ANY player, show the result to every AI
-brain = ai.observe(brain, { turn: state.turn, pegIndex, color, captured: matched });
+brain = observe(brain, { turn: state.turn, pegIndex, color, captured: matched });
 ```
 
 - All three functions are pure; `chooseMove` returns the advanced `rng`, so an AI
@@ -100,6 +103,27 @@ brain = ai.observe(brain, { turn: state.turn, pegIndex, color, captured: matched
 - Memory is indexed by peg index, so **create fresh brains when the board
   changes** (sudden death, restart).
 - `AI_PARAMS` holds the PLAN.md section 3 table.
+- **`captured: matched` is not optional.** A captured peg has left the board;
+  without the flag the AI files it away as somewhere still worth tapping.
 
-Measured over 200 seeded games each on the classic 5x5 board (bonus turn on):
-Owl beats Bunny 100%, Fox beats Bunny 92.5%, Owl beats Fox 99%.
+### Decay is per round, not per pick
+
+`state.turn` counts *every* seat's pick, so `turn - lastSeenTurn` grows twice as
+fast in a 2-player game as a single player's own turns do, and three times as
+fast with three seats. Measuring decay against it directly would have made every
+tier quietly weaker the more players joined — the same Fox noticeably dimmer in
+a 3-player game than in a 2-player one, for no reason a player could see. So
+`chooseMove` divides the gap by the number of seats still in the rotation and
+raises `decayPerTurn` to that: **one unit of decay = one full round of play**,
+whatever the table size. The per-tier numbers themselves are unchanged.
+
+### Slips follow the board as drawn
+
+The board is rendered as concentric rings (`src/layout/roundLayout.ts`), not as
+the `cols x rows` grid in `BoardSpec`. A slip therefore lands on a ring
+neighbour (`boardNeighbours`), which is the peg a player would actually have
+fumbled onto. `adjacentIndices` still describes the abstract grid and is kept
+for callers that want it.
+
+Measured over 200 seeded games each on the classic board (bonus turn on):
+Owl beats Bunny 100%, Fox beats Bunny 90.5%, Owl beats Fox 94%.

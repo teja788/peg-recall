@@ -58,14 +58,23 @@ function fallbackPlan(n: number): number[] {
     left -= take;
     k++;
   }
+  // A trailing ring holding a single peg would be a shell with one occupant
+  // sitting on the axis of the one below it — hand that peg to the ring below.
+  while (plan.length > 1 && plan[plan.length - 1] === 1) {
+    plan.pop();
+    plan[plan.length - 1] += 1;
+  }
   return plan;
 }
 
 /** Minimum ring radius (in spacing units) so neighbours on that ring are ≥ 1 apart. */
 function ringRadiusFor(count: number, prevRadius: number, hasPrev: boolean): number {
-  if (count <= 1) return 0;
+  // Any ring after the first sits at least one spacing outside the one below
+  // it — a lone peg included, which would otherwise land on the centre.
+  const floor = hasPrev ? prevRadius + 1 : 0;
+  if (count <= 1) return floor;
   const chord = 1 / (2 * Math.sin(Math.PI / count));
-  return Math.max(chord, hasPrev ? prevRadius + 1 : 0);
+  return Math.max(chord, floor);
 }
 
 /** Choose `n` unit-spaced points on concentric circles. */
@@ -85,8 +94,8 @@ export function unitCluster(n: number): UnitPoint[] {
       const y = r * Math.sin(t);
       out.push({ x, y, dist: r, angle: Math.atan2(y, x), ring });
     }
-    if (count > 1) { prev = r; hasPrev = true; }
-    else { prev = 0; hasPrev = true; }
+    prev = r;
+    hasPrev = true;
   });
   return out;
 }

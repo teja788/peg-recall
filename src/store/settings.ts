@@ -1,94 +1,36 @@
 import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
 
-import type { AvatarId, BoardSize, Difficulty } from '../engine/types';
+import {
+  AVATAR_CYCLE,
+  DEFAULT_SETTINGS,
+  SETTINGS_KEY,
+  persistable,
+  sanitize,
+  type Settings,
+} from './settingsModel';
 
-export type GameMode = 'ai' | '2p' | '3p';
-
-export interface Settings {
-  soundOn: boolean;
-  showShapes: boolean;
-  boardSize: BoardSize;
-  difficulty: Difficulty;
-  bonusTurnOnMatch: boolean;
-  kidMode: boolean;
-  lastMode: GameMode;
-  /** Seat avatars, index 0..2. Seat 1 is the computer in `ai` mode. */
-  avatars: AvatarId[];
-}
-
-export const DEFAULT_SETTINGS: Settings = {
-  soundOn: true,
-  showShapes: false,
-  boardSize: 'classic',
-  difficulty: 'fox',
-  bonusTurnOnMatch: true,
-  kidMode: false,
-  lastMode: 'ai',
-  avatars: ['fox', 'owl', 'bear'],
-};
-
-export const AVATAR_CYCLE: AvatarId[] = ['fox', 'owl', 'bear', 'frog', 'bunny', 'cat'];
-export const BOARD_CYCLE: BoardSize[] = ['small', 'classic', 'big', 'huge'];
-/** The board is a disc, so sizes are named by peg count, not by rows x cols. */
-export const BOARD_LABEL: Record<BoardSize, string> = {
-  small: 'Small · 16 pegs',
-  classic: 'Classic · 25 pegs',
-  big: 'Big · 36 pegs',
-  huge: 'Huge · 40 pegs',
-};
-/** Just the name, for places too narrow for the peg count (the Home picker). */
-export const BOARD_NAME: Record<BoardSize, string> = {
-  small: 'Small',
-  classic: 'Classic',
-  big: 'Big',
-  huge: 'Huge',
-};
-export const DIFFICULTY_LABEL: Record<Difficulty, string> = {
-  bunny: 'Bunny',
-  fox: 'Fox',
-  owl: 'Owl',
-};
-/** One word under each opponent in the Home picker. */
-export const DIFFICULTY_TIER: Record<Difficulty, string> = {
-  bunny: 'Easy',
-  fox: 'Medium',
-  owl: 'Hard',
-};
-export const DIFFICULTY_HINT: Record<Difficulty, string> = {
-  bunny: 'Forgets a lot. Good for little players.',
-  fox: 'Remembers about half the board.',
-  owl: 'Remembers nearly everything.',
-};
-
-const KEY = 'pegrecall.settings.v1';
+// The data and the pure helpers live in settingsModel.ts (which imports no
+// native module); re-exported here so every screen keeps one import path.
+export {
+  AVATAR_CYCLE,
+  BOARD_CYCLE,
+  BOARD_LABEL,
+  BOARD_NAME,
+  DEFAULT_SETTINGS,
+  DIFFICULTY_HINT,
+  DIFFICULTY_LABEL,
+  DIFFICULTY_TIER,
+  sanitize,
+} from './settingsModel';
+export type { GameMode, Settings } from './settingsModel';
 
 interface SettingsStore extends Settings {
   hydrated: boolean;
   hydrate: () => Promise<void>;
   set: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
   toggle: (key: 'soundOn' | 'showShapes' | 'bonusTurnOnMatch' | 'kidMode') => void;
-  cycleBoardSize: () => void;
   cycleAvatar: (seat: number) => void;
-  reset: () => void;
-}
-
-function sanitize(raw: unknown): Partial<Settings> {
-  if (!raw || typeof raw !== 'object') return {};
-  const r = raw as Record<string, unknown>;
-  const out: Partial<Settings> = {};
-  if (typeof r.soundOn === 'boolean') out.soundOn = r.soundOn;
-  if (typeof r.showShapes === 'boolean') out.showShapes = r.showShapes;
-  if (typeof r.bonusTurnOnMatch === 'boolean') out.bonusTurnOnMatch = r.bonusTurnOnMatch;
-  if (typeof r.kidMode === 'boolean') out.kidMode = r.kidMode;
-  if (BOARD_CYCLE.includes(r.boardSize as BoardSize)) out.boardSize = r.boardSize as BoardSize;
-  if (['bunny', 'fox', 'owl'].includes(r.difficulty as string)) out.difficulty = r.difficulty as Difficulty;
-  if (['ai', '2p', '3p'].includes(r.lastMode as string)) out.lastMode = r.lastMode as GameMode;
-  if (Array.isArray(r.avatars)) {
-    const av = r.avatars.filter((a): a is AvatarId => AVATAR_CYCLE.includes(a as AvatarId));
-    if (av.length === 3) out.avatars = av;
-  }
-  return out;
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -97,17 +39,7 @@ function persist(s: Settings) {
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     saveTimer = null;
-    const payload: Settings = {
-      soundOn: s.soundOn,
-      showShapes: s.showShapes,
-      boardSize: s.boardSize,
-      difficulty: s.difficulty,
-      bonusTurnOnMatch: s.bonusTurnOnMatch,
-      kidMode: s.kidMode,
-      lastMode: s.lastMode,
-      avatars: s.avatars,
-    };
-    Promise.resolve(Storage.setItem(KEY, JSON.stringify(payload))).catch(() => {
+    Promise.resolve(Storage.setItem(SETTINGS_KEY, JSON.stringify(persistable(s)))).catch(() => {
       /* storage is a nicety, never a failure the player should see */
     });
   }, 120);
@@ -120,7 +52,7 @@ export const useSettings = create<SettingsStore>((setState, getState) => ({
   hydrate: async () => {
     if (getState().hydrated) return;
     try {
-      const raw = await Storage.getItem(KEY);
+      const raw = await Storage.getItem(SETTINGS_KEY);
       if (raw) setState({ ...sanitize(JSON.parse(raw)), hydrated: true });
       else setState({ hydrated: true });
     } catch {
@@ -138,12 +70,6 @@ export const useSettings = create<SettingsStore>((setState, getState) => ({
     persist(getState());
   },
 
-  cycleBoardSize: () => {
-    const i = BOARD_CYCLE.indexOf(getState().boardSize);
-    setState({ boardSize: BOARD_CYCLE[(i + 1) % BOARD_CYCLE.length] });
-    persist(getState());
-  },
-
   cycleAvatar: (seat) => {
     const avatars = [...getState().avatars];
     const cur = AVATAR_CYCLE.indexOf(avatars[seat]);
@@ -156,11 +82,6 @@ export const useSettings = create<SettingsStore>((setState, getState) => ({
       }
     }
     setState({ avatars });
-    persist(getState());
-  },
-
-  reset: () => {
-    setState({ ...DEFAULT_SETTINGS });
     persist(getState());
   },
 }));

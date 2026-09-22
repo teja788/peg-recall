@@ -5,10 +5,11 @@
  * glyph: a tray peg is a score counter, so its colour is the whole message and
  * at tray size (≈ 14–20 pt wide) a glyph would only turn to mush.
  */
-import React, { useId, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { PegColor } from '../../engine/types';
 import type { ArtTheme } from './palette';
-import { PEG_DOLL_ASPECT, pegDollScene } from './perspectiveModel';
+import { cachedPegDollScene } from './pegDoll';
+import { PEG_DOLL_ASPECT } from './perspectiveModel';
 import { SvgScene } from './scene3d';
 
 /** Height / width of a tray peg — the same doll, so the same ratio. */
@@ -21,13 +22,16 @@ export interface TrayPegProps {
   theme?: ArtTheme;
 }
 
-export function TrayPeg({ width, color, theme = 'light' }: TrayPegProps) {
-  const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
+function TrayPegImpl({ width, color, theme = 'light' }: TrayPegProps) {
+  // Same cached scene as the board's dolls: a tray peg is just the face-up doll
+  // at tray width, so it costs one scene build per colour, not one per peg.
   const scene = useMemo(
-    () => pegDollScene(width, color, true, false, theme, uid),
-    [width, color, theme, uid],
+    () => cachedPegDollScene(width, color, true, false, theme),
+    [width, color, theme],
   );
   return <SvgScene scene={scene} />;
 }
+
+export const TrayPeg = memo(TrayPegImpl);
 
 export default TrayPeg;

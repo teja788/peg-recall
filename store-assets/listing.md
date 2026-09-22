@@ -189,7 +189,7 @@ records stored only in the app's own on-device storage (`expo-sqlite/kv-store`).
 **Review notes (paste as-is):**
 
 ```
-Color Catch is a single-binary offline memory game. There is no login, no account, no server and no network access of any kind - the app never makes a network request, and it collects no data (App Privacy: Data Not Collected). No demo account is required.
+Color Catch is a single-binary offline memory game. There is no login, no account, no server, and the game itself never makes a network request. On launch, the app may contact Expo's update service (u.expo.dev) to check for an app update - that check carries no personal data and no gameplay data. The app collects no data (App Privacy: Data Not Collected). No demo account is required.
 
 How to reach everything quickly from a cold launch:
 
@@ -214,8 +214,8 @@ Example format: `2026 Raviteja Endigeri`. No "(c)" symbol - App Store Connect ad
 
 | Field | Value |
 |---|---|
-| Support URL (required) | `https://teja788.github.io/peg-recall/pegrecall/support.html` |
-| Marketing URL (optional) | `https://teja788.github.io/peg-recall/pegrecall/index.html` |
+| Support URL (required) | `https://teja788.github.io/peg-recall/support.html` |
+| Marketing URL (optional) | `https://teja788.github.io/peg-recall/index.html` |
 | Privacy Policy URL (required) | `https://teja788.github.io/peg-recall/privacy.html` |
 
 `https://teja788.github.io/peg-recall` = the same static host used for the previous app (PLAN item 14). Deploy the three

@@ -12,3 +12,6 @@ src/layout/__tests__/
 PLAN.md
 *.md
 !README.md
+/ios
+/android
+.DS_Store

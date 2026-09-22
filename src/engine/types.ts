@@ -36,13 +36,11 @@ export interface PlayerSpec {
 
 export interface Rules {
   bonusTurnOnMatch: boolean;   // physical rulebook: true (default ON)
-  deadColor: 'reroll';         // die never shows a color with 0 pegs left
   tieBreak: 'suddenDeath' | 'shared';
   kidMode: boolean;            // longer reveal (x1.5), shared-win ties
 }
 export const DEFAULT_RULES: Rules = {
   bonusTurnOnMatch: true,
-  deadColor: 'reroll',
   tieBreak: 'suddenDeath',
   kidMode: false,
 };
@@ -132,11 +130,14 @@ export interface AiParams {
   memorizeInitial: number;
   /** Base recall probability p0. */
   recallP0: number;
-  /** Decay d applied per turn since the peg was last seen. */
+  /** Decay d applied per ROUND (not per pick) since the peg was last seen:
+   *  `turn` counts every seat's pick, so the engine divides by the number of
+   *  seats still in the rotation. Keeps a tier equally strong at 2 and 3
+   *  players. */
   decayPerTurn: number;
   /** Max remembered pegs; Infinity = unlimited. Oldest entries are evicted. */
   maxTracked: number;
-  /** Probability a recalled pick slips to an orthogonally adjacent peg. */
+  /** Probability a recalled pick slips to a peg next to it on the round board. */
   slip: number;
   /** What to do with no usable memory of the rolled colour. */
   fallback: 'anyHidden' | 'unseenOrKnownWrong' | 'unseenOnly';

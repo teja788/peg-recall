@@ -13,7 +13,6 @@ import {
   BOARD_SPECS,
   PEG_COLORS,
   SUDDEN_DEATH_SPEC,
-  type BoardSize,
   type BoardSpec,
   type GameAction,
   type GameConfig,
@@ -26,11 +25,6 @@ import {
 import { createRng, deriveSeed, nextInt, shuffle } from './rng';
 
 const MAX_REROLLS = 64;
-
-/** Board spec for a size (the 3x3 sudden-death board is SUDDEN_DEATH_SPEC). */
-export function boardSpec(size: BoardSize): BoardSpec {
-  return BOARD_SPECS[size];
-}
 
 /** Reveal countdown in ms, kid mode included (x1.5). */
 export function revealDurationMs(state: GameState): number {
@@ -64,7 +58,7 @@ export function isHumanTurn(state: GameState): boolean {
 }
 
 /** Seats in the rotation (all of them, or only the tied ones in sudden death). */
-export function activeSeats(state: GameState): number[] {
+function activeSeats(state: GameState): number[] {
   if (state.activeSeats && state.activeSeats.length > 0) return state.activeSeats;
   return state.config.players.map((_, i) => i);
 }

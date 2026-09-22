@@ -2,19 +2,21 @@
  * Color Catch — the animated peg doll that stands in a hole on the round board.
  *
  * The drawing itself lives in the art layer (`PegDoll`); everything here is
- * movement. A peg is drawn twice, wood under colour, and the colour layer's
- * opacity is what "turns the cap over" — a tilted wooden peg has no back face
- * to flip, so a 250 ms cross-fade is both truer to the toy and cheaper than a
- * rotateY. Positions come from the board, so this component only ever moves
+ * movement. Turning a cap over is a 250 ms cross-fade of a coloured doll over
+ * a wooden one — a tilted wooden peg has no back face to flip, so a fade is
+ * both truer to the toy and cheaper than a rotateY. The second doll is mounted
+ * only for the length of that fade (see `Faces`); at rest a peg is one `<Svg>`,
+ * not two. Positions come from the board, so this component only ever moves
  * relative to its own resting place.
  *
  * Reduce Motion: cross-fades only. No rise, no bob, no lift, no arc.
  */
-import { PEG_DOLL_ASPECT, PEG_DOLL_BASE_Y, PegDoll, type ArtTheme } from '@art';
-import React, { memo, useEffect, useRef } from 'react';
+import { PEG_DOLL_ASPECT, PEG_DOLL_BASE_Y, PegDoll, WOOD, type ArtTheme } from '@art';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
+  runOnJS,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -60,18 +62,34 @@ interface DollProps {
   theme: ArtTheme;
 }
 
-/** Wood doll with the coloured doll cross-faded on top. */
+/**
+ * Wood doll with the coloured doll cross-faded on top.
+ *
+ * Both layers exist only while a cross-fade is actually in flight (`fading`).
+ * The rest of the time exactly one of them is on screen: at rest the colour
+ * layer is at opacity 0 or 1, so the layer underneath is either invisible or
+ * covered pixel for pixel by a doll of identical geometry — mounting it bought
+ * nothing and cost a whole `<Svg>` surface per peg. A 40-peg board at rest goes
+ * from 81 surfaces / 1,602 react-native-svg elements to 41 / 762; the counts
+ * are asserted in src/ui/art/__tests__/nodeBudget.test.ts.
+ *
+ * The coloured layer keeps its animated wrapper in both cases, so the fade can
+ * start on the UI thread in the same frame React mounts the wood back in.
+ */
 function Faces({
   width,
   color,
   showShapes,
   theme,
   colour,
-}: DollProps & { colour: SharedValue<number> }) {
+  faceUp,
+  fading,
+}: DollProps & { colour: SharedValue<number>; faceUp: boolean; fading: boolean }) {
   const colourStyle = useAnimatedStyle(() => ({ opacity: colour.value }));
+  if (!fading && !faceUp) return <PegDoll width={width} color={null} faceUp={false} theme={theme} />;
   return (
     <>
-      <PegDoll width={width} color={null} faceUp={false} theme={theme} />
+      {fading ? <PegDoll width={width} color={null} faceUp={false} theme={theme} /> : null}
       <Animated.View style={[StyleSheet.absoluteFill, colourStyle]}>
         <PegDoll width={width} color={color} faceUp showShape={showShapes} theme={theme} />
       </Animated.View>
@@ -110,6 +128,8 @@ function PegImpl({
   const colour = useSharedValue(faceUp ? 1 : 0);
   const bob = useSharedValue(0);
   const vis = useSharedValue(ghost ? 0 : 1);
+  /** true only while the cap is mid cross-fade — see `Faces`. */
+  const [fading, setFading] = useState(false);
 
   // rise out of the hole when the reveal starts
   useEffect(() => {
@@ -127,16 +147,31 @@ function PegImpl({
   fallRef.current = fallDelay;
 
   // cap colour on / off, with a little press-down bob on the way down
+  const mounted = useRef(false);
   useEffect(() => {
     const down = !faceUp;
     const delay = down ? fallRef.current : 0;
-    colour.value = withDelay(
-      delay,
-      withTiming(faceUp ? 1 : 0, {
-        duration: reduced ? 160 : PEG_ANIM.fall,
-        easing: Easing.inOut(Easing.quad),
-      }),
-    );
+    if (!mounted.current) {
+      // First pass: the shared value was already seeded to this exact value, so
+      // the old `withTiming` here was a 250 ms no-op. Skipping it keeps both
+      // dolls off screen at mount, which is when a 40-peg board is busiest.
+      mounted.current = true;
+      colour.value = faceUp ? 1 : 0;
+    } else {
+      setFading(true);
+      colour.value = withDelay(
+        delay,
+        withTiming(
+          faceUp ? 1 : 0,
+          { duration: reduced ? 160 : PEG_ANIM.fall, easing: Easing.inOut(Easing.quad) },
+          // Interrupted (`finished` false) means another fade has already taken
+          // over and will clear the flag itself.
+          (finished) => {
+            if (finished) runOnJS(setFading)(false);
+          },
+        ),
+      );
+    }
     if (down && !reduced) {
       bob.value = withDelay(
         delay,
@@ -171,6 +206,8 @@ function PegImpl({
         showShapes={showShapes}
         theme={theme}
         colour={colour}
+        faceUp={faceUp}
+        fading={fading}
       />
     </Animated.View>
   );
@@ -295,19 +332,23 @@ function MovingPegImpl({
               width: shadowW,
               height: shadowW * 0.26,
               borderRadius: shadowW / 2,
-              backgroundColor: theme === 'dark' ? '#000000' : '#3A2A1B',
+              backgroundColor: WOOD[theme].shadow,
             },
             shadowStyle,
           ]}
         />
       )}
       <Animated.View style={[StyleSheet.absoluteFill, body]}>
+        {/* There is only ever one moving peg, and its cap is fading for most of
+            the timeline, so it simply keeps both layers for the whole move. */}
         <Faces
           width={width}
           color={color}
           showShapes={showShapes}
           theme={theme}
           colour={colour}
+          faceUp
+          fading
         />
       </Animated.View>
     </View>

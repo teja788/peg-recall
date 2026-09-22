@@ -9,7 +9,7 @@
  * The mark is the game object itself: a ROUND wooden board (PLAN.md section 2)
  * with seven pegs — one centre plus a hex ring of six — three of them face-up
  * in orange / blue / green. Geometry and wood tones mirror
- * src/ui/art/svgModel.ts + src/ui/art/palette.ts; peg positions are the same
+ * src/ui/art/perspectiveModel.ts + src/ui/art/palette.ts; peg positions are the same
  * hex lattice src/layout/roundLayout.ts produces for 7 pegs.
  *
  * No dependencies, and deliberately filter-free (no feGaussianBlur): shadows

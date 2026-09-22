@@ -6,7 +6,7 @@
  * every 70 ms (plus 300 ms for each dead colour the engine had to reroll past),
  * then it lands on the rolled colour with a short bounce.
  */
-import { WoodDie, type ArtTheme } from '@art';
+import { WOOD_DIE_ASPECT, WoodDie, type ArtTheme } from '@art';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable } from 'react-native';
 import Animated, {
@@ -22,8 +22,16 @@ import Animated, {
 import { PEG_COLORS, type PegColor } from '../engine/types';
 import { PEG_PAINT, useTheme } from '../theme';
 
-/** Height of the die art as a multiple of its width (see woodDieScene). */
-const DIE_ASPECT = 0.9;
+/**
+ * Height of the die art as a multiple of its width.
+ *
+ * Taken from the art layer, which derives it from the die's own proportions
+ * (0.986, not the 0.9 this used to guess): a short container cropped the
+ * block's contact shadow and, worse, put the box centre a few points above the
+ * cube's own centre, so the tumble rotated about a point up near the top face
+ * and the drop shadow swung with it.
+ */
+const DIE_ASPECT = WOOD_DIE_ASPECT;
 /** How far it wobbles while it tumbles. */
 const WOBBLE_DEG = 25;
 /** Colour flicker interval while tumbling. */

@@ -24,7 +24,9 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider>
-          <StatusBar style="auto" />
+          {/* every screen sits on the teal table backdrop, in both schemes,
+              so the bar is always light — `auto` goes black in light mode */}
+          <StatusBar style="light" />
           <Stack
             screenOptions={{
               headerShown: false,

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 
-import { DARK, LIGHT, layout, radii, spacing, timing, type, type Surfaces } from './tokens';
+import { DARK, LIGHT, radii, spacing, timing, type, type Surfaces } from './tokens';
 
 export * from './tokens';
 
@@ -11,7 +11,6 @@ export interface Theme {
   spacing: typeof spacing;
   radii: typeof radii;
   type: typeof type;
-  layout: typeof layout;
   timing: typeof timing;
 }
 
@@ -22,7 +21,6 @@ function makeTheme(scheme: 'light' | 'dark'): Theme {
     spacing,
     radii,
     type,
-    layout,
     timing,
   };
 }

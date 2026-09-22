@@ -6,9 +6,13 @@
  * straight from a node script and serialise the same numbers the app draws
  * (see assets/source/build-peg-preview.ts → assets/source/preview-pegs.html).
  *
- * Reuses the `Prim` / `Grad` primitive vocabulary from svgModel.ts, but each
- * function here returns a `Scene` (a rectangular box) rather than a `Drawing`
- * (a square one): a tilted board is wide and flat, a peg doll is tall and thin.
+ * Every piece of art is described as a flat list of primitives (`Prim`) plus
+ * the gradients it references, inside a rectangular `Scene` box: a tilted board
+ * is wide and flat, a peg doll is tall and thin. Two consumers render the same
+ * description — `src/ui/art/scene3d.tsx` with react-native-svg in the app, and
+ * `assets/source/build-peg-preview.ts` as plain SVG text in the browser — so
+ * the preview page cannot drift away from what the app draws, and node counts
+ * are countable in a test (`src/ui/art/__tests__/nodeBudget.test.ts`).
  *
  * Coordinate conventions
  * ----------------------
@@ -23,13 +27,49 @@
  * No blur filters: soft shadows are stacks of low-opacity ellipses, which
  * rasterise identically in react-native-svg and in WebKit.
  */
-import type { PegColor } from '../../engine/types';
+import { PEG_COLORS, type PegColor } from '../../engine/types';
 import { PEG_GLYPH_ON, PEG_HEX, PEG_RIM, WOOD, shade } from './palette';
 import type { ArtTheme } from './palette';
 import { SHAPE_PATHS, SHAPE_VIEWBOX } from './shapePaths';
-import type { Grad, Prim } from './svgModel';
 
-export type { Grad, Prim } from './svgModel';
+/* ------------------------------------------------------------------ prims */
+
+export interface GradStop {
+  offset: number;
+  color: string;
+  opacity?: number;
+}
+
+/** A gradient in objectBoundingBox units (0..1 across the shape's box). */
+export interface Grad {
+  id: string;
+  kind: 'radial' | 'linear';
+  /** radial */
+  cx?: number;
+  cy?: number;
+  r?: number;
+  /** linear */
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
+  stops: GradStop[];
+}
+
+interface Paintable {
+  fill?: string;
+  stroke?: string;
+  sw?: number;
+  opacity?: number;
+  /** round line caps, for the little lit arcs */
+  round?: boolean;
+  transform?: string;
+}
+
+export type Prim =
+  | ({ t: 'circle'; cx: number; cy: number; r: number } & Paintable)
+  | ({ t: 'ellipse'; cx: number; cy: number; rx: number; ry: number } & Paintable)
+  | ({ t: 'path'; d: string } & Paintable);
 
 /** A drawing authored in a rectangular box. */
 export interface Scene {
@@ -114,9 +154,6 @@ export const PEG_DOLL_ASPECT = P.aspect;
 /** y of the base centre inside the box, as a fraction of the peg's width. */
 export const PEG_DOLL_BASE_Y = P.baseY;
 
-/** y of the very top of the head, as a fraction of the peg's width. */
-export const PEG_DOLL_CAP_TOP_Y = P.capTopY;
-
 /**
  * Height of the head alone, in peg widths. Keep this below the projected row
  * pitch (`spacing * 0.866 * yScale`) or a peg's head swallows the base of the
@@ -134,12 +171,6 @@ export const PEG_DOLL_STAND_HEIGHT = P.baseY - P.capTopY;
 export function pegDollAnchor(width: number): { x: number; y: number } {
   return { x: r2(width * 0.5), y: r2(width * P.baseY) };
 }
-
-/** Same thing as fractions of the box, for callers doing transform maths. */
-export const PEG_DOLL_ANCHOR = {
-  x: 0.5,
-  y: P.baseY / P.aspect,
-} as const;
 
 /** Cap / body / band tones for one peg, face-up or face-down. */
 function dollTones(color: PegColor | null, faceUp: boolean, theme: ArtTheme) {
@@ -168,6 +199,12 @@ function dollTones(color: PegColor | null, faceUp: boolean, theme: ArtTheme) {
  * optional shape glyph on the front of the cap.
  *
  * 5 prims face-down, 6 face-up, 7 with a glyph — well under the 10-node budget.
+ *
+ * The 2-3 gradients are all objectBoundingBox, so their *contents* depend only
+ * on `(color, faceUp, theme)` — `uid` exists to name them, not to vary them.
+ * Callers in the app should go through `cachedPegDollScene()` in pegDoll.tsx,
+ * which keys `uid` by that triple and hands every matching doll one shared
+ * scene instead of rebuilding this for each of the 40 pegs on a board.
  */
 export function pegDollScene(
   width: number,
@@ -690,7 +727,20 @@ const D = {
   sidePip: 0.235,
   /** how much of the face slope the side pips are sheared by */
   pipShear: 0.6,
+  /** room left under the block for its contact shadow */
+  shadowPad: 0.09,
 } as const;
+
+/**
+ * Height / width of the box `woodDieScene()` draws into.
+ *
+ * Derived from `D`, never hand-written: the box runs from the top vertex down
+ * past the two visible side faces to the bottom of the near corner, plus the
+ * room the contact shadow needs. Callers that size a container for the die
+ * (src/ui/Die.tsx) must use this, or the art sits off-centre inside its own
+ * box and the tumble rotates about the wrong point.
+ */
+export const WOOD_DIE_ASPECT = D.top + 2 * D.hw * D.tip + D.side + D.shadowPad;
 
 /**
  * The two decorative colours on the side faces, for a die showing `color`.
@@ -700,10 +750,11 @@ const D = {
  * six-colour wheel gives a fixed, well-separated pair per roll — decorative,
  * deterministic, and never mistakable for the answer.
  */
-const WHEEL: readonly PegColor[] = ['orange', 'sky', 'blue', 'green', 'yellow', 'purple'];
+const WHEEL: readonly PegColor[] = PEG_COLORS;
 function sidePips(color: PegColor): { front: PegColor; right: PegColor } {
+  const n = WHEEL.length;
   const i = WHEEL.indexOf(color);
-  return { front: WHEEL[(i + 2) % 6], right: WHEEL[(i + 4) % 6] };
+  return { front: WHEEL[(i + 2) % n], right: WHEEL[(i + 4) % n] };
 }
 
 /**
@@ -774,7 +825,7 @@ export function woodDieScene(
       t: 'path',
       d: roundPoly([T, R, M, L], rr),
       fill: `url(#${topId})`,
-      stroke: theme === 'light' ? '#FFF1D4' : '#D2AC78',
+      stroke: w.dieBevel,
       sw: r2(Math.max(0.7, u(0.009))),
       opacity: theme === 'light' ? 0.85 : 0.6,
     },
@@ -783,7 +834,7 @@ export function woodDieScene(
       t: 'path',
       d: `M ${r2(cx)} ${r2(M[1] + rr * 0.6)} L ${r2(cx)} ${r2(BM[1] - rr * 0.9)}`,
       fill: 'none',
-      stroke: theme === 'light' ? '#FFEFD2' : '#C49A64',
+      stroke: w.dieCorner,
       sw: r2(Math.max(0.8, u(0.018))),
       opacity: theme === 'light' ? 0.34 : 0.2,
       round: true,
@@ -806,13 +857,15 @@ export function woodDieScene(
     },
   ];
 
+  // Big pip on the top face, squashed onto the tipped plane. Declared out here
+  // because the glyph box below has to fit inside it.
+  const prx = hw * D.pip;
+  const pry = hh * D.pip;
+
   if (color) {
     const sides = sidePips(color);
     const slope = hh / hw;
 
-    // Big pip on the top face, squashed onto the tipped plane.
-    const prx = hw * D.pip;
-    const pry = hh * D.pip;
     const pcy = y0 + hh;
     prims.push({
       t: 'ellipse',
@@ -884,12 +937,20 @@ export function woodDieScene(
 
   // Top-face lettering: the engraved "?" before the first roll, or the colour's
   // shape glyph on top of the big pip.
-  const gk = color ? 0.62 : 1.0;
-  const gsx = (hw * gk) / SHAPE_VIEWBOX;
-  const gsy = (hh * gk) / SHAPE_VIEWBOX;
+  //
+  // Scaled UNIFORMLY, and deliberately not sheared or squashed onto the tipped
+  // plane: the glyphs are the colour-blind cue (PLAN.md section 4), and a
+  // non-uniform scale turns ● into an ellipse and ■ into a rectangle — exactly
+  // the pairs the glyph set exists to keep apart. The box is therefore the
+  // largest *upright square* that still fits, with 8% clearance: inscribed in
+  // the pip's ellipse (half-side a·b/√(a²+b²)) once a colour is showing, and in
+  // the top-face rhombus (side 2·hw·hh/(hw+hh)) before the first roll.
+  const gside =
+    (color ? (2 * prx * pry) / Math.hypot(prx, pry) : (2 * hw * hh) / (hw + hh)) * 0.92;
+  const gs = gside / SHAPE_VIEWBOX;
   const gm = (dy: number) =>
-    `matrix(${r2(gsx)} 0 0 ${r2(gsy)} ` +
-    `${r2(cx - (gsx * SHAPE_VIEWBOX) / 2)} ${r2(y0 + hh + dy - (gsy * SHAPE_VIEWBOX) / 2)})`;
+    `matrix(${r2(gs)} 0 0 ${r2(gs)} ` +
+    `${r2(cx - gside / 2)} ${r2(y0 + hh + dy - gside / 2)})`;
   if (!color) {
     const cut = `${Q_STEM} ${Q_DOT}`;
     // Cut: dark stroke. Then the lit lower wall of the groove, a hair below it.
@@ -907,7 +968,7 @@ export function woodDieScene(
       t: 'path',
       d: cut,
       fill: 'none',
-      stroke: theme === 'light' ? '#FFF6E4' : '#D3B084',
+      stroke: w.dieCut,
       sw: 1.4,
       round: true,
       transform: gm(u(0.012)),
@@ -984,5 +1045,5 @@ export function woodDieScene(
     },
   ];
 
-  return { w: size, h: r2(BM[1] + u(0.09)), grads, prims };
+  return { w: size, h: r2(u(WOOD_DIE_ASPECT)), grads, prims };
 }

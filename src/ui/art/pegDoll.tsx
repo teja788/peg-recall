@@ -13,31 +13,82 @@
  *
  * Node budget: 5 prims face-down, 6 face-up, 7 with a shape glyph.
  */
-import React, { useId, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { PegColor } from '../../engine/types';
 import type { ArtTheme } from './palette';
 import {
-  PEG_DOLL_ANCHOR,
   PEG_DOLL_ASPECT,
   PEG_DOLL_BASE_Y,
   PEG_DOLL_CAP_HEIGHT,
-  PEG_DOLL_CAP_TOP_Y,
   PEG_DOLL_STAND_HEIGHT,
   pegDollAnchor,
   pegDollScene,
+  type Scene,
 } from './perspectiveModel';
 import { SvgScene } from './scene3d';
 
 export {
   PEG_DOLL_ASPECT,
-  PEG_DOLL_ANCHOR,
   PEG_DOLL_BASE_Y,
   PEG_DOLL_CAP_HEIGHT,
-  PEG_DOLL_CAP_TOP_Y,
   PEG_DOLL_STAND_HEIGHT,
   pegDollAnchor,
   pegDollScene,
 };
+
+/* ------------------------------------------------------------ scene cache */
+
+/**
+ * Gradient id for one doll, derived from what the gradient actually *contains*.
+ *
+ * A doll's three gradients (body, band, cap) are authored in objectBoundingBox
+ * units, so their definitions depend only on `(color, faceUp, theme)` — not on
+ * the peg's size, and not on which peg it is. Giving every mounted doll a
+ * `useId()` of its own therefore produced ~200 distinct gradient definitions on
+ * a 40-peg board for 14 distinct gradients, and defeated every chance of
+ * sharing the built scene.
+ *
+ * Keying the ids by content instead is safe on both renderers: react-native-svg
+ * resolves `url(#…)` against the brushes defined inside the *same* `<Svg>` root
+ * (SvgView.mDefinedBrushes), so two dolls never see each other's defs; and on
+ * web, duplicate ids that name byte-identical gradients resolve to the same
+ * paint either way.
+ */
+const gradKey = (color: PegColor | null, faceUp: boolean, theme: ArtTheme) =>
+  `${color && faceUp ? color : 'wood'}${theme === 'dark' ? 'D' : 'L'}`;
+
+/**
+ * Built scenes, shared by every doll that draws the same thing.
+ *
+ * A board hands every peg the same `width`, so this collapses 40-plus scene
+ * builds per render pass (each one laying out path strings and gradient stop
+ * lists) down to one per distinct look — at most 13 for a board plus its tray
+ * (wood + six colours, with and without glyphs) per theme and width.
+ */
+const SCENES = new Map<string, Scene>();
+/** A resize walks `width` through a range; don't let the cache grow forever. */
+const SCENE_CACHE_MAX = 96;
+
+/** `pegDollScene`, memoised on everything it reads. */
+export function cachedPegDollScene(
+  width: number,
+  color: PegColor | null,
+  faceUp: boolean,
+  showShape: boolean,
+  theme: ArtTheme,
+): Scene {
+  const key = `${Math.round(width * 100)}|${color ?? ''}|${faceUp ? 1 : 0}|${
+    showShape ? 1 : 0
+  }|${theme}`;
+  const hit = SCENES.get(key);
+  if (hit) return hit;
+  if (SCENES.size >= SCENE_CACHE_MAX) SCENES.clear();
+  const scene = pegDollScene(width, color, faceUp, showShape, theme, gradKey(color, faceUp, theme));
+  SCENES.set(key, scene);
+  return scene;
+}
+
+/* ------------------------------------------------------------------- doll */
 
 export interface PegDollProps {
   /** Width of the cap — the widest point of the peg. */
@@ -51,14 +102,21 @@ export interface PegDollProps {
   theme?: ArtTheme;
 }
 
-export function PegDoll({ width, color, faceUp, showShape = false, theme = 'light' }: PegDollProps) {
-  // Unique per mounted peg: two pegs on screen must not share gradient ids.
-  const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
+function PegDollImpl({
+  width,
+  color,
+  faceUp,
+  showShape = false,
+  theme = 'light',
+}: PegDollProps) {
   const scene = useMemo(
-    () => pegDollScene(width, color, faceUp, showShape, theme, uid),
-    [width, color, faceUp, showShape, theme, uid],
+    () => cachedPegDollScene(width, color, faceUp, showShape, theme),
+    [width, color, faceUp, showShape, theme],
   );
   return <SvgScene scene={scene} />;
 }
+
+/** Memoised: a board re-renders on every pick, but a peg's art rarely changes. */
+export const PegDoll = memo(PegDollImpl);
 
 export default PegDoll;

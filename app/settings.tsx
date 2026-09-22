@@ -23,7 +23,18 @@ export default function SettingsScreen() {
   const t = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const s = useSettings();
+  // per-slice selectors: subscribing to the whole store re-renders this screen
+  // (and every PlayerTray in it) on any unrelated settings write
+  const soundOn = useSettings((s) => s.soundOn);
+  const showShapes = useSettings((s) => s.showShapes);
+  const bonusTurnOnMatch = useSettings((s) => s.bonusTurnOnMatch);
+  const kidMode = useSettings((s) => s.kidMode);
+  const boardSize = useSettings((s) => s.boardSize);
+  const difficulty = useSettings((s) => s.difficulty);
+  const avatars = useSettings((s) => s.avatars);
+  const toggle = useSettings((s) => s.toggle);
+  const setSetting = useSettings((s) => s.set);
+  const cycleAvatar = useSettings((s) => s.cycleAvatar);
 
   return (
     <Backdrop>
@@ -60,26 +71,26 @@ export default function SettingsScreen() {
         <ToggleRow
           title="Sound"
           subtitle="Soft clicks and a chime on a match"
-          value={s.soundOn}
-          onToggle={() => s.toggle('soundOn')}
+          value={soundOn}
+          onToggle={() => toggle('soundOn')}
         />
         <ToggleRow
           title="Shapes on pegs"
           subtitle="A shape as well as a colour, for colour-blind play"
-          value={s.showShapes}
-          onToggle={() => s.toggle('showShapes')}
+          value={showShapes}
+          onToggle={() => toggle('showShapes')}
         />
         <ToggleRow
           title="Bonus turn on a match"
           subtitle="Keep rolling while you keep matching"
-          value={s.bonusTurnOnMatch}
-          onToggle={() => s.toggle('bonusTurnOnMatch')}
+          value={bonusTurnOnMatch}
+          onToggle={() => toggle('bonusTurnOnMatch')}
         />
         <ToggleRow
           title="Kid mode"
           subtitle="Longer look at the board, ties are shared wins"
-          value={s.kidMode}
-          onToggle={() => s.toggle('kidMode')}
+          value={kidMode}
+          onToggle={() => toggle('kidMode')}
         />
 
         <Text style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}>
@@ -90,8 +101,8 @@ export default function SettingsScreen() {
             <Chip
               key={b}
               text={BOARD_LABEL[b]}
-              selected={s.boardSize === b}
-              onPress={() => s.set('boardSize', b)}
+              selected={boardSize === b}
+              onPress={() => setSetting('boardSize', b)}
             />
           ))}
         </View>
@@ -106,13 +117,13 @@ export default function SettingsScreen() {
               text={`${DIFFICULTY_GLYPH[d]}  ${DIFFICULTY_LABEL[d]}`}
               label={DIFFICULTY_LABEL[d]}
               hint={DIFFICULTY_HINT[d]}
-              selected={s.difficulty === d}
-              onPress={() => s.set('difficulty', d)}
+              selected={difficulty === d}
+              onPress={() => setSetting('difficulty', d)}
             />
           ))}
         </View>
         <Text style={{ ...t.type.caption, color: t.c.onBackdropMuted }}>
-          {DIFFICULTY_HINT[s.difficulty]}
+          {DIFFICULTY_HINT[difficulty]}
         </Text>
 
         <Text style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}>
@@ -122,14 +133,14 @@ export default function SettingsScreen() {
           Tap an animal to change it. The computer always wears its own face.
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.sm }}>
-          {s.avatars.map((avatar, seat) => (
+          {avatars.map((avatar, seat) => (
             <PlayerTray
               key={seat}
               spec={{ id: `seat${seat}`, kind: 'human', avatar }}
               caption={`P${seat + 1}`}
               active={false}
               size={40}
-              onPress={() => s.cycleAvatar(seat)}
+              onPress={() => cycleAvatar(seat)}
             />
           ))}
         </View>

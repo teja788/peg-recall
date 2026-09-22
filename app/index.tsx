@@ -1,6 +1,6 @@
 import { Avatar } from '@art';
-import { useRouter } from 'expo-router';
-import React, { useCallback } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useRef } from 'react';
 import { ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -47,12 +47,32 @@ export default function Home() {
   const toggle = useSettings((s) => s.toggle);
   const setSetting = useSettings((s) => s.set);
 
+  // A second tap lands before the push has rendered, and the stack ends up two
+  // game screens deep — Back then drops you onto another game instead of Home.
+  // The latch is cleared when Home is focused again, i.e. once we are back.
+  const navigating = useRef(false);
+  useFocusEffect(
+    useCallback(() => {
+      navigating.current = false;
+    }, []),
+  );
+
+  const go = useCallback(
+    (href: Parameters<typeof router.push>[0]) => {
+      if (navigating.current) return;
+      navigating.current = true;
+      router.push(href);
+    },
+    [router],
+  );
+
   const play = useCallback(
     (mode: GameMode) => {
+      if (navigating.current) return;
       setSetting('lastMode', mode);
-      router.push({ pathname: '/game', params: { mode } });
+      go({ pathname: '/game', params: { mode } });
     },
-    [router, setSetting],
+    [go, setSetting],
   );
 
   const cardStyle = compact ? { minHeight: 84 } : undefined;
@@ -83,7 +103,7 @@ export default function Home() {
         <IconButton
           glyph="⚙️"
           label="Settings"
-          onPress={() => router.push('/settings')}
+          onPress={() => go('/settings')}
           tone="filled"
         />
       </View>

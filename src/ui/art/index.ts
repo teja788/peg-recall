@@ -1,32 +1,28 @@
-/** Color Catch — art layer. Everything visual that is drawn rather than laid out. */
-export { Avatar, AVATAR_NAMES, AVATAR_ACCENT, AVATAR_IDS } from './avatars';
+/**
+ * Color Catch — art layer. Everything visual that is drawn rather than laid out.
+ *
+ * One family only: the 3/4 view (PLAN.md section 2) — a tilted wooden disc,
+ * upright peg dolls standing in it, and a wooden colour die on the same table.
+ * The geometry is pure TypeScript in perspectiveModel.ts; the components here
+ * are thin react-native-svg renderers over it, so `npx tsx` can build the
+ * preview page (assets/source/build-peg-preview.ts) from the same numbers.
+ *
+ * The app icon does NOT come through here: assets/source/build-svg.js writes
+ * icon.svg standalone, with its own copy of the constants it needs.
+ */
+
+export { Avatar, AVATAR_NAMES } from './avatars';
 export type { AvatarProps } from './avatars';
-export { Shape, SHAPE_PATHS, SHAPE_VIEWBOX } from './shapes';
-export type { ShapeProps } from './shapes';
-export { DieFace } from './dieFace';
-export type { DieFaceProps } from './dieFace';
+
+export { SHAPE_PATHS, SHAPE_VIEWBOX } from './shapePaths';
+
 export { PEG_HEX, PEG_RIM, PEG_GLYPH_ON, NEUTRAL, WOOD, shade } from './palette';
 export type { ArtTheme, WoodTones } from './palette';
-export { RoundBoard } from './roundBoard';
-export type { RoundBoardProps, Hole } from './roundBoard';
-export { Peg3D, PegTop } from './peg3d';
-export type { Peg3DProps, PegTopProps } from './peg3d';
-export { DieCube } from './dieCube';
-export type { DieCubeProps } from './dieCube';
-export { SvgDrawing } from './renderPrims';
-export { roundBoardDrawing, pegDrawing, pegTopDrawing, dieCubeDrawing } from './svgModel';
-export type { Drawing, Prim, Grad } from './svgModel';
-
-/* ------------------------------------------------------------------------ */
-/* The 3/4-view family (PLAN.md section 2). This is what the game screen uses;
- * the flat-top RoundBoard / Peg3D / DieCube above are kept only for the icon
- * and preview scripts. */
 
 export { PerspectiveBoard } from './boardPerspective';
 export type { PerspectiveBoardProps, PerspectiveHole } from './boardPerspective';
 export {
   BOARD_Y_SCALE,
-  BOARD_EDGE_RATIO,
   PEG_WIDTH_OF_SPACING,
   boardCentre,
   boardHeight,
@@ -38,13 +34,13 @@ export {
   pegDollAnchor,
   woodDieScene,
   PEG_DOLL_ASPECT,
-  PEG_DOLL_ANCHOR,
   PEG_DOLL_BASE_Y,
   PEG_DOLL_CAP_HEIGHT,
-  PEG_DOLL_CAP_TOP_Y,
   PEG_DOLL_STAND_HEIGHT,
+  WOOD_DIE_ASPECT,
 } from './perspectiveModel';
-export type { Scene } from './perspectiveModel';
+export type { Grad, GradStop, Prim, Scene } from './perspectiveModel';
+
 export { PegDoll } from './pegDoll';
 export type { PegDollProps } from './pegDoll';
 export { WoodDie } from './dieWood';

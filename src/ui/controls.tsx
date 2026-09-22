@@ -183,6 +183,7 @@ export function OptionPill({
         {art}
         <Text
           numberOfLines={1}
+          maxFontSizeMultiplier={1.3}
           style={{
             ...t.type.caption,
             marginTop: 3,
@@ -191,10 +192,12 @@ export function OptionPill({
         >
           {title}
         </Text>
+        {/* "25 pegs" / "Tricky" is information, not decoration, so it scales
+            with Dynamic Type — capped, because four pills share one row. */}
         {hint ? (
           <Text
             numberOfLines={1}
-            allowFontScaling={false}
+            maxFontSizeMultiplier={1.3}
             style={{
               fontSize: 11,
               lineHeight: 14,

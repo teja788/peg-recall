@@ -1,5 +1,5 @@
 {
-  "name": "pegrecall",
+  "name": "color-catch",
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
@@ -9,7 +9,9 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-navigation/native": "^7.4.1",
     "expo": "~55.0.31",
+    "expo-asset": "~55.0.20",
     "expo-audio": "~55.0.18",
     "expo-constants": "~55.0.17",
     "expo-haptics": "~55.0.18",

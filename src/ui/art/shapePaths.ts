@@ -1,10 +1,12 @@
 /**
  * Color Catch — peg shape glyph paths.
  *
- * Split out of shapes.tsx so that pure modules (svgModel.ts, and the node
- * preview script that imports it) can read the paths without pulling in
- * react-native-svg. shapes.tsx re-exports both names, so existing imports of
- * `SHAPE_PATHS` / `SHAPE_VIEWBOX` from './shapes' keep working.
+ * Kept as a pure module with no react-native-svg import, so perspectiveModel.ts
+ * and the node preview script can read the paths straight off it.
+ *
+ * Drawn as real paths, never text: font glyph metrics differ across iOS
+ * versions and would drift off-centre. The mapping is fixed by PLAN.md
+ * section 4 —  orange ●  sky ▲  blue ■  green ★  yellow ♥  purple ◆.
  */
 import type { PegColor } from '../../engine/types';
 

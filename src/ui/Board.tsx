@@ -48,6 +48,16 @@ export const BOARD_TILT_TALL = 0.66;
 const SIDE_MARGIN = 16;
 /** A board wider than this stops being a toy and starts being a table. */
 export const MAX_BOARD = 700;
+/**
+ * The disc never shrinks below this, however short the window is. A squat
+ * window (a landscape phone, an iPad Stage Manager sliver) leaves so little
+ * height once the banner and the die have taken theirs that the fit-to-height
+ * maths comes out at zero — and a zero-width board renders nothing at all. A
+ * board that overflows its box and gets clipped is recoverable; a blank screen
+ * is not. Callers shrink their own chrome first, and only then let the disc
+ * spill (app/game.tsx).
+ */
+export const MIN_BOARD = 180;
 /** Minimum touch target (PLAN.md section 4 asks for 52 where it can be had). */
 const TOUCH = 52;
 
@@ -185,10 +195,19 @@ export function Board({
   const boardRef = useRef<View>(null);
   const [origin, setOrigin] = useState({ x: 0, y: 0 });
 
-  // the flip-down wave only runs on the edge out of the reveal
-  const wasReveal = useRef(state.phase === 'reveal');
-  const staggerDown = wasReveal.current && state.phase !== 'reveal';
-  wasReveal.current = state.phase === 'reveal';
+  // The flip-down wave only runs on the edge out of the reveal. Derived with
+  // the "adjust state while rendering" pattern rather than by writing a ref
+  // mid-render: a ref write is a side effect, so under StrictMode's double
+  // render (or a render React throws away) the edge is seen once and lost.
+  // `staggerDown` then stays set until the next phase change, which is
+  // harmless — Peg reads `fallDelay` through a ref and never restarts a live
+  // fade on it.
+  const [prevPhase, setPrevPhase] = useState(state.phase);
+  const [staggerDown, setStaggerDown] = useState(false);
+  if (prevPhase !== state.phase) {
+    setPrevPhase(state.phase);
+    setStaggerDown(prevPhase === 'reveal');
+  }
 
   const onLayout = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -205,9 +224,11 @@ export function Board({
     if (fixedWidth != null) return Math.max(0, Math.floor(fixedWidth));
     if (box.w <= 0 || box.h <= 0) return 0;
     const ratio = boardHeightRatio(pegCount, tilt);
-    return Math.floor(
-      Math.max(0, Math.min(box.w - SIDE_MARGIN * 2, box.h / ratio, MAX_BOARD)),
-    );
+    const fit = Math.min(box.w - SIDE_MARGIN * 2, box.h / ratio, MAX_BOARD);
+    // never below MIN_BOARD — a short box clips the disc rather than blanking
+    // it — but never wider than the box either, which is the one thing that
+    // would push pegs off the side where they cannot be tapped
+    return Math.floor(Math.max(0, Math.min(box.w, Math.max(MIN_BOARD, fit))));
   }, [fixedWidth, box.w, box.h, pegCount, tilt]);
 
   const m = useMemo(
@@ -221,7 +242,10 @@ export function Board({
   );
 
   const reported = useRef('');
-  if (m && width > 0) {
+  if (__DEV__ && m && width > 0) {
+    // the whole diagnostic — the string build included — is dev-only; in a
+    // release build this block is dropped instead of formatting six numbers
+    // on every render
     const rowPitch = m.layout.spacing * 0.866 * tilt;
     const capH = m.pegWidth * PEG_DOLL_CAP_HEIGHT;
     const line =
@@ -231,7 +255,7 @@ export function Board({
       ` rowPitch=${rowPitch.toFixed(1)} capH=${capH.toFixed(1)}` +
       ` clear=${capH < rowPitch ? 'yes' : 'NO'}` +
       ` box=${Math.round(box.w)}x${Math.round(box.h)}`;
-    if (reported.current !== line && __DEV__) {
+    if (reported.current !== line) {
       reported.current = line;
       // dev only: read back with the browser console when checking touch sizes
       console.log('[peg-recall board]', line);
