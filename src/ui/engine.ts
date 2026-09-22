@@ -11,7 +11,6 @@ export {
   chooseMove,
   createAi,
   createGame,
-  hiddenPegsByColor,
   isHumanTurn,
   observe,
   observeInitialReveal,

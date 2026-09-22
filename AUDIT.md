@@ -40,7 +40,7 @@ Tick an item only after the fix is verified (typecheck + tests + manual check wh
 
 - [x] D1 Glyph ink contrast fails on orange 2.25:1, sky 2.31:1, purple 3.06:1 — `src/ui/art/palette.ts:34-41`. Dark ink.
 - [x] D2 Two `PegDoll`s mounted per peg permanently (81 SVG surfaces / ~1,880 nodes at 40 pegs) — `src/ui/Peg.tsx:73-78`.
-- [x] D3 Per-doll gradient `Defs` (≈200 gradients for 14 distinct) — `pegDoll.tsx:56`. Partial: scenes memoised per (color, faceUp, theme), ids keyed by that triple; full hoist into one board-level `<Svg>` is a ~1-day follow-up touching Board.tsx/BoardMini.tsx.
+- [x] D3 Per-doll gradient `Defs` (≈200 gradients for 14 distinct) — `pegDoll.tsx:56`. Partial: scenes memoised per (color, faceUp, theme), ids keyed by that triple; full hoist into one board-level `<Svg>` deliberately NOT done: with reanimated `useAnimatedProps` on `<G>`, every animated peg would re-render the whole 40-peg surface each frame during the flip-down wave, which is worse than 41 small surfaces.
 - [x] D4 Die top glyph scaled non-uniformly — `perspectiveModel.ts:888-892`.
 - [x] D5 `allowFontScaling={false}` on meaningful text; tray row cannot wrap — `src/ui/controls.tsx`, `PlayerTray.tsx`, `app/game.tsx:307`.
 - [x] D6 `showShapes` off by default; die is colour-only — `src/store/settings.ts:22`. Decide.
@@ -60,7 +60,7 @@ Tick an item only after the fix is verified (typecheck + tests + manual check wh
 - [x] F4 Stray hard-coded hexes — `svgModel.ts:418`, `Peg.tsx:298`, `perspectiveModel.ts:777,786,910`. `WHEEL` duplicates `PEG_COLORS`.
 - [x] F5 `package.json` name `pegrecall`; README title "(Memory Chess)". Rename package to `color-catch`.
 - [x] F6 `.easignore` missing `/ios`, `/android`, `.DS_Store`.
-- [x] F7 Submission checklist vs reality: pages live? (`PLAN.md:144` vs `submission-checklist.md:21-24`); ASC record already exists (`:75`); only 2 of 6 iPhone screenshots, no iPad set. Docs reconciled; pages verified live over HTTPS (redeploy needed for new privacy wording). OPEN: screenshots still 2 of 6, no iPad set.
+- [x] F7 Submission checklist vs reality: pages live? (`PLAN.md:144` vs `submission-checklist.md:21-24`); ASC record already exists (`:75`); only 2 of 6 iPhone screenshots, no iPad set. Docs reconciled; pages verified live over HTTPS (redeploy needed for new privacy wording). Screenshots: all 6 iPhone 6.5" and 6 iPad 12.9" shots captured 2026-09-23 via `capture-screenshots.mjs`.
 - [x] F8 `.claude/settings.json` tracked despite `.gitignore` rule. `expo-system-ui` kept: its plugin writes `UIUserInterfaceStyle` for `userInterfaceStyle: automatic`. `.claude/settings.json` left tracked (benign).
 
 ## G. Test gaps

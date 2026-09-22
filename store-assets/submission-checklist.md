@@ -67,16 +67,12 @@ Legend: **[you]** = must be done by the user (Apple ID, 2FA, payments, Finder di
 
 ## 5. Screenshots
 
-- [ ] **OPEN ITEM (2026-09-22):** `store-assets/screenshots/iphone-6.5/` has only 2 of the 6 required
-      shots (`01-home.png`, `02-reveal.png`) and there is no `iphone-6.5` full set beyond those two.
-      There is no iPad screenshot set at all - `store-assets/screenshots/` has no 12.9"/2048×2732
-      folder. Both must be captured before submission; App Store Connect requires the full 6.5"
-      iPhone set and, since this app supports iPad, an iPad set too.
-- [ ] Follow `store-assets/screenshots-plan.md`: six shots, 6.5" iPhone **1284 x 2778** and 12.9"
-      iPad **2048 x 2732**, portrait.
-- [ ] Capture via simulator + `simctl openurl` deep links (`exp://.../--/game?mode=ai|2p|3p`,
-      `/settings`) + `idb ui tap` for one-off taps. The iOS Simulator MCP panel crashes on macOS 12
-      - don't retry it.
+- [x] Both sets captured 2026-09-23 with `node store-assets/capture-screenshots.mjs` (headless
+      Chromium against the web build on :8089): `store-assets/screenshots/iphone-6.5/01..06.png`
+      at **1284 x 2778** and `store-assets/screenshots/ipad-12.9/01..06.png` at **2048 x 2732**,
+      portrait, in the order of `store-assets/screenshots-plan.md`. Sizes verified with `sips`.
+- [ ] Eyeball all 12 once more on a phone-sized view before upload (04-match shows the flip
+      mid-animation; recapture if the frame looks off).
 - [ ] Copy finals to `~/Downloads/pegrecall-screenshots/` immediately - scratchpad `/tmp` is purged.
 
 ## 6. Create the App Store Connect record
