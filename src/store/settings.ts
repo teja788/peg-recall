@@ -1,4 +1,3 @@
-import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
 
 import {
@@ -9,6 +8,7 @@ import {
   sanitize,
   type Settings,
 } from './settingsModel';
+import { storage } from './storage';
 
 // The data and the pure helpers live in settingsModel.ts (which imports no
 // native module); re-exported here so every screen keeps one import path.
@@ -35,11 +35,14 @@ interface SettingsStore extends Settings {
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
+/** Hydration never blocks the game: past this, defaults win and play starts. */
+const HYDRATE_TIMEOUT_MS = 2000;
+
 function persist(s: Settings) {
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     saveTimer = null;
-    Promise.resolve(Storage.setItem(SETTINGS_KEY, JSON.stringify(persistable(s)))).catch(() => {
+    storage.setItem(SETTINGS_KEY, JSON.stringify(persistable(s))).catch(() => {
       /* storage is a nicety, never a failure the player should see */
     });
   }, 120);
@@ -52,7 +55,10 @@ export const useSettings = create<SettingsStore>((setState, getState) => ({
   hydrate: async () => {
     if (getState().hydrated) return;
     try {
-      const raw = await Storage.getItem(SETTINGS_KEY);
+      const raw = await Promise.race<string | null>([
+        storage.getItem(SETTINGS_KEY),
+        new Promise((resolve) => setTimeout(() => resolve(null), HYDRATE_TIMEOUT_MS)),
+      ]);
       if (raw) setState({ ...sanitize(JSON.parse(raw)), hydrated: true });
       else setState({ hydrated: true });
     } catch {
