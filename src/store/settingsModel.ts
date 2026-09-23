@@ -24,9 +24,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   soundOn: true,
-  // On by default: the die is otherwise colour-only, which leaves a colour-blind
-  // player with nothing to read. Anyone who dislikes the glyphs can turn it off.
-  showShapes: true,
+  showShapes: false,
   boardSize: 'classic',
   difficulty: 'fox',
   bonusTurnOnMatch: true,

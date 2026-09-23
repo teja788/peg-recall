@@ -48,7 +48,7 @@ function isMode(v: unknown): v is GameMode {
  */
 
 /** How much of the screen width the disc may take. */
-const BOARD_OF_WIDTH = 0.92;
+const BOARD_OF_WIDTH = 0.96;
 /** Board width the chrome below was drawn against (a 390 pt phone). */
 const CHROME_BASE = 360;
 /** Chrome never shrinks below the phone size, and stops growing at 1.6x. */
