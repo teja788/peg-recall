@@ -43,3 +43,6 @@ yarn-error.*
 # local
 .DS_Store
 .claude/
+
+# v1.1 screenshots (110 MB) - finals live in ~/Downloads/colorcatch-v1.1-screenshots and App Store Connect
+store-assets/screenshots-v1.1/

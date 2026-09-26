@@ -182,10 +182,12 @@ https://teja788.github.io/peg-recall/privacy.html
 
 Natural Mexican Spanish (tú, computadora, carro, papás, abuelitos). The app UI is English only, so on-screen names (Bunny, Fox, Owl, Small/Classic/Big/Huge, Kid mode, Shapes on Pegs, Play Again, How to play) are kept in English where the shopper will see them, and the description says the app is in English. The U.S. store also indexes Spanish (Mexico), so these keywords add Spanish coverage in the U.S. on top of Mexico.
 
-### App Name (21/30)
+### App Name (29/30)
+
+"Color Catch: Memorama" was rejected by App Store Connect on 2026-09-26 (name already in use).
 
 ```
-Color Catch: Memorama
+Color Catch: Memorama y Dados
 ```
 
 ### Subtitle (29/30)
@@ -249,7 +251,7 @@ Above the fold (first 170 characters): "El memorama de fichas de madera que jueg
 ### Keywords (97/100 bytes)
 
 ```
-memoria,niños,sin,internet,jugadores,dos,colores,dados,preescolar,abuelos,concentración,parejas
+memoria,niños,sin,internet,jugadores,dos,colores,fichas,preescolar,abuelos,concentración,parejas
 ```
 
 No word is shared with the en-US keyword field (checked by script). "memorama", "juego", "mesa" and "familia" are already in the name/subtitle, so they are not repeated. Target phrases: memorama de colores, juego de memoria, juegos de mesa para dos jugadores, juegos sin internet, juego de dados, memorama preescolar, juego de concentración, juego de parejas, juegos para abuelos. "niños" as a single keyword is allowed (only "para niños" wording is restricted).
@@ -298,10 +300,12 @@ https://teja788.github.io/peg-recall/privacy.html
 
 British spelling (colour, coloured, colour-blind, winning streak). The brand name stays "Color Catch" - it is the app's name, not a word to localise. English (U.K.) is the listing for the UK and also India (where the physical peg toy sells as "memory chess"), and those storefronts do not read the en-US keyword field, so this keyword set stands on its own.
 
-### App Name (30/30)
+### App Name (28/30)
+
+App Store Connect refused the en-US name in this locale on 2026-09-26 ("already being used"), so en-GB has its own.
 
 ```
-Color Catch: Memory Board Game
+Color Catch: Memory Peg Game
 ```
 
 ### Subtitle (28/30)
@@ -363,7 +367,7 @@ Above the fold (first 170 characters): "The wooden peg memory game that kids, pa
 ### Keywords (99/100 bytes)
 
 ```
-colour,toddler,preschool,senior,concentration,2,two,player,peg,dice,brain,offline,match,pair,recall
+colour,toddler,preschool,senior,concentration,two,player,dice,brain,offline,match,pair,recall,board
 ```
 
 The en-US set with "colour" added (the name only indexes "color") and "3" and "night" dropped to fit ("family game night" is a US phrase; the UK says "games night"). "memory chess" is mentioned once in the description for recognition by Indian parents but kept out of keywords (it returns chess apps; PLAN section 6).
