@@ -24,6 +24,7 @@
  * out at 2x on a 13" iPad — big enough not to look like phone furniture on a
  * tablet, not so big it eats the board.
  */
+import { spacing } from '../theme/tokens';
 import { WOOD_DIE_ASPECT } from './art/perspectiveModel';
 
 export type TableMode = 'stacked' | 'side' | 'split';
@@ -83,6 +84,13 @@ export interface TableLayout {
 
 /** How much of the usable width the disc may take in the stacked layout. */
 export const BOARD_OF_WIDTH = 0.96;
+/**
+ * Stacked: the disc keeps at least this much clear on each side — the same
+ * side padding the tray row and the sound row use (app/game.tsx, spacing.md),
+ * so on a narrow phone the disc lines up with the trays instead of poking
+ * past them (0.96 alone leaves 7.5 pt a side at 375 pt).
+ */
+export const BOARD_SIDE_MARGIN = spacing.md;
 /** Gap between the banner and the top of the disc, at scale 1. */
 const BANNER_GAP = 12;
 /** Gap between the bottom of the disc and the die, at scale 1. */
@@ -136,8 +144,11 @@ function stacked(inp: TableInput, scale: number, box?: number): TableLayout {
   const { width: W, height: H, insets } = inp;
   const px = (n: number) => round(n * scale);
   const usableW = W - insets.left - insets.right;
-  // (the epsilon keeps 375 * 0.96 at 360, not 359.99…)
-  const cap = Math.floor(usableW * BOARD_OF_WIDTH + 1e-6);
+  // 96% of the width, but never closer to the edge than the trays: the
+  // margin wins below 600 pt, so a 375 pt phone gets 351, not 360. (The
+  // epsilon stops a product that should be a whole number flooring to one
+  // less through float error.)
+  const cap = Math.min(Math.floor(usableW * BOARD_OF_WIDTH + 1e-6), usableW - 2 * BOARD_SIDE_MARGIN);
   const tilt = inp.tiltFor(W, H);
   const ratio = inp.ratioFor(tilt);
   const table = box && box > 0 ? box : H - insets.top - insets.bottom - px(TOP_ROW) - px(BOTTOM_ROW);

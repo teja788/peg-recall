@@ -173,7 +173,7 @@ export function Die({
       accessibilityLabel={
         tumbling ? 'Die rolling' : paint ? `Die shows ${paint.label}` : 'Roll the die'
       }
-      accessibilityHint={canRoll ? 'Rolls the colour you must find' : undefined}
+      accessibilityHint={canRoll ? 'Rolls the color you must find' : undefined}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onRoll}

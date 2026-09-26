@@ -302,7 +302,7 @@ Agent split for P1–P4 (disjoint files, no `git stash`):
 
 - [x] D1–D7 decided
 - [ ] P0 promo text + accessibility labels live
-- [x] P1 fixes, tests green (150/150; A20 splash/Android icon, A22 margin left open)
+- [x] P1 fixes, tests green (166/166; A20 splash/Android icon/favicon regenerated from the new icon art, Android background navy `#022253`; A22 disc keeps a 12 pt side margin, 351 pt on a 375 pt phone)
 - [x] P2 palette (red #CE1202, violet #6201DA)
 - [x] P3 names ("Who's playing?" sheet) + stats
 - [x] P4 review prompt (speed + Toy 24 dropped)
