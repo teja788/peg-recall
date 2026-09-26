@@ -4,7 +4,9 @@
  */
 import { setAudioModeAsync, useAudioPlayer, type AudioPlayer } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
+import { AccessibilityInfo, Platform } from 'react-native';
+import { useReducedMotion as useReducedMotionAtLaunch } from 'react-native-reanimated';
 
 import { SOUND_SOURCES, type SoundName } from '@sounds';
 
@@ -88,7 +90,103 @@ export function hapticMatch() {
   }
 }
 
-/** A miss is deliberately silent and buzz-free (PLAN.md section 4). */
-export function hapticMiss() {
-  /* intentionally nothing */
+/* ------------------------------------------------------ live a11y settings */
+
+/**
+ * A tiny external store over one AccessibilityInfo setting: a single native
+ * subscription shared by every component that reads it (a 40-peg board would
+ * otherwise hold 40 listeners). `null` until the first read comes back.
+ */
+function a11ySetting(
+  read: () => Promise<boolean>,
+  event: 'reduceMotionChanged' | 'screenReaderChanged',
+) {
+  let value: boolean | null = null;
+  let started = false;
+  const listeners = new Set<() => void>();
+  const set = (v: boolean) => {
+    if (value === v) return;
+    value = v;
+    listeners.forEach((l) => l());
+  };
+  const start = () => {
+    if (started) return;
+    started = true;
+    try {
+      read().then(set, () => {});
+      // app-lifetime subscription: never removed, so never re-armed
+      AccessibilityInfo.addEventListener(event, set);
+    } catch {
+      /* not supported on this platform: keep the fallback */
+    }
+  };
+  return {
+    subscribe(cb: () => void) {
+      start();
+      listeners.add(cb);
+      return () => {
+        listeners.delete(cb);
+      };
+    },
+    get: () => value,
+  };
+}
+
+const reduceMotionSetting = a11ySetting(
+  () => AccessibilityInfo.isReduceMotionEnabled(),
+  'reduceMotionChanged',
+);
+const screenReaderSetting = a11ySetting(
+  () => AccessibilityInfo.isScreenReaderEnabled(),
+  'screenReaderChanged',
+);
+
+/**
+ * Reduce Motion, kept live. Reanimated's `useReducedMotion` is read once at
+ * launch and never changes, so switching the setting mid-game used to need an
+ * app restart. That launch value still seeds the first frame, so nothing
+ * animates while the async read is in flight.
+ */
+export function useReduceMotion(): boolean {
+  const atLaunch = useReducedMotionAtLaunch();
+  const live = useSyncExternalStore(
+    reduceMotionSetting.subscribe,
+    reduceMotionSetting.get,
+    reduceMotionSetting.get,
+  );
+  return live ?? atLaunch;
+}
+
+/** How long a line must stay put before VoiceOver reads it out. */
+const ANNOUNCE_SETTLE_MS = 350;
+
+/**
+ * Speaks `text` through VoiceOver once it has held still for a moment.
+ *
+ * iOS only: `accessibilityLiveRegion` (which the banner keeps) already does
+ * this on Android, and the web has no screen-reader announce API in RN. The
+ * settle delay swallows the transient lines ("…is rolling") that flash past
+ * between two states worth hearing, and the same line is never read twice in
+ * a row. An empty string cancels whatever was waiting.
+ */
+export function useAnnouncement(text: string) {
+  const screenReader = useSyncExternalStore(
+    screenReaderSetting.subscribe,
+    screenReaderSetting.get,
+    screenReaderSetting.get,
+  );
+  const last = useRef('');
+  useEffect(() => {
+    if (Platform.OS !== 'ios' || !screenReader || !text) return;
+    if (text === last.current) return;
+    const id = setTimeout(() => {
+      last.current = text;
+      try {
+        AccessibilityInfo.announceForAccessibility(text);
+      } catch {
+        /* never let an announcement break a turn */
+      }
+    }, ANNOUNCE_SETTLE_MS);
+    return () => clearTimeout(id);
+  }, [text, screenReader]);
 }

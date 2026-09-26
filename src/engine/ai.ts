@@ -249,7 +249,12 @@ export function chooseMove(
         target = index;
         break;
       }
-      delete memory[index]; // forgotten for good
+      // Forgotten for good — and forgotten entirely: a `knownWrong` note on this
+      // peg holds its TRUE colour (it was filed when another colour was
+      // rolled), so leaving it behind would fence off exactly the peg the AI
+      // just lost track of, and it could never stumble onto it again.
+      delete memory[index];
+      delete knownWrong[index];
     }
 
     if (target >= 0) {
@@ -270,8 +275,11 @@ export function chooseMove(
         const i = Number(key);
         if (memory[i].color !== die) knownWrong[i] = memory[i].color;
       }
-      const unseen = hidden.filter((i) => !(i in memory) && !(i in knownWrong));
-      const wrongPool = hidden.filter((i) => i in memory || i in knownWrong);
+      // A note that a peg is not-X says nothing when X itself was rolled (and a
+      // note whose colour IS the die is a forgotten peg): treat it as unseen.
+      const knownNotDie = (i: number) => i in knownWrong && knownWrong[i] !== die;
+      const unseen = hidden.filter((i) => !(i in memory) && !knownNotDie(i));
+      const wrongPool = hidden.filter((i) => i in memory || knownNotDie(i));
 
       if (params.fallback === 'anyHidden') {
         const [choice, r1] = pickFrom(r, hidden, hidden);

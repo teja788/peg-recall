@@ -7,8 +7,10 @@
  * back to front so near rows overlap far ones, and the touch targets are laid
  * over the top in the same order, so the peg you can see is the peg you hit.
  *
- * Never scrolls: the disc is sized from whatever box the parent hands us, so on
- * a small phone it shrinks and on an iPad it stops growing at 700 pt.
+ * Never scrolls: the disc is sized from whatever box the parent hands us (the
+ * game screen works that out in src/ui/gameLayout.ts), so on a small phone it
+ * shrinks and on an iPad it grows to fill the screen. Pegs, holes and touch
+ * targets all scale with the disc.
  */
 import {
   PEG_DOLL_ASPECT,
@@ -23,7 +25,7 @@ import {
   projectHole,
   type ArtTheme,
 } from '@art';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 
 import type { GameState } from '../engine/types';
@@ -46,8 +48,11 @@ export const BOARD_TILT = 0.62;
 export const BOARD_TILT_TALL = 0.66;
 /** Breathing room between the disc and the edge of the box we were given. */
 const SIDE_MARGIN = 16;
-/** A board wider than this stops being a toy and starts being a table. */
-export const MAX_BOARD = 700;
+/**
+ * Only for a board that sizes itself (no `width`): the game screen passes its
+ * own width, worked out from the space actually on screen, and is not capped.
+ */
+const MAX_BOARD = 1400;
 /**
  * The disc never shrinks below this, however short the window is. A squat
  * window (a landscape phone, an iPad Stage Manager sliver) leaves so little
@@ -88,6 +93,12 @@ export interface BoardProps {
   width?: number;
   /** Vertical squash of the disc; see `boardTiltFor()`. */
   tilt?: number;
+  /**
+   * Changes whenever the board may have moved in the window without its own
+   * layout changing (rotation, a Split View resize): the capture flight's
+   * origin is measured again.
+   */
+  measureKey?: string;
 }
 
 interface Metrics {
@@ -178,7 +189,45 @@ export function boardHeightRatio(pegCount: number, tilt: number = BOARD_TILT): n
   return r;
 }
 
-export function Board({
+/**
+ * One peg's touch target. Memoised with a per-index press handler, so a move
+ * re-renders only the cells whose peg actually changed instead of rebuilding
+ * 40 Pressables with fresh closures on every store update.
+ */
+const PegHit = memo(function PegHit({
+  index,
+  label,
+  off,
+  onPick,
+  left,
+  top,
+  width,
+  height,
+}: {
+  index: number;
+  label: string;
+  off: boolean;
+  onPick: (pegIndex: number) => void;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}) {
+  const onPress = useCallback(() => onPick(index), [onPick, index]);
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: off }}
+      disabled={off}
+      hitSlop={6}
+      onPress={onPress}
+      style={{ position: 'absolute', left, top, width, height }}
+    />
+  );
+});
+
+function BoardImpl({
   state,
   showShapes,
   disabled,
@@ -187,6 +236,7 @@ export function Board({
   moveNonce = 0,
   width: fixedWidth,
   tilt = BOARD_TILT,
+  measureKey,
 }: BoardProps) {
   const t = useTheme();
   const theme: ArtTheme = t.scheme;
@@ -219,6 +269,12 @@ export function Board({
       setOrigin((cur) => (cur.x === x && cur.y === y ? cur : { x, y })),
     );
   }, []);
+
+  useEffect(() => {
+    if (measureKey == null) return;
+    const id = requestAnimationFrame(onBoardLayout);
+    return () => cancelAnimationFrame(id);
+  }, [measureKey, onBoardLayout]);
 
   const width = useMemo(() => {
     if (fixedWidth != null) return Math.max(0, Math.floor(fixedWidth));
@@ -277,9 +333,10 @@ export function Board({
   if (move?.matched && movingAt) {
     const tray = trayAnchors?.[move.playerId];
     if (tray) {
+      // from the centre of the peg's box to the centre of the tray
       flyTo = {
         x: tray.x - origin.x - (movingAt.left + m.pegWidth / 2),
-        y: tray.y - origin.y - (movingAt.top + anchor.y),
+        y: tray.y - origin.y - (movingAt.top + (m.pegWidth * PEG_DOLL_ASPECT) / 2),
       };
     }
   }
@@ -331,33 +388,35 @@ export function Board({
           );
         })}
 
-        {/* touch targets, same order so the nearer peg wins an overlap */}
-        {m.pegs.map((slot) => {
+        {/* Touch targets, same order so the nearer peg wins an overlap.
+            VoiceOver walks them top-left to bottom-right by position (iOS
+            orders absolutely-placed siblings geometrically, and RN 0.83's
+            `experimental_accessibilityOrder` is behind a native flag that is
+            off in Expo builds), which is the same back-to-front order they are
+            mounted in. So the number each one is read out with is its place
+            in that walk — "Peg 1" is the first peg a swipe lands on, "Peg 2"
+            the next — with its ring kept alongside as a spatial hint. */}
+        {m.pegs.map((slot, order) => {
           const peg = state.pegs[slot.index];
           if (!peg) return null;
           const off = peg.state !== 'hidden' || disabled;
-          const label =
+          const what =
             peg.state === 'captured'
               ? 'taken'
               : peg.state === 'revealed'
                 ? PEG_PAINT[peg.color].label
                 : 'hidden';
           return (
-            <Pressable
+            <PegHit
               key={`hit-${peg.index}`}
-              accessibilityRole="button"
-              accessibilityLabel={`Ring ${slot.ring + 1}, peg ${slot.ringOrder + 1}, ${label}`}
-              accessibilityState={{ disabled: off }}
-              disabled={off}
-              hitSlop={6}
-              onPress={() => onPick(peg.index)}
-              style={{
-                position: 'absolute',
-                left: slot.left + m.pegWidth / 2 - m.hit.w / 2,
-                top: slot.top + anchor.y + m.hit.dy,
-                width: m.hit.w,
-                height: m.hit.h,
-              }}
+              index={peg.index}
+              label={`Peg ${order + 1}, ring ${slot.ring + 1}, ${what}`}
+              off={off}
+              onPick={onPick}
+              left={slot.left + m.pegWidth / 2 - m.hit.w / 2}
+              top={slot.top + anchor.y + m.hit.dy}
+              width={m.hit.w}
+              height={m.hit.h}
             />
           );
         })}
@@ -387,5 +446,11 @@ const styles = StyleSheet.create({
   /** when the screen sizes the disc, the board is exactly as tall as it draws */
   fixedWrap: { alignItems: 'center', justifyContent: 'center' },
 });
+
+/**
+ * Memoised: the game screen re-renders on every busy / pause / feedback flip,
+ * most of which change nothing the board draws.
+ */
+export const Board = memo(BoardImpl);
 
 export default Board;

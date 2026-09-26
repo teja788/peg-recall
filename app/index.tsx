@@ -1,6 +1,6 @@
 import { Avatar } from '@art';
 import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,16 +15,46 @@ import {
 import { useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
 import { BoardGlyph, BoardMini } from '../src/ui/BoardMini';
-import { IconButton, ModeCard, OptionPill } from '../src/ui/controls';
-import { PEG_PAINT } from '../src/theme/tokens';
-import { BOARD_SPECS, type Difficulty, type PegColor } from '../src/engine/types';
+import { IconButton, ModeCard, OptionPill, QuestionGlyph } from '../src/ui/controls';
+import { joinNames, playerLabel } from '../src/ui/names';
+import { PlayersSheet } from '../src/ui/PlayersSheet';
+import { BOARD_SPECS, type AvatarId, type Difficulty, type PegColor } from '../src/engine/types';
 
-/** Seven pegs each, so every card shows the board in a different mood. */
+/**
+ * Seven pegs each (index 0 is the centre, 1-6 the ring around it), so every
+ * card shows the board in a different mood. No card mixes the pairs players
+ * mix up (blue/violet, red/green, violet/purple), and red never stands next to
+ * purple.
+ */
 const PREVIEWS: Record<'ai' | '2p' | '3p', (PegColor | null)[]> = {
-  ai: ['sky', null, 'blue', null, 'sky', null, 'orange'],
-  '2p': ['green', 'orange', null, 'green', null, 'purple', null],
-  '3p': ['orange', 'purple', 'yellow', null, 'sky', 'green', null],
+  ai: ['yellow', null, 'violet', null, 'violet', null, 'red'],
+  '2p': ['green', 'blue', null, 'green', null, 'purple', null],
+  '3p': ['yellow', 'blue', 'red', null, 'purple', 'blue', null],
 };
+
+/**
+ * Card subtitles. Once someone has typed a name they read as the matchup
+ * ("Maya vs Fox", "Maya and Leo"); until then, as what the mode is. Seats with
+ * no name fall back to their animal, as they do in the game.
+ */
+function modeSubtitles(
+  names: readonly string[] | undefined,
+  avatars: readonly AvatarId[],
+  difficulty: Difficulty,
+): Record<GameMode, string> {
+  const named = (seat: number) => !!names?.[seat];
+  const label = (seat: number) =>
+    playerLabel({ name: names?.[seat] || undefined, avatar: avatars[seat] });
+  // joinNames fences off right-to-left names so " vs" / "and" stay put
+  const list = (seats: number[]) => joinNames(seats.map(label));
+  return {
+    ai: named(0)
+      ? `${list([0])} vs ${DIFFICULTY_LABEL[difficulty]}`
+      : `Opponent: ${DIFFICULTY_LABEL[difficulty]}`,
+    '2p': named(0) || named(1) ? list([0, 1]) : 'Pass and play on one device',
+    '3p': named(0) || named(1) || named(2) ? list([0, 1, 2]) : 'Take turns around the table',
+  };
+}
 
 /** Easiest first, so the row reads left-to-right as "gets harder". */
 const OPPONENTS: Difficulty[] = ['bunny', 'fox', 'owl'];
@@ -46,14 +76,22 @@ export default function Home() {
   const difficulty = useSettings((s) => s.difficulty);
   const toggle = useSettings((s) => s.toggle);
   const setSetting = useSettings((s) => s.set);
+  const names = useSettings((s) => s.names);
+  const avatars = useSettings((s) => s.avatars);
+  const subtitles = modeSubtitles(names, avatars, difficulty);
 
   // A second tap lands before the push has rendered, and the stack ends up two
   // game screens deep — Back then drops you onto another game instead of Home.
   // The latch is cleared when Home is focused again, i.e. once we are back.
   const navigating = useRef(false);
+  /** The mode whose "Who's playing?" sheet is up, if any. */
+  const [setup, setSetup] = useState<GameMode | null>(null);
   useFocusEffect(
     useCallback(() => {
       navigating.current = false;
+      // the sheet stays up while Home fades out under the game, and is gone
+      // by the time anyone comes back
+      return () => setSetup(null);
     }, []),
   );
 
@@ -66,13 +104,17 @@ export default function Home() {
     [router],
   );
 
+  /** A mode card: ask who's playing first (one more tap, on Play). */
+  const choose = useCallback((mode: GameMode) => {
+    if (navigating.current) return;
+    setSetup(mode);
+  }, []);
+
   const play = useCallback(
     (mode: GameMode) => {
-      if (navigating.current) return;
-      setSetting('lastMode', mode);
       go({ pathname: '/game', params: { mode } });
     },
-    [go, setSetting],
+    [go],
   );
 
   const cardStyle = compact ? { minHeight: 84 } : undefined;
@@ -94,6 +136,12 @@ export default function Home() {
           paddingHorizontal: t.spacing.lg,
         }}
       >
+        <IconButton
+          icon={<QuestionGlyph size={26} color={t.c.text} />}
+          label="How to play"
+          onPress={() => go('/how-to-play')}
+          tone="filled"
+        />
         <IconButton
           glyph={soundOn ? '🔊' : '🔇'}
           label={soundOn ? 'Sound on. Turn sound off' : 'Sound off. Turn sound on'}
@@ -135,36 +183,30 @@ export default function Home() {
           </Text>
           {compact ? null : (
             <Text style={{ ...t.type.body, color: t.c.onBackdropMuted, marginTop: t.spacing.xs }}>
-              Roll a colour. Remember where it was.
+              Roll a color. Remember where it was.
             </Text>
           )}
         </View>
 
         <ModeCard
           title="Play vs Computer"
-          subtitle={`Opponent: ${DIFFICULTY_LABEL[difficulty]}`}
-          glyph="🤖"
-          accent={PEG_PAINT.sky.fill}
+          subtitle={subtitles.ai}
           art={<BoardMini width={cardArt} colors={PREVIEWS.ai} theme={t.scheme} />}
-          onPress={() => play('ai')}
+          onPress={() => choose('ai')}
           style={cardStyle}
         />
         <ModeCard
           title="2 Players"
-          subtitle="Pass and play on one device"
-          glyph="✌️"
-          accent={PEG_PAINT.green.fill}
+          subtitle={subtitles['2p']}
           art={<BoardMini width={cardArt} colors={PREVIEWS['2p']} theme={t.scheme} />}
-          onPress={() => play('2p')}
+          onPress={() => choose('2p')}
           style={cardStyle}
         />
         <ModeCard
           title="3 Players"
-          subtitle="Take turns around the table"
-          glyph="🎉"
-          accent={PEG_PAINT.orange.fill}
+          subtitle={subtitles['3p']}
           art={<BoardMini width={cardArt} colors={PREVIEWS['3p']} theme={t.scheme} />}
-          onPress={() => play('3p')}
+          onPress={() => choose('3p')}
           style={cardStyle}
         />
 
@@ -213,6 +255,15 @@ export default function Home() {
           </View>
         </View>
       </ScrollView>
+
+      {setup ? (
+        <PlayersSheet
+          key={setup}
+          mode={setup}
+          onPlay={() => play(setup)}
+          onClose={() => setSetup(null)}
+        />
+      ) : null}
     </Backdrop>
   );
 }

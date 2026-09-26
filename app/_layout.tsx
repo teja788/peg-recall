@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useSettings } from '../src/store/settings';
+import { useStats } from '../src/store/stats';
 import { DARK, LIGHT, ThemeProvider } from '../src/theme';
 
 export default function RootLayout() {
@@ -14,6 +15,8 @@ export default function RootLayout() {
 
   useEffect(() => {
     void hydrate();
+    // per-name win stats: read once at launch, alongside the settings
+    void useStats.getState().hydrate();
   }, [hydrate]);
 
   // the colour behind the screens during a transition — matching the table
@@ -37,6 +40,7 @@ export default function RootLayout() {
             <Stack.Screen name="index" />
             <Stack.Screen name="game" />
             <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="how-to-play" options={{ presentation: 'modal' }} />
           </Stack>
         </ThemeProvider>
       </SafeAreaProvider>

@@ -63,19 +63,6 @@ function activeSeats(state: GameState): number[] {
   return state.config.players.map((_, i) => i);
 }
 
-/** Orthogonal neighbours of a peg index on a cols x rows grid. */
-export function adjacentIndices(index: number, spec: BoardSpec): number[] {
-  const { cols, rows } = spec;
-  const row = Math.floor(index / cols);
-  const col = index % cols;
-  const out: number[] = [];
-  if (row > 0) out.push(index - cols);
-  if (row < rows - 1) out.push(index + cols);
-  if (col > 0) out.push(index - 1);
-  if (col < cols - 1) out.push(index + 1);
-  return out;
-}
-
 /** Colour multiset for a board: as even as possible, remainder picked by rng. */
 function buildColorBag(
   rng: RngState,

@@ -48,11 +48,13 @@ export {
  * a 40-peg board for 14 distinct gradients, and defeated every chance of
  * sharing the built scene.
  *
- * Keying the ids by content instead is safe on both renderers: react-native-svg
+ * Keying the ids by content instead is safe on native: react-native-svg
  * resolves `url(#…)` against the brushes defined inside the *same* `<Svg>` root
- * (SvgView.mDefinedBrushes), so two dolls never see each other's defs; and on
- * web, duplicate ids that name byte-identical gradients resolve to the same
- * paint either way.
+ * (SvgView.mDefinedBrushes), so two dolls never see each other's defs. A
+ * browser does not — it takes the first element with that id in the whole
+ * document, which may sit in a hidden screen and then paints nothing — so on
+ * web `SvgScene` suffixes each surface's ids at render time (scene3d.tsx). The
+ * shared, cached scene is untouched either way.
  */
 const gradKey = (color: PegColor | null, faceUp: boolean, theme: ArtTheme) =>
   `${color && faceUp ? color : 'wood'}${theme === 'dark' ? 'D' : 'L'}`;

@@ -5,6 +5,7 @@ import { createGame, type GameState, type Peg } from '../../engine';
 import { timing } from '../../theme/tokens';
 import { DEFAULT_SETTINGS, type Settings } from '../settingsModel';
 import { configFor, setGameScheduler, tumbleMs, useGame, type GameScheduler } from '../game';
+import { useStats } from '../stats';
 
 /* ------------------------------------------------------------- fake clock */
 
@@ -103,7 +104,7 @@ test('sudden death builds brand-new brains, stamped with the current turn', () =
     state,
     // a brain full of memories of the board that just ended, including a peg
     // index the 9-peg mini board does not even have
-    ais: { p2: { difficulty: 'owl', memory: { 0: { color: 'orange', lastSeenTurn: 1 }, 20: { color: 'blue', lastSeenTurn: 3 } }, knownWrong: { 5: 'green' } } },
+    ais: { p2: { difficulty: 'owl', memory: { 0: { color: 'red', lastSeenTurn: 1 }, 20: { color: 'blue', lastSeenTurn: 3 } }, knownWrong: { 5: 'green' } } },
     busy: false,
     paused: false,
     feedback: null,
@@ -309,4 +310,73 @@ test('teardown and start leave no timer behind', () => {
   clock.advance(60_000);
   assert.equal(useGame.getState().state, null);
   assert.equal(useGame.getState().busy, false);
+});
+
+/* ------------------------------------------------------------- v1.1 names */
+
+test('typed names go on human seats only; the computer keeps its animal', () => {
+  const named = settings({ names: ['Maya', 'Leo', 'Sam'] });
+  const vsAi = configFor('ai', named, 1).players;
+  assert.equal(vsAi[0].name, 'Maya');
+  assert.equal(vsAi[1].kind, 'ai');
+  assert.equal(vsAi[1].name, undefined, 'the AI never takes seat 2’s name');
+  assert.equal('name' in vsAi[1], false);
+
+  const three = configFor('3p', named, 1).players;
+  assert.deepEqual(three.map((p) => p.name), ['Maya', 'Leo', 'Sam']);
+
+  const two = configFor('2p', settings({ names: ['', 'Leo', 'Sam'] }), 1).players;
+  assert.equal(two.length, 2);
+  assert.equal('name' in two[0], false, 'blank = no name, so the tray shows the animal');
+  assert.equal(two[1].name, 'Leo');
+});
+
+/* ------------------------------------------------------------- v1.1 stats */
+
+/** A decided board sitting in `result`: one RESULT_DONE from game over. */
+function decidedBoard(seed: number): GameState {
+  const state = tiedFinishedBoard(seed, 25);
+  return { ...state, scores: { p1: 13, p2: 12 } };
+}
+
+test('a finished game is recorded in the stats exactly once', () => {
+  const before = useStats.getState().gamesFinished;
+  const owlBefore = useStats.getState().vsAi.owl.played;
+  useGame.setState({ state: decidedBoard(808), ais: {}, busy: false, paused: false, feedback: null });
+
+  useGame.getState().dispatch({ type: 'RESULT_DONE' });
+  assert.equal(useGame.getState().state!.phase, 'gameOver');
+  assert.equal(useStats.getState().gamesFinished, before + 1);
+  assert.equal(useStats.getState().vsAi.owl.played, owlBefore + 1);
+
+  // a double-dispatch, and a stray re-set of the same finished state, count nothing
+  useGame.getState().dispatch({ type: 'RESULT_DONE' });
+  const over = useGame.getState().state!;
+  useGame.setState({ state: { ...over, phase: 'result' } });
+  useGame.getState().dispatch({ type: 'RESULT_DONE' });
+  assert.equal(useStats.getState().gamesFinished, before + 1, 'same board, still one game');
+
+  // a rematch is a new game: starting it records nothing, finishing it does
+  useGame.getState().rematch();
+  assert.equal(useStats.getState().gamesFinished, before + 1);
+  useGame.setState({ state: decidedBoard(809), ais: {}, busy: false, paused: false, feedback: null });
+  useGame.getState().dispatch({ type: 'RESULT_DONE' });
+  assert.equal(useStats.getState().gamesFinished, before + 2);
+});
+
+test('a tie going to sudden death is not recorded until sudden death ends', () => {
+  const before = useStats.getState().gamesFinished;
+  useGame.setState({ state: tiedFinishedBoard(4243, 25), ais: {}, busy: false, paused: false, feedback: null });
+  useGame.getState().dispatch({ type: 'RESULT_DONE' });
+  assert.equal(useGame.getState().state!.suddenDeath, true);
+  assert.equal(useStats.getState().gamesFinished, before, 'the tie itself is not a result');
+
+  // settle the mini board by hand: the next capture ends it
+  let s = useGame.getState().state!;
+  s = { ...s, phase: 'result', lastMove: { playerId: 'p1', pegIndex: 0, dieColor: s.pegs[0].color, matched: true } };
+  useGame.setState({ state: s, busy: false });
+  useGame.getState().dispatch({ type: 'RESULT_DONE' });
+  assert.equal(useGame.getState().state!.phase, 'gameOver');
+  assert.deepEqual(useGame.getState().state!.winnerIds, ['p1']);
+  assert.equal(useStats.getState().gamesFinished, before + 1);
 });

@@ -79,7 +79,6 @@ dimensions by `state.spec` — always read the grid from `state.spec`, not from
 | `isHumanTurn(state)` | active seat is a human |
 | `activePlayerSpec(state)` | the active `PlayerSpec` |
 | `revealDurationMs(state)` | reveal countdown, kid mode x1.5 |
-| `adjacentIndices(i, spec)` | orthogonal neighbours on the row-major grid |
 | `boardNeighbours(i, pegCount)` | neighbours on the round board **as drawn** |
 
 ## AI (`ai.ts`)
@@ -122,8 +121,7 @@ whatever the table size. The per-tier numbers themselves are unchanged.
 The board is rendered as concentric rings (`src/layout/roundLayout.ts`), not as
 the `cols x rows` grid in `BoardSpec`. A slip therefore lands on a ring
 neighbour (`boardNeighbours`), which is the peg a player would actually have
-fumbled onto. `adjacentIndices` still describes the abstract grid and is kept
-for callers that want it.
+fumbled onto.
 
 Measured over 200 seeded games each on the classic board (bonus turn on):
 Owl beats Bunny 100%, Fox beats Bunny 90.5%, Owl beats Fox 94%.

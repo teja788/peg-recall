@@ -6,7 +6,7 @@
  *
  * Drawn as real paths, never text: font glyph metrics differ across iOS
  * versions and would drift off-centre. The mapping is fixed by PLAN.md
- * section 4 —  orange ●  sky ▲  blue ■  green ★  yellow ♥  purple ◆.
+ * section 4 (slots kept in v1.1) —  red ●  violet ▲  blue ■  green ★  yellow ♥  purple ◆.
  */
 import type { PegColor } from '../../engine/types';
 
@@ -15,9 +15,9 @@ export const SHAPE_VIEWBOX = 24;
 
 export const SHAPE_PATHS: Record<PegColor, string> = {
   // ● circle
-  orange: 'M12 3.6a8.4 8.4 0 1 0 0 16.8a8.4 8.4 0 1 0 0-16.8Z',
+  red: 'M12 3.6a8.4 8.4 0 1 0 0 16.8a8.4 8.4 0 1 0 0-16.8Z',
   // ▲ triangle
-  sky: 'M12 4.6 L20.2 18.5 L3.8 18.5 Z',
+  violet: 'M12 4.6 L20.2 18.5 L3.8 18.5 Z',
   // ■ rounded square
   blue: 'M7 4.6 H17 A2.4 2.4 0 0 1 19.4 7 V17 A2.4 2.4 0 0 1 17 19.4 H7 A2.4 2.4 0 0 1 4.6 17 V7 A2.4 2.4 0 0 1 7 4.6 Z',
   // ★ five-point star

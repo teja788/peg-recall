@@ -12,6 +12,8 @@ import Svg, { Circle } from 'react-native-svg';
 import { useTheme } from '../theme';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+/** Dynamic Type cap for the countdown digit (see the render below). */
+const DIGIT_MAX_SCALE = 1.2;
 
 export interface RevealCountdownProps {
   durationMs: number;
@@ -137,7 +139,20 @@ export function RevealCountdown({
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
       </Svg>
-      <Text style={{ ...t.type.heading, color: t.c.text }}>{secondsLeft}</Text>
+      {/* The digit lives inside a fixed ring, so Dynamic Type may nudge it but
+          not outgrow it: 1.2x of a size-scaled heading still clears the
+          stroke. Decorative for VoiceOver — the view's label says it. */}
+      <Text
+        maxFontSizeMultiplier={DIGIT_MAX_SCALE}
+        style={{
+          ...t.type.heading,
+          fontSize: Math.round(t.type.heading.fontSize * (size / 64)),
+          lineHeight: Math.round(t.type.heading.lineHeight * (size / 64)),
+          color: t.c.text,
+        }}
+      >
+        {secondsLeft}
+      </Text>
     </View>
   );
 }

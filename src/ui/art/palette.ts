@@ -3,24 +3,42 @@
  *
  * Self-contained on purpose: src/ui/art/** must be usable by any screen without
  * reaching into the wider theme, and the engine layer must stay free of colour.
- * Values mirror PLAN.md section 4 (Okabe-Ito, colour-blind safe).
+ *
+ * v1.1 palette: the owner's proposal — red replaces orange, violet replaces sky
+ * blue, in the same slots; blue, green, yellow and purple are the untouched
+ * Okabe-Ito fills. Red and violet were tuned (assets/source/palette/, entry
+ * "V11 FINAL" in optimized.json, `node evaluate.mjs`) so that every pair stays
+ * apart across the whole shaded cap, for normal vision and for simulated
+ * protan / deutan / tritan vision. Worst pair, CIEDE2000, same stop vs same
+ * stop of the cap gradient (v1.0 Okabe-Ito in brackets):
+ *
+ *   normal 25.4 violet/blue  (13.6 sky/blue)
+ *   protan  9.5 blue/purple  ( 9.5 blue/purple)
+ *   deutan  9.0 violet/blue  ( 8.1 orange/yellow)
+ *   tritan  7.6 blue/green   ( 7.6 blue/green)
+ *
+ * The protan and tritan floors are pairs of kept colours, so no red or violet
+ * could lift them.
  */
 import type { PegColor } from '../../engine/types';
 
 /** Peg fill per colour. */
 export const PEG_HEX: Record<PegColor, string> = {
-  orange: '#E69F00',
-  sky: '#56B4E9',
+  red: '#CE1202',
+  violet: '#6201DA',
   blue: '#0072B2',
   green: '#009E73',
   yellow: '#F0E442',
   purple: '#CC79A7',
 };
 
-/** Rim/edge colour. Yellow needs a darker rim to stay visible on cream. */
+/**
+ * Rim/edge colour, roughly `shade(fill, -0.2)` (red and violet are exactly
+ * that). Yellow needs a darker rim to stay visible on cream.
+ */
 export const PEG_RIM: Record<PegColor, string> = {
-  orange: '#B87E00',
-  sky: '#3F92C0',
+  red: '#A50E02',
+  violet: '#4E01AE',
   blue: '#005688',
   green: '#00795A',
   yellow: '#B8A800',
@@ -31,31 +49,31 @@ export const PEG_RIM: Record<PegColor, string> = {
  * Glyph colour to draw on top of a peg of this colour.
  *
  * The glyph is the colour-blind cue (PLAN.md section 4), so it has to be
- * legible on every cap, not merely present. Only `blue` is dark enough for
- * white ink; every other Okabe-Ito fill is a mid or light tone, and white on it
- * fails badly (orange 2.25:1, sky 2.31:1, purple 3.06:1, green 3.42:1) — worse
- * still because the cap is drawn with a radial gradient running 30% lighter at
- * its centre, which is exactly where the glyph sits.
+ * legible on every cap, not merely present — and the cap is drawn with a radial
+ * gradient running 30% lighter at its centre, which is exactly where the glyph
+ * sits. Red, violet and blue are dark enough for white ink on all of it. The
+ * three light caps would fail with white (purple 3.06:1, green 3.42:1, yellow
+ * worse), so they take a dark ink of their own hue — `shade(PEG_RIM[c], -0.7)`
+ * for green/purple, `-0.5` for yellow — written out as literals here so the
+ * palette stays one flat table. (A dark same-hue ink would not work on red or
+ * violet: it drops to 2-3:1 on their fill.)
  *
- * So the five light caps take a dark ink of their own hue — `shade(PEG_RIM[c],
- * -0.6)` for orange/sky, `-0.7` for green/purple, `-0.5` for yellow — written
- * out as literals here so the palette stays one flat table. WCAG contrast of
- * ink against the flat fill, and against the darkest and lightest stop of the
- * cap gradient (`shade(fill, -0.22)` / `shade(fill, +0.3)`):
+ * WCAG contrast of ink against the flat fill, and against the darkest and
+ * lightest stop of the cap gradient (`shade(fill, -0.22)` / `shade(fill, +0.3)`):
  *
- *   orange #4A3200 on #E69F00   5.34 : 1   (3.32 dark stop, 7.15 lit stop)
- *   sky    #193A4D on #56B4E9   5.19 : 1   (3.23 dark stop, 6.94 lit stop)
- *   blue   #FFFFFF on #0072B2   5.19 : 1   (7.50 dark stop, 3.04 lit stop)
- *   green  #00241B on #009E73   4.84 : 1   (3.14 dark stop, 6.73 lit stop)
- *   yellow #5C5400 on #F0E442   5.83 : 1   (3.50 dark stop, 6.31 lit stop)
- *   purple #321C28 on #CC79A7   5.15 : 1   (3.30 dark stop, 6.82 lit stop)
+ *   red    #FFFFFF on #CE1202   5.66 : 1   ( 8.14 dark stop, 3.74 lit stop)
+ *   violet #FFFFFF on #6201DA   8.28 : 1   (11.10 dark stop, 4.78 lit stop)
+ *   blue   #FFFFFF on #0072B2   5.19 : 1   ( 7.50 dark stop, 3.04 lit stop)
+ *   green  #00241B on #009E73   4.84 : 1   ( 3.14 dark stop, 7.03 lit stop)
+ *   yellow #5C5400 on #F0E442   5.83 : 1   ( 3.50 dark stop, 6.30 lit stop)
+ *   purple #321C28 on #CC79A7   5.15 : 1   ( 3.30 dark stop, 7.42 lit stop)
  *
  * Every one clears 3:1 (WCAG 2.1 SC 1.4.11, non-text contrast) on all three.
  * src/ui/art/__tests__/nodeBudget.test.ts recomputes these from the palette.
  */
 export const PEG_GLYPH_ON: Record<PegColor, string> = {
-  orange: '#4A3200',
-  sky: '#193A4D',
+  red: '#FFFFFF',
+  violet: '#FFFFFF',
   blue: '#FFFFFF',
   green: '#00241B',
   yellow: '#5C5400',

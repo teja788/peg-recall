@@ -1,0 +1,138 @@
+{
+ "L1 literal (red, violet for sky; keep blue/green/yellow/purple)": {
+  "red": "#D62828",
+  "violet": "#8E6AC8",
+  "blue": "#0072B2",
+  "green": "#009E73",
+  "yellow": "#F0E442",
+  "purple": "#CC79A7"
+ },
+ "L2 literal w/ Okabe vermillion as red": {
+  "red": "#D55E00",
+  "violet": "#8E6AC8",
+  "blue": "#0072B2",
+  "green": "#009E73",
+  "yellow": "#F0E442",
+  "purple": "#CC79A7"
+ },
+ "L3 literal + purple->light pink": {
+  "red": "#D62828",
+  "violet": "#8E6AC8",
+  "blue": "#0072B2",
+  "green": "#009E73",
+  "yellow": "#F0E442",
+  "pink": "#F5AACB"
+ },
+ "L4 literal + purple->magenta": {
+  "red": "#D62828",
+  "violet": "#8E6AC8",
+  "blue": "#0072B2",
+  "green": "#009E73",
+  "yellow": "#F0E442",
+  "magenta": "#D6339E"
+ },
+ "O7 optimizer, blue kept (seed 7)": {
+  "red": "#B3250B",
+  "yellow": "#F5E82E",
+  "green": "#0CC37B",
+  "blue": "#1973CD",
+  "violet": "#5E0090",
+  "pink": "#F09ED0"
+ },
+ "K1 tuned (blue kept)": {
+  "red": "#C62A1E",
+  "yellow": "#F7E52C",
+  "green": "#1FB872",
+  "blue": "#1A70C4",
+  "violet": "#5E1C9C",
+  "pink": "#F2A4CF"
+ },
+ "K2 tuned (blue kept, Okabe blue exact)": {
+  "red": "#C62A1E",
+  "yellow": "#F7E52C",
+  "green": "#1FB872",
+  "blue": "#0072B2",
+  "violet": "#5E1C9C",
+  "pink": "#F2A4CF"
+ },
+ "K3 tuned (lighter violet)": {
+  "red": "#C62A1E",
+  "yellow": "#F7E52C",
+  "green": "#1FB872",
+  "blue": "#1A70C4",
+  "violet": "#6A2AB0",
+  "pink": "#F2A4CF"
+ },
+ "G5 (free blue, azure)": {
+  "red": "#CC2219",
+  "yellow": "#FAE72C",
+  "green": "#35875A",
+  "blue": "#1AA3F7",
+  "violet": "#6A24B8",
+  "pink": "#F5AACB"
+ },
+ "K4 tuned (deep violet)": {
+  "red": "#C8231A",
+  "yellow": "#F6E72E",
+  "green": "#12BE78",
+  "blue": "#1A72C8",
+  "violet": "#5A0A96",
+  "pink": "#F0A0CF"
+ },
+ "K5 tuned (deep violet, Okabe blue)": {
+  "red": "#C8231A",
+  "yellow": "#F6E72E",
+  "green": "#12BE78",
+  "blue": "#0072B2",
+  "violet": "#5A0A96",
+  "pink": "#F0A0CF"
+ },
+ "K6 tuned (deep violet, brighter blue)": {
+  "red": "#C8231A",
+  "yellow": "#F6E72E",
+  "green": "#12BE78",
+  "blue": "#1C7AD6",
+  "violet": "#5A0A96",
+  "pink": "#F0A0CF"
+ },
+ "K7 (K4, violet a touch lighter)": {
+  "red": "#C8231A",
+  "yellow": "#F6E72E",
+  "green": "#12BE78",
+  "blue": "#1A72C8",
+  "violet": "#6012A0",
+  "pink": "#F0A0CF"
+ },
+ "R RECOMMENDED": {
+  "red": "#C8231A",
+  "yellow": "#F6E72E",
+  "green": "#12BE78",
+  "blue": "#046FC7",
+  "violet": "#5A0A96",
+  "pink": "#F0A0CF"
+ },
+ "V11 FINAL (shipped in v1.1): literal tuned, pure red + electric violet": {
+  "red": "#CE1202",
+  "violet": "#6201DA",
+  "blue": "#0072B2",
+  "green": "#009E73",
+  "yellow": "#F0E442",
+  "purple": "#CC79A7"
+ },
+ "V11b literal tuned: tomato red + electric violet": {
+  "red": "#BF2203",
+  "violet": "#6201DA",
+  "blue": "#0072B2",
+  "green": "#009E73",
+  "yellow": "#F0E442",
+  "purple": "#CC79A7"
+ },
+ "V11c literal tuned: red + deep violet": {
+  "red": "#C81E10",
+  "violet": "#5C07CC",
+  "blue": "#0072B2",
+  "green": "#009E73",
+  "yellow": "#F0E442",
+  "purple": "#CC79A7"
+ }
+}

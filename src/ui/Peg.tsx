@@ -18,7 +18,6 @@ import Animated, {
   Easing,
   runOnJS,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withDelay,
   withSequence,
@@ -28,6 +27,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import type { PegColor } from '../engine/types';
+import { useReduceMotion } from './feedback';
 
 /** Fraction of the peg's height it sinks into the hole before the reveal. */
 const SUNK = 0.34;
@@ -73,8 +73,11 @@ interface DollProps {
  * from 81 surfaces / 1,602 react-native-svg elements to 41 / 762; the counts
  * are asserted in src/ui/art/__tests__/nodeBudget.test.ts.
  *
- * The coloured layer keeps its animated wrapper in both cases, so the fade can
- * start on the UI thread in the same frame React mounts the wood back in.
+ * The tree is the same two-slot fragment in every state — [wood | null,
+ * colour | null] — so React only ever mounts or unmounts the one layer that
+ * changed. (It used to return a bare wood doll at rest, a different root type
+ * from the fragment, so every flip-down threw away and rebuilt the peg's whole
+ * subtree: ~80 SVG dolls at once on a 40-peg board as the reveal ended.)
  */
 function Faces({
   width,
@@ -86,13 +89,16 @@ function Faces({
   fading,
 }: DollProps & { colour: SharedValue<number>; faceUp: boolean; fading: boolean }) {
   const colourStyle = useAnimatedStyle(() => ({ opacity: colour.value }));
-  if (!fading && !faceUp) return <PegDoll width={width} color={null} faceUp={false} theme={theme} />;
+  const wood = fading || !faceUp;
+  const coloured = fading || faceUp;
   return (
     <>
-      {fading ? <PegDoll width={width} color={null} faceUp={false} theme={theme} /> : null}
-      <Animated.View style={[StyleSheet.absoluteFill, colourStyle]}>
-        <PegDoll width={width} color={color} faceUp showShape={showShapes} theme={theme} />
-      </Animated.View>
+      {wood ? <PegDoll width={width} color={null} faceUp={false} theme={theme} /> : null}
+      {coloured ? (
+        <Animated.View style={[StyleSheet.absoluteFill, colourStyle]}>
+          <PegDoll width={width} color={color} faceUp showShape={showShapes} theme={theme} />
+        </Animated.View>
+      ) : null}
     </>
   );
 }
@@ -123,13 +129,22 @@ function PegImpl({
   fallDelay,
   ghost,
 }: PegProps) {
-  const reduced = useReducedMotion();
+  const reduced = useReduceMotion();
   const up = useSharedValue(rising && !reduced ? 0 : 1);
   const colour = useSharedValue(faceUp ? 1 : 0);
   const bob = useSharedValue(0);
   const vis = useSharedValue(ghost ? 0 : 1);
   /** true only while the cap is mid cross-fade — see `Faces`. */
   const [fading, setFading] = useState(false);
+  // A flip starts fading in the very render that sees `faceUp` change ("adjust
+  // state while rendering"), not in an effect afterwards: setting it from the
+  // effect committed one frame with the flag still false, which unmounted the
+  // layer about to fade and mounted it straight back.
+  const [shownFaceUp, setShownFaceUp] = useState(faceUp);
+  if (shownFaceUp !== faceUp) {
+    setShownFaceUp(faceUp);
+    setFading(true);
+  }
 
   // rise out of the hole when the reveal starts
   useEffect(() => {
@@ -146,9 +161,15 @@ function PegImpl({
   const fallRef = useRef(fallDelay);
   fallRef.current = fallDelay;
 
+  // Reduce Motion is live, but flipping it must not replay a flip: the effect
+  // below reads it through a ref and runs on `faceUp` alone.
+  const reducedRef = useRef(reduced);
+  reducedRef.current = reduced;
+
   // cap colour on / off, with a little press-down bob on the way down
   const mounted = useRef(false);
   useEffect(() => {
+    const reduced = reducedRef.current;
     const down = !faceUp;
     const delay = down ? fallRef.current : 0;
     if (!mounted.current) {
@@ -158,7 +179,6 @@ function PegImpl({
       mounted.current = true;
       colour.value = faceUp ? 1 : 0;
     } else {
-      setFading(true);
       colour.value = withDelay(
         delay,
         withTiming(
@@ -181,7 +201,7 @@ function PegImpl({
         ),
       );
     }
-  }, [faceUp, reduced, colour, bob]);
+  }, [faceUp, colour, bob]);
 
   useEffect(() => {
     vis.value = ghost ? 0 : withTiming(1, { duration: 120 });
@@ -220,7 +240,7 @@ export const Peg = memo(PegImpl);
 export interface MovingPegProps extends DollProps {
   /** true: lift, hold, then fly to the tray. false: lift, hold, settle back. */
   matched: boolean;
-  /** board-local vector from this peg's resting place to the tray centre */
+  /** board-local vector from this peg's box centre to the tray centre */
   flyTo: { x: number; y: number } | null;
   /** changes per move so the timeline always restarts */
   nonce: number;
@@ -242,7 +262,7 @@ function MovingPegImpl({
   flyTo,
   nonce,
 }: MovingPegProps) {
-  const reduced = useReducedMotion();
+  const reduced = useReduceMotion();
   const lift = useSharedValue(0);
   const colour = useSharedValue(0);
   const fly = useSharedValue(0);
@@ -301,13 +321,18 @@ function MovingPegImpl({
     const s = (1 + (LIFT_SCALE - 1) * lift.value) * (1 - 0.5 * f);
     // a slight arc: out of the board first, then down into the tray
     const arc = -Math.sin(Math.PI * f) * boxH * 0.45;
+    // The lift (and the scale-about-the-base correction) hand over to the
+    // flight as it goes, so the peg's centre lands on the tray's centre —
+    // otherwise it stopped a lift-height above it, which on an iPad-sized
+    // peg is above the tray altogether.
+    const held = 1 - f;
     return {
       opacity: f > 0.82 ? (1 - f) / 0.18 : 1,
       transform: [
         { translateX: fx * f },
         {
           translateY:
-            -lift.value * LIFT * boxH + (s - 1) * BASE_OFFSET * width + fy * f + arc,
+            (-lift.value * LIFT * boxH + (s - 1) * BASE_OFFSET * width) * held + fy * f + arc,
         },
         { scale: s },
       ],

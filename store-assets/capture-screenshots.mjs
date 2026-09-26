@@ -110,20 +110,20 @@ async function tap(page, label) {
   return ok;
 }
 
-const PEG_RE = /^Ring (\d+), peg (\d+), (.+)$/;
+const PEG_RE = /^(Peg \d+, ring \d+), (.+)$/;
 const TRAY_RE = /^([A-Za-z]+)(, computer)?, (\d+) pegs?(, their turn)?$/;
 const BANNERS = new Set(['Look and remember!', 'Sudden death — look and remember!', 'Match!', 'Not that one', 'Board clear!']);
 
 /** Everything the driver needs, read back out of the accessibility labels. */
 function readState(ls) {
-  const pegs = new Map(); // "Ring 3, peg 2" -> "hidden" | "taken" | colour
+  const pegs = new Map(); // "Peg 7, ring 2" -> "hidden" | "taken" | colour
   const trays = [];
   let banner = null;
   let die = null;
   for (const l of ls) {
     const p = PEG_RE.exec(l);
     if (p) {
-      pegs.set(`Ring ${p[1]}, peg ${p[2]}`, p[3]);
+      pegs.set(p[1], p[2]);
       continue;
     }
     const t = TRAY_RE.exec(l);
@@ -335,7 +335,7 @@ async function captureDevice(key) {
       });
       if (s.over) break;
       // "avoid yellow, it photographs weakly" - screenshots-plan.md
-      if (s.target === 'Blue' || s.target === 'Orange') {
+      if (s.target === 'Blue' || s.target === 'Red') {
         await sleep(BANNER_SETTLE); // let "Find …" finish sliding in
         await shoot(page, dir, '03-roll');
         shot3 = true;
@@ -353,7 +353,7 @@ async function captureDevice(key) {
         await until(page, (x) => x.humanRoll || x.over, { timeout: 60000 }).catch(() => {});
       }
     }
-    if (!shot3) console.log('   ! never rolled blue or orange - 03-roll not written');
+    if (!shot3) console.log('   ! never rolled blue or red - 03-roll not written');
 
     /* --- 4. shapes on, a match landing --------------------------------- */
     console.log(' 4 match with shapes');

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,7 +13,7 @@ import {
 import { useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
 import { Chip, IconButton, ToggleRow } from '../src/ui/controls';
-import { PlayerTray } from '../src/ui/PlayerTray';
+import { PillButton, RateRow, StatsCard } from '../src/ui/StatsCard';
 import type { Difficulty } from '../src/engine/types';
 
 const DIFFICULTIES: Difficulty[] = ['bunny', 'fox', 'owl'];
@@ -24,17 +24,15 @@ export default function SettingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   // per-slice selectors: subscribing to the whole store re-renders this screen
-  // (and every PlayerTray in it) on any unrelated settings write
+  // on any unrelated settings write
   const soundOn = useSettings((s) => s.soundOn);
   const showShapes = useSettings((s) => s.showShapes);
   const bonusTurnOnMatch = useSettings((s) => s.bonusTurnOnMatch);
   const kidMode = useSettings((s) => s.kidMode);
   const boardSize = useSettings((s) => s.boardSize);
   const difficulty = useSettings((s) => s.difficulty);
-  const avatars = useSettings((s) => s.avatars);
   const toggle = useSettings((s) => s.toggle);
   const setSetting = useSettings((s) => s.set);
-  const cycleAvatar = useSettings((s) => s.cycleAvatar);
 
   return (
     <Backdrop>
@@ -76,7 +74,7 @@ export default function SettingsScreen() {
         />
         <ToggleRow
           title="Shapes on pegs"
-          subtitle="A shape as well as a colour, for colour-blind play"
+          subtitle="Color-blind help: every color gets its own shape"
           value={showShapes}
           onToggle={() => toggle('showShapes')}
         />
@@ -126,40 +124,86 @@ export default function SettingsScreen() {
           {DIFFICULTY_HINT[difficulty]}
         </Text>
 
-        <Text style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}>
-          Players
-        </Text>
-        <Text style={{ ...t.type.caption, color: t.c.onBackdropMuted, marginTop: -t.spacing.xs }}>
-          Tap an animal to change it. The computer always wears its own face.
-        </Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.sm }}>
-          {avatars.map((avatar, seat) => (
-            <PlayerTray
-              key={seat}
-              spec={{ id: `seat${seat}`, kind: 'human', avatar }}
-              caption={`P${seat + 1}`}
-              active={false}
-              size={40}
-              onPress={() => cycleAvatar(seat)}
-            />
-          ))}
-        </View>
-
-        <Text style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}>Stats</Text>
-        <View
-          style={{
-            padding: t.spacing.lg,
-            borderRadius: t.radii.md,
-            backgroundColor: t.c.card,
-            borderWidth: 1,
-            borderColor: t.c.line,
-          }}
+        <Text
+          accessibilityRole="header"
+          style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}
         >
-          <Text style={{ ...t.type.body, color: t.c.textDim }}>
-            Wins, streaks and best times land here in a later build.
-          </Text>
-        </View>
+          Stats
+        </Text>
+        <StatsCard />
+        <ForgetNamesRow />
+        <RateRow />
       </ScrollView>
     </Backdrop>
+  );
+}
+
+/**
+ * Names now live on the "Who's playing?" sheet; all Settings keeps is the way
+ * to wipe them (every seat back to its animal, no recent-name chips). Confirmed
+ * inline, like Reset stats: no system dialog.
+ */
+function ForgetNamesRow() {
+  const t = useTheme();
+  const names = useSettings((s) => s.names);
+  const recentNames = useSettings((s) => s.recentNames);
+  const forgetNames = useSettings((s) => s.forgetNames);
+  const [confirming, setConfirming] = useState(false);
+  const saved = new Set(
+    [...names, ...recentNames].filter(Boolean).map((n) => n.toLowerCase()),
+  ).size;
+
+  return (
+    <View
+      accessibilityLiveRegion="polite"
+      style={{
+        minHeight: 56,
+        paddingVertical: t.spacing.md,
+        paddingHorizontal: t.spacing.lg,
+        borderRadius: t.radii.md,
+        backgroundColor: t.c.card,
+        borderWidth: 1,
+        borderColor: t.c.line,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: t.spacing.sm,
+      }}
+    >
+      {confirming ? (
+        <>
+          <Text style={{ ...t.type.body, color: t.c.text, flexGrow: 1 }}>Forget all names?</Text>
+          <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>
+            <PillButton text="Cancel" label="Cancel, keep names" onPress={() => setConfirming(false)} />
+            <PillButton
+              text="Forget"
+              label="Forget all player names"
+              filled
+              onPress={() => {
+                forgetNames();
+                setConfirming(false);
+              }}
+            />
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={{ flex: 1, minWidth: 160 }}>
+            <Text style={{ ...t.type.body, color: t.c.text }}>Player names</Text>
+            <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: 2 }}>
+              {saved === 0
+                ? 'None saved. Everyone plays as their animal.'
+                : `${saved} ${saved === 1 ? 'name' : 'names'} saved on this device`}
+            </Text>
+          </View>
+          {saved > 0 ? (
+            <PillButton
+              text="Forget player names"
+              onPress={() => setConfirming(true)}
+            />
+          ) : null}
+        </>
+      )}
+    </View>
   );
 }

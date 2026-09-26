@@ -22,7 +22,8 @@ import type {
   RngState,
 } from '../engine/types';
 import { timing } from '../theme/tokens';
-import { AVATAR_CYCLE, type GameMode, type Settings } from './settingsModel';
+import { AVATAR_CYCLE, humanAvatarVsAi, type GameMode, type Settings } from './settingsModel';
+import { useStats } from './stats';
 
 /* ---------------------------------------------------------------- timers */
 
@@ -119,28 +120,32 @@ function resumeTimers() {
 
 /* ------------------------------------------------------------ player setup */
 
+/** A seat's typed name, if any. Only ever given to HUMAN seats: the computer is
+ *  always called by its animal (Bunny, Fox, Owl). */
+function nameFor(s: Settings, seat: number): string | undefined {
+  const n = s.names?.[seat];
+  return typeof n === 'string' && n.trim() ? n.trim() : undefined;
+}
+
 function seatsFor(mode: GameMode, s: Settings): PlayerSpec[] {
   const avatars = s.avatars;
   if (mode === 'ai') {
     // the computer wears the face of its difficulty: Bunny, Fox or Owl
     const aiAvatar: AvatarId = s.difficulty;
-    let human = avatars[0];
-    if (human === aiAvatar) {
-      // prefer an animal that is not also a difficulty name, so the two trays
-      // never read as "Fox vs Fox" or "Owl (you) vs Fox"
-      human = (['bear', 'frog', 'cat'] as AvatarId[]).find((a) => a !== aiAvatar) ?? 'bear';
-    }
-    return [
-      { id: 'p1', kind: 'human', avatar: human },
-      { id: 'p2', kind: 'ai', avatar: aiAvatar, difficulty: s.difficulty as Difficulty },
-    ];
+    // never "Fox vs Fox": the same rule the "Who's playing?" sheet shows
+    const human = humanAvatarVsAi(avatars[0], aiAvatar);
+    const you: PlayerSpec = { id: 'p1', kind: 'human', avatar: human };
+    const name = nameFor(s, 0);
+    if (name) you.name = name;
+    return [you, { id: 'p2', kind: 'ai', avatar: aiAvatar, difficulty: s.difficulty as Difficulty }];
   }
   const count = mode === '3p' ? 3 : 2;
-  return Array.from({ length: count }, (_, i) => ({
-    id: `p${i + 1}`,
-    kind: 'human' as const,
-    avatar: avatars[i] ?? AVATAR_CYCLE[i],
-  }));
+  return Array.from({ length: count }, (_, i) => {
+    const seat: PlayerSpec = { id: `p${i + 1}`, kind: 'human', avatar: avatars[i] ?? AVATAR_CYCLE[i] };
+    const name = nameFor(s, i);
+    if (name) seat.name = name;
+    return seat;
+  });
 }
 
 export function configFor(mode: GameMode, s: Settings, seed = Date.now()): GameConfig {
@@ -197,6 +202,25 @@ interface GameStore {
 
 let rng: RngState = { seed: aiSeedFor(Date.now()), counter: 0 };
 let nonce = 0;
+/** The `generation` whose finished game has already gone into the stats. */
+let recordedGeneration = -1;
+
+/**
+ * Count a finished game in the stats — once. Only the reducer's step INTO
+ * gameOver gets here; a sudden-death tie-break is not a game over (the engine
+ * goes straight from the tied board to the mini board's reveal), so only its
+ * final result is recorded. Rematch, restart and start all bump `generation`,
+ * so each board can be recorded at most once however it is re-dispatched.
+ */
+function recordFinished(state: GameState) {
+  if (recordedGeneration === generation) return;
+  recordedGeneration = generation;
+  try {
+    useStats.getState().recordGame(state);
+  } catch {
+    /* stats must never break the end of a game */
+  }
+}
 
 export const useGame = create<GameStore>((setState, getState) => {
   /** Decide what the machine should do next, once nothing is animating. */
@@ -313,6 +337,10 @@ export const useGame = create<GameStore>((setState, getState) => {
       if (action.type === 'ROLL') {
         busyFor(tumbleMs(next.dieRerolls ?? 0));
         return;
+      }
+
+      if (next.phase === 'gameOver' && prev.phase !== 'gameOver') {
+        recordFinished(next);
       }
 
       // a sudden-death mini-board is a new board: new pegs, new brains

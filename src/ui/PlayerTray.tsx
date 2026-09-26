@@ -1,14 +1,18 @@
 import { Avatar, AVATAR_NAMES, TRAY_PEG_ASPECT, TrayPeg } from '@art';
-import { MotiView } from 'moti';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 import type { PegColor, PlayerSpec } from '../engine/types';
 import { useTheme } from '../theme';
-
-/** Display names live with the art, so a new avatar only lands in one place. */
-export const AVATAR_NAME = AVATAR_NAMES;
+import { spacing } from '../theme/tokens';
+import { useReduceMotion } from './feedback';
+import { playerLabel } from './names';
 
 /**
  * The tray text scales with Dynamic Type, but only so far: three trays share
@@ -18,8 +22,21 @@ export const AVATAR_NAME = AVATAR_NAMES;
  */
 const MAX_TEXT_SCALE = 1.4;
 
-export function playerName(spec: PlayerSpec): string {
-  return spec.name ?? AVATAR_NAME[spec.avatar] ?? 'Player';
+/** Card border, each side. */
+const BORDER = 2;
+/** Dense (three-across) spacing: card side padding, avatar-to-text gap. */
+const DENSE_PAD = 6;
+const DENSE_GAP = 4;
+
+/**
+ * Width of everything in a tray except its text column: border, side padding,
+ * avatar and the gap after it. The game screen subtracts this from each
+ * tray's share of the row to size `nameMaxWidth`, so three trays stay on one
+ * line on a 375-pt phone. Must mirror the layout in `PlayerTrayImpl`.
+ */
+export function trayChromeWidth(size: number, scale = 1, dense = false): number {
+  const px = (n: number) => Math.round(n * scale);
+  return 2 * BORDER + 2 * px(dense ? DENSE_PAD : spacing.md) + size + px(dense ? DENSE_GAP : spacing.sm);
 }
 
 export interface PlayerTrayProps {
@@ -40,6 +57,45 @@ export interface PlayerTrayProps {
   scale?: number;
   /** reports the tray centre in window coordinates, for the capture flight */
   onAnchor?: (id: string, point: { x: number; y: number }) => void;
+  /**
+   * Changes whenever the tray may have moved in the window without its own
+   * layout changing (a rotation, a Split View resize, the trays moving to a
+   * side column): the anchor is measured again.
+   */
+  measureKey?: string;
+  /**
+   * Widest the name may draw, in points, before it ellipsizes (≈64 pt with
+   * three trays across a phone, ≈100 with two — less on a 375-pt phone; see
+   * `trayChromeWidth`). Unset: as wide as the name.
+   */
+  nameMaxWidth?: number;
+  /** tighter padding and no "+n", for three trays sharing a phone-width row */
+  dense?: boolean;
+}
+
+/** The drop-in a captured peg makes as it lands in the tray. */
+const DROP_SPRING = { damping: 13, stiffness: 180 } as const;
+
+/**
+ * One captured peg, dropping in from just above with a small spring on mount.
+ *
+ * Driven by a shared value rather than a Reanimated `entering` preset: the
+ * motion is a custom three-way (fade, drop, grow) spring, and layout
+ * animations do not fire reliably on every target (see GameOverSheet). This
+ * replaced the one `moti` view in the app.
+ */
+function DropIn({ offset, reduced, children }: { offset: number; reduced: boolean; children: ReactNode }) {
+  const v = useSharedValue(reduced ? 1 : 0);
+  useEffect(() => {
+    if (!reduced) v.value = withSpring(1, DROP_SPRING);
+    // mount-only: a peg lands once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const style = useAnimatedStyle(() => ({
+    opacity: Math.min(1, v.value),
+    transform: [{ translateY: -6 * (1 - v.value) }, { scale: 0.7 + 0.3 * v.value }],
+  }));
+  return <Animated.View style={[{ marginRight: offset }, style]}>{children}</Animated.View>;
 }
 
 /** The row of captured pegs standing in a player's tray. */
@@ -49,13 +105,17 @@ function CapturedRow({
   width,
   theme,
   ink,
+  showExtra,
 }: {
   colors: PegColor[];
   max: number;
   width: number;
   theme: 'light' | 'dark';
   ink: string;
+  /** the "+n" overflow count; dense trays drop it (the score says it) */
+  showExtra: boolean;
 }) {
+  const reduced = useReduceMotion();
   const shown = colors.slice(-max);
   const extra = colors.length - shown.length;
   return (
@@ -64,17 +124,11 @@ function CapturedRow({
           the window: keying by slot makes every peg in the row a "new" peg on
           each capture, so the whole row replays the drop-in animation */}
       {shown.map((c, i) => (
-        <MotiView
-          key={colors.length - shown.length + i}
-          from={{ opacity: 0, translateY: -6, scale: 0.7 }}
-          animate={{ opacity: 1, translateY: 0, scale: 1 }}
-          transition={{ type: 'spring', damping: 13, stiffness: 180 }}
-          style={{ marginRight: -width * 0.18 }}
-        >
+        <DropIn key={colors.length - shown.length + i} offset={-width * 0.18} reduced={reduced}>
           <TrayPeg width={width} color={c} theme={theme} />
-        </MotiView>
+        </DropIn>
       ))}
-      {extra > 0 ? (
+      {showExtra && extra > 0 ? (
         <Text
           maxFontSizeMultiplier={MAX_TEXT_SCALE}
           style={{
@@ -92,7 +146,7 @@ function CapturedRow({
   );
 }
 
-export function PlayerTray({
+function PlayerTrayImpl({
   spec,
   score = 0,
   caption,
@@ -103,8 +157,15 @@ export function PlayerTray({
   size = 44,
   scale = 1,
   onAnchor,
+  measureKey,
+  nameMaxWidth,
+  dense = false,
 }: PlayerTrayProps) {
   const t = useTheme();
+  const name = playerLabel(spec);
+  const animal = AVATAR_NAMES[spec.avatar] ?? spec.avatar;
+  /** a typed name hides the animal, so VoiceOver says it as well */
+  const customName = name !== animal;
   const px = (n: number) => Math.round(n * scale);
   const captionType = {
     ...t.type.caption,
@@ -137,6 +198,14 @@ export function PlayerTray({
     );
   }, [onAnchor, spec.id]);
 
+  // onLayout only fires when this view's own frame changes; a parent moving
+  // it (the column shifting on a resize) needs a fresh measure too
+  useEffect(() => {
+    if (measureKey == null) return;
+    const id = requestAnimationFrame(onLayout);
+    return () => cancelAnimationFrame(id);
+  }, [measureKey, onLayout]);
+
   const body = (
     <Animated.View
       style={[
@@ -145,34 +214,51 @@ export function PlayerTray({
           backgroundColor: t.c.card,
           borderRadius: px(t.radii.md),
           paddingVertical: px(t.spacing.sm),
-          paddingHorizontal: px(t.spacing.md),
+          paddingHorizontal: px(dense ? DENSE_PAD : t.spacing.md),
           shadowColor: t.c.accent,
         },
         animated,
       ]}
     >
       <Avatar id={spec.avatar} size={size} />
-      <View style={{ marginLeft: px(t.spacing.sm) }}>
-        <Text
-          numberOfLines={1}
-          maxFontSizeMultiplier={MAX_TEXT_SCALE}
-          style={{ ...captionType, color: active ? t.c.accent : t.c.textDim }}
-        >
-          {playerName(spec)}
-          {spec.kind === 'ai' ? ' 🤖' : ''}
-        </Text>
+      {/* minWidth 0 lets this column (and the name in it) shrink below its
+          content width, so a long name ellipsizes instead of pushing the
+          tray row onto a second line */}
+      <View style={{ marginLeft: px(dense ? DENSE_GAP : t.spacing.sm), flexShrink: 1, minWidth: 0 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', minWidth: 0 }}>
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            maxFontSizeMultiplier={MAX_TEXT_SCALE}
+            style={{
+              ...captionType,
+              color: active ? t.c.accent : t.c.textDim,
+              flexShrink: 1,
+              minWidth: 0,
+              maxWidth: nameMaxWidth,
+            }}
+          >
+            {name}
+          </Text>
+          {spec.kind === 'ai' ? (
+            <Text maxFontSizeMultiplier={MAX_TEXT_SCALE} style={captionType}>
+              {' 🤖'}
+            </Text>
+          ) : null}
+        </View>
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexShrink: 1 }}>
           <Text maxFontSizeMultiplier={MAX_TEXT_SCALE} style={{ ...heading, color: t.c.text }}>
             {caption ?? score}
           </Text>
           {captured && captured.length > 0 ? (
-            <View style={{ marginLeft: px(t.spacing.sm) }}>
+            <View style={{ marginLeft: px(dense ? DENSE_GAP : t.spacing.sm) }}>
               <CapturedRow
                 colors={captured}
                 max={maxPegs}
                 width={pegWidth}
                 theme={t.scheme}
                 ink={t.c.textDim}
+                showExtra={!dense}
               />
             </View>
           ) : null}
@@ -181,9 +267,12 @@ export function PlayerTray({
     </Animated.View>
   );
 
+  // "Maya, fox, 3 pegs, their turn" — the animal only when a typed name hides
+  // it, so the default reads "Fox, computer, 3 pegs" as before
+  const who = customName ? `${name}, ${animal.toLowerCase()}` : name;
   const label = caption
-    ? `${caption}, ${playerName(spec)}`
-    : `${playerName(spec)}${spec.kind === 'ai' ? ', computer' : ''}, ${score} ${
+    ? `${caption}, ${who}`
+    : `${who}${spec.kind === 'ai' ? ', computer' : ''}, ${score} ${
         score === 1 ? 'peg' : 'pegs'
       }${active ? ', their turn' : ''}`;
 
@@ -194,7 +283,7 @@ export function PlayerTray({
         onLayout={onLayout}
         accessible
         accessibilityLabel={label}
-        style={{ flexShrink: 1 }}
+        style={{ flexShrink: 1, minWidth: 0 }}
       >
         {body}
       </View>
@@ -220,10 +309,19 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 2,
+    flexShrink: 1,
+    minWidth: 0,
+    borderWidth: BORDER,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 0 },
   },
 });
+
+/**
+ * Memoised: the screen passes a stable spec, a stable per-player `captured`
+ * array and a stable `onAnchor`, so a move re-renders only the trays whose
+ * score, pegs or turn actually changed.
+ */
+export const PlayerTray = memo(PlayerTrayImpl);
 
 export default PlayerTray;

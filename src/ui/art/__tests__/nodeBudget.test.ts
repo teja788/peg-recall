@@ -60,9 +60,9 @@ test('a doll box is as tall as PEG_DOLL_ASPECT says', () => {
 
 test('the die stays inside its 15-prim budget', () => {
   assert.equal(woodDieScene(96, null).prims.length, 9, 'un-rolled: block + the "?" cut');
-  assert.equal(woodDieScene(96, 'orange').prims.length, 14, 'rolled, no glyph');
-  assert.equal(woodDieScene(96, 'orange', true).prims.length, 15, 'rolled, with the glyph');
-  assert.equal(woodDieScene(96, 'orange', true).grads.length, 4);
+  assert.equal(woodDieScene(96, 'red').prims.length, 14, 'rolled, no glyph');
+  assert.equal(woodDieScene(96, 'red', true).prims.length, 15, 'rolled, with the glyph');
+  assert.equal(woodDieScene(96, 'red', true).grads.length, 4);
 });
 
 test('WOOD_DIE_ASPECT is the box woodDieScene actually returns (B12)', () => {
@@ -80,7 +80,7 @@ test('WOOD_DIE_ASPECT is the box woodDieScene actually returns (B12)', () => {
 });
 
 test('the die top glyph is scaled uniformly, so a circle stays round (D4)', () => {
-  for (const color of [null, 'orange'] as const) {
+  for (const color of [null, 'red'] as const) {
     const s = woodDieScene(96, color, true);
     // Only the lettering: the side pips are circles/ellipses and *are* sheared
     // onto their faces on purpose, which is fine — a dot has no orientation.
@@ -210,10 +210,13 @@ test('every peg glyph clears 3:1 on its own cap (D1)', () => {
   }
 });
 
-test('the four caps the audit flagged now carry dark ink, not white', () => {
-  for (const color of ['orange', 'sky', 'green', 'purple', 'yellow'] as const) {
+test('light caps carry dark ink; the dark caps keep white (D1)', () => {
+  for (const color of ['green', 'purple', 'yellow'] as const) {
     assert.notEqual(PEG_GLYPH_ON[color], '#FFFFFF', `${color} must not use white ink`);
   }
-  // Blue is the one Okabe-Ito fill dark enough for white (5.19:1).
-  assert.equal(PEG_GLYPH_ON.blue, '#FFFFFF');
+  // Red (5.66:1), violet (8.28:1) and blue (5.19:1) are dark enough for white;
+  // a dark same-hue ink would fall to 2-3:1 on them.
+  for (const color of ['red', 'violet', 'blue'] as const) {
+    assert.equal(PEG_GLYPH_ON[color], '#FFFFFF', `${color} keeps white ink`);
+  }
 });

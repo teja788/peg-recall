@@ -173,7 +173,7 @@ Rules
 
 Product
 6. Difficulty names: **Bunny / Fox / Owl**.
-7. Monetization: **free for v1**. Ads + paid unlock come later. Consequence: do NOT opt into Kids Category (it forbids third-party ad SDKs); ship 4+ rating. Plan an ad-free "unlock" IAP behind a parental gate when ads arrive.
+7. Monetization: **free, and no ads ever** (revised 2026-09-26, see PLAN-v1.1.md D4). Any future revenue = a one-time unlock IAP behind a parental gate. Kids Category still not opted into (irreversible; revisit later).
 8. Kids Category: **no**. 4+ rating only.
 9. **iPhone + iPad together in v1.**
 10. App name: **Color Catch**, subtitle "Memory Chess". (Renamed from "Peg Recall" 2026-09-19; bundle id, slug and the github.io/peg-recall privacy URL deliberately keep the old identifier - the ASC app record 6813625311 is welded to `com.raviteja.pegrecall`.)

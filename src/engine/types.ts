@@ -5,8 +5,8 @@
  * exported from src/engine/index.ts.
  */
 
-export type PegColor = 'orange' | 'sky' | 'blue' | 'green' | 'yellow' | 'purple';
-export const PEG_COLORS: readonly PegColor[] = ['orange', 'sky', 'blue', 'green', 'yellow', 'purple'];
+export type PegColor = 'red' | 'violet' | 'blue' | 'green' | 'yellow' | 'purple';
+export const PEG_COLORS: readonly PegColor[] = ['red', 'violet', 'blue', 'green', 'yellow', 'purple'];
 
 export type BoardSize = 'small' | 'classic' | 'big' | 'huge';
 export interface BoardSpec {

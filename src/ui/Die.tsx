@@ -3,8 +3,13 @@
  *
  * Drawn in the same 3/4 view as the board, so the die reads as a cube sitting
  * on the same table. A roll is 600 ms of wobble with the colours flicking past
- * every 70 ms (plus 300 ms for each dead colour the engine had to reroll past),
- * then it lands on the rolled colour with a short bounce.
+ * every 70 ms (plus 300 ms for each dead colour the engine had to reroll past,
+ * capped at three — `tumbleMs` in the store owns that number, so the die always
+ * lands before the store hands the turn on), then it lands on the rolled colour
+ * with a short bounce.
+ *
+ * Reduce Motion: no wobble and no colour flicker — the die goes blank for the
+ * length of the roll and then shows the colour.
  */
 import { WOOD_DIE_ASPECT, WoodDie, type ArtTheme } from '@art';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -12,7 +17,6 @@ import { Pressable } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withRepeat,
   withSequence,
@@ -20,7 +24,9 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { PEG_COLORS, type PegColor } from '../engine/types';
+import { tumbleMs } from '../store/game';
 import { PEG_PAINT, useTheme } from '../theme';
+import { useReduceMotion } from './feedback';
 
 /**
  * Height of the die art as a multiple of its width.
@@ -36,8 +42,6 @@ const DIE_ASPECT = WOOD_DIE_ASPECT;
 const WOBBLE_DEG = 25;
 /** Colour flicker interval while tumbling. */
 const FLICKER = 70;
-/** Extra tumble per dead colour the engine rolled past. */
-const REROLL_MS = 300;
 /** Apple's minimum is 44; the die is the one control everybody taps. */
 const TAP_MIN = 64;
 
@@ -67,7 +71,7 @@ export function Die({
 }: DieProps) {
   const t = useTheme();
   const theme: ArtTheme = t.scheme;
-  const reduced = useReducedMotion();
+  const reduced = useReduceMotion();
   const pool = colors && colors.length > 0 ? colors : [...PEG_COLORS];
   const [face, setFace] = useState<PegColor | null>(dieColor);
   const [tumbling, setTumbling] = useState(false);
@@ -103,20 +107,24 @@ export function Die({
       return;
     }
 
-    const total = t.timing.dieTumble + REROLL_MS * Math.max(0, rerolls);
+    // the same number the store waits for before it moves the game on
+    const total = tumbleMs(rerolls);
     setTumbling(true);
     onTumbleSound?.();
     stop();
 
-    // colours flick past, only ones still reachable on the board
-    let i = 0;
-    flicker.current = setInterval(() => {
-      i += 1;
-      const p = poolRef.current;
-      setFace(p[i % p.length]);
-    }, FLICKER);
+    if (reduced) {
+      // a 14 Hz colour flicker is exactly what Reduce Motion asks us not to do
+      setFace(null);
+    } else {
+      // colours flick past, only ones still reachable on the board
+      let i = 0;
+      flicker.current = setInterval(() => {
+        i += 1;
+        const p = poolRef.current;
+        setFace(p[i % p.length]);
+      }, FLICKER);
 
-    if (!reduced) {
       const seg = 150;
       const reps = Math.max(1, Math.round((total - 120) / (seg * 2)));
       wobble.value = withSequence(

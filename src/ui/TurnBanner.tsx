@@ -3,13 +3,20 @@ import { Text } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
 
 import { useTheme } from '../theme';
+import { useReduceMotion } from './feedback';
+
+/**
+ * Dynamic Type cap for the banner. It is one line in a pill between the trays
+ * and the disc; past ~1.3x a name-bearing line ("Grandma's turn") no longer
+ * fits and gets cut. The line shrinks to fit before it truncates, too.
+ */
+const MAX_TEXT_SCALE = 1.3;
 
 /** One line of text that slides in whenever it changes. */
 export function TurnBanner({
@@ -23,7 +30,7 @@ export function TurnBanner({
   scale?: number;
 }) {
   const t = useTheme();
-  const reduced = useReducedMotion();
+  const reduced = useReduceMotion();
   const [shown, setShown] = useState(text);
   const slide = useSharedValue(0);
   const fade = useSharedValue(1);
@@ -87,12 +94,17 @@ export function TurnBanner({
         },
         animated,
       ]}
+      // Android reads this out by itself; iOS has no live regions, so the
+      // game screen speaks the same moments through useAnnouncement
       accessibilityLiveRegion="polite"
       accessible
       accessibilityLabel={shown}
     >
       <Text
         numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.8}
+        maxFontSizeMultiplier={MAX_TEXT_SCALE}
         style={{
           ...t.type.heading,
           fontSize: Math.round(t.type.heading.fontSize * scale),

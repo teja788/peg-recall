@@ -8,7 +8,7 @@
  *
  * The mark is the game object itself: a ROUND wooden board (PLAN.md section 2)
  * with seven pegs — one centre plus a hex ring of six — three of them face-up
- * in orange / blue / green. Geometry and wood tones mirror
+ * in red / blue / green. Geometry and wood tones mirror
  * src/ui/art/perspectiveModel.ts + src/ui/art/palette.ts; peg positions are the same
  * hex lattice src/layout/roundLayout.ts produces for 7 pegs.
  *
@@ -36,7 +36,7 @@ const C = {
   pegBody: '#DEBA82',
   pegBodyDark: '#A07A4C',
   shadow: '#3A2612',
-  orange: '#E69F00', orangeRim: '#B87E00', orangeDark: '#79520D',
+  red: '#CE1202', redRim: '#A50E02', redDark: '#6B0901',
   blue: '#0072B2', blueRim: '#005688', blueDark: '#00385A',
   green: '#009E73', greenRim: '#00795A', greenDark: '#004F3B',
 };
@@ -73,7 +73,7 @@ const HOLES = [{ x: 0, y: 0 }].concat(
   }),
 );
 // index into HOLES -> face-up colour. 0 = centre.
-const FACE_UP = { 0: 'blue', 1: 'orange', 3: 'green' };
+const FACE_UP = { 0: 'blue', 1: 'red', 3: 'green' };
 
 const n = (v) => Math.round(v * 100) / 100;
 

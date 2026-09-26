@@ -200,3 +200,55 @@ test('Owl beats Fox (tiers are ordered)', () => {
   console.log(`  Owl vs Fox:   owl ${tally.owl}, fox ${tally.fox}, ties ${tally.tie} -> ${(rate * 100).toFixed(1)}%`);
   assert.ok(rate > 0.55, `owl win rate vs fox ${(rate * 100).toFixed(1)}%`);
 });
+
+test('A5: a forgotten peg is not fenced off by its old knownWrong note', () => {
+  const state = reduce(createGame(makeConfig({ seed: 21, players: [owl, bunny] })), {
+    type: 'REVEAL_DONE',
+  });
+  const rolled = { ...reduce(state, { type: 'ROLL' }), turn: 2000 };
+  const die = rolled.dieColor!;
+  const target = rolled.pegs.find((p) => p.color === die)!;
+  const other = rolled.pegs.find((p) => p.color !== die)!.color;
+
+  // The Owl once saw `target` (true colour = die), and on an earlier roll of a
+  // different colour filed it under knownWrong with that true colour. Every
+  // other peg it believes is NOT the die colour (fresh memories / notes).
+  let ai = createAi('owl');
+  for (const peg of rolled.pegs) {
+    if (peg.index === target.index) continue;
+    if (peg.color === die) ai = { ...ai, knownWrong: { ...ai.knownWrong, [peg.index]: other } };
+    else ai = observe(ai, { turn: 2000, pegIndex: peg.index, color: peg.color });
+  }
+  ai = {
+    ...ai,
+    memory: { ...ai.memory, [target.index]: { color: die, lastSeenTurn: 0 } },
+    knownWrong: { ...ai.knownWrong, [target.index]: die },
+  };
+
+  for (let i = 0; i < 30; i++) {
+    // 1000 rounds old: p = 0.92 * 0.975^1000, the recall always fails
+    const res = chooseMove(ai, rolled, createRng(i + 1));
+    assert.equal(target.index in res.ai.memory, false, 'the failed recall forgets the entry');
+    assert.equal(target.index in res.ai.knownWrong, false, 'A5: ...and its knownWrong note');
+    // The forgotten peg is the only one the Owl has no (not-die) belief about,
+    // so as an "unseen" peg it is exactly where the Owl should look.
+    assert.equal(res.pegIndex, target.index, `seed ${i + 1}: owl skipped the forgotten peg`);
+  }
+});
+
+test('A5: a knownWrong note in the rolled colour counts as unseen', () => {
+  const state = reduce(createGame(makeConfig({ seed: 33, players: [owl, bunny] })), {
+    type: 'REVEAL_DONE',
+  });
+  const rolled = reduce(state, { type: 'ROLL' });
+  const die = rolled.dieColor!;
+  const target = rolled.pegs.find((p) => p.color === die)!;
+  const other = rolled.pegs.find((p) => p.color !== die)!.color;
+  // no memory at all; every peg noted as not-die except `target`, noted AS die
+  const knownWrong: Record<number, typeof die> = {};
+  for (const peg of rolled.pegs) knownWrong[peg.index] = peg.index === target.index ? die : other;
+  const ai = { ...createAi('owl'), knownWrong };
+  for (let i = 0; i < 20; i++) {
+    assert.equal(chooseMove(ai, rolled, createRng(i + 7)).pegIndex, target.index);
+  }
+});

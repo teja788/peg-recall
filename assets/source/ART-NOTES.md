@@ -60,8 +60,11 @@ colour dice).
 | Die right face | `#BC9159` | `#80592D` |
 | Die bevel / edge | `#9A7448` | `#5C3F20` |
 
-Pips are the untouched Okabe-Ito peg colours (`PEG_HEX`) with `PEG_RIM` darkened
-12 % as their rim — fully saturated, no tinting.
+Pips are the untouched peg colours (`PEG_HEX` — v1.1: red, violet, blue, green,
+yellow, purple) with `PEG_RIM` darkened 12 % as their rim — fully saturated, no
+tinting. The v1.1 red and violet were tuned for separation on the shaded cap;
+see `assets/source/palette/` (`node evaluate.mjs`, entry "V11 FINAL") and
+`palette/final-v1.1.png`.
 
 `src/ui/art/palette.ts` is the source of truth; `assets/source/build-svg.js`
 keeps a hand-copy of the light set for the app icon.

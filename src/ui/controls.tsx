@@ -7,7 +7,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Rect } from 'react-native-svg';
+import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 import { useTheme } from '../theme';
 
@@ -18,6 +18,25 @@ export function PauseGlyph({ size, color }: { size: number; color: string }) {
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Rect x={7.4} y={4.5} width={3.6} height={15} rx={1.6} fill={color} />
       <Rect x={13} y={4.5} width={3.6} height={15} rx={1.6} fill={color} />
+    </Svg>
+  );
+}
+
+/** A question mark for "How to play". Drawn, not typed, for the same reason as
+ *  the pause bars: ❓ is a red emoji on iOS and a plain "?" is too thin to sit
+ *  next to the speaker and gear. */
+export function QuestionGlyph({ size, color }: { size: number; color: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path
+        d="M8.2 8.6 C8.2 6.2 10 4.6 12.2 4.6 C14.5 4.6 16.2 6.1 16.2 8.2 C16.2 10 15 10.9 13.8 11.7 C12.8 12.4 12.2 13.1 12.2 14.4 V15"
+        fill="none"
+        stroke={color}
+        strokeWidth={2.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Circle cx={12.2} cy={19.1} r={1.8} fill={color} />
     </Svg>
   );
 }
@@ -213,22 +232,18 @@ export function OptionPill({
   );
 }
 
-/** Big tappable card — the three modes on Home. One tap starts the game. */
+/** Big tappable card — the three modes on Home. A tap opens "Who's playing?". */
 export function ModeCard({
   title,
   subtitle,
-  glyph,
-  accent,
   art,
   onPress,
   style,
 }: {
   title: string;
   subtitle: string;
-  glyph: string;
-  accent: string;
-  /** a little board thumbnail, drawn instead of the coloured glyph disc */
-  art?: React.ReactNode;
+  /** a little board thumbnail on the left */
+  art: React.ReactNode;
   onPress: () => void;
   style?: ViewStyle;
 }) {
@@ -251,24 +266,7 @@ export function ModeCard({
         style,
       ]}
     >
-      {art ? (
-        <View style={{ width: 72, alignItems: 'center', justifyContent: 'center' }}>{art}</View>
-      ) : (
-        <View
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            backgroundColor: accent,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Text allowFontScaling={false} style={{ fontSize: 28 }}>
-            {glyph}
-          </Text>
-        </View>
-      )}
+      <View style={{ width: 72, alignItems: 'center', justifyContent: 'center' }}>{art}</View>
       <View style={{ flex: 1, marginLeft: t.spacing.lg }}>
         <Text style={{ ...t.type.heading, color: t.c.text }}>{title}</Text>
         <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: 2 }}>{subtitle}</Text>

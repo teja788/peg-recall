@@ -6,7 +6,6 @@ import {
   PEG_COLORS,
   SUDDEN_DEATH_SPEC,
   activePlayerSpec,
-  adjacentIndices,
   availableColors,
   createGame,
   hiddenPegsByColor,
@@ -377,7 +376,7 @@ test('sudden death only rotates the tied players', () => {
   assert.deepEqual(order, ['p1', 'p2', 'p1', 'p2'], 'p3 is skipped');
 });
 
-test('helpers: hiddenPegsByColor, availableColors, isHumanTurn, adjacentIndices', () => {
+test('helpers: hiddenPegsByColor, availableColors, isHumanTurn', () => {
   let s = startedGame(17);
   const counts = hiddenPegsByColor(s);
   assert.equal(Object.values(counts).reduce((a, b) => a + b, 0), 25);
@@ -400,11 +399,6 @@ test('helpers: hiddenPegsByColor, availableColors, isHumanTurn, adjacentIndices'
   a = reduce(a, { type: 'RESULT_DONE' });
   assert.equal(isHumanTurn(a), false);
   assert.equal(activePlayerSpec(a).difficulty, 'owl');
-
-  // 5x5: corner 0 -> {1, 5}; centre 12 -> {7, 17, 11, 13}
-  assert.deepEqual(adjacentIndices(0, s.spec).sort((x, y) => x - y), [1, 5]);
-  assert.deepEqual(adjacentIndices(12, s.spec).sort((x, y) => x - y), [7, 11, 13, 17]);
-  assert.deepEqual(adjacentIndices(24, s.spec).sort((x, y) => x - y), [19, 23]);
 
   // capturing removes a color from the die pool
   s = reduce(s, { type: 'ROLL' });

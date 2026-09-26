@@ -7,7 +7,8 @@
  * state, all the geometry lives in the model, which the browser preview
  * (assets/source/build-peg-preview.ts) renders with the same numbers.
  */
-import React from 'react';
+import React, { useId, useMemo } from 'react';
+import { Platform } from 'react-native';
 import Svg, {
   Circle,
   Defs,
@@ -64,7 +65,44 @@ export interface SvgSceneProps {
   height?: number;
 }
 
-export function SvgScene({ scene, width, height }: SvgSceneProps) {
+/** `url(#id)` references inside a fill or stroke. */
+const URL_REF = /url\(#([^)]+)\)/g;
+
+/**
+ * The scene with every gradient id (and every `url(#…)` pointing at one)
+ * suffixed with `uid`.
+ *
+ * Web only. A browser resolves `url(#id)` against the FIRST element with that
+ * id in the whole document, not the one in the same `<svg>`. The peg dolls
+ * name their gradients by content (`pdbredL`, see pegDoll.tsx) so every doll
+ * can share one built scene — and Home's BoardMini thumbnails, which stay
+ * mounted but `display: none` under a pushed screen, own the first copies.
+ * Chrome and Safari do not paint a gradient defined inside a hidden subtree,
+ * so the game board's pegs drew as bare outlines. react-native-svg resolves
+ * ids within the same `<Svg>` root, so native keeps the shared ids as they are.
+ */
+function scopeIds(scene: Scene, uid: string): Scene {
+  const ref = (v: string | undefined) => (v ? v.replace(URL_REF, (_m, id) => `url(#${id}_${uid})`) : v);
+  return {
+    ...scene,
+    grads: scene.grads.map((g) => ({ ...g, id: `${g.id}_${uid}` })),
+    prims: scene.prims.map((p) =>
+      p.fill?.startsWith('url(') || p.stroke?.startsWith('url(')
+        ? { ...p, fill: ref(p.fill), stroke: ref(p.stroke) }
+        : p,
+    ),
+  };
+}
+
+const WEB = Platform.OS === 'web';
+
+export function SvgScene({ scene: authored, width, height }: SvgSceneProps) {
+  // useId() is called on every platform (hook order); only web uses it
+  const uid = useId().replace(/[^A-Za-z0-9_-]/g, '');
+  const scene = useMemo(
+    () => (WEB && authored.grads.length > 0 ? scopeIds(authored, uid) : authored),
+    [authored, uid],
+  );
   return (
     <Svg
       width={width ?? scene.w}

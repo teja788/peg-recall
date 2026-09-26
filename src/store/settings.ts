@@ -1,18 +1,11 @@
-import { create } from 'zustand';
-
-import {
-  AVATAR_CYCLE,
-  DEFAULT_SETTINGS,
-  SETTINGS_KEY,
-  persistable,
-  sanitize,
-  type Settings,
-} from './settingsModel';
+import { createSettingsStore } from './settingsStore';
+import { bindStatsStorage, useStats } from './stats';
 import { storage } from './storage';
 
 // The data and the pure helpers live in settingsModel.ts (which imports no
 // native module); re-exported here so every screen keeps one import path.
 export {
+  ANIMAL_NAME,
   AVATAR_CYCLE,
   BOARD_CYCLE,
   BOARD_LABEL,
@@ -21,73 +14,26 @@ export {
   DIFFICULTY_HINT,
   DIFFICULTY_LABEL,
   DIFFICULTY_TIER,
+  NAME_INPUT_MAX,
+  NAME_MAX,
+  RECENT_MAX,
+  cleanName,
+  humanAvatarVsAi,
+  isAnimalName,
+  nameToStore,
   sanitize,
 } from './settingsModel';
-export type { GameMode, Settings } from './settingsModel';
+export type { CycleOptions, GameMode, Settings } from './settingsModel';
+export type { SettingsStore } from './settingsStore';
 
-interface SettingsStore extends Settings {
-  hydrated: boolean;
-  hydrate: () => Promise<void>;
-  set: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
-  toggle: (key: 'soundOn' | 'showShapes' | 'bonusTurnOnMatch' | 'kidMode') => void;
-  cycleAvatar: (seat: number) => void;
-}
+// Stats persist through the same storage backend. stats.ts itself imports no
+// native module (so the game store and its tests can use it); this is where it
+// is handed the real storage, since every screen loads settings first.
+bindStatsStorage(storage);
 
-let saveTimer: ReturnType<typeof setTimeout> | null = null;
-
-/** Hydration never blocks the game: past this, defaults win and play starts. */
-const HYDRATE_TIMEOUT_MS = 2000;
-
-function persist(s: Settings) {
-  if (saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    saveTimer = null;
-    storage.setItem(SETTINGS_KEY, JSON.stringify(persistable(s))).catch(() => {
-      /* storage is a nicety, never a failure the player should see */
-    });
-  }, 120);
-}
-
-export const useSettings = create<SettingsStore>((setState, getState) => ({
-  ...DEFAULT_SETTINGS,
-  hydrated: false,
-
-  hydrate: async () => {
-    if (getState().hydrated) return;
-    try {
-      const raw = await Promise.race<string | null>([
-        storage.getItem(SETTINGS_KEY),
-        new Promise((resolve) => setTimeout(() => resolve(null), HYDRATE_TIMEOUT_MS)),
-      ]);
-      if (raw) setState({ ...sanitize(JSON.parse(raw)), hydrated: true });
-      else setState({ hydrated: true });
-    } catch {
-      setState({ hydrated: true });
-    }
+export const useSettings = createSettingsStore(storage, {
+  // wherever settings hydrate (app/_layout.tsx), the stats read starts too
+  onHydrate: () => {
+    void useStats.getState().hydrate();
   },
-
-  set: (key, value) => {
-    setState({ [key]: value } as Pick<Settings, typeof key>);
-    persist(getState());
-  },
-
-  toggle: (key) => {
-    setState({ [key]: !getState()[key] } as Pick<Settings, typeof key>);
-    persist(getState());
-  },
-
-  cycleAvatar: (seat) => {
-    const avatars = [...getState().avatars];
-    const cur = AVATAR_CYCLE.indexOf(avatars[seat]);
-    // skip avatars already taken by another seat so trays stay tellable apart
-    for (let step = 1; step <= AVATAR_CYCLE.length; step++) {
-      const candidate = AVATAR_CYCLE[(cur + step) % AVATAR_CYCLE.length];
-      if (!avatars.some((a, i) => i !== seat && a === candidate)) {
-        avatars[seat] = candidate;
-        break;
-      }
-    }
-    setState({ avatars });
-    persist(getState());
-  },
-}));
+});

@@ -116,7 +116,7 @@ function boardScene(width: number, { theme, showShapes }: SceneOpts): { svg: str
   // Every gradient id on the page has to be unique: these SVGs share one HTML
   // document, and `url(#id)` resolves across the whole of it.
   const tag = `${theme}${showShapes ? 's' : ''}`;
-  const die = woodDieScene(dieSize, 'sky', showShapes, theme, `bd${tag}`);
+  const die = woodDieScene(dieSize, 'violet', showShapes, theme, `bd${tag}`);
   const canvasH = top + boardH + die.h + width * 0.03;
 
   const defs: string[] = [];

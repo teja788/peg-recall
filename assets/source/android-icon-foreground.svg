@@ -42,15 +42,15 @@
       <stop offset="0.78" stop-color="#A98D63"/><stop offset="1" stop-color="#D1AF7A"/>
     </linearGradient>
     <radialGradient id="pg512_386c" cx="0.34" cy="0.26" r="0.86">
-      <stop offset="0" stop-color="#EEBC4D"/><stop offset="0.55" stop-color="#E69F00"/><stop offset="1" stop-color="#B37C00"/>
+      <stop offset="0" stop-color="#DD594E"/><stop offset="0.55" stop-color="#CE1202"/><stop offset="1" stop-color="#A10E02"/>
     </radialGradient>
     <ellipse cx="515.6" cy="389.8" rx="59.47" ry="9.6" fill="#3A2612" opacity="0.2"/>
     <path d="M 461.6 193.6 L 461.6 385.6 A 50.4 12 0 0 0 562.4 385.6 L 562.4 193.6 Z" fill="url(#pg512_386b)"/>
     <linearGradient id="pg512_386n" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#C69833"/><stop offset="0.34" stop-color="#B87E00"/><stop offset="1" stop-color="#815800"/>
+      <stop offset="0" stop-color="#B73E35"/><stop offset="0.34" stop-color="#A50E02"/><stop offset="1" stop-color="#740A01"/>
     </linearGradient>
     <path d="M 461.6 193.6 L 461.6 270.4 A 50.4 17.14 0 0 0 562.4 270.4 L 562.4 193.6 Z" fill="url(#pg512_386n)"/>
-    <path d="M 452 186.4 A 60 57.6 0 0 1 572 186.4 A 60 43.2 0 0 1 452 186.4 Z" fill="url(#pg512_386c)" stroke="#68470B" stroke-width="2.16"/>
+    <path d="M 452 186.4 A 60 57.6 0 0 1 572 186.4 A 60 43.2 0 0 1 452 186.4 Z" fill="url(#pg512_386c)" stroke="#5C0801" stroke-width="2.16"/>
     <ellipse cx="489.2" cy="157.6" rx="15.6" ry="15.6" fill="#FFFFFF" opacity="0.4" transform="rotate(-24 489.2 157.6)"/>
     <linearGradient id="pg720_465b" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="#E1C18F"/><stop offset="0.3" stop-color="#E7CCA3"/>
