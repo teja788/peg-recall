@@ -4,6 +4,12 @@
  *   node scripts/asc-api.mjs status        # versions + review state of Color Catch
  *   node scripts/asc-api.mjs get <path>    # raw GET, e.g. /v1/apps/6813625311/appStoreVersions
  *
+ * For full release flows (listing pull/diff/push, screenshots, build attach, submit) use the
+ * release CLI instead, with the listing in store-assets/listing.json:
+ *   node ~/.claude/skills/ship-ios-app/release.mjs status --app 6813625311
+ *   node ~/.claude/skills/ship-ios-app/release.mjs release --app 6813625311 --version x.y.z \
+ *     --listing store-assets/listing.json --shots <dir> --dry-run
+ *
  * Credentials live outside the repo: ~/.appstoreconnect/config.json holds
  * {"keyId", "issuerId"} and the key is ~/.appstoreconnect/private_keys/AuthKey_<keyId>.p8.
  * Env ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH override them.
