@@ -1,38 +1,40 @@
 /**
- * App Store screenshot capture for Color Catch.
+ * App Store screenshots for Color Catch: seven shots, two device sizes, every
+ * locale in store-assets/captions.json. Not tied to a version: edit captions
+ * in captions.json, reshoot only what changed.
  *
- * Drives the Expo *web* build in headless Chromium (Playwright) and writes the
- * six shots of store-assets/screenshots-plan.md at both required sizes.
+ *   node store-assets/capture-screenshots.mjs [iphone-6.5|ipad-12.9] [--only=1,3]
+ *   node store-assets/capture-screenshots.mjs compose      # captions only, no app needed
  *
- *   node store-assets/capture-screenshots.mjs                # both device sets
- *   node store-assets/capture-screenshots.mjs iphone-6.5     # one set
+ * Stage 1 drives the Expo web build in headless Chromium (Playwright) and
+ * writes the bare game frames to store-assets/screenshot-frames/<device>/.
+ * Stage 2 is the ship-ios-app skill's compose-screenshots.mjs: frames +
+ * captions.json -> store-assets/screenshots/<locale>/<device>/, ready for
+ * `release.mjs screenshots --shots store-assets/screenshots`.
  *
- * Requires a dev server on http://localhost:8089 (override with PEG_URL) and
- * `npx playwright@1.47.0 install chromium` once. Only playwright-core is a
- * package dependency; the browser comes from the shared ms-playwright cache.
+ * Requires the dev server on http://localhost:8089 (override with PEG_URL):
+ *   CI=1 npx expo start --web --port 8089
+ * and the shared Playwright Chromium (`npx playwright@1.47.0 install chromium`).
  *
- * Why the web build and not the simulator: this Mac (4 GB, macOS 12) boots a
- * simulator in 5-10 minutes and the iOS Simulator MCP panel crashes on it.
- * Headless Chromium runs requestAnimationFrame normally, so the reveal
- * countdown, the die tumble and the confetti all actually animate.
- *
- * How the game is driven: every control carries an accessibilityLabel, which
- * react-native-web renders as aria-label, so the script finds elements by
- * label and dispatches mousedown/mouseup/click on them directly (the RNW
- * responder system listens for those on document). Clicking by coordinate
- * would be wrong for pegs - their hit boxes overlap on the tilted board.
- * During the opening reveal every peg's label carries its colour, so the
- * script memorises the board and can then match or miss on purpose.
+ * Settings are seeded straight into localStorage (web storage backend, key
+ * pegrecall.settings.v1) before each shot, so every shot starts from a known
+ * state: shapes off (except shot 6), light mode (except shot 7), typed names.
+ * The game is driven by aria-labels; during the opening reveal every peg's
+ * label carries its colour, so the board is memorised and the script can
+ * match or miss on purpose.
  */
 
-import { mkdir, writeFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { mkdir } from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { chromium } from 'playwright-core';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const OUT_ROOT = path.join(HERE, 'screenshots');
+const RAW_ROOT = path.join(HERE, 'screenshot-frames');
+const COMPOSE = path.join(os.homedir(), '.claude/skills/ship-ios-app/compose-screenshots.mjs');
 const BASE = process.env.PEG_URL ?? 'http://localhost:8089';
 
 /* ------------------------------------------------------------------ devices */
@@ -41,29 +43,54 @@ const DEVICES = {
   'iphone-6.5': {
     viewport: { width: 428, height: 926 },
     deviceScaleFactor: 3,
-    expect: [1284, 2778],
-    /** board for shots 2-4 */
-    board: 'classic',
-    /** board for the 3-player shot */
+    size: [1284, 2778],
+    board: 'classic', // shots 1, 2
     board3p: 'big',
+    boardShapes: 'small',
   },
   'ipad-12.9': {
     viewport: { width: 1024, height: 1366 },
     deviceScaleFactor: 2,
-    expect: [2048, 2732],
-    // "an iPad screenshot of a 4x4 board looks empty" - screenshots-plan.md
+    size: [2048, 2732],
+    // a 25-peg disc on a 12.9" screen reads as empty
     board: 'big',
     board3p: 'huge',
+    boardShapes: 'classic',
+    rivalsInGame: true,
   },
 };
 
-const BOARD_CHIP = {
-  small: 'Small · 16 pegs',
-  classic: 'Classic · 25 pegs',
-  big: 'Big · 36 pegs',
-  huge: 'Huge · 40 pegs',
+/* ------------------------------------------------------------------- shots */
+
+const SHOTS = [
+  { n: 1, file: '01-look' },
+  { n: 2, file: '02-roll' },
+  { n: 3, file: '03-family' },
+  { n: 4, file: '04-rivals' },
+  { n: 5, file: '05-sizes' },
+  { n: 6, file: '06-shapes' },
+  { n: 7, file: '07-win-dark' },
+];
+
+/* ---------------------------------------------------------------- settings */
+
+const SETTINGS_KEY = 'pegrecall.settings.v1';
+const STATS_KEY = 'pegrecall.stats.v1';
+
+/** A household that has played a few times: names typed, chips remembered. */
+const BASE_SETTINGS = {
+  version: 3,
+  soundOn: true,
+  showShapes: false,
+  boardSize: 'classic',
+  difficulty: 'fox',
+  bonusTurnOnMatch: true,
+  kidMode: false,
+  lastMode: 'ai',
+  avatars: ['fox', 'owl', 'bear'],
+  names: ['Maya', '', ''],
+  recentNames: ['Maya', 'Leo', 'Nana'],
 };
-const REVEAL_MS = { small: 4000, classic: 6000, big: 8000, huge: 9000 };
 
 /* ------------------------------------------------------- page-side helpers */
 
@@ -89,11 +116,21 @@ function tapInPage(label) {
   return true;
 }
 
-/** Runs in the page: every aria-label on screen, in DOM order. */
 function labelsInPage() {
   return Array.from(document.querySelectorAll('[aria-label]')).map((e) =>
     e.getAttribute('aria-label'),
   );
+}
+
+/**
+ * Headless Chromium is always "visible", but pin it anyway: the game pauses
+ * on every visibilitychange to hidden, and a pause sheet in a store shot is
+ * the one failure that is easy to miss.
+ */
+function pinVisible() {
+  Object.defineProperty(Document.prototype, 'visibilityState', { get: () => 'visible', configurable: true });
+  Object.defineProperty(Document.prototype, 'hidden', { get: () => false, configurable: true });
+  document.addEventListener('visibilitychange', (e) => e.stopImmediatePropagation(), true);
 }
 
 /* ------------------------------------------------------- driver primitives */
@@ -107,14 +144,13 @@ async function labels(page) {
 async function tap(page, label) {
   const ok = await page.evaluate(tapInPage, label);
   if (!ok) throw new Error(`no control labelled "${label}"`);
-  return ok;
 }
 
 const PEG_RE = /^(Peg \d+, ring \d+), (.+)$/;
-const TRAY_RE = /^([A-Za-z]+)(, computer)?, (\d+) pegs?(, their turn)?$/;
-const BANNERS = new Set(['Look and remember!', 'Sudden death — look and remember!', 'Match!', 'Not that one', 'Board clear!']);
+// "Fox, computer, 3 pegs" / "Maya, bear, 2 pegs, their turn"
+const TRAY_RE = /^(.+?)(?:, (?:fox|owl|bear|frog|bunny|cat))?(, computer)?, (\d+) pegs?(, their turn)?$/;
+const RESULT = new Set(['Match!', 'Not that one']);
 
-/** Everything the driver needs, read back out of the accessibility labels. */
 function readState(ls) {
   const pegs = new Map(); // "Peg 7, ring 2" -> "hidden" | "taken" | colour
   const trays = [];
@@ -126,16 +162,22 @@ function readState(ls) {
       pegs.set(p[1], p[2]);
       continue;
     }
-    const t = TRAY_RE.exec(l);
-    if (t) {
-      trays.push({ name: t[1], ai: !!t[2], score: Number(t[3]), active: !!t[4] });
-      continue;
-    }
     if (l === 'Roll the die' || l === 'Die rolling' || l.startsWith('Die shows ')) {
       die = l;
       continue;
     }
-    if (BANNERS.has(l) || /'s turn$/.test(l) || /^Find /.test(l) || / is (thinking|rolling)…$/.test(l)) {
+    const t = TRAY_RE.exec(l);
+    if (t && !l.startsWith('Peg ') && !l.startsWith('Round board')) {
+      trays.push({ name: t[1], ai: !!t[2], score: Number(t[3]), active: !!t[4] });
+    }
+    if (
+      RESULT.has(l) ||
+      l === 'Board clear!' ||
+      /look and remember!$/i.test(l) ||
+      /'s? turn$/.test(l) ||
+      /^Find [A-Z][a-z]+$/.test(l) ||
+      / is (thinking|rolling)…$/.test(l)
+    ) {
       banner = l;
     }
   }
@@ -143,18 +185,16 @@ function readState(ls) {
   const find = banner && /^Find (.+)$/.exec(banner);
   const ring = ls.map((l) => /^Memorise the board\. (\d+) seconds? left$/.exec(l)).find(Boolean);
   return {
-    /** seconds left on the opening countdown ring, or null */
     countdown: ring ? Number(ring[1]) : null,
     pegs,
     trays,
     banner,
     die,
     over,
-    /** colour the die is showing, while a pick is open */
+    paused: ls.includes('Resume'),
     target: find ? find[1] : null,
-    /** a human seat is on the clock and may roll */
-    humanRoll: !!banner && /'s turn$/.test(banner),
-    revealing: banner === 'Look and remember!' || banner === 'Sudden death — look and remember!',
+    humanRoll: ls.includes('Roll the die') && !!banner && /'s? turn$/.test(banner),
+    revealing: !!banner && /look and remember!$/i.test(banner),
     active: trays.find((t) => t.active) ?? null,
   };
 }
@@ -163,12 +203,12 @@ async function state(page) {
   return readState(await labels(page));
 }
 
-/** Poll until `pred(state)` holds. Returns that state. */
 async function until(page, pred, { timeout = 30000, step = 100, what = 'condition' } = {}) {
   const deadline = Date.now() + timeout;
   let last = null;
   for (;;) {
     last = await state(page);
+    if (last.paused) throw new Error('the pause sheet came up');
     if (pred(last)) return last;
     if (Date.now() > deadline) {
       throw new Error(`timed out waiting for ${what} (banner="${last?.banner}" die="${last?.die}")`);
@@ -177,110 +217,316 @@ async function until(page, pred, { timeout = 30000, step = 100, what = 'conditio
   }
 }
 
+/** Write settings (and optionally stats) straight into web storage. */
+async function seed(page, patch = {}, stats) {
+  // a same-origin page that runs no app code, so nothing can write over us
+  await page.goto(`${BASE}/favicon.ico`, { waitUntil: 'load', timeout: 60000 }).catch(() => {});
+  await page.evaluate(
+    ([k, v, sk, sv]) => {
+      localStorage.clear();
+      localStorage.setItem(k, v);
+      if (sv) localStorage.setItem(sk, sv);
+    },
+    [SETTINGS_KEY, JSON.stringify({ ...BASE_SETTINGS, ...patch }), STATS_KEY, stats ? JSON.stringify(stats) : null],
+  );
+}
+
 async function goto(page, route) {
   await page.goto(BASE + route, { waitUntil: 'load', timeout: 180000 });
-  // the settings store hydrates from expo-sqlite/kv-store before anything draws,
-  // so wait for real controls rather than for the (empty) first frame
-  const deadline = Date.now() + 60000;
+  const deadline = Date.now() + 90000;
   for (;;) {
     const ls = await labels(page);
-    if (ls.length > 2) break;
+    if (ls.length > 2 && !ls.includes('Loading game')) break;
     if (Date.now() > deadline) throw new Error(`${route} never painted`);
     await sleep(150);
   }
-  await sleep(500);
+  await sleep(600);
 }
 
 /** The turn banner swaps its text at zero opacity, 130 ms into a 260 ms slide. */
-const BANNER_SETTLE = 200;
+const BANNER_SETTLE = 320;
 
-/* ------------------------------------------------------------- game moves */
-
-/** Memorise the board while the opening reveal is up. */
 async function memorise(page) {
   const s = await until(page, (x) => x.pegs.size > 0 && [...x.pegs.values()].some((v) => v !== 'hidden'), {
-    timeout: 30000,
+    timeout: 60000,
     what: 'the opening reveal',
   });
   const map = new Map();
   for (const [k, v] of s.pegs) if (v !== 'hidden' && v !== 'taken') map.set(k, v);
   if (map.size < s.pegs.size) {
-    // one more read, in case the first landed mid-flip
+    await sleep(300);
     const again = await state(page);
     for (const [k, v] of again.pegs) if (v !== 'hidden' && v !== 'taken') map.set(k, v);
   }
   return map;
 }
 
-/**
- * One full human turn: roll, then take the peg the die asked for (`match`) or
- * a deliberately wrong one (`miss`). `onResult` fires the instant the result
- * banner appears, which is the only moment a flying peg is on screen.
- */
-async function playTurn(page, colours, intent, onResult) {
-  await until(page, (s) => s.humanRoll || s.over, { timeout: 45000, what: 'a human turn' });
-  if ((await state(page)).over) return null;
+async function waitHuman(page) {
+  return until(page, (s) => s.humanRoll || s.over, { timeout: 90000, what: 'a human turn' });
+}
 
+async function roll(page) {
   await tap(page, 'Roll the die');
-  const rolled = await until(page, (s) => s.target != null || s.over, {
-    timeout: 20000,
-    what: 'the die to settle',
-  });
-  if (rolled.over) return null;
+  return until(page, (s) => s.target != null || s.over, { timeout: 20000, what: 'the die to settle' });
+}
 
-  const wanted = rolled.target;
-  const free = [...rolled.pegs.entries()].filter(([, v]) => v === 'hidden');
-  const right = free.filter(([k]) => colours.get(k) === wanted);
-  const wrong = free.filter(([k]) => colours.get(k) && colours.get(k) !== wanted);
-  let pick;
-  if (intent === 'match') pick = right[0] ?? wrong[0];
-  else pick = wrong[Math.floor(wrong.length / 2)] ?? right[0];
-  if (!pick) return null;
-
-  await tap(page, `${pick[0]}, hidden`);
-  const res = await until(page, (s) => s.banner === 'Match!' || s.banner === 'Not that one' || s.over, {
+/** Take the peg the die asked for (`match`) or a known-wrong one (`miss`). */
+async function pick(page, s, colours, intent, onResult) {
+  const free = [...s.pegs.entries()].filter(([, v]) => v === 'hidden');
+  const right = free.filter(([k]) => colours.get(k) === s.target);
+  const wrong = free.filter(([k]) => colours.get(k) && colours.get(k) !== s.target);
+  const p = intent === 'match' ? right[0] ?? wrong[0] : wrong[Math.floor(wrong.length / 2)] ?? right[0];
+  if (!p) return null;
+  await tap(page, `${p[0]}, hidden`);
+  const res = await until(page, (x) => RESULT.has(x.banner) || x.over, {
     timeout: 20000,
-    step: 60,
+    step: 50,
     what: 'the move to resolve',
   });
   const matched = res.banner === 'Match!';
-  if (onResult) await onResult(res, matched, wanted);
-  // let the result animation finish before the next instruction
-  await until(page, (s) => s.banner !== 'Match!' && s.banner !== 'Not that one', {
-    timeout: 20000,
-    what: 'the result to clear',
-  }).catch(() => {});
-  return { matched, colour: wanted };
+  // a match removes the peg from the board for good
+  if (matched) colours.delete(p[0]);
+  if (onResult) await onResult(res, matched);
+  await until(page, (x) => !RESULT.has(x.banner), { timeout: 20000, what: 'the result to clear' }).catch(() => {});
+  return matched;
 }
 
-/* ------------------------------------------------------------------ shots */
+async function playTurn(page, colours, intent, onResult) {
+  if ((await waitHuman(page)).over) return null;
+  const s = await roll(page);
+  if (s.over) return null;
+  return pick(page, s, colours, intent, onResult);
+}
 
 async function shoot(page, dir, name) {
   const file = path.join(dir, `${name}.png`);
   await page.screenshot({ path: file });
   console.log(`   wrote ${path.relative(process.cwd(), file)}`);
-  return file;
 }
 
-/** Settings screen: board size, opponent, and the two switches we use. */
-async function applySettings(page, { board, shapes, difficulty }) {
-  await goto(page, '/settings');
-  if (board) await tap(page, BOARD_CHIP[board]);
-  if (difficulty) await tap(page, difficulty);
-  if (shapes !== undefined) {
-    // no aria-checked is rendered for the switch rows, so the caller tracks
-    // the value; `shapes` is "set it to this" and is only passed on a change
-    await tap(page, 'Shapes on pegs');
-  }
-  await sleep(700); // the store persists on a 120 ms debounce
-}
+/* ---------------------------------------------------------- the seven shots */
 
-async function captureDevice(key) {
+const CAPTURE = {
+  /** 1 - the opening reveal, every peg face-up, countdown ring partway. */
+  async 1(page, dev, dir) {
+    await seed(page, { boardSize: dev.board, difficulty: 'fox' });
+    await goto(page, '/game?mode=ai');
+    await memorise(page);
+    const total = { classic: 6, big: 8, huge: 9, small: 4 }[dev.board];
+    const at = Math.max(3, Math.round(total * 0.6));
+    await until(page, (s) => s.countdown != null && s.countdown <= at, {
+      timeout: 20000,
+      step: 60,
+      what: `countdown ${at}`,
+    });
+    await sleep(300);
+    await shoot(page, dir, '01-look');
+  },
+
+  /** 2 - face-down board, die landed on red or violet, "Find Red". */
+  async 2(page, dev, dir) {
+    await seed(page, { boardSize: dev.board, difficulty: 'fox' });
+    await goto(page, '/game?mode=ai');
+    const colours = await memorise(page);
+    await until(page, (s) => !s.revealing, { timeout: 30000, what: 'the reveal to end' });
+    // pegs in both trays, so the game looks underway
+    await playTurn(page, colours, 'match');
+    await playTurn(page, colours, 'match');
+    await playTurn(page, colours, 'miss');
+    for (let i = 0; i < 20; i += 1) {
+      if ((await waitHuman(page)).over) break;
+      const s = await roll(page);
+      if (s.over) break;
+      if (s.target === 'Red' || s.target === 'Violet') {
+        await sleep(BANNER_SETTLE + 400); // die settle bounce + banner slide
+        await shoot(page, dir, '02-roll');
+        return;
+      }
+      // not the colour we want: spend the pick on a miss, so the board keeps
+      // most of its pegs and the turn passes on
+      await pick(page, s, colours, 'miss');
+    }
+    throw new Error('never rolled red or violet');
+  },
+
+  /** 3 - three players, typed names in the trays, mid-game. */
+  async 3(page, dev, dir) {
+    await seed(page, {
+      boardSize: dev.board3p,
+      lastMode: '3p',
+      names: ['Maya', 'Leo', 'Nana'],
+      avatars: ['fox', 'owl', 'bear'],
+    });
+    await goto(page, '/game?mode=3p');
+    const colours = await memorise(page);
+    await until(page, (s) => !s.revealing, { timeout: 30000, what: 'the reveal to end' });
+    const total = (await state(page)).pegs.size;
+    const perSeat = Math.max(3, Math.round(total / 6));
+    for (let i = 0; i < 60; i += 1) {
+      const s = await state(page);
+      if (s.over) break;
+      const taken = s.trays.reduce((n, t) => n + t.score, 0);
+      if (taken >= Math.floor(total / 2.4) && s.trays.every((t) => t.score >= 2)) break;
+      const mine = s.active?.score ?? 0;
+      await playTurn(page, colours, mine >= perSeat ? 'miss' : 'match');
+    }
+    await waitHuman(page);
+    await sleep(BANNER_SETTLE + 300);
+    await shoot(page, dir, '03-family');
+  },
+
+  /** 4 - Home: the Bunny / Fox / Owl opponent row, Owl picked. */
+  async 4(page, dev, dir) {
+    await seed(page, { boardSize: dev.board, difficulty: 'owl', names: ['Maya', 'Leo', 'Nana'] });
+    if (!dev.rivalsInGame) {
+      await goto(page, '/');
+      await sleep(900);
+      await shoot(page, dir, '04-rivals');
+      return;
+    }
+    // iPad: Home is a 560-pt column in the middle of a 1024-pt screen and
+    // reads as empty, so show a game against Owl instead, Owl on the move.
+    await goto(page, '/game?mode=ai');
+    const colours = await memorise(page);
+    await until(page, (s) => !s.revealing, { timeout: 30000, what: 'the reveal to end' });
+    for (let round = 0; round < 6; round += 1) {
+      await playTurn(page, colours, 'match');
+      await playTurn(page, colours, 'miss'); // hands the turn to Owl
+      // Owl's turn, caught in the page itself (Owl picks within a few hundred
+      // ms of its die landing, too fast to poll from here): the banner fully
+      // faded in and at rest, and the die either landed on a colour or still
+      // waiting to be thrown - never mid-tumble
+      const s = await state(page);
+      const owl = s.trays.find((t) => t.ai);
+      if (!s.over && owl?.active && owl.score >= 2 && s.trays.every((t) => t.score >= 2)) {
+        const ok = await page.evaluate(
+          () =>
+            new Promise((resolve) => {
+              const deadline = performance.now() + 8000;
+              const tick = () => {
+                const els = Array.from(document.querySelectorAll('[aria-label]'));
+                const banner = els.find((e) => / is (thinking|rolling)…$/.test(e.getAttribute('aria-label')));
+                const die = els.find((e) => /^(Die |Roll the die)/.test(e.getAttribute('aria-label')));
+                if (banner && die) {
+                  const cs = getComputedStyle(banner);
+                  const m = new DOMMatrixReadOnly(cs.transform === 'none' ? undefined : cs.transform);
+                  const still = parseFloat(cs.opacity) > 0.99 && Math.abs(m.m42) < 0.5;
+                  const d = die.getAttribute('aria-label');
+                  const b = banner.getAttribute('aria-label');
+                  if (still && ((/rolling…$/.test(b) && d.startsWith('Die shows')) || (/thinking…$/.test(b) && d === 'Roll the die'))) {
+                    resolve(true);
+                    return;
+                  }
+                }
+                if (performance.now() > deadline) resolve(false);
+                else requestAnimationFrame(tick);
+              };
+              tick();
+            }),
+        );
+        if (ok) {
+          await shoot(page, dir, '04-rivals');
+          return;
+        }
+      }
+      await waitHuman(page);
+    }
+    throw new Error('no Owl frame for shot 4');
+  },
+
+  /** 5 - Settings: kid mode on, board sizes 16 to 40, Huge picked. */
+  async 5(page, dev, dir) {
+    // a family that has played a few evenings, so Stats is not an empty card
+    const now = Date.now();
+    const p = (label, avatar, played, wins, ago) => ({ key: `name:${label.toLowerCase()}`, label, avatar, played, wins, lastPlayed: now - ago });
+    const stats = {
+      version: 1,
+      players: {
+        'name:maya': p('Maya', 'fox', 21, 11, 1000),
+        'name:leo': p('Leo', 'owl', 9, 4, 2000),
+        'name:nana': p('Nana', 'bear', 9, 2, 3000),
+      },
+      vsAi: {
+        bunny: { played: 4, wins: 4, streak: 4, bestStreak: 4 },
+        fox: { played: 5, wins: 3, streak: 1, bestStreak: 2 },
+        owl: { played: 3, wins: 1, streak: 0, bestStreak: 1 },
+      },
+      gamesFinished: 21,
+      finishedDays: [],
+      reviewAskedVersion: null,
+    };
+    await seed(page, { boardSize: 'huge', kidMode: true, difficulty: 'bunny' }, stats);
+    await goto(page, '/settings');
+    await sleep(900);
+    await shoot(page, dir, '05-sizes');
+  },
+
+  /**
+   * 6 - Shapes on Pegs, during the reveal: every peg carries its shape. A
+   * match frame shows only one face-up peg (plus the die), which sells the
+   * feature far less, so the reveal it is - on a smaller board than shot 1, so
+   * the shapes are bigger and the two frames do not look alike.
+   */
+  async 6(page, dev, dir) {
+    await seed(page, { boardSize: dev.boardShapes, difficulty: 'fox', showShapes: true });
+    await goto(page, '/game?mode=ai');
+    await memorise(page);
+    const total = { classic: 6, big: 8, huge: 9, small: 4 }[dev.boardShapes];
+    await until(page, (s) => s.countdown != null && s.countdown <= Math.max(2, Math.round(total * 0.6)), {
+      timeout: 20000,
+      step: 60,
+      what: 'countdown',
+    });
+    await sleep(300);
+    await shoot(page, dir, '06-shapes');
+  },
+
+  /** 7 - dark mode, a human win vs Bunny, confetti falling. */
+  async 7(page, dev, dir) {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    try {
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        await seed(page, { boardSize: 'small', difficulty: 'bunny' });
+        await goto(page, '/game?mode=ai');
+        const colours = await memorise(page);
+        await until(page, (s) => !s.revealing, { timeout: 30000, what: 'the reveal to end' });
+        for (let i = 0; i < 40; i += 1) {
+          const s = await state(page);
+          if (s.over) break;
+          if (s.revealing) {
+            // a tie went to sudden death: learn the new board
+            for (const [k, v] of (await memorise(page)).entries()) colours.set(k, v);
+            await until(page, (x) => !x.revealing, { timeout: 30000 });
+          }
+          // two misses early, so the score is not a shut-out
+          const r = await playTurn(page, colours, i === 1 || i === 4 ? 'miss' : 'match');
+          if (r == null && (await state(page)).over) break;
+        }
+        const end = await until(page, (s) => s.over, { timeout: 60000, what: 'the game to end' });
+        const text = await page.evaluate(() => document.body.innerText);
+        const headline = /^.*(wins|share the win).*$/m.exec(text)?.[0] ?? '?';
+        const maya = end.trays.find((t) => t.name === 'Maya');
+        const ai = end.trays.find((t) => t.ai);
+        console.log(`   game over: ${headline} (${maya?.score}-${ai?.score})`);
+        // a win, but not a shut-out
+        if (/^Maya wins!/.test(headline) && ai?.score > 0) {
+          await sleep(700); // sheet up, confetti mid-fall
+          await shoot(page, dir, '07-win-dark');
+          return;
+        }
+      }
+      throw new Error('Maya never won');
+    } finally {
+      await page.emulateMedia({ colorScheme: 'light' });
+    }
+  },
+};
+
+async function captureDevice(key, only) {
   const dev = DEVICES[key];
-  const dir = path.join(OUT_ROOT, key);
+  const dir = path.join(RAW_ROOT, key);
   await mkdir(dir, { recursive: true });
   console.log(`\n=== ${key} (${dev.viewport.width}x${dev.viewport.height} @${dev.deviceScaleFactor}) ===`);
-
   const browser = await chromium.launch({ headless: true });
   const ctx = await browser.newContext({
     viewport: dev.viewport,
@@ -289,144 +535,59 @@ async function captureDevice(key) {
     reducedMotion: 'no-preference',
     isMobile: false,
   });
+  await ctx.addInitScript(pinVisible);
   const page = await ctx.newPage();
-  page.on('pageerror', (e) => console.log('   [pageerror]', String(e).slice(0, 200)));
-
+  page.on('pageerror', (e) => {
+    // headless Chromium has no codec for the sound files; harmless
+    if (!/no supported sources/.test(String(e))) console.log('   [pageerror]', String(e).slice(0, 200));
+  });
+  const failed = [];
   try {
-    /* --- 1. home ------------------------------------------------------- */
-    console.log(' 1 home');
-    await applySettings(page, { board: 'classic', difficulty: 'Fox' });
-    await goto(page, '/');
-    await sleep(1200);
-    await shoot(page, dir, '01-home');
-
-    /* --- 2. the opening reveal ----------------------------------------- */
-    console.log(' 2 reveal');
-    if (dev.board !== 'classic') await applySettings(page, { board: dev.board });
-    await goto(page, '/game?mode=ai');
-    let colours = await memorise(page);
-    // land partway into the countdown: every peg still up, ring clearly cut
-    const ringAt = Math.max(3, Math.round((REVEAL_MS[dev.board] / 1000) * 0.62));
-    await until(page, (s) => s.countdown != null && s.countdown <= ringAt, {
-      timeout: 20000,
-      step: 60,
-      what: `the countdown to reach ${ringAt}`,
-    }).catch(() => {});
-    await sleep(250);
-    await shoot(page, dir, '02-reveal');
-
-    /* --- 3. roll the die, board face-down ------------------------------ */
-    console.log(' 3 roll');
-    await until(page, (s) => !s.revealing, { timeout: 30000, what: 'the reveal to end' });
-    // put pegs in both trays first, so the game looks underway
-    await playTurn(page, colours, 'match');
-    await playTurn(page, colours, 'match');
-    await playTurn(page, colours, 'miss'); // hands the turn to the computer
-    await until(page, (s) => s.humanRoll || s.over, { timeout: 60000, what: 'the computer to play' });
-
-    let shot3 = false;
-    for (let i = 0; i < 12 && !shot3; i += 1) {
-      await until(page, (s) => s.humanRoll || s.over, { timeout: 45000, what: 'a human turn' });
-      if ((await state(page)).over) break;
-      await tap(page, 'Roll the die');
-      const s = await until(page, (x) => x.target != null || x.over, {
-        timeout: 20000,
-        what: 'the die to settle',
-      });
-      if (s.over) break;
-      // "avoid yellow, it photographs weakly" - screenshots-plan.md
-      if (s.target === 'Blue' || s.target === 'Red') {
-        await sleep(BANNER_SETTLE); // let "Find …" finish sliding in
-        await shoot(page, dir, '03-roll');
-        shot3 = true;
+    for (const shot of SHOTS) {
+      if (only && !only.includes(shot.n)) continue;
+      console.log(` ${shot.n} ${shot.file}`);
+      let ok = false;
+      for (let attempt = 1; attempt <= 2 && !ok; attempt += 1) {
+        try {
+          await CAPTURE[shot.n](page, dev, dir);
+          ok = true;
+        } catch (e) {
+          console.log(`   ! attempt ${attempt}: ${e.message}`);
+        }
       }
-      // consume the open pick either way, so the next roll can happen
-      const free = [...s.pegs.entries()].filter(([, v]) => v === 'hidden');
-      const right = free.filter(([k]) => colours.get(k) === s.target);
-      const pick = (right[0] ?? free[0])?.[0];
-      if (!pick) break;
-      await tap(page, `${pick}, hidden`);
-      await until(page, (x) => x.banner !== 'Match!' && x.banner !== 'Not that one', {
-        timeout: 20000,
-      }).catch(() => {});
-      if (!(await state(page)).humanRoll) {
-        await until(page, (x) => x.humanRoll || x.over, { timeout: 60000 }).catch(() => {});
-      }
+      if (!ok) failed.push(shot.file);
     }
-    if (!shot3) console.log('   ! never rolled blue or red - 03-roll not written');
-
-    /* --- 4. shapes on, a match landing --------------------------------- */
-    console.log(' 4 match with shapes');
-    await applySettings(page, { shapes: true, difficulty: 'Owl' });
-    await goto(page, '/game?mode=ai');
-    colours = await memorise(page);
-    await until(page, (s) => !s.revealing, { timeout: 30000, what: 'the reveal to end' });
-    // a clear lead over Owl, then catch the peg on its way to the tray
-    for (let i = 0; i < 3; i += 1) await playTurn(page, colours, 'match');
-    await playTurn(page, colours, 'miss');
-    await until(page, (s) => s.humanRoll || s.over, { timeout: 60000 }).catch(() => {});
-    for (let i = 0; i < 2; i += 1) await playTurn(page, colours, 'match');
-    await playTurn(page, colours, 'match', async () => {
-      // the "Match!" banner is legible again ~130 ms after it swaps, and the
-      // peg is still on its way to the tray until 850 ms
-      await sleep(150);
-      await shoot(page, dir, '04-match');
-    });
-
-    /* --- 5. three players ---------------------------------------------- */
-    console.log(' 5 three players');
-    await applySettings(page, { board: dev.board3p, shapes: false });
-    await goto(page, '/game?mode=3p');
-    colours = await memorise(page);
-    await until(page, (s) => !s.revealing, { timeout: 30000, what: 'the reveal to end' });
-    const total = (await state(page)).pegs.size;
-    const perSeat = Math.max(3, Math.round(total / 6));
-    for (let i = 0; i < 40; i += 1) {
-      const s = await state(page);
-      if (s.over) break;
-      const taken = s.trays.reduce((n, t) => n + t.score, 0);
-      if (taken >= Math.floor(total / 2)) break;
-      const mine = s.active?.score ?? 0;
-      await playTurn(page, colours, mine >= perSeat ? 'miss' : 'match');
-    }
-    // capture as the next seat's banner slides in
-    await until(page, (s) => s.humanRoll || s.over, { timeout: 45000 });
-    await sleep(BANNER_SETTLE);
-    await shoot(page, dir, '05-three-players');
-
-    /* --- 6. the win, in dark mode -------------------------------------- */
-    console.log(' 6 win, dark mode');
-    await applySettings(page, { board: 'small', difficulty: 'Bunny' });
-    await page.emulateMedia({ colorScheme: 'dark' });
-    await goto(page, '/game?mode=ai');
-    colours = await memorise(page);
-    await until(page, (s) => !s.revealing, { timeout: 30000, what: 'the reveal to end' });
-    for (let i = 0; i < 30; i += 1) {
-      const s = await state(page);
-      if (s.over) break;
-      // two deliberate misses early, so the scoreboard is not a shut-out
-      await playTurn(page, colours, i === 1 || i === 4 ? 'miss' : 'match');
-      if (!(await state(page)).humanRoll) {
-        await until(page, (x) => x.humanRoll || x.over, { timeout: 60000 }).catch(() => {});
-      }
-    }
-    await until(page, (s) => s.over, { timeout: 60000, what: 'the game to end' });
-    await sleep(650); // sheet in, confetti mid-fall
-    await shoot(page, dir, '06-win-dark');
-    await page.emulateMedia({ colorScheme: 'light' });
   } finally {
     await ctx.close();
     await browser.close();
   }
+  return failed;
 }
 
 /* ------------------------------------------------------------------- main */
 
-const only = process.argv.slice(2).filter((a) => !a.startsWith('-'));
-const keys = only.length ? only : Object.keys(DEVICES);
-for (const k of keys) {
-  if (!DEVICES[k]) throw new Error(`unknown device "${k}" (have: ${Object.keys(DEVICES).join(', ')})`);
-  await captureDevice(k); // one browser at a time - this Mac has 4 GB
+const args = process.argv.slice(2);
+const stage = args[0] === 'compose' ? args.shift() : 'all';
+const onlyArg = args.find((a) => a.startsWith('--only='));
+const only = onlyArg ? onlyArg.slice(7).split(',').map(Number) : null;
+const devs = args.filter((a) => !a.startsWith('-'));
+const keys = devs.length ? devs : Object.keys(DEVICES);
+
+if (stage === 'all') {
+  const failed = [];
+  for (const k of keys) {
+    if (!DEVICES[k]) throw new Error(`unknown device "${k}"`);
+    for (const f of await captureDevice(k, only)) failed.push(`${k}/${f}`); // one browser at a time
+  }
+  if (failed.length) {
+    console.log(`\nFAILED: ${failed.join(', ')}`);
+    process.exitCode = 1;
+  }
 }
-console.log('\ndone');
-await writeFile(path.join(OUT_ROOT, '.last-run'), new Date().toISOString());
+if (!process.exitCode) {
+  execFileSync(
+    'node',
+    [COMPOSE, '--frames', RAW_ROOT, '--captions', path.join(HERE, 'captions.json'), '--out', path.join(HERE, 'screenshots')],
+    { stdio: 'inherit', cwd: path.dirname(HERE) },
+  );
+}

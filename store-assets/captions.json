@@ -1,0 +1,37 @@
+{
+  "style": {
+    "font": "fonts/Nunito.ttf",
+    "text": "#2B2622",
+    "background": ["#FBF6EC", "#EFE3CF"],
+    "dots": ["#CE1202", "#F0E442", "#009E73", "#0072B2", "#6201DA", "#CC79A7"]
+  },
+  "captions": {
+    "en-US": {
+      "01-look": "Look. Remember. Find it.",
+      "02-roll": "Roll a color. Pick the peg.",
+      "03-family": "Pass and play with the family",
+      "04-rivals": "Bunny, Fox or Owl: pick a rival",
+      "05-sizes": "From 16 pegs to 40",
+      "06-shapes": "Shapes for color-blind players",
+      "07-win-dark": "Free. Offline. No ads."
+    },
+    "es-MX": {
+      "01-look": "Mira. Recuerda. Encuéntrala.",
+      "02-roll": "Tira el dado. Elige la ficha.",
+      "03-family": "Pásalo y juega en familia",
+      "04-rivals": "Reta a la computadora: 3 niveles",
+      "05-sizes": "De 16 a 40 fichas",
+      "06-shapes": "Figuras para jugadores daltónicos",
+      "07-win-dark": "Gratis. Sin internet. Sin anuncios."
+    },
+    "en-GB": {
+      "01-look": "Look. Remember. Find it.",
+      "02-roll": "Roll a colour. Pick the peg.",
+      "03-family": "Pass and play with the family",
+      "04-rivals": "Bunny, Fox or Owl: pick a rival",
+      "05-sizes": "From 16 pegs to 40",
+      "06-shapes": "Shapes for colour-blind players",
+      "07-win-dark": "Free. Offline. No ads."
+    }
+  }
+}
