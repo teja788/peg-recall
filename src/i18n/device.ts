@@ -9,7 +9,9 @@ import { getLocales } from 'expo-localization';
 import { pickLang, setLang } from './index';
 
 try {
-  setLang(pickLang(getLocales().map((l) => l.languageTag)));
+  // web only: ?lang=de opens the app in that language (testing, links)
+  const asked = typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('lang');
+  setLang(pickLang([asked, ...getLocales().map((l) => l.languageTag)]));
 } catch {
   /* no locale info: stay in English */
 }
