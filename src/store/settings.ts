@@ -15,6 +15,7 @@ export {
   cleanName,
   humanAvatarVsAi,
   isAnimalName,
+  nameKey,
   isLocked,
   nameToStore,
   playable,

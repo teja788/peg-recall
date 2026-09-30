@@ -114,16 +114,24 @@ export function cleanName(raw: unknown): string {
 /** How many typed names are remembered for the chips. */
 export const RECENT_MAX = 8;
 
+/**
+ * A name as compared ignoring case: the same on every device, whatever its
+ * language (never toLocaleLowerCase: on a Turkish phone "I" would lower to
+ * "ı"). Turkish dotted and dotless i fold together, so "İpek" = "ipek" =
+ * "IPEK", "Işıl" = "IŞIL" and "KEDİ" = "Kedi".
+ */
+export function nameKey(raw: unknown): string {
+  return cleanName(raw).toLowerCase().replace(/\u0307/g, '').replace(/ı/g, 'i');
+}
+
 /** An animal's name in the app's language ("Fox", "Fuchs"): a seat's default name. */
 export function animalName(avatar: AvatarId): string {
   return tr(`animal.${avatar}`);
 }
 
-/** The animal's name in every language the app speaks, lower-cased. */
+/** The animal's name in every language the app speaks, as `nameKey`s. */
 function animalWords(avatar: AvatarId): string[] {
-  return everyLanguage(`animal.${avatar}`)
-    .filter(Boolean)
-    .map((n) => n.toLowerCase());
+  return everyLanguage(`animal.${avatar}`).filter(Boolean).map(nameKey);
 }
 
 const ANIMAL_WORDS = new Set(AVATAR_CYCLE.flatMap(animalWords));
@@ -131,7 +139,7 @@ const ANIMAL_WORDS = new Set(AVATAR_CYCLE.flatMap(animalWords));
 /** "fox", "FOX", " Fox ", "Fuchs" — any of the six animal names, in any
  *  language the app speaks, whatever the case. */
 export function isAnimalName(name: string): boolean {
-  return ANIMAL_WORDS.has(cleanName(name).toLowerCase());
+  return ANIMAL_WORDS.has(nameKey(name));
 }
 
 /**
@@ -143,7 +151,7 @@ export function isAnimalName(name: string): boolean {
 export function nameToStore(raw: unknown, avatar: AvatarId): string {
   const name = cleanName(raw);
   if (!name) return '';
-  return animalWords(avatar).includes(name.toLowerCase()) ? '' : name;
+  return animalWords(avatar).includes(nameKey(name)) ? '' : name;
 }
 
 /**
@@ -157,7 +165,7 @@ export function addRecentNames(recent: readonly unknown[], played: readonly unkn
   const seen = new Set<string>();
   for (const raw of [...played, ...recent]) {
     const name = cleanName(raw);
-    const key = name.toLowerCase();
+    const key = nameKey(name);
     if (!name || isAnimalName(name) || seen.has(key)) continue;
     seen.add(key);
     out.push(name);

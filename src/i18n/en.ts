@@ -51,7 +51,7 @@ export const en = {
   'tier.bunny': 'Easy',
   'tier.fox': 'Medium',
   'tier.owl': 'Hard',
-  'diffHint.bunny': 'Forgets a lot. Good for little players.',
+  'diffHint.bunny': 'Forgets a lot. A gentle start.',
   'diffHint.fox': 'Remembers about half the board.',
   'diffHint.owl': 'Remembers nearly everything.',
 

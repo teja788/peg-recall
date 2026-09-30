@@ -43,7 +43,7 @@ export const de: Strings = {
   'tier.bunny': 'Leicht',
   'tier.fox': 'Mittel',
   'tier.owl': 'Schwer',
-  'diffHint.bunny': 'Vergisst viel. Gut für kleine Spieler.',
+  'diffHint.bunny': 'Vergisst viel. Ein sanfter Einstieg.',
   'diffHint.fox': 'Merkt sich etwa das halbe Brett.',
   'diffHint.owl': 'Merkt sich fast alles.',
 

@@ -5,6 +5,7 @@
  */
 
 import { tr } from '../i18n';
+import { nameKey } from '../store/settingsModel';
 
 /** Chips shown under the seats (the store remembers a few more). */
 export const CHIPS_SHOWN = 6;
@@ -26,9 +27,9 @@ export function chipTarget(focused: number | null, stored: readonly string[], se
 
 /** Is this name already on one of the seats in play (ignoring case)? */
 export function inLineup(name: string, stored: readonly string[], seats: number): boolean {
-  const key = name.trim().toLowerCase();
+  const key = nameKey(name);
   if (!key) return false;
-  return stored.slice(0, seats).some((n) => n.trim().toLowerCase() === key);
+  return stored.slice(0, seats).some((n) => nameKey(n) === key);
 }
 
 /** "Player 1, Fox, named Maya" — or just "Player 1, Fox" on the default name. */

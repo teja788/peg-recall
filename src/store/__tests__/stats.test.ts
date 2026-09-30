@@ -49,6 +49,8 @@ test('playerKey: by name (case-insensitive) when typed, by animal otherwise', ()
   assert.equal(playerKey(human('p2', 'cat', 'MAYA')), 'name:maya', 'same Maya on any seat/animal');
   assert.equal(playerKey(human('p1', 'fox')), 'animal:fox');
   assert.equal(playerKey(human('p1', 'fox', '  ')), 'animal:fox');
+  assert.equal(playerKey(human('p1', 'fox', 'İpek')), playerKey(human('p2', 'cat', 'IPEK')), 'Turkish İ');
+  assert.equal(playerKey(human('p1', 'fox', 'Işıl')), playerKey(human('p2', 'cat', 'IŞIL')), 'Turkish ı');
 });
 
 test('changing the device language never splits a player (stable ids, not names)', () => {

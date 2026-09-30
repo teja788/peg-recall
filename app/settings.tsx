@@ -8,6 +8,7 @@ import {
   BOARD_CYCLE,
   animalName,
   isLocked,
+  nameKey,
   playable,
   useSettings,
 } from '../src/store/settings';
@@ -172,7 +173,7 @@ function ForgetNamesRow() {
   const forgetNames = useSettings((s) => s.forgetNames);
   const [confirming, setConfirming] = useState(false);
   const saved = new Set(
-    [...names, ...recentNames].filter(Boolean).map((n) => n.toLowerCase()),
+    [...names, ...recentNames].filter(Boolean).map(nameKey),
   ).size;
 
   return (

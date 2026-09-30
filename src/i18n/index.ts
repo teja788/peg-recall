@@ -13,12 +13,25 @@ import { es } from './es';
 import { fr } from './fr';
 import { it } from './it';
 import { ja } from './ja';
+import { ko } from './ko';
+import { nl } from './nl';
+import { pl } from './pl';
 import { pt } from './pt';
+import { tr as trDict } from './tr';
+import { zh } from './zh';
 
 export type Key = keyof typeof en;
-export type Strings = Record<Key, string>;
+/** "pegs" for the plural pair 'pegs.one' / 'pegs.other'. */
+type PluralBase = { [K in Key]: K extends `${infer B}.one` ? B : never }[Key];
+/** Every English key, plus the extra plural forms a language may need
+ *  (Polish: 3 pionki, 5 pionków). A missing or unknown key is a compile error. */
+export type Strings = Record<Key, string> & Partial<Record<`${PluralBase}.${'few' | 'many'}`, string>>;
 
-export const DICTS = { en, de, fr, pt, ja, es, it } satisfies Record<string, Strings>;
+/** zh is Traditional Chinese (zh-Hant), used for every Chinese locale. */
+export const DICTS = { en, de, fr, pt, ja, es, it, ko, zh, tr: trDict, nl, pl } satisfies Record<
+  string,
+  Strings
+>;
 export type Lang = keyof typeof DICTS;
 export const LANGS = Object.keys(DICTS) as Lang[];
 
@@ -33,7 +46,8 @@ export function setLang(l: Lang): void {
   current = l;
 }
 
-/** First supported language among the preferred locales ("de-AT" → de), else English. */
+/** First supported language among the preferred locales ("de-AT" → de, any
+ *  "zh-…" → zh, which is Traditional Chinese), else English. */
 export function pickLang(tags: readonly (string | null | undefined)[]): Lang {
   for (const tag of tags) {
     const code = String(tag ?? '').toLowerCase().split(/[-_]/)[0];
@@ -55,12 +69,32 @@ export function tr(key: Key, vars?: Vars): string {
   });
 }
 
-type PluralBase = { [K in Key]: K extends `${infer B}.one` ? B : never }[Key];
+export type PluralCategory = 'one' | 'few' | 'many' | 'other';
 
-/** `trn('pegs', 3)` → "3 pegs": the `.one` form for one (and zero in French), else `.other`. */
+/** The plural form for `n` in language `l` (CLDR, via Intl.PluralRules). */
+export function pluralCategory(l: Lang, n: number): PluralCategory {
+  try {
+    const c = new Intl.PluralRules(l).select(n);
+    return c === 'one' || c === 'few' || c === 'many' ? c : 'other';
+  } catch {
+    // no Intl.PluralRules (an older Hermes): the same rules for whole numbers
+    if (l === 'ja' || l === 'ko' || l === 'zh') return 'other';
+    if (l === 'pl') {
+      if (n === 1) return 'one';
+      const d = n % 10;
+      const h = n % 100;
+      return d >= 2 && d <= 4 && (h < 12 || h > 14) ? 'few' : 'many';
+    }
+    return n === 1 || ((l === 'fr' || l === 'pt') && n === 0) ? 'one' : 'other';
+  }
+}
+
+/** `trn('pegs', 3)` → "3 pegs", "3 pionki", "5 pionków": the language's plural
+ *  form (`.one` / `.few` / `.many`), else `.other`. */
 export function trn(base: PluralBase, n: number, vars?: Vars): string {
-  const one = n === 1 || (current === 'fr' && n === 0);
-  return tr(`${base}.${one ? 'one' : 'other'}` as Key, { n, ...vars });
+  const dict: Partial<Record<string, string>> = DICTS[current];
+  const key = `${base}.${pluralCategory(current, n)}`;
+  return tr((key in dict ? key : `${base}.other`) as Key, { n, ...vars });
 }
 
 function formatNumber(n: number): string {

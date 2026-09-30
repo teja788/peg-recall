@@ -66,6 +66,11 @@ const NAMES = {
   ja: ['ゆい', 'はると', 'ばあば'],
   es: ['Sofía', 'Mateo', 'Abuela'],
   it: ['Giulia', 'Luca', 'Nonna'],
+  ko: ['서연', '민준', '할머니'],
+  zh: ['欣妤', '承恩', '阿嬤'],
+  tr: ['İpek', 'Emir', 'Nine'],
+  nl: ['Emma', 'Daan', 'Oma'],
+  pl: ['Zosia', 'Antek', 'Babcia'],
 }[LOCALE];
 
 /* ------------------------------------------------------------------ devices */
@@ -181,7 +186,10 @@ async function tap(page, label) {
 }
 
 const PEG_RE = tpl('game.peg');
-const PEGS_RE = [tpl('pegs.one'), tpl('pegs.other')];
+// every plural form the language has (Polish: 1 pionek, 3 pionki, 5 pionków)
+const PEGS_RE = ['one', 'few', 'many', 'other']
+  .filter((f) => `pegs.${f}` in i18n.DICTS[LOCALE])
+  .map((f) => tpl(`pegs.${f}`));
 const RESULT = new Set([T('game.match'), T('game.miss')]);
 const HIDDEN = T('game.pegHidden');
 const TAKEN = T('game.pegTaken');
@@ -593,7 +601,7 @@ async function captureDevice(key, only) {
     colorScheme: 'light',
     reducedMotion: 'no-preference',
     isMobile: false,
-    locale: LOCALE === 'en' ? 'en-US' : LOCALE,
+    locale: { en: 'en-US', zh: 'zh-TW' }[LOCALE] ?? LOCALE,
   });
   await ctx.addInitScript(pinVisible);
   const page = await ctx.newPage();

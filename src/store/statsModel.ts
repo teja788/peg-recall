@@ -11,7 +11,7 @@
 
 import type { AvatarId, Difficulty, GameState, PlayerSpec } from '../engine/types';
 import { playerLabel } from '../ui/names';
-import { AVATAR_CYCLE, cleanName, nameToStore } from './settingsModel';
+import { AVATAR_CYCLE, cleanName, nameKey, nameToStore } from './settingsModel';
 
 export interface WinRecord {
   played: number;
@@ -81,7 +81,7 @@ export const EMPTY_STATS: Stats = deepFreeze(emptyStats());
  *  typed on the fox's own seat: that is still just the fox). */
 export function playerKey(spec: PlayerSpec): string {
   const name = nameToStore(spec.name, spec.avatar);
-  return name ? `name:${name.toLowerCase()}` : `animal:${spec.avatar}`;
+  return name ? `name:${nameKey(name)}` : `animal:${spec.avatar}`;
 }
 
 /** The name a stats row shows. An animal row is named in the app's language

@@ -44,7 +44,7 @@ export const fr: Strings = {
   'tier.bunny': 'Facile',
   'tier.fox': 'Moyen',
   'tier.owl': 'Difficile',
-  'diffHint.bunny': 'Oublie beaucoup. Parfait pour les petits.',
+  'diffHint.bunny': 'Oublie beaucoup. Pour commencer en douceur.',
   'diffHint.fox': 'Retient environ la moitié du plateau.',
   'diffHint.owl': 'Retient presque tout.',
 

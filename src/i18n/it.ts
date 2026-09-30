@@ -43,7 +43,7 @@ export const it: Strings = {
   'tier.bunny': 'Facile',
   'tier.fox': 'Medio',
   'tier.owl': 'Difficile',
-  'diffHint.bunny': 'Dimentica tanto. Perfetto per i più piccoli.',
+  'diffHint.bunny': 'Dimentica tanto. Per iniziare con calma.',
   'diffHint.fox': 'Ricorda circa metà tabellone.',
   'diffHint.owl': 'Ricorda quasi tutto.',
 

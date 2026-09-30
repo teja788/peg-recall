@@ -45,7 +45,7 @@ export const ja: Strings = {
   'tier.bunny': 'かんたん',
   'tier.fox': 'ふつう',
   'tier.owl': 'むずかしい',
-  'diffHint.bunny': 'よくわすれるよ。ちいさな子にぴったり。',
+  'diffHint.bunny': 'よくわすれるよ。はじめてにぴったり。',
   'diffHint.fox': 'ボードのはんぶんくらいおぼえているよ。',
   'diffHint.owl': 'ほとんどぜんぶおぼえているよ。',
 

@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
+import { setLang } from '../../i18n';
+
 import {
   DEFAULT_SETTINGS,
   NAME_INPUT_MAX,
@@ -12,6 +14,7 @@ import {
   cleanName,
   humanAvatarVsAi,
   isAnimalName,
+  nameKey,
   isLocked,
   nameToStore,
   nextAvatars,
@@ -333,6 +336,32 @@ test('animal names count in every language the app speaks', () => {
   }
   // and never saved as a "played before" chip
   assert.deepEqual(addRecentNames([], ['Mia', 'Eule', 'Leon']), ['Mia', 'Leon']);
+});
+
+test('Turkish names compare the same on every device (İ/i, I/ı), whatever the app language', () => {
+  const check = () => {
+    assert.equal(cleanName('  İpek '), 'İpek', 'the dotted capital is kept as typed');
+    assert.equal(nameKey('İpek'), nameKey('ipek'));
+    assert.equal(nameKey('İPEK'), nameKey('ipek'));
+    assert.equal(nameKey('IPEK'), nameKey('ipek'));
+    assert.equal(nameKey('Işıl'), nameKey('IŞIL'));
+    assert.notEqual(nameKey('Işıl'), nameKey('İpek'));
+    assert.deepEqual(addRecentNames(['ipek', 'Işıl'], ['İpek', 'IŞIL', 'Emir']), ['İpek', 'IŞIL', 'Emir']);
+    for (const n of ['Kedi', 'KEDİ', 'kedi', 'BAYKUŞ', 'baykuş', 'Ayı', 'AYI', 'TAVŞAN']) {
+      assert.equal(isAnimalName(n), true, n);
+    }
+    assert.equal(nameToStore('KEDİ', 'cat'), '');
+    assert.equal(nameToStore('AYI', 'bear'), '');
+    assert.equal(nameToStore('İpek', 'cat'), 'İpek');
+    assert.equal(isAnimalName('Işıl'), false);
+  };
+  check();
+  try {
+    setLang('tr');
+    check();
+  } finally {
+    setLang('en');
+  }
 });
 
 test('humanAvatarVsAi: never the computer\'s own animal', () => {
