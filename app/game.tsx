@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useGame } from '../src/store/game';
 import { maybeRequestReview } from '../src/store/reviewPrompt';
-import { useSettings, type GameMode } from '../src/store/settings';
+import { playable, playableMode, useSettings, type GameMode } from '../src/store/settings';
 import { PEG_PAINT, useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
 import { Board, MIN_BOARD, boardHeightRatio, boardTiltFor } from '../src/ui/Board';
@@ -175,7 +175,8 @@ export default function GameScreen() {
   const win = useWindowDimensions();
   const reduced = useReduceMotion();
   const params = useLocalSearchParams<{ mode?: string }>();
-  const mode: GameMode = isMode(params.mode) ? params.mode : 'ai';
+  const unlocked = useSettings((s) => s.unlocked);
+  const mode: GameMode = playableMode(isMode(params.mode) ? params.mode : 'ai', unlocked);
 
   const hydrated = useSettings((s) => s.hydrated);
   const showShapes = useSettings((s) => s.showShapes);
@@ -221,7 +222,7 @@ export default function GameScreen() {
     if (!hasState) started.current = false;
     if (started.current) return;
     started.current = true;
-    start(mode, useSettings.getState());
+    start(mode, playable(useSettings.getState()));
   }, [hydrated, hasState, mode, start, leaving]);
 
   useEffect(

@@ -27,6 +27,9 @@ export interface Settings {
    *  the one-tap chips on the "Who's playing?" sheet. Cleaned, no animal names,
    *  distinct ignoring case, at most RECENT_MAX. */
   recentNames: string[];
+  /** The one-time unlock (bought, restored or grandfathered): Big and Huge
+   *  boards, Owl, 3 players. Only ever turned on; see `playable`. */
+  unlocked: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -40,6 +43,7 @@ export const DEFAULT_SETTINGS: Settings = {
   avatars: ['fox', 'owl', 'bear'],
   names: ['', '', ''],
   recentNames: [],
+  unlocked: false,
 };
 
 export const AVATAR_CYCLE: AvatarId[] = ['fox', 'owl', 'bear', 'frog', 'bunny', 'cat'];
@@ -82,8 +86,8 @@ export const DIFFICULTY_HINT: Record<Difficulty, string> = {
  */
 export const SETTINGS_KEY = 'pegrecall.settings.v1';
 /** Schema version written into the stored blob (1.0 wrote none = version 1;
- *  2 added `names`, 3 added `recentNames`). */
-export const SETTINGS_VERSION = 3;
+ *  2 added `names`, 3 added `recentNames`, 4 added `unlocked`). */
+export const SETTINGS_VERSION = 4;
 
 /* ------------------------------------------------------------ player names */
 
@@ -256,6 +260,7 @@ export function sanitize(raw: unknown): Partial<Settings> {
   if (typeof r.showShapes === 'boolean') out.showShapes = r.showShapes;
   if (typeof r.bonusTurnOnMatch === 'boolean') out.bonusTurnOnMatch = r.bonusTurnOnMatch;
   if (typeof r.kidMode === 'boolean') out.kidMode = r.kidMode;
+  if (typeof r.unlocked === 'boolean') out.unlocked = r.unlocked;
   if (BOARD_CYCLE.includes(r.boardSize as BoardSize)) out.boardSize = r.boardSize as BoardSize;
   if (['bunny', 'fox', 'owl'].includes(r.difficulty as string)) out.difficulty = r.difficulty as Difficulty;
   if (['ai', '2p', '3p'].includes(r.lastMode as string)) out.lastMode = r.lastMode as GameMode;
@@ -292,5 +297,43 @@ export function persistable(s: Settings): PersistedSettings {
     avatars: s.avatars,
     names: s.names,
     recentNames: s.recentNames,
+    unlocked: s.unlocked,
   };
+}
+
+/* ------------------------------------------------------------------ unlock */
+
+/** What the unlock opens. Board sizes, opponents and modes share no names. */
+const LOCKED = new Set<string>(['big', 'huge', 'owl', '3p']);
+
+/** true when `value` (a board size, opponent or mode) needs the unlock. */
+export function isLocked(unlocked: boolean, value: BoardSize | Difficulty | GameMode): boolean {
+  return !unlocked && LOCKED.has(value);
+}
+
+/**
+ * The settings a game is dealt with, and the choices the pickers show as
+ * selected: a locked value saved earlier (a TestFlight build, a refund) falls
+ * back to the nearest free one. The stored value is left alone.
+ */
+export function playable<S extends Settings>(s: S): S {
+  if (s.unlocked) return s;
+  const boardSize = isLocked(false, s.boardSize) ? 'classic' : s.boardSize;
+  const difficulty = isLocked(false, s.difficulty) ? 'fox' : s.difficulty;
+  return boardSize === s.boardSize && difficulty === s.difficulty ? s : { ...s, boardSize, difficulty };
+}
+
+/**
+ * true for settings saved by 1.0 or 1.1, which had no unlock: an early player,
+ * who keeps everything. Backs up AppTransaction, which needs iOS 16.
+ */
+export function savedBeforeUnlock(raw: unknown): boolean {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
+  const v = (raw as Record<string, unknown>).version;
+  return typeof v !== 'number' || v < 4;
+}
+
+/** 3 players without the unlock (a deep link, an old route) plays as 2. */
+export function playableMode(mode: GameMode, unlocked: boolean): GameMode {
+  return isLocked(unlocked, mode) ? '2p' : mode;
 }

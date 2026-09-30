@@ -5,6 +5,7 @@ import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { startPurchases } from '../src/store/purchases';
 import { useSettings } from '../src/store/settings';
 import { useStats } from '../src/store/stats';
 import { DARK, LIGHT, ThemeProvider } from '../src/theme';
@@ -17,6 +18,8 @@ export default function RootLayout() {
     void hydrate();
     // per-name win stats: read once at launch, alongside the settings
     void useStats.getState().hydrate();
+    // replayed App Store transactions, and "already owns the unlock?" (quietly)
+    startPurchases();
   }, [hydrate]);
 
   // the colour behind the screens during a transition — matching the table

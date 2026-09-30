@@ -9,6 +9,8 @@ import {
   BOARD_NAME,
   DIFFICULTY_LABEL,
   DIFFICULTY_TIER,
+  isLocked,
+  playable,
   useSettings,
   type GameMode,
 } from '../src/store/settings';
@@ -18,6 +20,7 @@ import { BoardGlyph, BoardMini } from '../src/ui/BoardMini';
 import { IconButton, ModeCard, OptionPill, QuestionGlyph } from '../src/ui/controls';
 import { joinNames, playerLabel } from '../src/ui/names';
 import { PlayersSheet } from '../src/ui/PlayersSheet';
+import { UnlockSheet } from '../src/ui/UnlockSheet';
 import { BOARD_SPECS, type AvatarId, type Difficulty, type PegColor } from '../src/engine/types';
 
 /**
@@ -72,8 +75,10 @@ export default function Home() {
   const { height } = useWindowDimensions();
   const compact = height < SHORT_SCREEN;
   const soundOn = useSettings((s) => s.soundOn);
-  const boardSize = useSettings((s) => s.boardSize);
-  const difficulty = useSettings((s) => s.difficulty);
+  // a saved Big board or Owl shows (and plays) as Classic / Fox until unlocked
+  const boardSize = useSettings((s) => playable(s).boardSize);
+  const difficulty = useSettings((s) => playable(s).difficulty);
+  const unlocked = useSettings((s) => s.unlocked);
   const toggle = useSettings((s) => s.toggle);
   const setSetting = useSettings((s) => s.set);
   const names = useSettings((s) => s.names);
@@ -86,12 +91,16 @@ export default function Home() {
   const navigating = useRef(false);
   /** The mode whose "Who's playing?" sheet is up, if any. */
   const [setup, setSetup] = useState<GameMode | null>(null);
+  const [unlocking, setUnlocking] = useState(false);
   useFocusEffect(
     useCallback(() => {
       navigating.current = false;
       // the sheet stays up while Home fades out under the game, and is gone
       // by the time anyone comes back
-      return () => setSetup(null);
+      return () => {
+        setSetup(null);
+        setUnlocking(false);
+      };
     }, []),
   );
 
@@ -105,10 +114,14 @@ export default function Home() {
   );
 
   /** A mode card: ask who's playing first (one more tap, on Play). */
-  const choose = useCallback((mode: GameMode) => {
-    if (navigating.current) return;
-    setSetup(mode);
-  }, []);
+  const choose = useCallback(
+    (mode: GameMode) => {
+      if (navigating.current) return;
+      if (isLocked(unlocked, mode)) setUnlocking(true);
+      else setSetup(mode);
+    },
+    [unlocked],
+  );
 
   const play = useCallback(
     (mode: GameMode) => {
@@ -207,6 +220,7 @@ export default function Home() {
           subtitle={subtitles['3p']}
           art={<BoardMini width={cardArt} colors={PREVIEWS['3p']} theme={t.scheme} />}
           onPress={() => choose('3p')}
+          locked={isLocked(unlocked, '3p')}
           style={cardStyle}
         />
 
@@ -223,7 +237,10 @@ export default function Home() {
                   title={BOARD_NAME[b]}
                   hint={`${pegs} pegs`}
                   label={`${BOARD_NAME[b]} board, ${pegs} pegs`}
-                  onPress={() => setSetting('boardSize', b)}
+                  locked={isLocked(unlocked, b)}
+                  onPress={() =>
+                    isLocked(unlocked, b) ? setUnlocking(true) : setSetting('boardSize', b)
+                  }
                   art={
                     <BoardGlyph
                       size={glyphSize}
@@ -248,7 +265,10 @@ export default function Home() {
                 title={DIFFICULTY_LABEL[d]}
                 hint={DIFFICULTY_TIER[d]}
                 label={`${DIFFICULTY_LABEL[d]} opponent, ${DIFFICULTY_TIER[d]}`}
-                onPress={() => setSetting('difficulty', d)}
+                locked={isLocked(unlocked, d)}
+                onPress={() =>
+                  isLocked(unlocked, d) ? setUnlocking(true) : setSetting('difficulty', d)
+                }
                 art={<Avatar id={d} size={avatarSize} />}
               />
             ))}
@@ -264,6 +284,7 @@ export default function Home() {
           onClose={() => setSetup(null)}
         />
       ) : null}
+      {unlocking ? <UnlockSheet onClose={() => setUnlocking(false)} /> : null}
     </Backdrop>
   );
 }

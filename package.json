@@ -16,6 +16,7 @@
     "expo-audio": "~55.0.18",
     "expo-constants": "~55.0.17",
     "expo-haptics": "~55.0.18",
+    "expo-iap": "^5.8.2",
     "expo-linear-gradient": "~55.0.18",
     "expo-linking": "~55.0.17",
     "expo-router": "~55.0.18",

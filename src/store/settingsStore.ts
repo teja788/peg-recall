@@ -17,6 +17,7 @@ import {
   nextAvatars,
   persistable,
   sanitize,
+  savedBeforeUnlock,
   type CycleOptions,
   type Settings,
 } from './settingsModel';
@@ -85,7 +86,9 @@ export function createSettingsStore(storage: KeyValueStorage, opts: SettingsStor
         }
         hydrating = gate
           .hydrate((raw) => {
-            const stored = sanitize(parseJson(raw));
+            const parsed = parseJson(raw);
+            const stored = sanitize(parsed);
+            if (savedBeforeUnlock(parsed)) stored.unlocked = true;
             const apply: Partial<Settings> = {};
             for (const k of Object.keys(stored) as (keyof Settings)[]) {
               if (!touched.has(k)) (apply as Record<string, unknown>)[k] = stored[k];

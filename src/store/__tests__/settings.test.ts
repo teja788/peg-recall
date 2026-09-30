@@ -12,10 +12,14 @@ import {
   cleanName,
   humanAvatarVsAi,
   isAnimalName,
+  isLocked,
   nameToStore,
   nextAvatars,
   persistable,
+  playable,
+  playableMode,
   sanitize,
+  savedBeforeUnlock,
   type Settings,
 } from '../settingsModel';
 
@@ -132,7 +136,7 @@ test('persistable writes only the stored fields, plus the schema version', () =>
     [...Object.keys(DEFAULT_SETTINGS), 'version'].sort(),
   );
   assert.equal(persistable(DEFAULT_SETTINGS).version, SETTINGS_VERSION);
-  assert.equal(SETTINGS_VERSION, 3);
+  assert.equal(SETTINGS_VERSION, 4);
 });
 
 /* ----------------------------------------------------------------- A18 */
@@ -157,7 +161,7 @@ test('A18: a v1 blob (no version, no names) hydrates with every field intact', (
     avatars: ['cat', 'frog', 'bunny'],
   };
   const s = hydrated(JSON.stringify(v1));
-  assert.deepEqual(s, { ...v1, names: ['', '', ''], recentNames: [] });
+  assert.deepEqual(s, { ...v1, names: ['', '', ''], recentNames: [], unlocked: false });
   assert.equal(SETTINGS_KEY, 'pegrecall.settings.v1', 'no key migration');
 });
 
@@ -173,7 +177,7 @@ test('A18: a current blob round-trips and the version field is ignored on read',
   const blob = {
     ...persistable({ ...DEFAULT_SETTINGS, names: ['Ann', 'Bo', 'Cy'], recentNames: ['Ann', 'Dee'] }),
   };
-  assert.equal(blob.version, 3);
+  assert.equal(blob.version, 4);
   assert.deepEqual(hydrated(JSON.stringify(blob)).recentNames, ['Ann', 'Dee']);
   assert.equal('version' in sanitize(blob), false, 'version never leaks into Settings');
   assert.deepEqual(hydrated(JSON.stringify(blob)).names, ['Ann', 'Bo', 'Cy']);
@@ -349,4 +353,43 @@ test('nextAvatars: an animal held by a seat not in play is swapped over', () => 
   ]) {
     assert.equal(new Set(out).size, 3, 'stored avatars stay distinct');
   }
+});
+
+/* -------------------------------------------------------------- unlock */
+
+test('settings saved by 1.0/1.1 mark an early player; 1.2 blobs and junk do not', () => {
+  assert.equal(savedBeforeUnlock({ boardSize: 'big' }), true, '1.0 wrote no version');
+  assert.equal(savedBeforeUnlock({ version: 3 }), true);
+  assert.equal(savedBeforeUnlock({ version: 4, unlocked: false }), false);
+  assert.equal(savedBeforeUnlock(null), false);
+  assert.equal(savedBeforeUnlock([]), false);
+});
+
+test('a stored unlocked flag round-trips', () => {
+  assert.equal(hydrated(JSON.stringify({ unlocked: true })).unlocked, true);
+  assert.equal(sanitize({ unlocked: 'yes' }).unlocked, undefined, 'junk is dropped');
+});
+
+test('lock rules: Big, Huge, Owl and 3 players need the unlock', () => {
+  for (const v of ['big', 'huge', 'owl', '3p'] as const) {
+    assert.equal(isLocked(false, v), true, v);
+    assert.equal(isLocked(true, v), false, v);
+  }
+  for (const v of ['small', 'classic', 'bunny', 'fox', 'ai', '2p'] as const) {
+    assert.equal(isLocked(false, v), false, v);
+  }
+});
+
+test('playable falls back to the nearest free value, never changes an unlocked one', () => {
+  const s: Settings = { ...DEFAULT_SETTINGS, boardSize: 'huge', difficulty: 'owl' };
+  const p = playable(s);
+  assert.equal(p.boardSize, 'classic');
+  assert.equal(p.difficulty, 'fox');
+  assert.equal(s.boardSize, 'huge', 'the stored settings are not touched');
+  assert.equal(playable({ ...s, unlocked: true }).boardSize, 'huge');
+  const free = { ...DEFAULT_SETTINGS, boardSize: 'small' as const, difficulty: 'bunny' as const };
+  assert.equal(playable(free), free, 'nothing locked: the same object back');
+  assert.equal(playableMode('3p', false), '2p');
+  assert.equal(playableMode('3p', true), '3p');
+  assert.equal(playableMode('ai', false), 'ai');
 });

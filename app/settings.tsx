@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -8,12 +8,18 @@ import {
   BOARD_LABEL,
   DIFFICULTY_HINT,
   DIFFICULTY_LABEL,
+  isLocked,
+  playable,
   useSettings,
 } from '../src/store/settings';
+import { buy } from '../src/store/purchases';
+import { TIP_IDS, type ProductId } from '../src/store/purchasesModel';
 import { useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
 import { Chip, IconButton, ToggleRow } from '../src/ui/controls';
+import { ParentalGate } from '../src/ui/ParentalGate';
 import { PillButton, RateRow, StatsCard } from '../src/ui/StatsCard';
+import { BUY_NOTE, UnlockSheet, usePrices } from '../src/ui/UnlockSheet';
 import type { Difficulty } from '../src/engine/types';
 
 const DIFFICULTIES: Difficulty[] = ['bunny', 'fox', 'owl'];
@@ -29,10 +35,13 @@ export default function SettingsScreen() {
   const showShapes = useSettings((s) => s.showShapes);
   const bonusTurnOnMatch = useSettings((s) => s.bonusTurnOnMatch);
   const kidMode = useSettings((s) => s.kidMode);
-  const boardSize = useSettings((s) => s.boardSize);
-  const difficulty = useSettings((s) => s.difficulty);
+  const boardSize = useSettings((s) => playable(s).boardSize);
+  const difficulty = useSettings((s) => playable(s).difficulty);
+  const unlocked = useSettings((s) => s.unlocked);
   const toggle = useSettings((s) => s.toggle);
   const setSetting = useSettings((s) => s.set);
+  /** the Unlock sheet is up; 'restore' opens it on the restore question */
+  const [sheet, setSheet] = useState<'unlock' | 'restore' | null>(null);
 
   return (
     <Backdrop>
@@ -100,7 +109,8 @@ export default function SettingsScreen() {
               key={b}
               text={BOARD_LABEL[b]}
               selected={boardSize === b}
-              onPress={() => setSetting('boardSize', b)}
+              locked={isLocked(unlocked, b)}
+              onPress={() => (isLocked(unlocked, b) ? setSheet('unlock') : setSetting('boardSize', b))}
             />
           ))}
         </View>
@@ -116,7 +126,8 @@ export default function SettingsScreen() {
               label={DIFFICULTY_LABEL[d]}
               hint={DIFFICULTY_HINT[d]}
               selected={difficulty === d}
-              onPress={() => setSetting('difficulty', d)}
+              locked={isLocked(unlocked, d)}
+              onPress={() => (isLocked(unlocked, d) ? setSheet('unlock') : setSetting('difficulty', d))}
             />
           ))}
         </View>
@@ -132,8 +143,20 @@ export default function SettingsScreen() {
         </Text>
         <StatsCard />
         <ForgetNamesRow />
+
+        <UnlockRow unlocked={unlocked} onOpen={setSheet} />
+        <Text
+          accessibilityRole="header"
+          style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}
+        >
+          Support Color Catch
+        </Text>
+        <TipJar />
         <RateRow />
       </ScrollView>
+      {sheet ? (
+        <UnlockSheet restoring={sheet === 'restore'} onClose={() => setSheet(null)} />
+      ) : null}
     </Backdrop>
   );
 }
@@ -201,6 +224,123 @@ function ForgetNamesRow() {
               text="Forget player names"
               onPress={() => setConfirming(true)}
             />
+          ) : null}
+        </>
+      )}
+    </View>
+  );
+}
+
+/** "Unlock everything": opens the sheet, or says it is owned. Restore lives
+ *  here too (Apple asks for it wherever the purchase is offered). */
+function UnlockRow({
+  unlocked,
+  onOpen,
+}: {
+  unlocked: boolean;
+  onOpen: (what: 'unlock' | 'restore') => void;
+}) {
+  const t = useTheme();
+  return (
+    <View
+      style={{
+        minHeight: 56,
+        paddingVertical: t.spacing.md,
+        paddingHorizontal: t.spacing.lg,
+        borderRadius: t.radii.md,
+        backgroundColor: t.c.card,
+        borderWidth: 1,
+        borderColor: t.c.line,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: t.spacing.sm,
+      }}
+    >
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={unlocked ? 'Unlock everything: unlocked' : 'Unlock everything'}
+        accessibilityHint="Big and Huge boards, Owl and 3 players"
+        onPress={() => onOpen('unlock')}
+        style={({ pressed }) => ({
+          flex: 1,
+          minWidth: 160,
+          flexDirection: 'row',
+          alignItems: 'center',
+          opacity: pressed ? 0.7 : 1,
+        })}
+      >
+        <View style={{ flex: 1, paddingRight: t.spacing.md }}>
+          <Text style={{ ...t.type.body, color: t.c.text }}>Unlock everything</Text>
+          <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: 2 }}>
+            {unlocked ? 'Unlocked. Thank you!' : 'Big and Huge boards, Owl, 3 players'}
+          </Text>
+        </View>
+        <Text allowFontScaling={false} style={{ fontSize: 22, color: t.c.textDim }}>
+          ›
+        </Text>
+      </Pressable>
+      {unlocked ? null : <PillButton text="Restore purchase" onPress={() => onOpen('restore')} />}
+    </View>
+  );
+}
+
+const TIP_NAME: Record<(typeof TIP_IDS)[number], string> = {
+  'com.raviteja.pegrecall.tip.small': 'Small tip',
+  'com.raviteja.pegrecall.tip.medium': 'Medium tip',
+  'com.raviteja.pegrecall.tip.large': 'Large tip',
+};
+
+/** The tip jar: three consumables that unlock nothing, behind the math question. */
+function TipJar() {
+  const t = useTheme();
+  const prices = usePrices();
+  const [asking, setAsking] = useState<ProductId | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+
+  const tip = async (id: ProductId) => {
+    setAsking(null);
+    setNote(null);
+    setBusy(true);
+    const r = await buy(id);
+    setNote(r === 'done' ? 'Thank you! Your tip keeps Color Catch ad-free. 💛' : BUY_NOTE[r]);
+    setBusy(false);
+  };
+
+  return (
+    <View
+      style={{
+        paddingVertical: t.spacing.md,
+        paddingHorizontal: t.spacing.lg,
+        borderRadius: t.radii.md,
+        backgroundColor: t.c.card,
+        borderWidth: 1,
+        borderColor: t.c.line,
+        gap: t.spacing.md,
+      }}
+    >
+      {asking ? (
+        <ParentalGate onPass={() => void tip(asking)} onCancel={() => setAsking(null)} />
+      ) : (
+        <>
+          <Text style={{ ...t.type.caption, color: t.c.textDim }}>
+            Tips help keep Color Catch ad-free. They don&apos;t unlock anything.
+          </Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.sm }}>
+            {TIP_IDS.map((id) => (
+              <PillButton
+                key={id}
+                text={prices[id] ? `${TIP_NAME[id]} · ${prices[id]}` : TIP_NAME[id]}
+                label={prices[id] ? `${TIP_NAME[id]}, ${prices[id]}` : TIP_NAME[id]}
+                onPress={() => (busy ? undefined : setAsking(id))}
+              />
+            ))}
+          </View>
+          {busy || note ? (
+            <Text accessibilityLiveRegion="polite" style={{ ...t.type.label, color: t.c.text }}>
+              {busy ? 'One moment…' : note}
+            </Text>
           ) : null}
         </>
       )}

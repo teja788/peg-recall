@@ -41,6 +41,22 @@ export function QuestionGlyph({ size, color }: { size: number; color: string }) 
   );
 }
 
+/** A small padlock: the badge on options that need "Unlock everything". */
+export function LockGlyph({ size, color }: { size: number; color: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path
+        d="M7.5 11 V8 A4.5 4.5 0 0 1 16.5 8 V11"
+        fill="none"
+        stroke={color}
+        strokeWidth={2.6}
+        strokeLinecap="round"
+      />
+      <Rect x={4.5} y={10.5} width={15} height={11} rx={2.6} fill={color} />
+    </Svg>
+  );
+}
+
 /** 44 pt round button holding one glyph (speaker, gear, back…) or drawn icon. */
 export function IconButton({
   glyph,
@@ -99,25 +115,30 @@ export function Chip({
   hint,
   onPress,
   selected,
+  locked,
 }: {
   text: string;
   label?: string;
   hint?: string;
   onPress: () => void;
   selected?: boolean;
+  /** needs the unlock: a padlock, and a tap opens the Unlock sheet */
+  locked?: boolean;
 }) {
   const t = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label ?? text}
-      accessibilityHint={hint}
+      accessibilityLabel={locked ? `${label ?? text}, locked` : (label ?? text)}
+      accessibilityHint={locked ? 'Opens Unlock everything' : hint}
       accessibilityState={{ selected: !!selected }}
       onPress={onPress}
       style={({ pressed }) => ({
         minHeight: 44,
         paddingHorizontal: t.spacing.lg,
-        justifyContent: 'center',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: t.spacing.xs,
         borderRadius: t.radii.pill,
         backgroundColor: selected ? t.c.accent : t.c.card,
         borderWidth: 2,
@@ -127,6 +148,7 @@ export function Chip({
         opacity: pressed ? 0.75 : 1,
       })}
     >
+      {locked ? <LockGlyph size={14} color={t.c.textDim} /> : null}
       <Text style={{ ...t.type.label, color: selected ? t.c.accentInk : t.c.text }}>{text}</Text>
     </Pressable>
   );
@@ -148,6 +170,7 @@ export function OptionPill({
   selected,
   label,
   onPress,
+  locked,
 }: {
   /** small drawing above the label — a board glyph or an avatar */
   art: React.ReactNode;
@@ -157,6 +180,8 @@ export function OptionPill({
   /** spoken name; falls back to "title, hint" */
   label?: string;
   onPress: () => void;
+  /** needs the unlock: a padlock badge, and a tap opens the Unlock sheet */
+  locked?: boolean;
 }) {
   const t = useTheme();
   const reduced = useReducedMotion();
@@ -181,7 +206,8 @@ export function OptionPill({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label ?? (hint ? `${title}, ${hint}` : title)}
+      accessibilityLabel={`${label ?? (hint ? `${title}, ${hint}` : title)}${locked ? ', locked' : ''}`}
+      accessibilityHint={locked ? 'Opens Unlock everything' : undefined}
       accessibilityState={{ selected }}
       onPress={onPress}
       style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.75 : 1 })}
@@ -200,6 +226,16 @@ export function OptionPill({
         ]}
       >
         {art}
+        {locked ? (
+          <View
+            style={[
+              styles.lockBadge,
+              { backgroundColor: t.c.card, borderColor: t.c.line, top: t.spacing.xs, right: t.spacing.xs },
+            ]}
+          >
+            <LockGlyph size={11} color={t.c.textDim} />
+          </View>
+        ) : null}
         <Text
           numberOfLines={1}
           maxFontSizeMultiplier={1.3}
@@ -239,6 +275,7 @@ export function ModeCard({
   art,
   onPress,
   style,
+  locked,
 }: {
   title: string;
   subtitle: string;
@@ -246,13 +283,15 @@ export function ModeCard({
   art: React.ReactNode;
   onPress: () => void;
   style?: ViewStyle;
+  /** needs the unlock: a padlock by the chevron, and a tap opens the Unlock sheet */
+  locked?: boolean;
 }) {
   const t = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={title}
-      accessibilityHint={subtitle}
+      accessibilityLabel={locked ? `${title}, locked` : title}
+      accessibilityHint={locked ? 'Opens Unlock everything' : subtitle}
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
@@ -271,6 +310,11 @@ export function ModeCard({
         <Text style={{ ...t.type.heading, color: t.c.text }}>{title}</Text>
         <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: 2 }}>{subtitle}</Text>
       </View>
+      {locked ? (
+        <View style={{ marginRight: t.spacing.sm }}>
+          <LockGlyph size={18} color={t.c.textDim} />
+        </View>
+      ) : null}
       <Text allowFontScaling={false} style={{ fontSize: 22, color: t.c.textDim }}>
         ›
       </Text>
@@ -350,6 +394,15 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   row: { flexDirection: 'row', alignItems: 'center' },
+  lockBadge: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   pill: {
     minHeight: 44,
     alignItems: 'center',

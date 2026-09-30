@@ -79,7 +79,7 @@ const STATS_KEY = 'pegrecall.stats.v1';
 
 /** A household that has played a few times: names typed, chips remembered. */
 const BASE_SETTINGS = {
-  version: 3,
+  version: 4,
   soundOn: true,
   showShapes: false,
   boardSize: 'classic',
@@ -90,6 +90,9 @@ const BASE_SETTINGS = {
   avatars: ['fox', 'owl', 'bear'],
   names: ['Maya', '', ''],
   recentNames: ['Maya', 'Leo', 'Nana'],
+  // shots show Big / Huge boards, Owl and 3 players: the store listing's own
+  // screenshots are of the unlocked game
+  unlocked: true,
 };
 
 /* ------------------------------------------------------- page-side helpers */

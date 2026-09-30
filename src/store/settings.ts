@@ -20,7 +20,10 @@ export {
   cleanName,
   humanAvatarVsAi,
   isAnimalName,
+  isLocked,
   nameToStore,
+  playable,
+  playableMode,
   sanitize,
 } from './settingsModel';
 export type { CycleOptions, GameMode, Settings } from './settingsModel';

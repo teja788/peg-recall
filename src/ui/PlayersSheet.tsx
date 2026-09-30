@@ -48,6 +48,7 @@ import {
   NAME_INPUT_MAX,
   humanAvatarVsAi,
   nameToStore,
+  playable,
   useSettings,
   type GameMode,
 } from '../store/settings';
@@ -92,8 +93,9 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
   const names = useSettings((s) => s.names);
   const avatars = useSettings((s) => s.avatars);
   const recentNames = useSettings((s) => s.recentNames);
-  const difficulty = useSettings((s) => s.difficulty);
-  const boardSize = useSettings((s) => s.boardSize);
+  // what the game will actually be dealt (see `playable`)
+  const difficulty = useSettings((s) => playable(s).difficulty);
+  const boardSize = useSettings((s) => playable(s).boardSize);
   const setName = useSettings((s) => s.setName);
   const cycleAvatar = useSettings((s) => s.cycleAvatar);
   const rememberNames = useSettings((s) => s.rememberNames);
