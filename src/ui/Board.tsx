@@ -30,7 +30,8 @@ import { Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-nativ
 
 import type { GameState } from '../engine/types';
 import { roundLayout, type RoundLayout } from '../layout/roundLayout';
-import { PEG_PAINT, useTheme } from '../theme';
+import { useTheme } from '../theme';
+import { tr } from '../i18n';
 import { MovingPeg, PEG_ANIM, Peg } from './Peg';
 
 /**
@@ -346,7 +347,7 @@ function BoardImpl({
       <View
         ref={boardRef}
         onLayout={onBoardLayout}
-        accessibilityLabel={`Round board, ${pegCount} pegs`}
+        accessibilityLabel={tr('game.board', { n: pegCount })}
         style={{ width, height: m.height }}
       >
         {/* the disc */}
@@ -402,15 +403,15 @@ function BoardImpl({
           const off = peg.state !== 'hidden' || disabled;
           const what =
             peg.state === 'captured'
-              ? 'taken'
+              ? tr('game.pegTaken')
               : peg.state === 'revealed'
-                ? PEG_PAINT[peg.color].label
-                : 'hidden';
+                ? tr(`color.${peg.color}`)
+                : tr('game.pegHidden');
           return (
             <PegHit
               key={`hit-${peg.index}`}
               index={peg.index}
-              label={`Peg ${order + 1}, ring ${slot.ring + 1}, ${what}`}
+              label={tr('game.peg', { n: order + 1, ring: slot.ring + 1, what })}
               off={off}
               onPick={onPick}
               left={slot.left + m.pegWidth / 2 - m.hit.w / 2}

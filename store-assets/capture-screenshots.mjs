@@ -3,8 +3,13 @@
  * locale in store-assets/captions.json. Not tied to a version: edit captions
  * in captions.json, reshoot only what changed.
  *
- *   node store-assets/capture-screenshots.mjs [iphone-6.5|ipad-12.9] [--only=1,3]
+ *   node store-assets/capture-screenshots.mjs [iphone-6.5|ipad-12.9] [--only=1,3] [--locale=de]
  *   node store-assets/capture-screenshots.mjs compose      # captions only, no app needed
+ *
+ * --locale (en, de, fr, pt, ja, es, it; default en) runs the app in that
+ * language (the browser's navigator.language) with names natural to it, and
+ * writes the frames to screenshot-frames/<locale>/<device>/ (en keeps
+ * screenshot-frames/<device>/). The app's own strings (src/i18n) drive it.
  *
  * Stage 1 drives the Expo web build in headless Chromium (Playwright) and
  * writes the bare game frames to store-assets/screenshot-frames/<device>/.
@@ -19,9 +24,9 @@
  * Settings are seeded straight into localStorage (web storage backend, key
  * pegrecall.settings.v1) before each shot, so every shot starts from a known
  * state: shapes off (except shot 6), light mode (except shot 7), typed names.
- * The game is driven by aria-labels; during the opening reveal every peg's
- * label carries its colour, so the board is memorised and the script can
- * match or miss on purpose.
+ * The game is driven by aria-labels, in the app's language (read from
+ * src/i18n); during the opening reveal every peg's label carries its colour, so
+ * the board is memorised and the script can match or miss on purpose.
  */
 
 import { execFileSync } from 'node:child_process';
@@ -31,11 +36,37 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { chromium } from 'playwright-core';
+import { require as tsxRequire } from 'tsx/cjs/api';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const RAW_ROOT = path.join(HERE, 'screenshot-frames');
 const COMPOSE = path.join(os.homedir(), '.claude/skills/ship-ios-app/compose-screenshots.mjs');
 const BASE = process.env.PEG_URL ?? 'http://localhost:8089';
+
+/* ------------------------------------------------------------------ locale */
+
+const LOCALE = (process.argv.find((a) => a.startsWith('--locale=')) ?? '--locale=en').slice(9);
+const i18n = tsxRequire('../src/i18n/index.ts', import.meta.url);
+if (!i18n.LANGS.includes(LOCALE)) throw new Error(`unknown locale "${LOCALE}" (${i18n.LANGS.join(', ')})`);
+i18n.setLang(LOCALE);
+const T = i18n.tr;
+/** A string template as an anchored regex: "Find {color}" -> /^Find (?<color>.+?)$/. */
+const tpl = (key) =>
+  new RegExp(
+    `^${T(key)
+      .replace(/[.*+?^$()|[\]\\]/g, '\\$&')
+      .replace(/\{(\w+)\}/g, (_, k) => `(?<${k}>.+?)`)}$`,
+  );
+/** Seat names a family in that language would type: two kids and a grandparent. */
+const NAMES = {
+  en: ['Maya', 'Leo', 'Nana'],
+  de: ['Mia', 'Leon', 'Oma'],
+  fr: ['Léa', 'Hugo', 'Mamie'],
+  pt: ['Ana', 'Lucas', 'Vovó'],
+  ja: ['ゆい', 'はると', 'ばあば'],
+  es: ['Sofía', 'Mateo', 'Abuela'],
+  it: ['Giulia', 'Luca', 'Nonna'],
+}[LOCALE];
 
 /* ------------------------------------------------------------------ devices */
 
@@ -88,8 +119,8 @@ const BASE_SETTINGS = {
   kidMode: false,
   lastMode: 'ai',
   avatars: ['fox', 'owl', 'bear'],
-  names: ['Maya', '', ''],
-  recentNames: ['Maya', 'Leo', 'Nana'],
+  names: [NAMES[0], '', ''],
+  recentNames: NAMES,
   // shots show Big / Huge boards, Owl and 3 players: the store listing's own
   // screenshots are of the unlocked game
   unlocked: true,
@@ -149,55 +180,70 @@ async function tap(page, label) {
   if (!ok) throw new Error(`no control labelled "${label}"`);
 }
 
-const PEG_RE = /^(Peg \d+, ring \d+), (.+)$/;
-// "Fox, computer, 3 pegs" / "Maya, bear, 2 pegs, their turn"
-const TRAY_RE = /^(.+?)(?:, (?:fox|owl|bear|frog|bunny|cat))?(, computer)?, (\d+) pegs?(, their turn)?$/;
-const RESULT = new Set(['Match!', 'Not that one']);
+const PEG_RE = tpl('game.peg');
+const PEGS_RE = [tpl('pegs.one'), tpl('pegs.other')];
+const RESULT = new Set([T('game.match'), T('game.miss')]);
+const HIDDEN = T('game.pegHidden');
+const TAKEN = T('game.pegTaken');
+const ROLL = T('game.roll');
+const LOOK = new Set([T('game.look'), T('game.lookSudden')]);
+const BANNERS = ['game.turn', 'game.find', 'game.thinking', 'game.rolling'].map(tpl);
+const TURN_RE = tpl('game.turn');
+const FIND_RE = tpl('game.find');
+const REVEAL_RE = tpl('game.reveal');
+const DIE_FACE_RE = tpl('game.dieFace');
+const BOARD_RE = tpl('game.board');
+
+/** A peg's label, as the board would read it with `what` ("hidden", a colour). */
+const pegLabel = (id, what) => {
+  const [n, ring] = id.split('|');
+  return T('game.peg', { n: Number(n), ring: Number(ring), what });
+};
 
 function readState(ls) {
-  const pegs = new Map(); // "Peg 7, ring 2" -> "hidden" | "taken" | colour
+  const pegs = new Map(); // "7|2" (peg 7, ring 2) -> hidden | taken | colour
   const trays = [];
   let banner = null;
   let die = null;
   for (const l of ls) {
     const p = PEG_RE.exec(l);
     if (p) {
-      pegs.set(p[1], p[2]);
+      pegs.set(`${p.groups.n}|${p.groups.ring}`, p.groups.what);
       continue;
     }
-    if (l === 'Roll the die' || l === 'Die rolling' || l.startsWith('Die shows ')) {
+    if (l === ROLL || l === T('game.dieRolling') || DIE_FACE_RE.test(l)) {
       die = l;
       continue;
     }
-    const t = TRAY_RE.exec(l);
-    if (t && !l.startsWith('Peg ') && !l.startsWith('Round board')) {
-      trays.push({ name: t[1], ai: !!t[2], score: Number(t[3]), active: !!t[4] });
+    // "Fox, computer, 3 pegs" / "Maya, Bear, 2 pegs, their turn"
+    const parts = l.split(', ');
+    const score = parts.map((x) => PEGS_RE.map((re) => re.exec(x)).find(Boolean)).find(Boolean);
+    if (score && parts.length > 1 && !BOARD_RE.test(l)) {
+      trays.push({
+        name: parts[0],
+        ai: parts.includes(T('common.computer')),
+        score: Number(score.groups.n),
+        active: parts.includes(T('game.theirTurn')),
+      });
     }
-    if (
-      RESULT.has(l) ||
-      l === 'Board clear!' ||
-      /look and remember!$/i.test(l) ||
-      /'s? turn$/.test(l) ||
-      /^Find [A-Z][a-z]+$/.test(l) ||
-      / is (thinking|rolling)…$/.test(l)
-    ) {
+    if (RESULT.has(l) || l === T('game.boardClear') || LOOK.has(l) || BANNERS.some((re) => re.test(l))) {
       banner = l;
     }
   }
-  const over = ls.includes('Play again');
-  const find = banner && /^Find (.+)$/.exec(banner);
-  const ring = ls.map((l) => /^Memorise the board\. (\d+) seconds? left$/.exec(l)).find(Boolean);
+  const over = ls.includes(T('over.playAgain'));
+  const find = banner && FIND_RE.exec(banner);
+  const ring = ls.map((l) => REVEAL_RE.exec(l)).find(Boolean);
   return {
-    countdown: ring ? Number(ring[1]) : null,
+    countdown: ring ? Number(/\d+/.exec(ring.groups.seconds)[0]) : null,
     pegs,
     trays,
     banner,
     die,
     over,
-    paused: ls.includes('Resume'),
-    target: find ? find[1] : null,
-    humanRoll: ls.includes('Roll the die') && !!banner && /'s? turn$/.test(banner),
-    revealing: !!banner && /look and remember!$/i.test(banner),
+    paused: ls.includes(T('pause.resume')),
+    target: find ? find.groups.color : null,
+    humanRoll: ls.includes(ROLL) && !!banner && TURN_RE.test(banner),
+    revealing: LOOK.has(banner),
     active: trays.find((t) => t.active) ?? null,
   };
 }
@@ -239,7 +285,7 @@ async function goto(page, route) {
   const deadline = Date.now() + 90000;
   for (;;) {
     const ls = await labels(page);
-    if (ls.length > 2 && !ls.includes('Loading game')) break;
+    if (ls.length > 2 && !ls.includes(T('game.loading'))) break;
     if (Date.now() > deadline) throw new Error(`${route} never painted`);
     await sleep(150);
   }
@@ -250,16 +296,16 @@ async function goto(page, route) {
 const BANNER_SETTLE = 320;
 
 async function memorise(page) {
-  const s = await until(page, (x) => x.pegs.size > 0 && [...x.pegs.values()].some((v) => v !== 'hidden'), {
+  const s = await until(page, (x) => x.pegs.size > 0 && [...x.pegs.values()].some((v) => v !== HIDDEN), {
     timeout: 60000,
     what: 'the opening reveal',
   });
   const map = new Map();
-  for (const [k, v] of s.pegs) if (v !== 'hidden' && v !== 'taken') map.set(k, v);
+  for (const [k, v] of s.pegs) if (v !== HIDDEN && v !== TAKEN) map.set(k, v);
   if (map.size < s.pegs.size) {
     await sleep(300);
     const again = await state(page);
-    for (const [k, v] of again.pegs) if (v !== 'hidden' && v !== 'taken') map.set(k, v);
+    for (const [k, v] of again.pegs) if (v !== HIDDEN && v !== TAKEN) map.set(k, v);
   }
   return map;
 }
@@ -269,24 +315,24 @@ async function waitHuman(page) {
 }
 
 async function roll(page) {
-  await tap(page, 'Roll the die');
+  await tap(page, ROLL);
   return until(page, (s) => s.target != null || s.over, { timeout: 20000, what: 'the die to settle' });
 }
 
 /** Take the peg the die asked for (`match`) or a known-wrong one (`miss`). */
 async function pick(page, s, colours, intent, onResult) {
-  const free = [...s.pegs.entries()].filter(([, v]) => v === 'hidden');
+  const free = [...s.pegs.entries()].filter(([, v]) => v === HIDDEN);
   const right = free.filter(([k]) => colours.get(k) === s.target);
   const wrong = free.filter(([k]) => colours.get(k) && colours.get(k) !== s.target);
   const p = intent === 'match' ? right[0] ?? wrong[0] : wrong[Math.floor(wrong.length / 2)] ?? right[0];
   if (!p) return null;
-  await tap(page, `${p[0]}, hidden`);
+  await tap(page, pegLabel(p[0], HIDDEN));
   const res = await until(page, (x) => RESULT.has(x.banner) || x.over, {
     timeout: 20000,
     step: 50,
     what: 'the move to resolve',
   });
-  const matched = res.banner === 'Match!';
+  const matched = res.banner === T('game.match');
   // a match removes the peg from the board for good
   if (matched) colours.delete(p[0]);
   if (onResult) await onResult(res, matched);
@@ -340,7 +386,7 @@ const CAPTURE = {
       if ((await waitHuman(page)).over) break;
       const s = await roll(page);
       if (s.over) break;
-      if (s.target === 'Red' || s.target === 'Violet') {
+      if (s.target === T('color.red') || s.target === T('color.violet')) {
         await sleep(BANNER_SETTLE + 400); // die settle bounce + banner slide
         await shoot(page, dir, '02-roll');
         return;
@@ -357,7 +403,7 @@ const CAPTURE = {
     await seed(page, {
       boardSize: dev.board3p,
       lastMode: '3p',
-      names: ['Maya', 'Leo', 'Nana'],
+      names: NAMES,
       avatars: ['fox', 'owl', 'bear'],
     });
     await goto(page, '/game?mode=3p');
@@ -380,7 +426,7 @@ const CAPTURE = {
 
   /** 4 - Home: the Bunny / Fox / Owl opponent row, Owl picked. */
   async 4(page, dev, dir) {
-    await seed(page, { boardSize: dev.board, difficulty: 'owl', names: ['Maya', 'Leo', 'Nana'] });
+    await seed(page, { boardSize: dev.board, difficulty: 'owl', names: NAMES });
     if (!dev.rivalsInGame) {
       await goto(page, '/');
       await sleep(900);
@@ -403,20 +449,27 @@ const CAPTURE = {
       const owl = s.trays.find((t) => t.ai);
       if (!s.over && owl?.active && owl.score >= 2 && s.trays.every((t) => t.score >= 2)) {
         const ok = await page.evaluate(
-          () =>
+          ([thinking, rolling, face, roll]) =>
             new Promise((resolve) => {
+              const [isThinking, isRolling, isFace] = [thinking, rolling, face].map((src) => new RegExp(src));
               const deadline = performance.now() + 8000;
               const tick = () => {
                 const els = Array.from(document.querySelectorAll('[aria-label]'));
-                const banner = els.find((e) => / is (thinking|rolling)…$/.test(e.getAttribute('aria-label')));
-                const die = els.find((e) => /^(Die |Roll the die)/.test(e.getAttribute('aria-label')));
+                const banner = els.find((e) => {
+                  const l = e.getAttribute('aria-label');
+                  return isThinking.test(l) || isRolling.test(l);
+                });
+                const die = els.find((e) => {
+                  const l = e.getAttribute('aria-label');
+                  return l === roll || isFace.test(l);
+                });
                 if (banner && die) {
                   const cs = getComputedStyle(banner);
                   const m = new DOMMatrixReadOnly(cs.transform === 'none' ? undefined : cs.transform);
                   const still = parseFloat(cs.opacity) > 0.99 && Math.abs(m.m42) < 0.5;
                   const d = die.getAttribute('aria-label');
                   const b = banner.getAttribute('aria-label');
-                  if (still && ((/rolling…$/.test(b) && d.startsWith('Die shows')) || (/thinking…$/.test(b) && d === 'Roll the die'))) {
+                  if (still && ((isRolling.test(b) && isFace.test(d)) || (isThinking.test(b) && d === roll))) {
                     resolve(true);
                     return;
                   }
@@ -426,6 +479,7 @@ const CAPTURE = {
               };
               tick();
             }),
+          [tpl('game.thinking').source, tpl('game.rolling').source, DIE_FACE_RE.source, ROLL],
         );
         if (ok) {
           await shoot(page, dir, '04-rivals');
@@ -442,12 +496,13 @@ const CAPTURE = {
     // a family that has played a few evenings, so Stats is not an empty card
     const now = Date.now();
     const p = (label, avatar, played, wins, ago) => ({ key: `name:${label.toLowerCase()}`, label, avatar, played, wins, lastPlayed: now - ago });
+    const [a, b, c] = NAMES.map((n) => [n.toLowerCase(), n]);
     const stats = {
       version: 1,
       players: {
-        'name:maya': p('Maya', 'fox', 21, 11, 1000),
-        'name:leo': p('Leo', 'owl', 9, 4, 2000),
-        'name:nana': p('Nana', 'bear', 9, 2, 3000),
+        [`name:${a[0]}`]: p(a[1], 'fox', 21, 11, 1000),
+        [`name:${b[0]}`]: p(b[1], 'owl', 9, 4, 2000),
+        [`name:${c[0]}`]: p(c[1], 'bear', 9, 2, 3000),
       },
       vsAi: {
         bunny: { played: 4, wins: 4, streak: 4, bestStreak: 4 },
@@ -507,18 +562,19 @@ const CAPTURE = {
         }
         const end = await until(page, (s) => s.over, { timeout: 60000, what: 'the game to end' });
         const text = await page.evaluate(() => document.body.innerText);
-        const headline = /^.*(wins|share the win).*$/m.exec(text)?.[0] ?? '?';
-        const maya = end.trays.find((t) => t.name === 'Maya');
+        const winsRe = tpl('over.wins');
+        const headline = text.split('\n').find((l) => winsRe.test(l) || tpl('over.share').test(l)) ?? '?';
+        const maya = end.trays.find((t) => t.name === NAMES[0]);
         const ai = end.trays.find((t) => t.ai);
         console.log(`   game over: ${headline} (${maya?.score}-${ai?.score})`);
         // a win, but not a shut-out
-        if (/^Maya wins!/.test(headline) && ai?.score > 0) {
+        if (winsRe.exec(headline)?.groups.name === NAMES[0] && ai?.score > 0) {
           await sleep(700); // sheet up, confetti mid-fall
           await shoot(page, dir, '07-win-dark');
           return;
         }
       }
-      throw new Error('Maya never won');
+      throw new Error(`${NAMES[0]} never won`);
     } finally {
       await page.emulateMedia({ colorScheme: 'light' });
     }
@@ -527,9 +583,9 @@ const CAPTURE = {
 
 async function captureDevice(key, only) {
   const dev = DEVICES[key];
-  const dir = path.join(RAW_ROOT, key);
+  const dir = LOCALE === 'en' ? path.join(RAW_ROOT, key) : path.join(RAW_ROOT, LOCALE, key);
   await mkdir(dir, { recursive: true });
-  console.log(`\n=== ${key} (${dev.viewport.width}x${dev.viewport.height} @${dev.deviceScaleFactor}) ===`);
+  console.log(`\n=== ${key} ${LOCALE} (${dev.viewport.width}x${dev.viewport.height} @${dev.deviceScaleFactor}) ===`);
   const browser = await chromium.launch({ headless: true });
   const ctx = await browser.newContext({
     viewport: dev.viewport,
@@ -537,6 +593,7 @@ async function captureDevice(key, only) {
     colorScheme: 'light',
     reducedMotion: 'no-preference',
     isMobile: false,
+    locale: LOCALE === 'en' ? 'en-US' : LOCALE,
   });
   await ctx.addInitScript(pinVisible);
   const page = await ctx.newPage();
@@ -587,7 +644,9 @@ if (stage === 'all') {
     process.exitCode = 1;
   }
 }
-if (!process.exitCode) {
+// compose-screenshots.mjs lays one frame set under every caption locale, so it
+// only runs on the English frames
+if (!process.exitCode && LOCALE === 'en') {
   execFileSync(
     'node',
     [COMPOSE, '--frames', RAW_ROOT, '--captions', path.join(HERE, 'captions.json'), '--out', path.join(HERE, 'screenshots')],

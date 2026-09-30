@@ -24,6 +24,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { tr } from '../i18n';
 import { buy, loadPrices, restore } from '../store/purchases';
 import { UNLOCK_ID, type BuyResult, type ProductId } from '../store/purchasesModel';
 import { useSettings } from '../store/settings';
@@ -45,17 +46,11 @@ export function usePrices(): Partial<Record<ProductId, string>> {
 }
 
 /** What to say when a purchase did not end in a delivery. */
-export const BUY_NOTE: Record<Exclude<BuyResult, 'done'>, string> = {
-  cancelled: 'Purchase cancelled. Nothing was charged.',
-  pending: 'Waiting for approval. It will arrive once approved.',
-  failed: 'That did not go through. Please try again later.',
-};
+export function buyNote(r: Exclude<BuyResult, 'done'>): string {
+  return tr(`buy.${r}`);
+}
 
-const PERKS = [
-  'Big (36 pegs) and Huge (40 pegs) boards',
-  'Owl, the computer that remembers nearly everything',
-  '3 Players, pass and play',
-];
+const PERKS = ['unlock.perkBoards', 'unlock.perkOwl', 'unlock.perk3p'] as const;
 
 export function UnlockSheet({
   onClose,
@@ -93,9 +88,9 @@ export function UnlockSheet({
     setBusy(true);
     if (what === 'buy') {
       const r = await buy(UNLOCK_ID);
-      if (r !== 'done') setNote(BUY_NOTE[r]);
+      if (r !== 'done') setNote(buyNote(r));
     } else if (!(await restore())) {
-      setNote('Nothing to restore for this Apple Account.');
+      setNote(tr('unlock.nothing'));
     }
     setBusy(false);
   };
@@ -103,9 +98,9 @@ export function UnlockSheet({
   const body = unlocked ? (
     <>
       <Text style={{ ...t.type.body, color: t.c.text, textAlign: 'center' }}>
-        Everything is unlocked. Thank you, and have fun!
+        {tr('unlock.thanks')}
       </Text>
-      <SheetButton text="Done" filled onPress={onClose} />
+      <SheetButton text={tr('common.done')} filled onPress={onClose} />
     </>
   ) : gate ? (
     <ParentalGate onPass={() => void run(gate)} onCancel={() => setGate(null)} />
@@ -115,12 +110,12 @@ export function UnlockSheet({
         {PERKS.map((p) => (
           <View key={p} accessible style={{ flexDirection: 'row', gap: t.spacing.sm }}>
             <Text style={{ ...t.type.body, color: t.c.accent }}>✓</Text>
-            <Text style={{ ...t.type.body, color: t.c.text, flex: 1 }}>{p}</Text>
+            <Text style={{ ...t.type.body, color: t.c.text, flex: 1 }}>{tr(p)}</Text>
           </View>
         ))}
       </View>
       <Text style={{ ...t.type.caption, color: t.c.textDim }}>
-        One purchase, yours to keep. No ads, ever.
+        {tr('unlock.keep')}
       </Text>
       {note ? (
         <Text accessibilityLiveRegion="polite" style={{ ...t.type.label, color: t.c.text }}>
@@ -128,12 +123,12 @@ export function UnlockSheet({
         </Text>
       ) : null}
       <SheetButton
-        text={busy ? 'One moment…' : price ? `Unlock for ${price}` : 'Unlock'}
+        text={busy ? tr('common.oneMoment') : price ? tr('unlock.for', { price }) : tr('unlock.button')}
         filled
         disabled={busy}
         onPress={() => setGate('buy')}
       />
-      <SheetButton text="Restore purchase" disabled={busy} onPress={() => setGate('restore')} />
+      <SheetButton text={tr('unlock.restore')} disabled={busy} onPress={() => setGate('restore')} />
     </>
   );
 
@@ -144,7 +139,7 @@ export function UnlockSheet({
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Close"
+        accessibilityLabel={tr('common.close')}
         importantForAccessibility="no"
         accessibilityElementsHidden
         onPress={onClose}
@@ -186,11 +181,11 @@ export function UnlockSheet({
                 accessibilityRole="header"
                 style={{ ...t.type.title, color: t.c.text, flex: 1 }}
               >
-                Unlock everything
+                {tr('unlock.title')}
               </Text>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Close"
+                accessibilityLabel={tr('common.close')}
                 onPress={onClose}
                 hitSlop={8}
                 style={({ pressed }) => ({

@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { hasRtl, joinNames, playerLabel, possessive } from '../names';
+import { setLang } from '../../i18n';
+import { hasRtl, isolate, joinNames, playerLabel } from '../names';
 
 const FSI = '⁨';
 const PDI = '⁩';
@@ -21,16 +22,6 @@ test('playerLabel: the typed name, else the animal', () => {
   }
 });
 
-test('possessive: "Maya\'s", "James\'"', () => {
-  assert.equal(possessive('Maya'), "Maya's");
-  assert.equal(possessive('James'), "James'");
-  assert.equal(possessive('JAMES'), "JAMES'");
-  assert.equal(possessive('Fox'), "Fox's");
-  assert.equal(possessive('Bunny'), "Bunny's");
-  assert.equal(possessive(' Leo '), "Leo's");
-  assert.equal(possessive('🦊'), "🦊's");
-});
-
 test('joinNames: one, two, three', () => {
   assert.equal(joinNames([]), '');
   assert.equal(joinNames(['Maya']), 'Maya');
@@ -40,7 +31,7 @@ test('joinNames: one, two, three', () => {
 });
 
 test('plain names are never wrapped in isolates', () => {
-  for (const s of [possessive('Maya'), joinNames(['Maya', 'Zoë', 'José']), possessive('Grandpa 👴')]) {
+  for (const s of [isolate('Maya'), joinNames(['Maya', 'Zoë', 'José']), isolate('Grandpa 👴')]) {
     assert.ok(!s.includes(FSI) && !s.includes(PDI), JSON.stringify(s));
   }
 });
@@ -50,11 +41,25 @@ test('RTL names are isolated so the punctuation stays put', () => {
   assert.equal(hasRtl('مريم'), true);
   assert.equal(hasRtl('Maya'), false);
   assert.equal(hasRtl('Zoë'), false);
-  assert.equal(possessive('שרה'), `${FSI}שרה${PDI}'s`);
+  assert.equal(isolate('שרה'), `${FSI}שרה${PDI}`);
   assert.equal(joinNames(['Maya', 'مريم']), `Maya and ${FSI}مريم${PDI}`);
   assert.equal(
     joinNames(['שרה', 'Leo', 'مريم']),
     `${FSI}שרה${PDI}, Leo and ${FSI}مريم${PDI}`,
     'only the RTL names are wrapped',
   );
+});
+
+test('in another language: the animal and the "and" are translated', () => {
+  try {
+    setLang('de');
+    assert.equal(playerLabel({ avatar: 'owl' }), 'Eule');
+    assert.equal(playerLabel({ name: '', avatar: 'bunny' }), 'Hase', "a saved '' is still the animal");
+    assert.equal(playerLabel({ name: 'Mia', avatar: 'owl' }), 'Mia');
+    assert.equal(joinNames(['Mia', 'Leon', 'Oma']), 'Mia, Leon und Oma');
+    setLang('ja');
+    assert.equal(joinNames(['ゆい', 'はると']), 'ゆいとはると');
+  } finally {
+    setLang('en');
+  }
 });

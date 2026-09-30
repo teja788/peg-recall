@@ -10,6 +10,7 @@ import Animated, {
 import Svg, { Circle } from 'react-native-svg';
 
 import { useTheme } from '../theme';
+import { tr, trn } from '../i18n';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 /** Dynamic Type cap for the countdown digit (see the render below). */
@@ -113,7 +114,7 @@ export function RevealCountdown({
     <View
       style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}
       accessible
-      accessibilityLabel={`Memorise the board. ${secondsLeft} seconds left`}
+      accessibilityLabel={tr('game.reveal', { seconds: trn('seconds', secondsLeft) })}
     >
       <Svg width={size} height={size} style={{ position: 'absolute' }}>
         {/* a cream token on the table, so the ring never sits on bare backdrop */}

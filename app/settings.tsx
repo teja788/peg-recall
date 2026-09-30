@@ -3,11 +3,10 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { tr, trn } from '../src/i18n';
 import {
   BOARD_CYCLE,
-  BOARD_LABEL,
-  DIFFICULTY_HINT,
-  DIFFICULTY_LABEL,
+  animalName,
   isLocked,
   playable,
   useSettings,
@@ -19,8 +18,8 @@ import { Backdrop } from '../src/ui/Backdrop';
 import { Chip, IconButton, ToggleRow } from '../src/ui/controls';
 import { ParentalGate } from '../src/ui/ParentalGate';
 import { PillButton, RateRow, StatsCard } from '../src/ui/StatsCard';
-import { BUY_NOTE, UnlockSheet, usePrices } from '../src/ui/UnlockSheet';
-import type { Difficulty } from '../src/engine/types';
+import { buyNote, UnlockSheet, usePrices } from '../src/ui/UnlockSheet';
+import { BOARD_SPECS, type Difficulty } from '../src/engine/types';
 
 const DIFFICULTIES: Difficulty[] = ['bunny', 'fox', 'owl'];
 const DIFFICULTY_GLYPH: Record<Difficulty, string> = { bunny: '🐰', fox: '🦊', owl: '🦉' };
@@ -56,7 +55,7 @@ export default function SettingsScreen() {
       >
         <IconButton
           glyph="‹"
-          label="Close settings"
+          label={tr('settings.close')}
           onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
           tone="filled"
         />
@@ -64,7 +63,7 @@ export default function SettingsScreen() {
           accessibilityRole="header"
           style={{ ...t.type.title, color: t.c.onBackdrop, marginLeft: t.spacing.sm }}
         >
-          Settings
+          {tr('settings.title')}
         </Text>
       </View>
 
@@ -76,38 +75,38 @@ export default function SettingsScreen() {
         }}
       >
         <ToggleRow
-          title="Sound"
-          subtitle="Soft clicks and a chime on a match"
+          title={tr('settings.sound')}
+          subtitle={tr('settings.soundHint')}
           value={soundOn}
           onToggle={() => toggle('soundOn')}
         />
         <ToggleRow
-          title="Shapes on pegs"
-          subtitle="Color-blind help: every color gets its own shape"
+          title={tr('settings.shapes')}
+          subtitle={tr('settings.shapesHint')}
           value={showShapes}
           onToggle={() => toggle('showShapes')}
         />
         <ToggleRow
-          title="Bonus turn on a match"
-          subtitle="Keep rolling while you keep matching"
+          title={tr('settings.bonus')}
+          subtitle={tr('settings.bonusHint')}
           value={bonusTurnOnMatch}
           onToggle={() => toggle('bonusTurnOnMatch')}
         />
         <ToggleRow
-          title="Kid mode"
-          subtitle="Longer look at the board, ties are shared wins"
+          title={tr('settings.kid')}
+          subtitle={tr('settings.kidHint')}
           value={kidMode}
           onToggle={() => toggle('kidMode')}
         />
 
         <Text style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}>
-          Board size
+          {tr('board.size')}
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.sm }}>
           {BOARD_CYCLE.map((b) => (
             <Chip
               key={b}
-              text={BOARD_LABEL[b]}
+              text={tr('board.withPegs', { name: tr(`board.${b}`), n: BOARD_SPECS[b].pegs })}
               selected={boardSize === b}
               locked={isLocked(unlocked, b)}
               onPress={() => (isLocked(unlocked, b) ? setSheet('unlock') : setSetting('boardSize', b))}
@@ -116,15 +115,15 @@ export default function SettingsScreen() {
         </View>
 
         <Text style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}>
-          Computer opponent
+          {tr('settings.opponent')}
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.sm }}>
           {DIFFICULTIES.map((d) => (
             <Chip
               key={d}
-              text={`${DIFFICULTY_GLYPH[d]}  ${DIFFICULTY_LABEL[d]}`}
-              label={DIFFICULTY_LABEL[d]}
-              hint={DIFFICULTY_HINT[d]}
+              text={`${DIFFICULTY_GLYPH[d]}  ${animalName(d)}`}
+              label={animalName(d)}
+              hint={tr(`diffHint.${d}`)}
               selected={difficulty === d}
               locked={isLocked(unlocked, d)}
               onPress={() => (isLocked(unlocked, d) ? setSheet('unlock') : setSetting('difficulty', d))}
@@ -132,14 +131,14 @@ export default function SettingsScreen() {
           ))}
         </View>
         <Text style={{ ...t.type.caption, color: t.c.onBackdropMuted }}>
-          {DIFFICULTY_HINT[difficulty]}
+          {tr(`diffHint.${difficulty}`)}
         </Text>
 
         <Text
           accessibilityRole="header"
           style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}
         >
-          Stats
+          {tr('settings.stats')}
         </Text>
         <StatsCard />
         <ForgetNamesRow />
@@ -149,7 +148,7 @@ export default function SettingsScreen() {
           accessibilityRole="header"
           style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}
         >
-          Support Color Catch
+          {tr('settings.support')}
         </Text>
         <TipJar />
         <RateRow />
@@ -195,12 +194,16 @@ function ForgetNamesRow() {
     >
       {confirming ? (
         <>
-          <Text style={{ ...t.type.body, color: t.c.text, flexGrow: 1 }}>Forget all names?</Text>
+          <Text style={{ ...t.type.body, color: t.c.text, flexGrow: 1 }}>{tr('names.forgetAsk')}</Text>
           <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>
-            <PillButton text="Cancel" label="Cancel, keep names" onPress={() => setConfirming(false)} />
             <PillButton
-              text="Forget"
-              label="Forget all player names"
+              text={tr('common.cancel')}
+              label={tr('names.cancelLabel')}
+              onPress={() => setConfirming(false)}
+            />
+            <PillButton
+              text={tr('names.forget')}
+              label={tr('names.forgetLabel')}
               filled
               onPress={() => {
                 forgetNames();
@@ -212,16 +215,14 @@ function ForgetNamesRow() {
       ) : (
         <>
           <View style={{ flex: 1, minWidth: 160 }}>
-            <Text style={{ ...t.type.body, color: t.c.text }}>Player names</Text>
+            <Text style={{ ...t.type.body, color: t.c.text }}>{tr('names.title')}</Text>
             <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: 2 }}>
-              {saved === 0
-                ? 'None saved. Everyone plays as their animal.'
-                : `${saved} ${saved === 1 ? 'name' : 'names'} saved on this device`}
+              {saved === 0 ? tr('names.none') : trn('names.saved', saved)}
             </Text>
           </View>
           {saved > 0 ? (
             <PillButton
-              text="Forget player names"
+              text={tr('names.forgetButton')}
               onPress={() => setConfirming(true)}
             />
           ) : null}
@@ -259,8 +260,8 @@ function UnlockRow({
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={unlocked ? 'Unlock everything: unlocked' : 'Unlock everything'}
-        accessibilityHint="Big and Huge boards, Owl and 3 players"
+        accessibilityLabel={tr(unlocked ? 'unlock.titleDone' : 'unlock.title')}
+        accessibilityHint={tr('unlock.what')}
         onPress={() => onOpen('unlock')}
         style={({ pressed }) => ({
           flex: 1,
@@ -271,25 +272,25 @@ function UnlockRow({
         })}
       >
         <View style={{ flex: 1, paddingRight: t.spacing.md }}>
-          <Text style={{ ...t.type.body, color: t.c.text }}>Unlock everything</Text>
+          <Text style={{ ...t.type.body, color: t.c.text }}>{tr('unlock.title')}</Text>
           <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: 2 }}>
-            {unlocked ? 'Unlocked. Thank you!' : 'Big and Huge boards, Owl, 3 players'}
+            {tr(unlocked ? 'unlock.doneRow' : 'unlock.what')}
           </Text>
         </View>
         <Text allowFontScaling={false} style={{ fontSize: 22, color: t.c.textDim }}>
           ›
         </Text>
       </Pressable>
-      {unlocked ? null : <PillButton text="Restore purchase" onPress={() => onOpen('restore')} />}
+      {unlocked ? null : <PillButton text={tr('unlock.restore')} onPress={() => onOpen('restore')} />}
     </View>
   );
 }
 
-const TIP_NAME: Record<(typeof TIP_IDS)[number], string> = {
-  'com.raviteja.pegrecall.tip.small': 'Small tip',
-  'com.raviteja.pegrecall.tip.medium': 'Medium tip',
-  'com.raviteja.pegrecall.tip.large': 'Large tip',
-};
+const TIP_NAME = {
+  'com.raviteja.pegrecall.tip.small': 'tip.small',
+  'com.raviteja.pegrecall.tip.medium': 'tip.medium',
+  'com.raviteja.pegrecall.tip.large': 'tip.large',
+} as const satisfies Record<(typeof TIP_IDS)[number], string>;
 
 /** The tip jar: three consumables that unlock nothing, behind the math question. */
 function TipJar() {
@@ -304,7 +305,7 @@ function TipJar() {
     setNote(null);
     setBusy(true);
     const r = await buy(id);
-    setNote(r === 'done' ? 'Thank you! Your tip keeps Color Catch ad-free. 💛' : BUY_NOTE[r]);
+    setNote(r === 'done' ? tr('tip.thanks') : buyNote(r));
     setBusy(false);
   };
 
@@ -325,21 +326,24 @@ function TipJar() {
       ) : (
         <>
           <Text style={{ ...t.type.caption, color: t.c.textDim }}>
-            Tips help keep Color Catch ad-free. They don&apos;t unlock anything.
+            {tr('tip.about')}
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.sm }}>
-            {TIP_IDS.map((id) => (
-              <PillButton
-                key={id}
-                text={prices[id] ? `${TIP_NAME[id]} · ${prices[id]}` : TIP_NAME[id]}
-                label={prices[id] ? `${TIP_NAME[id]}, ${prices[id]}` : TIP_NAME[id]}
-                onPress={() => (busy ? undefined : setAsking(id))}
-              />
-            ))}
+            {TIP_IDS.map((id) => {
+              const name = tr(TIP_NAME[id]);
+              return (
+                <PillButton
+                  key={id}
+                  text={prices[id] ? `${name} · ${prices[id]}` : name}
+                  label={prices[id] ? `${name}, ${prices[id]}` : name}
+                  onPress={() => (busy ? undefined : setAsking(id))}
+                />
+              );
+            })}
           </View>
           {busy || note ? (
             <Text accessibilityLiveRegion="polite" style={{ ...t.type.label, color: t.c.text }}>
-              {busy ? 'One moment…' : note}
+              {busy ? tr('common.oneMoment') : note}
             </Text>
           ) : null}
         </>

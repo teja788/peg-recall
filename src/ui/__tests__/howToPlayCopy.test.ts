@@ -3,6 +3,7 @@ import { test } from 'node:test';
 
 import { createGame, reduce, revealDurationMs } from '../../engine/game';
 import { BOARD_SPECS, DEFAULT_RULES, type GameState } from '../../engine/types';
+import { LANGS, setLang } from '../../i18n';
 import { DEFAULT_SETTINGS } from '../../store/settingsModel';
 import { boardSizesLine, howToPlaySteps, tips, waysToPlay } from '../HowToPlayCopy';
 
@@ -108,5 +109,22 @@ test('copy stays short: no step over ~115 characters, no sentence over 10 words'
         assert.ok(words <= 10, `${s.id}: "${sentence}" has ${words} words`);
       }
     }
+  }
+});
+
+test('every language: the rules follow the settings, and stay short', () => {
+  try {
+    for (const lang of LANGS) {
+      setLang(lang);
+      const on = howToPlaySteps({ bonusTurnOnMatch: true, kidMode: false });
+      const off = howToPlaySteps({ bonusTurnOnMatch: false, kidMode: true });
+      assert.notEqual(on[2].body, off[2].body, `${lang}: find differs with the bonus turn`);
+      assert.notEqual(on[3].body, off[3].body, `${lang}: win differs with kid mode`);
+      // German and French run ~30% longer than English
+      for (const s of [...on, ...off]) assert.ok(s.body.length <= 150, `${lang} ${s.id}: ${s.body.length} chars`);
+      assert.match(boardSizesLine(), /16.*40/, `${lang}: sizes line has the peg counts`);
+    }
+  } finally {
+    setLang('en');
   }
 });

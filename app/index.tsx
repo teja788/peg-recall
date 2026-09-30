@@ -4,11 +4,10 @@ import React, { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { tr } from '../src/i18n';
 import {
   BOARD_CYCLE,
-  BOARD_NAME,
-  DIFFICULTY_LABEL,
-  DIFFICULTY_TIER,
+  animalName,
   isLocked,
   playable,
   useSettings,
@@ -52,10 +51,10 @@ function modeSubtitles(
   const list = (seats: number[]) => joinNames(seats.map(label));
   return {
     ai: named(0)
-      ? `${list([0])} vs ${DIFFICULTY_LABEL[difficulty]}`
-      : `Opponent: ${DIFFICULTY_LABEL[difficulty]}`,
-    '2p': named(0) || named(1) ? list([0, 1]) : 'Pass and play on one device',
-    '3p': named(0) || named(1) || named(2) ? list([0, 1, 2]) : 'Take turns around the table',
+      ? tr('home.vs', { a: list([0]), b: animalName(difficulty) })
+      : tr('home.opponentIs', { name: animalName(difficulty) }),
+    '2p': named(0) || named(1) ? list([0, 1]) : tr('home.passAndPlay'),
+    '3p': named(0) || named(1) || named(2) ? list([0, 1, 2]) : tr('home.aroundTable'),
   };
 }
 
@@ -151,19 +150,19 @@ export default function Home() {
       >
         <IconButton
           icon={<QuestionGlyph size={26} color={t.c.text} />}
-          label="How to play"
+          label={tr('howto.title')}
           onPress={() => go('/how-to-play')}
           tone="filled"
         />
         <IconButton
           glyph={soundOn ? '🔊' : '🔇'}
-          label={soundOn ? 'Sound on. Turn sound off' : 'Sound off. Turn sound on'}
+          label={tr(soundOn ? 'common.soundOn' : 'common.soundOff')}
           onPress={() => toggle('soundOn')}
           tone="filled"
         />
         <IconButton
           glyph="⚙️"
-          label="Settings"
+          label={tr('settings.title')}
           onPress={() => go('/settings')}
           tone="filled"
         />
@@ -196,27 +195,27 @@ export default function Home() {
           </Text>
           {compact ? null : (
             <Text style={{ ...t.type.body, color: t.c.onBackdropMuted, marginTop: t.spacing.xs }}>
-              Roll a color. Remember where it was.
+              {tr('home.tagline')}
             </Text>
           )}
         </View>
 
         <ModeCard
-          title="Play vs Computer"
+          title={tr('home.vsComputer')}
           subtitle={subtitles.ai}
           art={<BoardMini width={cardArt} colors={PREVIEWS.ai} theme={t.scheme} />}
           onPress={() => choose('ai')}
           style={cardStyle}
         />
         <ModeCard
-          title="2 Players"
+          title={tr('home.twoPlayers')}
           subtitle={subtitles['2p']}
           art={<BoardMini width={cardArt} colors={PREVIEWS['2p']} theme={t.scheme} />}
           onPress={() => choose('2p')}
           style={cardStyle}
         />
         <ModeCard
-          title="3 Players"
+          title={tr('home.threePlayers')}
           subtitle={subtitles['3p']}
           art={<BoardMini width={cardArt} colors={PREVIEWS['3p']} theme={t.scheme} />}
           onPress={() => choose('3p')}
@@ -225,7 +224,7 @@ export default function Home() {
         />
 
         <View>
-          <Text style={rowLabel}>Board</Text>
+          <Text style={rowLabel}>{tr('home.board')}</Text>
           <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>
             {BOARD_CYCLE.map((b) => {
               const pegs = BOARD_SPECS[b].pegs;
@@ -234,9 +233,9 @@ export default function Home() {
                 <OptionPill
                   key={b}
                   selected={on}
-                  title={BOARD_NAME[b]}
-                  hint={`${pegs} pegs`}
-                  label={`${BOARD_NAME[b]} board, ${pegs} pegs`}
+                  title={tr(`board.${b}`)}
+                  hint={tr('board.pegsShort', { n: pegs })}
+                  label={tr('home.boardLabel', { name: tr(`board.${b}`), n: pegs })}
                   locked={isLocked(unlocked, b)}
                   onPress={() =>
                     isLocked(unlocked, b) ? setUnlocking(true) : setSetting('boardSize', b)
@@ -256,15 +255,15 @@ export default function Home() {
         </View>
 
         <View>
-          <Text style={rowLabel}>Opponent</Text>
+          <Text style={rowLabel}>{tr('home.opponent')}</Text>
           <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>
             {OPPONENTS.map((d) => (
               <OptionPill
                 key={d}
                 selected={difficulty === d}
-                title={DIFFICULTY_LABEL[d]}
-                hint={DIFFICULTY_TIER[d]}
-                label={`${DIFFICULTY_LABEL[d]} opponent, ${DIFFICULTY_TIER[d]}`}
+                title={animalName(d)}
+                hint={tr(`tier.${d}`)}
+                label={tr('home.opponentLabel', { name: animalName(d), tier: tr(`tier.${d}`) })}
                 locked={isLocked(unlocked, d)}
                 onPress={() =>
                   isLocked(unlocked, d) ? setUnlocking(true) : setSetting('difficulty', d)

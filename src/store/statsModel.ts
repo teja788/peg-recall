@@ -4,13 +4,14 @@
  *
  * Players are tracked by NAME when they typed one ("Maya" on any seat, any
  * animal, is the same Maya) and by ANIMAL when they did not ("Fox" is whoever
- * sat as the fox without a name). Only human seats are tracked; games against
+ * sat as the fox without a name). Animal rows are keyed by the animal's id,
+ * never its name, so they survive a change of device language. Only human seats are tracked; games against
  * the computer also feed a per-difficulty record with a win streak.
  */
 
 import type { AvatarId, Difficulty, GameState, PlayerSpec } from '../engine/types';
 import { playerLabel } from '../ui/names';
-import { AVATAR_CYCLE, cleanName } from './settingsModel';
+import { AVATAR_CYCLE, cleanName, nameToStore } from './settingsModel';
 
 export interface WinRecord {
   played: number;
@@ -76,10 +77,17 @@ function deepFreeze<T>(o: T): T {
 /** Frozen: every function here returns new objects and never mutates this. */
 export const EMPTY_STATS: Stats = deepFreeze(emptyStats());
 
-/** 'name:maya' for a typed name, else 'animal:fox'. */
+/** 'name:maya' for a typed name, else 'animal:fox' (also for "Fox" or "Fuchs"
+ *  typed on the fox's own seat: that is still just the fox). */
 export function playerKey(spec: PlayerSpec): string {
-  const name = typeof spec.name === 'string' ? spec.name.trim() : '';
-  return name ? `name:${name.toLocaleLowerCase()}` : `animal:${spec.avatar}`;
+  const name = nameToStore(spec.name, spec.avatar);
+  return name ? `name:${name.toLowerCase()}` : `animal:${spec.avatar}`;
+}
+
+/** The name a stats row shows. An animal row is named in the app's language
+ *  whatever label it was saved with, so an old "Owl" row reads "Eule" in German. */
+export function statsLabel(p: Pick<PlayerStats, 'key' | 'label' | 'avatar'>): string {
+  return p.key.startsWith('animal:') ? playerLabel({ avatar: p.avatar }) : p.label;
 }
 
 /** Local calendar day, YYYY-MM-DD. */

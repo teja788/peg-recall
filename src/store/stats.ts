@@ -30,6 +30,7 @@ export {
   playerKey,
   sanitizeStats,
   shouldAskForReview,
+  statsLabel,
 } from './statsModel';
 export type { PlayerStats, Stats, VsAiStats, WinRecord } from './statsModel';
 

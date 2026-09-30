@@ -25,7 +25,8 @@ import Animated, {
 
 import { PEG_COLORS, type PegColor } from '../engine/types';
 import { tumbleMs } from '../store/game';
-import { PEG_PAINT, useTheme } from '../theme';
+import { useTheme } from '../theme';
+import { tr } from '../i18n';
 import { useReduceMotion } from './feedback';
 
 /**
@@ -163,7 +164,6 @@ export function Die({
       : { transform: [{ rotate: `${wobble.value * WOBBLE_DEG}deg` }, { scale: scale.value }] },
   );
 
-  const paint = face ? PEG_PAINT[face] : null;
   const disabled = !canRoll || tumbling;
   const h = size * DIE_ASPECT;
 
@@ -171,9 +171,13 @@ export function Die({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={
-        tumbling ? 'Die rolling' : paint ? `Die shows ${paint.label}` : 'Roll the die'
+        tumbling
+          ? tr('game.dieRolling')
+          : face
+            ? tr('game.dieFace', { color: tr(`color.${face}`) })
+            : tr('game.roll')
       }
-      accessibilityHint={canRoll ? 'Rolls the color you must find' : undefined}
+      accessibilityHint={canRoll ? tr('game.rollHint') : undefined}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onRoll}
@@ -185,7 +189,7 @@ export function Die({
         height: Math.max(TAP_MIN, h),
         alignItems: 'center',
         justifyContent: 'center',
-        opacity: canRoll || paint ? 1 : 0.6,
+        opacity: canRoll || face ? 1 : 0.6,
       }}
     >
       <Animated.View style={[{ width: size, height: h }, animated]}>

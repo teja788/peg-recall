@@ -1,18 +1,18 @@
 /**
  * How players are named in text: tray labels, "Maya's turn", "Maya and Leo
- * share the win!". Pure TypeScript (no React Native) so the stats model and the
+ * share the win!", in the app's language. Pure TypeScript (no React Native) so the stats model and the
  * tests can use it too.
  */
 
 import type { AvatarId } from '../engine/types';
-import { ANIMAL_NAME } from '../store/settingsModel';
+import { tr } from '../i18n';
+import { AVATAR_CYCLE, animalName } from '../store/settingsModel';
 
-/** The name a seat goes by: its typed name, else its animal ("Fox"). */
+/** The name a seat goes by: its typed name, else its animal ("Fox", "Fuchs"). */
 export function playerLabel(spec: { name?: string; avatar: AvatarId }): string {
   const typed = typeof spec.name === 'string' ? spec.name.trim() : '';
   if (typed) return typed;
-  const animal = ANIMAL_NAME[spec.avatar];
-  if (animal) return animal;
+  if (AVATAR_CYCLE.includes(spec.avatar)) return animalName(spec.avatar);
   const id = String(spec.avatar ?? '');
   return id ? id.charAt(0).toUpperCase() + id.slice(1) : 'Player';
 }
@@ -33,24 +33,18 @@ const FSI = '⁨';
 const PDI = '⁩';
 
 /**
- * An RTL name dropped into an English sentence can drag the punctuation after
- * it ("'s", ",", "and") to the wrong side. First-strong isolates fence it off.
- * Plain names are returned untouched so ordinary strings stay readable.
+ * An RTL name dropped into a left-to-right sentence can drag the punctuation
+ * after it (",", "and", "'s turn") to the wrong side. First-strong isolates
+ * fence it off. Plain names are returned untouched so ordinary strings stay
+ * readable.
  */
-function isolate(name: string): string {
+export function isolate(name: string): string {
   return hasRtl(name) ? FSI + name + PDI : name;
 }
 
-/** "Maya's", "James'" (a name ending in s takes a bare apostrophe). */
-export function possessive(name: string): string {
-  const n = name.trim();
-  const ends = n.charAt(n.length - 1);
-  return isolate(n) + (ends === 's' || ends === 'S' ? "'" : "'s");
-}
-
-/** "Maya", "Maya and Leo", "Maya, Leo and Sam". */
+/** "Maya", "Maya and Leo", "Maya, Leo and Sam" (in the app's language). */
 export function joinNames(names: string[]): string {
   const parts = names.map((n) => isolate(n.trim()));
   if (parts.length <= 1) return parts[0] ?? '';
-  return `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
+  return parts.slice(0, -1).join(tr('list.sep')) + tr('list.and') + parts[parts.length - 1];
 }

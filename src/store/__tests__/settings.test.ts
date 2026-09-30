@@ -322,6 +322,19 @@ test('nameToStore: blank or the seat\'s own animal (any case) means default', ()
   assert.equal(isAnimalName('Maya'), false);
 });
 
+test('animal names count in every language the app speaks', () => {
+  // the owl seat typed "Eule" (German) or "フクロウ" is still just the owl
+  assert.equal(nameToStore('Eule', 'owl'), '');
+  assert.equal(nameToStore('hibou', 'owl'), '');
+  assert.equal(nameToStore('フクロウ', 'owl'), '');
+  assert.equal(nameToStore('Eule', 'fox'), 'Eule', "another animal's name is a real name here");
+  for (const n of ['Fuchs', 'Zorro', 'Búho', 'coniglio', 'Grenouille', 'Gato', 'ネコ']) {
+    assert.equal(isAnimalName(n), true, n);
+  }
+  // and never saved as a "played before" chip
+  assert.deepEqual(addRecentNames([], ['Mia', 'Eule', 'Leon']), ['Mia', 'Leon']);
+});
+
 test('humanAvatarVsAi: never the computer\'s own animal', () => {
   assert.equal(humanAvatarVsAi('cat', 'fox'), 'cat');
   assert.equal(humanAvatarVsAi('fox', 'fox'), 'bear');

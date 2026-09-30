@@ -5,6 +5,8 @@
  * front of every purchase and restore.
  */
 
+import { tr } from '../i18n';
+
 export const UNLOCK_ID = 'com.raviteja.pegrecall.unlock';
 export const TIP_IDS = [
   'com.raviteja.pegrecall.tip.small',
@@ -51,7 +53,7 @@ export function mathQuestion(rand: () => number = Math.random): MathQuestion {
   const pick = () => 2 + Math.floor(rand() * 8); // 2..9
   const a = pick();
   const b = pick();
-  return { text: `${a} + ${b} = ?`, label: `What is ${a} plus ${b}?`, answer: a + b };
+  return { text: `${a} + ${b} = ?`, label: tr('gate.question', { a, b }), answer: a + b };
 }
 
 /** Typed text against the answer: digits only, spaces ignored. */

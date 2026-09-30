@@ -4,6 +4,8 @@
  * already in the lineup, and what VoiceOver says for a seat.
  */
 
+import { tr } from '../i18n';
+
 /** Chips shown under the seats (the store remembers a few more). */
 export const CHIPS_SHOWN = 6;
 
@@ -31,6 +33,6 @@ export function inLineup(name: string, stored: readonly string[], seats: number)
 
 /** "Player 1, Fox, named Maya" — or just "Player 1, Fox" on the default name. */
 export function seatLabel(seat: number, animal: string, stored: string): string {
-  const base = `Player ${seat + 1}, ${animal}`;
-  return stored ? `${base}, named ${stored}` : base;
+  const n = seat + 1;
+  return stored ? tr('players.seatNamed', { n, animal, name: stored }) : tr('players.seat', { n, animal });
 }

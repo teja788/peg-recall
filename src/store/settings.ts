@@ -5,15 +5,10 @@ import { storage } from './storage';
 // The data and the pure helpers live in settingsModel.ts (which imports no
 // native module); re-exported here so every screen keeps one import path.
 export {
-  ANIMAL_NAME,
   AVATAR_CYCLE,
   BOARD_CYCLE,
-  BOARD_LABEL,
-  BOARD_NAME,
   DEFAULT_SETTINGS,
-  DIFFICULTY_HINT,
-  DIFFICULTY_LABEL,
-  DIFFICULTY_TIER,
+  animalName,
   NAME_INPUT_MAX,
   NAME_MAX,
   RECENT_MAX,

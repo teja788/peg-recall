@@ -40,12 +40,10 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { AvatarId } from '../engine/types';
+import { tr } from '../i18n';
 import {
-  ANIMAL_NAME,
-  BOARD_NAME,
-  DIFFICULTY_LABEL,
-  DIFFICULTY_TIER,
   NAME_INPUT_MAX,
+  animalName,
   humanAvatarVsAi,
   nameToStore,
   playable,
@@ -57,11 +55,11 @@ import { useReduceMotion } from './feedback';
 import { CHIPS_SHOWN, chipTarget, inLineup, seatLabel } from './lineup';
 
 const SEATS: Record<GameMode, number> = { ai: 1, '2p': 2, '3p': 3 };
-const MODE_TITLE: Record<GameMode, string> = {
-  ai: 'vs Computer',
-  '2p': '2 Players',
-  '3p': '3 Players',
-};
+const MODE_TITLE = {
+  ai: 'players.modeAi',
+  '2p': 'home.twoPlayers',
+  '3p': 'home.threePlayers',
+} as const satisfies Record<GameMode, string>;
 const AVATAR_SIZE = 44;
 /** Past this the rows stop growing: three of them share the sheet on an SE. */
 const MAX_SCALE = 1.6;
@@ -119,7 +117,7 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
   const scroller = useRef<ScrollView>(null);
 
   const textFor = (seat: number) =>
-    edits[seat] ?? (names[seat] || ANIMAL_NAME[shown(seat)]);
+    edits[seat] ?? (names[seat] || animalName(shown(seat)));
 
   const commit = useCallback(
     (seat: number) => {
@@ -271,7 +269,7 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Close"
+        accessibilityLabel={tr('common.close')}
         importantForAccessibility="no"
         accessibilityElementsHidden
         onPress={close}
@@ -327,19 +325,22 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
                     maxFontSizeMultiplier={1.4}
                     style={{ ...t.type.title, color: t.c.text }}
                   >
-                    Who&apos;s playing?
+                    {tr('players.title')}
                   </Text>
                   <Text
                     maxFontSizeMultiplier={1.4}
                     style={{ ...t.type.caption, color: t.c.textDim, marginTop: 2 }}
                   >
-                    {`${MODE_TITLE[mode]} · ${BOARD_NAME[boardSize]} board`}
+                    {tr('players.subtitle', {
+                      mode: tr(MODE_TITLE[mode]),
+                      board: tr(`board.${boardSize}`),
+                    })}
                   </Text>
                 </View>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Close"
-                  accessibilityHint="Back to the home screen without starting"
+                  accessibilityLabel={tr('common.close')}
+                  accessibilityHint={tr('players.closeHint')}
                   onPress={close}
                   hitSlop={8}
                   style={({ pressed }) => ({
@@ -388,7 +389,7 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
             >
               {Array.from({ length: seats }, (_, seat) => {
                 const avatar = shown(seat);
-                const animal = ANIMAL_NAME[avatar];
+                const animal = animalName(avatar);
                 const last = seat === seats - 1;
                 const isFocused = focused === seat;
                 return (
@@ -409,7 +410,7 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel={seatLabel(seat, animal, storedNow[seat])}
-                      accessibilityHint="Changes to the next animal"
+                      accessibilityHint={tr('players.seatHint')}
                       onPress={() => cycle(seat)}
                       hitSlop={6}
                       style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
@@ -422,7 +423,7 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
                       maxFontSizeMultiplier={1.3}
                       style={{ ...t.type.label, color: t.c.textDim, minWidth: 24 }}
                     >
-                      {`P${seat + 1}`}
+                      {tr('players.seatShort', { n: seat + 1 })}
                     </Text>
                     <TextInput
                       ref={(el) => {
@@ -446,8 +447,8 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
                         else inputs.current[seat + 1]?.focus();
                       }}
                       selectTextOnFocus
-                      accessibilityLabel={`Player ${seat + 1} name`}
-                      accessibilityHint={`Leave as ${animal} or type a name`}
+                      accessibilityLabel={tr('players.nameLabel', { n: seat + 1 })}
+                      accessibilityHint={tr('players.nameHint', { animal })}
                       autoCapitalize="words"
                       autoCorrect={false}
                       autoComplete="off"
@@ -488,7 +489,10 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
             {mode === 'ai' ? (
               <View
                 accessible
-                accessibilityLabel={`Against the computer: ${DIFFICULTY_LABEL[difficulty]}, ${DIFFICULTY_TIER[difficulty]}`}
+                accessibilityLabel={tr('players.against', {
+                  name: animalName(difficulty),
+                  tier: tr(`tier.${difficulty}`),
+                })}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -497,17 +501,17 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
                 }}
               >
                 <Text maxFontSizeMultiplier={1.4} style={sectionLabel}>
-                  vs
+                  {tr('players.vs')}
                 </Text>
                 <Avatar id={difficulty} size={36} />
                 <Text maxFontSizeMultiplier={1.4} style={{ ...t.type.body, color: t.c.text }}>
-                  {DIFFICULTY_LABEL[difficulty]}
+                  {animalName(difficulty)}
                 </Text>
                 <Text
                   maxFontSizeMultiplier={1.4}
                   style={{ ...t.type.caption, color: t.c.textDim, flex: 1, minWidth: 0 }}
                 >
-                  {`${DIFFICULTY_TIER[difficulty]} · change it on Home`}
+                  {tr('players.changeOnHome', { tier: tr(`tier.${difficulty}`) })}
                 </Text>
               </View>
             ) : null}
@@ -515,7 +519,7 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
             {chips.length > 0 ? (
               <View style={{ gap: t.spacing.sm }}>
                 <Text accessibilityRole="header" maxFontSizeMultiplier={1.4} style={sectionLabel}>
-                  Played before
+                  {tr('players.playedBefore')}
                 </Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.sm }}>
                   {chips.map((name) => {
@@ -525,7 +529,7 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
                         key={name}
                         accessibilityRole="button"
                         accessibilityLabel={name}
-                        accessibilityHint={used ? 'Already playing' : 'Puts this name on a seat'}
+                        accessibilityHint={tr(used ? 'players.chipUsed' : 'players.chipHint')}
                         accessibilityState={{ selected: used, disabled: used }}
                         disabled={used}
                         onPress={() => pickChip(name)}
@@ -554,7 +558,7 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
               </View>
             ) : (
               <Text maxFontSizeMultiplier={1.4} style={{ ...t.type.caption, color: t.c.textDim }}>
-                Tap an animal to change it, or a name to type your own.
+                {tr('players.tapHint')}
               </Text>
             )}
           </ScrollView>
@@ -574,8 +578,8 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
           >
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Play"
-              accessibilityHint="Starts the game"
+              accessibilityLabel={tr('players.play')}
+              accessibilityHint={tr('players.playHint')}
               onPress={play}
               style={({ pressed }) => ({
                 minHeight: 56,
@@ -587,7 +591,7 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
               })}
             >
               <Text maxFontSizeMultiplier={1.4} style={{ ...t.type.heading, color: t.c.accentInk }}>
-                Play
+                {tr('players.play')}
               </Text>
             </Pressable>
           </View>

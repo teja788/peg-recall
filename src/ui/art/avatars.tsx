@@ -14,15 +14,6 @@ import React from 'react';
 import Svg, { Circle, Ellipse, G, Path } from 'react-native-svg';
 import type { AvatarId } from '../../engine/types';
 
-export const AVATAR_NAMES: Record<AvatarId, string> = {
-  fox: 'Fox',
-  owl: 'Owl',
-  bear: 'Bear',
-  frog: 'Frog',
-  bunny: 'Bunny',
-  cat: 'Cat',
-};
-
 /** Muted disc behind each face. Distinct in hue, all low-chroma and warm-safe. */
 const AVATAR_ACCENT: Record<AvatarId, string> = {
   fox: '#F6D3B0',

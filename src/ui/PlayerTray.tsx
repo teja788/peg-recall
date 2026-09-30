@@ -1,4 +1,4 @@
-import { Avatar, AVATAR_NAMES, TRAY_PEG_ASPECT, TrayPeg } from '@art';
+import { Avatar, TRAY_PEG_ASPECT, TrayPeg } from '@art';
 import React, { memo, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
@@ -12,6 +12,8 @@ import type { PegColor, PlayerSpec } from '../engine/types';
 import { useTheme } from '../theme';
 import { spacing } from '../theme/tokens';
 import { useReduceMotion } from './feedback';
+import { tr, trn } from '../i18n';
+import { animalName } from '../store/settingsModel';
 import { playerLabel } from './names';
 
 /**
@@ -163,7 +165,7 @@ function PlayerTrayImpl({
 }: PlayerTrayProps) {
   const t = useTheme();
   const name = playerLabel(spec);
-  const animal = AVATAR_NAMES[spec.avatar] ?? spec.avatar;
+  const animal = animalName(spec.avatar);
   /** a typed name hides the animal, so VoiceOver says it as well */
   const customName = name !== animal;
   const px = (n: number) => Math.round(n * scale);
@@ -269,12 +271,17 @@ function PlayerTrayImpl({
 
   // "Maya, fox, 3 pegs, their turn" — the animal only when a typed name hides
   // it, so the default reads "Fox, computer, 3 pegs" as before
-  const who = customName ? `${name}, ${animal.toLowerCase()}` : name;
+  const who = customName ? `${name}, ${animal}` : name;
   const label = caption
     ? `${caption}, ${who}`
-    : `${who}${spec.kind === 'ai' ? ', computer' : ''}, ${score} ${
-        score === 1 ? 'peg' : 'pegs'
-      }${active ? ', their turn' : ''}`;
+    : [
+        who,
+        spec.kind === 'ai' ? tr('common.computer') : null,
+        trn('pegs', score),
+        active ? tr('game.theirTurn') : null,
+      ]
+        .filter(Boolean)
+        .join(', ');
 
   if (!onPress) {
     return (
@@ -296,7 +303,7 @@ function PlayerTrayImpl({
       onLayout={onLayout}
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityHint="Changes this player's animal"
+      accessibilityHint={tr('game.trayHint')}
       onPress={onPress}
       style={{ minHeight: 44 }}
     >

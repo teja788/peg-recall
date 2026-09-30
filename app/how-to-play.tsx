@@ -4,13 +4,14 @@ import React from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { tr } from '../src/i18n';
 import { useSettings } from '../src/store/settings';
 import { useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
 import { IconButton } from '../src/ui/controls';
 import { RowArt, StepArt, type ArtColors } from '../src/ui/HowToPlayArt';
 import {
-  TIPS_FOOTNOTE,
+  tipsFootnote,
   howToPlaySteps,
   tips,
   waysToPlay,
@@ -30,7 +31,7 @@ const HIDDEN_FROM_A11Y = {
 };
 
 /** "Look" -> "Look.", "Oops!" stays: so a screen reader pauses after a title. */
-const sentence = (s: string) => (/[.!?]$/.test(s) ? s : `${s}.`);
+const sentence = (s: string) => (/[.!?。！？]$/.test(s) ? s : `${s}.`);
 
 /**
  * "How to play": the rules as four illustrated steps, then the ways to play and
@@ -79,13 +80,13 @@ export default function HowToPlayScreen() {
           paddingVertical: t.spacing.sm,
         }}
       >
-        <IconButton glyph="‹" label="Close how to play" onPress={close} tone="filled" />
+        <IconButton glyph="‹" label={tr('howto.close')} onPress={close} tone="filled" />
         <Text
           accessibilityRole="header"
           maxFontSizeMultiplier={MAX_SCALE}
           style={{ ...t.type.title, color: t.c.onBackdrop, marginLeft: t.spacing.sm }}
         >
-          How to play
+          {tr('howto.title')}
         </Text>
       </View>
 
@@ -101,14 +102,14 @@ export default function HowToPlayScreen() {
           maxFontSizeMultiplier={MAX_SCALE}
           style={{ ...t.type.body, color: t.c.onBackdrop }}
         >
-          Remember where the colors are. Catch the most pegs!
+          {tr('howto.intro')}
         </Text>
 
         {steps.map((s, i) => (
           <View
             key={s.id}
             accessible
-            accessibilityLabel={`Step ${i + 1} of ${steps.length}. ${sentence(s.title)} ${s.body}`}
+            accessibilityLabel={`${tr('howto.step', { n: i + 1, total: steps.length })} ${sentence(s.title)} ${s.body}`}
             style={{
               ...cardBox,
               flexDirection: 'row',
@@ -166,22 +167,22 @@ export default function HowToPlayScreen() {
         ))}
 
         <Text accessibilityRole="header" maxFontSizeMultiplier={MAX_SCALE} style={sectionLabel}>
-          Ways to play
+          {tr('howto.ways')}
         </Text>
         <RowCard rows={waysToPlay()} />
 
         <Text accessibilityRole="header" maxFontSizeMultiplier={MAX_SCALE} style={sectionLabel}>
-          Tips
+          {tr('howto.tips')}
         </Text>
         <RowCard rows={tips()} />
         <Text maxFontSizeMultiplier={MAX_SCALE} style={{ ...t.type.caption, color: t.c.onBackdropMuted }}>
-          {TIPS_FOOTNOTE}
+          {tipsFootnote()}
         </Text>
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Got it"
-          accessibilityHint="Goes back to the home screen"
+          accessibilityLabel={tr('howto.gotIt')}
+          accessibilityHint={tr('howto.gotItHint')}
           onPress={close}
           style={({ pressed }) => ({
             marginTop: t.spacing.md,
@@ -198,7 +199,7 @@ export default function HowToPlayScreen() {
           })}
         >
           <Text maxFontSizeMultiplier={MAX_SCALE} style={{ ...t.type.heading, color: t.c.accentInk }}>
-            Got it!
+            {tr('howto.gotIt')}
           </Text>
         </Pressable>
       </ScrollView>

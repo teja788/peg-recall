@@ -32,6 +32,60 @@
       "05-sizes": "From 16 pegs to 40",
       "06-shapes": "Shapes for colour-blind players",
       "07-win-dark": "Free. Offline. No ads."
+    },
+    "de-DE": {
+      "01-look": "Ansehen. Merken. Finden.",
+      "02-roll": "Würfeln. Stein antippen.",
+      "03-family": "Reihum mit der Familie",
+      "04-rivals": "Hase, Fuchs oder Eule?",
+      "05-sizes": "16 bis 40 Steine",
+      "06-shapes": "Formen für Farbenblinde",
+      "07-win-dark": "Offline und werbefrei"
+    },
+    "fr-FR": {
+      "01-look": "Voir. Retenir. Trouver.",
+      "02-roll": "Un dé, une couleur, un pion",
+      "03-family": "À tour de rôle, en famille",
+      "04-rivals": "Lapin, Renard ou Hibou ?",
+      "05-sizes": "De 16 à 40 pions",
+      "06-shapes": "Des formes pour les daltoniens",
+      "07-win-dark": "Hors ligne. Sans pub."
+    },
+    "pt-BR": {
+      "01-look": "Olhe. Lembre. Encontre.",
+      "02-roll": "Jogue o dado. Ache o pino.",
+      "03-family": "Um aparelho, a família toda",
+      "04-rivals": "Coelho, Raposa ou Coruja?",
+      "05-sizes": "De 16 a 40 pinos",
+      "06-shapes": "Formas para daltônicos",
+      "07-win-dark": "Offline e sem anúncios"
+    },
+    "ja": {
+      "01-look": "見て、覚えて、探そう",
+      "02-roll": "サイコロを振って同じ色のコマを探そう",
+      "03-family": "1台を回して家族で対戦",
+      "04-rivals": "ウサギ・キツネ・フクロウと対戦",
+      "05-sizes": "コマは16個から40個まで",
+      "06-shapes": "色が苦手でも形で遊べる",
+      "07-win-dark": "オフライン・広告なし"
+    },
+    "es-ES": {
+      "01-look": "Mira. Recuerda. Busca.",
+      "02-roll": "Tira y busca el color",
+      "03-family": "Pásalo y juega en familia",
+      "04-rivals": "¿Conejo, Zorro o Búho?",
+      "05-sizes": "De 16 a 40 fichas",
+      "06-shapes": "Figuras para daltónicos",
+      "07-win-dark": "Sin conexión ni anuncios"
+    },
+    "it": {
+      "01-look": "Guarda. Ricorda. Trova.",
+      "02-roll": "Tira e trova la pedina",
+      "03-family": "Passa e gioca in famiglia",
+      "04-rivals": "Coniglio, Volpe o Gufo?",
+      "05-sizes": "Da 16 a 40 pedine",
+      "06-shapes": "Forme per i daltonici",
+      "07-win-dark": "Offline, senza pubblicità"
     }
   }
 }

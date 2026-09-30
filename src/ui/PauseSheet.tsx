@@ -15,6 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { tr } from '../i18n';
 import { useTheme } from '../theme';
 import { useReduceMotion } from './feedback';
 
@@ -60,7 +61,7 @@ export function PauseSheet({ onResume, onRestart, onHome }: PauseSheetProps) {
           face-up pegs studyable behind a light scrim. Tapping it resumes. */}
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Resume game"
+        accessibilityLabel={tr('pause.resumeGame')}
         onPress={onResume}
         style={[
           StyleSheet.absoluteFill,
@@ -101,17 +102,17 @@ export function PauseSheet({ onResume, onRestart, onHome }: PauseSheetProps) {
               accessibilityRole="header"
               style={{ ...t.type.title, color: t.c.text, textAlign: 'center' }}
             >
-              Paused
+              {tr('pause.title')}
             </Text>
             <Text style={{ ...t.type.caption, color: t.c.textDim, textAlign: 'center' }}>
-              The board is frozen — nobody is peeking.
+              {tr('pause.body')}
             </Text>
           </View>
 
           <View style={{ gap: t.spacing.md }}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Resume"
+              accessibilityLabel={tr('pause.resume')}
               onPress={onResume}
               style={({ pressed }) => [
                 styles.btn,
@@ -122,12 +123,12 @@ export function PauseSheet({ onResume, onRestart, onHome }: PauseSheetProps) {
                 },
               ]}
             >
-              <Text style={{ ...t.type.heading, color: t.c.accentInk }}>Resume</Text>
+              <Text style={{ ...t.type.heading, color: t.c.accentInk }}>{tr('pause.resume')}</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Restart"
-              accessibilityHint="Deals a new board and starts over"
+              accessibilityLabel={tr('pause.restart')}
+              accessibilityHint={tr('pause.restartHint')}
               onPress={onRestart}
               style={({ pressed }) => [
                 styles.btn,
@@ -139,12 +140,12 @@ export function PauseSheet({ onResume, onRestart, onHome }: PauseSheetProps) {
                 },
               ]}
             >
-              <Text style={{ ...t.type.heading, color: t.c.text }}>Restart</Text>
+              <Text style={{ ...t.type.heading, color: t.c.text }}>{tr('pause.restart')}</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Home"
-              accessibilityHint="Leaves this game and returns to the main menu"
+              accessibilityLabel={tr('common.home')}
+              accessibilityHint={tr('pause.homeHint')}
               onPress={onHome}
               style={({ pressed }) => [
                 styles.btn,
@@ -156,7 +157,7 @@ export function PauseSheet({ onResume, onRestart, onHome }: PauseSheetProps) {
                 },
               ]}
             >
-              <Text style={{ ...t.type.heading, color: t.c.text }}>Home</Text>
+              <Text style={{ ...t.type.heading, color: t.c.text }}>{tr('common.home')}</Text>
             </Pressable>
           </View>
         </ScrollView>

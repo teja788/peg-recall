@@ -4,18 +4,15 @@ import { Linking, Platform, Pressable, Text, View } from 'react-native';
 
 import type { Difficulty } from '../engine/types';
 import { WRITE_REVIEW_URL } from '../store/reviewPrompt';
-import { DIFFICULTY_LABEL } from '../store/settings';
-import { useStats } from '../store/stats';
+import { percent, tr, trn } from '../i18n';
+import { animalName } from '../store/settings';
+import { statsLabel, useStats } from '../store/stats';
 import { useTheme } from '../theme';
 
 const DIFFICULTIES: Difficulty[] = ['bunny', 'fox', 'owl'];
 /** A win rate over one or two games says nothing, so it waits for the third. */
 const MIN_GAMES_FOR_RATE = 3;
 const ROW_AVATAR = 36;
-
-function plural(n: number, one: string, many = `${one}s`) {
-  return `${n} ${n === 1 ? one : many}`;
-}
 
 /** The card surface every settings block sits on (matches ToggleRow). */
 function useCardStyle() {
@@ -88,7 +85,7 @@ export function StatsCard() {
             b.wins - a.wins ||
             b.played - a.played ||
             b.lastPlayed - a.lastPlayed ||
-            a.label.localeCompare(b.label),
+            statsLabel(a).localeCompare(statsLabel(b)),
         ),
     [players],
   );
@@ -109,7 +106,7 @@ export function StatsCard() {
     return (
       <View style={card}>
         <Text style={{ ...t.type.body, color: t.c.textDim }}>
-          Finish a game to start the scoreboard.
+          {tr('stats.empty')}
         </Text>
       </View>
     );
@@ -120,23 +117,24 @@ export function StatsCard() {
       {ranked.length > 0 ? (
         <>
           <Text accessibilityRole="header" style={subheading}>
-            Players
+            {tr('stats.players')}
           </Text>
           {ranked.map((p) => {
-            const rate =
-              p.played >= MIN_GAMES_FOR_RATE ? Math.round((p.wins / p.played) * 100) : null;
-            const detail = `${plural(p.wins, 'win')} · ${p.played} played${
-              rate === null ? '' : ` · ${rate}%`
+            const label = statsLabel(p);
+            const rate = p.played >= MIN_GAMES_FOR_RATE ? percent(p.wins / p.played) : null;
+            const wins = trn('wins', p.wins);
+            const detail = `${tr('stats.detail', { wins, n: p.played })}${
+              rate === null ? '' : ` · ${rate}`
             }`;
-            const spoken = `${p.label}: ${plural(p.wins, 'win')}, ${plural(p.played, 'game')} played${
-              rate === null ? '' : `, ${rate} percent`
+            const spoken = `${tr('stats.spoken', { name: label, wins, games: trn('games', p.played) })}${
+              rate === null ? '' : `, ${rate}`
             }`;
             return (
               <View key={p.key} accessible accessibilityLabel={spoken} style={row}>
                 <Avatar id={p.avatar} size={ROW_AVATAR} />
                 <View style={{ flex: 1 }}>
                   <Text numberOfLines={1} style={rowText}>
-                    {p.label}
+                    {label}
                   </Text>
                   <Text style={rowDetail}>{detail}</Text>
                 </View>
@@ -152,18 +150,27 @@ export function StatsCard() {
             accessibilityRole="header"
             style={[subheading, ranked.length > 0 ? { marginTop: t.spacing.sm } : null]}
           >
-            Vs computer
+            {tr('stats.vsComputer')}
           </Text>
           {opponents.map((d) => {
             const r = vsAi[d];
             const losses = Math.max(0, r.played - r.wins);
-            const name = DIFFICULTY_LABEL[d];
-            const detail = `${r.wins}–${losses} of ${r.played} · streak ${r.streak} · best ${r.bestStreak}`;
-            const spoken = `Against ${name}: ${plural(r.wins, 'win')}, ${plural(
+            const name = animalName(d);
+            const detail = tr('stats.aiDetail', {
+              wins: r.wins,
               losses,
-              'loss',
-              'losses',
-            )}, of ${plural(r.played, 'game')}. Current streak ${r.streak}, best ${r.bestStreak}`;
+              played: r.played,
+              streak: r.streak,
+              best: r.bestStreak,
+            });
+            const spoken = tr('stats.aiSpoken', {
+              name,
+              wins: trn('wins', r.wins),
+              losses: trn('losses', losses),
+              games: trn('games', r.played),
+              streak: r.streak,
+              best: r.bestStreak,
+            });
             return (
               <View key={d} accessible accessibilityLabel={spoken} style={row}>
                 <Avatar id={d} size={ROW_AVATAR} />
@@ -197,16 +204,18 @@ export function StatsCard() {
               gap: t.spacing.sm,
             }}
           >
-            <Text style={{ ...t.type.body, color: t.c.text, flexGrow: 1 }}>Reset all stats?</Text>
+            <Text style={{ ...t.type.body, color: t.c.text, flexGrow: 1 }}>
+              {tr('stats.resetAsk')}
+            </Text>
             <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>
               <PillButton
-                text="Cancel"
-                label="Cancel, keep stats"
+                text={tr('common.cancel')}
+                label={tr('stats.cancelLabel')}
                 onPress={() => setConfirming(false)}
               />
               <PillButton
-                text="Reset"
-                label="Reset all stats"
+                text={tr('stats.reset')}
+                label={tr('stats.resetLabel')}
                 filled
                 onPress={() => {
                   reset();
@@ -218,9 +227,9 @@ export function StatsCard() {
         ) : (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
             <Text style={{ ...t.type.caption, color: t.c.textDim, flex: 1 }}>
-              {plural(gamesFinished, 'game')} finished on this device
+              {trn('stats.finished', gamesFinished)}
             </Text>
-            <PillButton text="Reset stats" onPress={() => setConfirming(true)} />
+            <PillButton text={tr('stats.resetButton')} onPress={() => setConfirming(true)} />
           </View>
         )}
       </View>
@@ -235,8 +244,8 @@ export function RateRow() {
   return (
     <Pressable
       accessibilityRole="link"
-      accessibilityLabel="Rate Color Catch"
-      accessibilityHint="Opens the App Store"
+      accessibilityLabel={tr('rate.title')}
+      accessibilityHint={tr('rate.hint')}
       onPress={() => {
         Linking.openURL(WRITE_REVIEW_URL).catch(() => {
           /* no store on this device (simulator): nothing useful to say */
@@ -256,9 +265,9 @@ export function RateRow() {
       })}
     >
       <View style={{ flex: 1, paddingRight: t.spacing.md }}>
-        <Text style={{ ...t.type.body, color: t.c.text }}>Rate Color Catch</Text>
+        <Text style={{ ...t.type.body, color: t.c.text }}>{tr('rate.title')}</Text>
         <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: 2 }}>
-          A quick review helps other families find it
+          {tr('rate.sub')}
         </Text>
       </View>
       <Text allowFontScaling={false} style={{ fontSize: 22, color: t.c.textDim }}>

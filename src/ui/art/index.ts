@@ -11,7 +11,7 @@
  * icon.svg standalone, with its own copy of the constants it needs.
  */
 
-export { Avatar, AVATAR_NAMES } from './avatars';
+export { Avatar } from './avatars';
 export type { AvatarProps } from './avatars';
 
 export { SHAPE_PATHS, SHAPE_VIEWBOX } from './shapePaths';

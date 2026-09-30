@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { DEFAULT_RULES, createGame, reduce, type GameState, type PlayerSpec } from '../../engine';
+import { setLang } from '../../i18n';
 import { createStatsStore } from '../stats';
 import {
   EMPTY_STATS,
@@ -13,6 +14,7 @@ import {
   playerKey,
   sanitizeStats,
   shouldAskForReview,
+  statsLabel,
   type Stats,
 } from '../statsModel';
 import type { KeyValueStorage } from '../storage';
@@ -47,6 +49,33 @@ test('playerKey: by name (case-insensitive) when typed, by animal otherwise', ()
   assert.equal(playerKey(human('p2', 'cat', 'MAYA')), 'name:maya', 'same Maya on any seat/animal');
   assert.equal(playerKey(human('p1', 'fox')), 'animal:fox');
   assert.equal(playerKey(human('p1', 'fox', '  ')), 'animal:fox');
+});
+
+test('changing the device language never splits a player (stable ids, not names)', () => {
+  // saved by an English build: the default owl seat and games vs the Owl computer
+  const saved = JSON.parse(
+    JSON.stringify(applyGameResult(EMPTY_STATS, finished([human('p1', 'owl'), ai('fox')], ['p1']), DAY1)),
+  );
+  saved.vsAi.owl = { played: 2, wins: 1, streak: 0, bestStreak: 1 };
+  assert.equal(saved.players['animal:owl'].label, 'Owl');
+  try {
+    setLang('de');
+    let s = sanitizeStats(saved);
+    assert.equal(statsLabel(s.players['animal:owl']), 'Eule', 'an old "Owl" row reads in German');
+    // a German game: the owl seat on its default name, then typed "Eule"
+    s = applyGameResult(s, finished([human('p1', 'owl'), ai('fox')], ['p2']), DAY2);
+    s = applyGameResult(s, finished([human('p1', 'owl', 'Eule'), ai('owl')], ['p1']), DAY2);
+    assert.deepEqual(Object.keys(s.players), ['animal:owl']);
+    assert.equal(s.players['animal:owl'].played, 3);
+    assert.equal(s.players['animal:owl'].wins, 2);
+    assert.deepEqual(s.vsAi.owl, { played: 3, wins: 2, streak: 1, bestStreak: 1 }, 'vs the computer by difficulty');
+    assert.equal(statsLabel(s.players['animal:owl']), 'Eule');
+    setLang('en');
+    assert.equal(statsLabel(s.players['animal:owl']), 'Owl', 'and back again');
+    assert.equal(statsLabel({ key: 'name:maya', label: 'Maya', avatar: 'owl' }), 'Maya', 'typed names as typed');
+  } finally {
+    setLang('en');
+  }
 });
 
 /* ------------------------------------------------------ applyGameResult */

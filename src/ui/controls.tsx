@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
+import { tr } from '../i18n';
 import { useTheme } from '../theme';
 
 /** The two bars of a pause button. Drawn, not typed: ⏸ renders as a colour
@@ -129,8 +130,8 @@ export function Chip({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={locked ? `${label ?? text}, locked` : (label ?? text)}
-      accessibilityHint={locked ? 'Opens Unlock everything' : hint}
+      accessibilityLabel={locked ? tr('common.locked', { label: label ?? text }) : (label ?? text)}
+      accessibilityHint={locked ? tr('common.lockedHint') : hint}
       accessibilityState={{ selected: !!selected }}
       onPress={onPress}
       style={({ pressed }) => ({
@@ -206,8 +207,12 @@ export function OptionPill({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${label ?? (hint ? `${title}, ${hint}` : title)}${locked ? ', locked' : ''}`}
-      accessibilityHint={locked ? 'Opens Unlock everything' : undefined}
+      accessibilityLabel={
+        locked
+          ? tr('common.locked', { label: label ?? (hint ? `${title}, ${hint}` : title) })
+          : (label ?? (hint ? `${title}, ${hint}` : title))
+      }
+      accessibilityHint={locked ? tr('common.lockedHint') : undefined}
       accessibilityState={{ selected }}
       onPress={onPress}
       style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.75 : 1 })}
@@ -290,8 +295,8 @@ export function ModeCard({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={locked ? `${title}, locked` : title}
-      accessibilityHint={locked ? 'Opens Unlock everything' : subtitle}
+      accessibilityLabel={locked ? tr('common.locked', { label: title }) : title}
+      accessibilityHint={locked ? tr('common.lockedHint') : subtitle}
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,

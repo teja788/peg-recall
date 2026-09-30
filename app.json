@@ -45,7 +45,13 @@
         }
       ],
       "expo-asset",
-      "expo-iap"
+      "expo-iap",
+      [
+        "expo-localization",
+        {
+          "supportedLocales": ["en", "de", "fr", "pt", "ja", "es", "it"]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false

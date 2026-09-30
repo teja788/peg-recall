@@ -7,6 +7,7 @@
  */
 
 import type { AvatarId, BoardSize, Difficulty } from '../engine/types';
+import { everyLanguage, tr } from '../i18n';
 
 export type GameMode = 'ai' | '2p' | '3p';
 
@@ -48,37 +49,6 @@ export const DEFAULT_SETTINGS: Settings = {
 
 export const AVATAR_CYCLE: AvatarId[] = ['fox', 'owl', 'bear', 'frog', 'bunny', 'cat'];
 export const BOARD_CYCLE: BoardSize[] = ['small', 'classic', 'big', 'huge'];
-/** The board is a disc, so sizes are named by peg count, not by rows x cols. */
-export const BOARD_LABEL: Record<BoardSize, string> = {
-  small: 'Small · 16 pegs',
-  classic: 'Classic · 25 pegs',
-  big: 'Big · 36 pegs',
-  huge: 'Huge · 40 pegs',
-};
-/** Just the name, for places too narrow for the peg count (the Home picker). */
-export const BOARD_NAME: Record<BoardSize, string> = {
-  small: 'Small',
-  classic: 'Classic',
-  big: 'Big',
-  huge: 'Huge',
-};
-export const DIFFICULTY_LABEL: Record<Difficulty, string> = {
-  bunny: 'Bunny',
-  fox: 'Fox',
-  owl: 'Owl',
-};
-/** One word under each opponent in the Home picker. */
-export const DIFFICULTY_TIER: Record<Difficulty, string> = {
-  bunny: 'Easy',
-  fox: 'Medium',
-  owl: 'Hard',
-};
-export const DIFFICULTY_HINT: Record<Difficulty, string> = {
-  bunny: 'Forgets a lot. Good for little players.',
-  fox: 'Remembers about half the board.',
-  owl: 'Remembers nearly everything.',
-};
-
 /**
  * Storage key. Deliberately still `.v1`: the blob itself carries a `version`
  * field now (2), and `sanitize` reads every version field by field, so a 1.0
@@ -144,33 +114,36 @@ export function cleanName(raw: unknown): string {
 /** How many typed names are remembered for the chips. */
 export const RECENT_MAX = 8;
 
-/** Same words as the avatar art's names (kept here so the model stays RN-free). */
-export const ANIMAL_NAME: Record<AvatarId, string> = {
-  fox: 'Fox',
-  owl: 'Owl',
-  bear: 'Bear',
-  frog: 'Frog',
-  bunny: 'Bunny',
-  cat: 'Cat',
-};
+/** An animal's name in the app's language ("Fox", "Fuchs"): a seat's default name. */
+export function animalName(avatar: AvatarId): string {
+  return tr(`animal.${avatar}`);
+}
 
-const ANIMAL_WORDS = new Set(Object.values(ANIMAL_NAME).map((n) => n.toLowerCase()));
+/** The animal's name in every language the app speaks, lower-cased. */
+function animalWords(avatar: AvatarId): string[] {
+  return everyLanguage(`animal.${avatar}`)
+    .filter(Boolean)
+    .map((n) => n.toLowerCase());
+}
 
-/** "fox", "FOX", " Fox " — any of the six animal names, whatever the case. */
+const ANIMAL_WORDS = new Set(AVATAR_CYCLE.flatMap(animalWords));
+
+/** "fox", "FOX", " Fox ", "Fuchs" — any of the six animal names, in any
+ *  language the app speaks, whatever the case. */
 export function isAnimalName(name: string): boolean {
   return ANIMAL_WORDS.has(cleanName(name).toLowerCase());
 }
 
 /**
  * What a name field stores when it is committed: the cleaned text, or '' (=
- * "use the animal") when it is empty or just the seat's own animal name. So a
- * field left on its prefilled "Fox" keeps following the animal if the avatar
- * changes later.
+ * "use the animal") when it is empty or just the seat's own animal name, in
+ * any language. So a field left on its prefilled "Fox" keeps following the
+ * animal if the avatar changes later, and shows as "Fuchs" on a German phone.
  */
 export function nameToStore(raw: unknown, avatar: AvatarId): string {
   const name = cleanName(raw);
   if (!name) return '';
-  return name.toLowerCase() === ANIMAL_NAME[avatar]?.toLowerCase() ? '' : name;
+  return animalWords(avatar).includes(name.toLowerCase()) ? '' : name;
 }
 
 /**

@@ -37,7 +37,8 @@ import {
   useSounds,
 } from '../src/ui/feedback';
 import { TRAY_GAP, tableLayout } from '../src/ui/gameLayout';
-import { playerLabel, possessive } from '../src/ui/names';
+import { isolate, playerLabel } from '../src/ui/names';
+import { tr, trn } from '../src/i18n';
 
 import type { GameState, Peg, PegColor } from '../src/engine/types';
 
@@ -102,32 +103,37 @@ function tableCopy(
 ): { banner: string; tone: 'normal' | 'accent'; say: string } {
   if (!state) return { banner: '', tone: 'normal', say: '' };
   const active = activePlayerSpec(state);
-  const name = playerLabel(active);
-  const colour = (c: PegColor) => PEG_PAINT[c].label;
+  // isolated, so a right-to-left name cannot drag the words around it
+  const name = isolate(playerLabel(active));
+  const colour = (c: PegColor) => tr(`color.${c}`);
 
   switch (state.phase) {
     case 'reveal': {
-      const banner = state.suddenDeath ? 'Sudden death — look and remember!' : 'Look and remember!';
+      const banner = tr(state.suddenDeath ? 'game.lookSudden' : 'game.look');
       const seconds = Math.round(revealDurationMs(state) / 1000);
       return {
         banner,
         tone: 'accent',
-        say: `${state.suddenDeath ? "It's a tie. " : ''}${banner} ${seconds} seconds.`,
+        say: `${state.suddenDeath ? `${tr('game.tie')} ` : ''}${banner} ${trn('seconds', seconds)}.`,
       };
     }
     case 'result': {
       const move = state.lastMove;
       if (!move) break;
-      const who = playerLabel(
-        state.config.players.find((p) => p.id === move.playerId) ?? active,
+      const who = isolate(
+        playerLabel(state.config.players.find((p) => p.id === move.playerId) ?? active),
       );
       const peg = state.pegs[move.pegIndex];
       return move.matched
-        ? { banner: 'Match!', tone: 'accent', say: `Match! ${who} caught ${colour(move.dieColor)}.` }
+        ? {
+            banner: tr('game.match'),
+            tone: 'accent',
+            say: tr('game.matchSay', { name: who, color: colour(move.dieColor) }),
+          }
         : {
-            banner: 'Not that one',
+            banner: tr('game.miss'),
             tone: 'normal',
-            say: peg ? `Not that one. That peg is ${colour(peg.color)}.` : 'Not that one.',
+            say: peg ? tr('game.missSay', { color: colour(peg.color) }) : tr('game.miss'),
           };
     }
     case 'gameOver': {
@@ -136,30 +142,33 @@ function tableCopy(
       const headline = gameOverHeadline(state);
       const tie = suddenDeathLine(state);
       return {
-        banner: state.suddenDeath ? headline : 'Board clear!',
+        banner: state.suddenDeath ? headline : tr('game.boardClear'),
         tone: 'normal',
         say: tie ? `${headline} ${tie}` : headline,
       };
     }
     case 'pick': {
       if (!state.dieColor) break;
-      if (busy) return { banner: `${name} is rolling…`, tone: 'accent', say: '' };
+      if (busy) return { banner: tr('game.rolling', { name }), tone: 'accent', say: '' };
       const c = colour(state.dieColor);
       return {
-        banner: `Find ${c}`,
+        banner: tr('game.find', { color: c }),
         tone: 'accent',
-        say: active.kind === 'ai' ? `${name} rolled ${c}.` : `Die shows ${c}. Find ${c}.`,
+        say:
+          active.kind === 'ai'
+            ? tr('game.aiRolled', { name, color: c })
+            : tr('game.dieShows', { color: c }),
       };
     }
     default:
       break;
   }
   return active.kind === 'ai'
-    ? { banner: `${name} is thinking…`, tone: 'normal', say: `${possessive(name)} turn.` }
+    ? { banner: tr('game.thinking', { name }), tone: 'normal', say: tr('game.turn', { name }) }
     : {
-        banner: `${possessive(name)} turn`,
+        banner: tr('game.turn', { name }),
         tone: 'normal',
-        say: `${possessive(name)} turn. Tap the die.`,
+        say: tr('game.turnSay', { name }),
       };
 }
 
@@ -446,7 +455,7 @@ export default function GameScreen() {
   if (!view) {
     return (
       <Backdrop>
-        <View style={{ flex: 1 }} accessibilityLabel="Loading game" />
+        <View style={{ flex: 1 }} accessibilityLabel={tr('game.loading')} />
       </Backdrop>
     );
   }
@@ -497,8 +506,8 @@ export default function GameScreen() {
   const pauseButton = (
     <IconButton
       icon={<PauseGlyph size={Math.round(L.px(48) * 0.5)} color={t.c.text} />}
-      label="Pause"
-      hint="Stops the game and opens the menu"
+      label={tr('game.pause')}
+      hint={tr('game.pauseHint')}
       onPress={openPause}
       size={L.px(48)}
       tone="filled"
@@ -507,7 +516,7 @@ export default function GameScreen() {
   const soundButton = (
     <IconButton
       glyph={soundOn ? '🔊' : '🔇'}
-      label={soundOn ? 'Sound on. Turn sound off' : 'Sound off. Turn sound on'}
+      label={tr(soundOn ? 'common.soundOn' : 'common.soundOff')}
       onPress={() => toggleSetting('soundOn')}
       size={L.px(44)}
       tone="filled"
@@ -572,7 +581,7 @@ export default function GameScreen() {
             marginTop: Math.round(4 * L.chromeScale),
           }}
         >
-          Tap the die
+          {tr('game.tapDie')}
         </Text>
       ) : null}
     </View>

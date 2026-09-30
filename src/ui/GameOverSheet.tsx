@@ -10,9 +10,10 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { GameState, PlayerSpec } from '../engine/types';
+import { tr, trn } from '../i18n';
 import { useTheme } from '../theme';
 import { useReduceMotion } from './feedback';
-import { joinNames, playerLabel } from './names';
+import { isolate, joinNames, playerLabel } from './names';
 
 export interface GameOverSheetProps {
   state: GameState;
@@ -29,10 +30,10 @@ export interface GameOverSheetProps {
  */
 export function gameOverHeadline(state: GameState): string {
   const winners = state.config.players.filter((p) => state.winnerIds.includes(p.id));
-  if (winners.length === 0) return 'Game over';
-  if (winners.length > 1) return `${joinNames(winners.map(playerLabel))} share the win!`;
-  const name = playerLabel(winners[0]);
-  return state.suddenDeath ? `${name} wins the sudden death!` : `${name} wins!`;
+  if (winners.length === 0) return tr('over.none');
+  if (winners.length > 1) return tr('over.share', { names: joinNames(winners.map(playerLabel)) });
+  const name = isolate(playerLabel(winners[0]));
+  return tr(state.suddenDeath ? 'over.winsSudden' : 'over.wins', { name });
 }
 
 /** The seats that played the sudden-death board, or [] if there was none. */
@@ -51,8 +52,8 @@ export function suddenDeathLine(state: GameState): string | null {
   if (tied.length === 0) return null;
   const main = state.scores[tied[0].id] ?? 0;
   const sd = state.suddenDeathScores ?? {};
-  const tally = tied.map((p) => `${playerLabel(p)} ${sd[p.id] ?? 0}`).join(', ');
-  return `Tied on ${main} ${main === 1 ? 'peg' : 'pegs'}. Sudden death: ${tally}.`;
+  const tally = tied.map((p) => `${isolate(playerLabel(p))} ${sd[p.id] ?? 0}`).join(tr('list.sep'));
+  return trn('over.tied', main, { tally });
 }
 
 export function GameOverSheet({ state, onRematch, onHome }: GameOverSheetProps) {
@@ -157,9 +158,15 @@ export function GameOverSheet({ state, onRematch, onHome }: GameOverSheetProps) 
                 <View
                   key={p.id}
                   accessible
-                  accessibilityLabel={`${name}${p.kind === 'ai' ? ', computer' : ''}, ${score} ${
-                    score === 1 ? 'peg' : 'pegs'
-                  }${tieBreak ? `, ${sd[p.id] ?? 0} in sudden death` : ''}${won ? ', winner' : ''}`}
+                  accessibilityLabel={[
+                    name,
+                    p.kind === 'ai' ? tr('common.computer') : null,
+                    trn('pegs', score),
+                    tieBreak ? tr('over.inSudden', { n: sd[p.id] ?? 0 }) : null,
+                    won ? tr('over.winner') : null,
+                  ]
+                    .filter(Boolean)
+                    .join(', ')}
                   style={[
                     styles.row,
                     {
@@ -195,7 +202,7 @@ export function GameOverSheet({ state, onRematch, onHome }: GameOverSheetProps) 
                         marginHorizontal: t.spacing.sm,
                       }}
                     >
-                      {`+${sd[p.id] ?? 0} sudden death`}
+                      {tr('over.suddenBadge', { n: sd[p.id] ?? 0 })}
                     </Text>
                   ) : null}
                   <Text style={{ ...t.type.heading, color: won ? t.c.accent : t.c.text }}>
@@ -209,7 +216,7 @@ export function GameOverSheet({ state, onRematch, onHome }: GameOverSheetProps) 
           <View style={{ gap: t.spacing.md }}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Play again"
+              accessibilityLabel={tr('over.playAgain')}
               onPress={onRematch}
               style={({ pressed }) => [
                 styles.btn,
@@ -220,11 +227,11 @@ export function GameOverSheet({ state, onRematch, onHome }: GameOverSheetProps) 
                 },
               ]}
             >
-              <Text style={{ ...t.type.heading, color: t.c.accentInk }}>Play again</Text>
+              <Text style={{ ...t.type.heading, color: t.c.accentInk }}>{tr('over.playAgain')}</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Back to home"
+              accessibilityLabel={tr('over.backHome')}
               onPress={onHome}
               style={({ pressed }) => [
                 styles.btn,
@@ -236,7 +243,7 @@ export function GameOverSheet({ state, onRematch, onHome }: GameOverSheetProps) 
                 },
               ]}
             >
-              <Text style={{ ...t.type.heading, color: t.c.text }}>Home</Text>
+              <Text style={{ ...t.type.heading, color: t.c.text }}>{tr('common.home')}</Text>
             </Pressable>
           </View>
         </ScrollView>

@@ -7,27 +7,26 @@ import { PEG_HEX, PEG_RIM } from '../ui/art/palette';
 
 import type { PegColor } from '../engine/types';
 
-/** A peg colour as the UI frames it: fill, rim and its spoken name. */
+/** A peg colour as the UI frames it: fill and rim (its name is in src/i18n). */
 export interface PegPaint {
   fill: string;
   rim: string;
-  label: string;
 }
 
 /**
  * Fill and rim are *taken from* src/ui/art/palette.ts rather than repeated
  * here: the art layer is the one place a peg colour is defined, so the drawn
- * peg and the UI that frames it can never drift apart by a shade. Only the
- * spoken label belongs to this layer (the shape glyphs are drawn from
- * src/ui/art/shapePaths.ts).
+ * peg and the UI that frames it can never drift apart by a shade (the shape
+ * glyphs are drawn from src/ui/art/shapePaths.ts, the spoken names live in
+ * src/i18n).
  */
 export const PEG_PAINT: Record<PegColor, PegPaint> = {
-  red: { fill: PEG_HEX.red, rim: PEG_RIM.red, label: 'Red' },
-  violet: { fill: PEG_HEX.violet, rim: PEG_RIM.violet, label: 'Violet' },
-  blue: { fill: PEG_HEX.blue, rim: PEG_RIM.blue, label: 'Blue' },
-  green: { fill: PEG_HEX.green, rim: PEG_RIM.green, label: 'Green' },
-  yellow: { fill: PEG_HEX.yellow, rim: PEG_RIM.yellow, label: 'Yellow' },
-  purple: { fill: PEG_HEX.purple, rim: PEG_RIM.purple, label: 'Purple' },
+  red: { fill: PEG_HEX.red, rim: PEG_RIM.red },
+  violet: { fill: PEG_HEX.violet, rim: PEG_RIM.violet },
+  blue: { fill: PEG_HEX.blue, rim: PEG_RIM.blue },
+  green: { fill: PEG_HEX.green, rim: PEG_RIM.green },
+  yellow: { fill: PEG_HEX.yellow, rim: PEG_RIM.yellow },
+  purple: { fill: PEG_HEX.purple, rim: PEG_RIM.purple },
 };
 
 export interface Surfaces {

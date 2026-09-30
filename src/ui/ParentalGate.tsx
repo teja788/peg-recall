@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 
+import { tr } from '../i18n';
 import { isRightAnswer, mathQuestion } from '../store/purchasesModel';
 import { useTheme } from '../theme';
 import { PillButton } from './StatsCard';
@@ -29,7 +30,7 @@ export function ParentalGate({ onPass, onCancel }: { onPass: () => void; onCance
   return (
     <View style={{ gap: t.spacing.md }}>
       <Text style={{ ...t.type.label, color: t.c.textDim }}>
-        For grown-ups: answer to continue
+        {tr('gate.intro')}
       </Text>
       <Text
         accessibilityRole="header"
@@ -49,8 +50,8 @@ export function ParentalGate({ onPass, onCancel }: { onPass: () => void; onCance
         autoFocus
         autoComplete="off"
         autoCorrect={false}
-        accessibilityLabel={`Answer. ${q.label}`}
-        placeholder="Answer"
+        accessibilityLabel={tr('gate.answerLabel', { question: q.label })}
+        placeholder={tr('gate.answer')}
         placeholderTextColor={t.c.textDim}
         selectionColor={t.c.accent}
         maxFontSizeMultiplier={1.6}
@@ -67,12 +68,12 @@ export function ParentalGate({ onPass, onCancel }: { onPass: () => void; onCance
       />
       {wrong ? (
         <Text accessibilityLiveRegion="polite" style={{ ...t.type.caption, color: t.c.textDim }}>
-          Not quite. Here is a new one.
+          {tr('gate.wrong')}
         </Text>
       ) : null}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.sm }}>
-        <PillButton text="Cancel" onPress={onCancel} />
-        <PillButton text="Continue" filled onPress={check} />
+        <PillButton text={tr('common.cancel')} onPress={onCancel} />
+        <PillButton text={tr('common.continue')} filled onPress={check} />
       </View>
     </View>
   );
