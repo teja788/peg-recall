@@ -120,6 +120,8 @@ export const RECENT_MAX = 8;
  * "ı"). Turkish dotted and dotless i fold together, so "İpek" = "ipek" =
  * "IPEK", "Işıl" = "IŞIL" and "KEDİ" = "Kedi".
  */
+// ponytail: ı and i fold together, so "Işıl" and "Isil" count as one player;
+// per-locale collation (Turkish case rules) is the upgrade if that ever matters.
 export function nameKey(raw: unknown): string {
   return cleanName(raw).toLowerCase().replace(/\u0307/g, '').replace(/ı/g, 'i');
 }
