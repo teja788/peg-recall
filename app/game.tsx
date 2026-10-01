@@ -643,6 +643,8 @@ export default function GameScreen() {
             paddingLeft: insets.left + L.edge,
             paddingRight: insets.right + L.edge,
             columnGap: L.edge,
+            // keeps the board's zIndex in here; see the stacked layout below
+            zIndex: 0,
           }}
         >
           {split ? (
@@ -676,7 +678,11 @@ export default function GameScreen() {
 
   return (
     <Backdrop>
-    <View style={{ flex: 1, paddingTop: insets.top }}>
+    {/* zIndex 0 makes this column its own stacking context. Without it the
+        native side flattens this layout-only View away, the table's zIndex 1
+        lands among the overlays, and the board paints over the game-over
+        sheet, hiding Play again / Home (web stacks z-index the same way). */}
+    <View style={{ flex: 1, paddingTop: insets.top, zIndex: 0 }}>
       {/* trays */}
       <View
         style={{
