@@ -241,4 +241,5 @@ export const zh: Strings = {
   'gate.answer': '答案',
   'gate.answerLabel': '答案。{question}',
   'gate.wrong': '不太對，換一題。',
+  'gate.delete': '刪除',
 };

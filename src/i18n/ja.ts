@@ -243,4 +243,5 @@ export const ja: Strings = {
   'gate.answer': 'こたえ',
   'gate.answerLabel': 'こたえ。{question}',
   'gate.wrong': 'ちがいます。新しい問題です。',
+  'gate.delete': '1文字消す',
 };

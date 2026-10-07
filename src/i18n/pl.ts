@@ -262,4 +262,5 @@ export const pl: Strings = {
   'gate.answer': 'Odpowiedź',
   'gate.answerLabel': 'Odpowiedź. {question}',
   'gate.wrong': 'Nie do końca. Oto nowe pytanie.',
+  'gate.delete': 'Usuń',
 };

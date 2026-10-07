@@ -245,4 +245,5 @@ export const es: Strings = {
   'gate.answer': 'Respuesta',
   'gate.answerLabel': 'Respuesta. {question}',
   'gate.wrong': 'Casi. Aquí tienes otra.',
+  'gate.delete': 'Borrar',
 };

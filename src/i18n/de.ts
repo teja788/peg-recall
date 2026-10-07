@@ -241,4 +241,5 @@ export const de: Strings = {
   'gate.answer': 'Antwort',
   'gate.answerLabel': 'Antwort. {question}',
   'gate.wrong': 'Nicht ganz. Hier ist eine neue Aufgabe.',
+  'gate.delete': 'Löschen',
 };

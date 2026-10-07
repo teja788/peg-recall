@@ -246,4 +246,5 @@ export const tr: Strings = {
   'gate.answer': 'Cevap',
   'gate.answerLabel': 'Cevap. {question}',
   'gate.wrong': 'Olmadı. İşte yeni bir soru.',
+  'gate.delete': 'Sil',
 };

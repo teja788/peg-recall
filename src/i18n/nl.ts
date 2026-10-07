@@ -242,4 +242,5 @@ export const nl: Strings = {
   'gate.answer': 'Antwoord',
   'gate.answerLabel': 'Antwoord. {question}',
   'gate.wrong': 'Net niet. Hier is een nieuwe.',
+  'gate.delete': 'Wissen',
 };

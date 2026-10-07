@@ -241,4 +241,5 @@ export const it: Strings = {
   'gate.answer': 'Risposta',
   'gate.answerLabel': 'Risposta. {question}',
   'gate.wrong': 'Quasi. Eccone un’altra.',
+  'gate.delete': 'Cancella',
 };

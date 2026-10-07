@@ -246,4 +246,5 @@ export const ko: Strings = {
   'gate.answer': '답',
   'gate.answerLabel': '답. {question}',
   'gate.wrong': '아쉬워요. 새 문제예요.',
+  'gate.delete': '지우기',
 };

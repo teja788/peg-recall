@@ -257,4 +257,5 @@ export const en = {
   'gate.answer': 'Answer',
   'gate.answerLabel': 'Answer. {question}',
   'gate.wrong': 'Not quite. Here is a new one.',
+  'gate.delete': 'Delete',
 };
