@@ -1,0 +1,146 @@
+{
+  "style": {
+    "font": "fonts/Nunito.ttf",
+    "text": "#2B2622",
+    "background": [
+      "#FBF6EC",
+      "#EFE3CF"
+    ],
+    "dots": [
+      "#CE1202",
+      "#F0E442",
+      "#009E73",
+      "#0072B2",
+      "#6201DA",
+      "#CC79A7"
+    ]
+  },
+  "captions": {
+    "en-US": {
+      "01-look": "Look. Remember. Find it.",
+      "02-family": "Pass and play with the family",
+      "03-shapes": "Shapes for color-blind players",
+      "04-roll": "Roll a color. Pick the peg.",
+      "05-rivals": "Bunny, Fox or Owl: pick a rival",
+      "06-sizes": "From 16 pegs to 40",
+      "07-win-dark": "Free. Offline. No ads."
+    },
+    "es-MX": {
+      "01-look": "Mira. Recuerda. Encuéntrala.",
+      "02-family": "Pásalo y juega en familia",
+      "03-shapes": "Figuras para jugadores daltónicos",
+      "04-roll": "Tira el dado. Elige la ficha.",
+      "05-rivals": "Reta a la computadora: 3 niveles",
+      "06-sizes": "De 16 a 40 fichas",
+      "07-win-dark": "Gratis. Sin internet. Sin anuncios."
+    },
+    "en-GB": {
+      "01-look": "Look. Remember. Find it.",
+      "02-family": "Pass and play with the family",
+      "03-shapes": "Shapes for colour-blind players",
+      "04-roll": "Roll a colour. Pick the peg.",
+      "05-rivals": "Bunny, Fox or Owl: pick a rival",
+      "06-sizes": "From 16 pegs to 40",
+      "07-win-dark": "Free. Offline. No ads."
+    },
+    "de-DE": {
+      "01-look": "Ansehen. Merken. Finden.",
+      "02-family": "Reihum mit der Familie",
+      "03-shapes": "Formen für Farbenblinde",
+      "04-roll": "Würfeln. Stein antippen.",
+      "05-rivals": "Hase, Fuchs oder Eule?",
+      "06-sizes": "16 bis 40 Steine",
+      "07-win-dark": "Offline und werbefrei"
+    },
+    "fr-FR": {
+      "01-look": "Voir. Retenir. Trouver.",
+      "02-family": "À tour de rôle, en famille",
+      "03-shapes": "Des formes pour les daltoniens",
+      "04-roll": "Un dé, une couleur, un pion",
+      "05-rivals": "Lapin, Renard ou Hibou ?",
+      "06-sizes": "De 16 à 40 pions",
+      "07-win-dark": "Hors ligne. Sans pub."
+    },
+    "pt-BR": {
+      "01-look": "Olhe. Lembre. Encontre.",
+      "02-family": "Um aparelho, a família toda",
+      "03-shapes": "Formas para daltônicos",
+      "04-roll": "Jogue o dado. Ache o pino.",
+      "05-rivals": "Coelho, Raposa ou Coruja?",
+      "06-sizes": "De 16 a 40 pinos",
+      "07-win-dark": "Offline e sem anúncios"
+    },
+    "ja": {
+      "01-look": "見て、覚えて、探そう",
+      "02-family": "1台を回して家族で対戦",
+      "03-shapes": "色が苦手でも形で遊べる",
+      "04-roll": "サイコロを振って同じ色のコマを探そう",
+      "05-rivals": "ウサギ・キツネ・フクロウと対戦",
+      "06-sizes": "コマは16個から40個まで",
+      "07-win-dark": "オフライン・広告なし"
+    },
+    "es-ES": {
+      "01-look": "Mira. Recuerda. Busca.",
+      "02-family": "Pásalo y juega en familia",
+      "03-shapes": "Figuras para daltónicos",
+      "04-roll": "Tira y busca el color",
+      "05-rivals": "¿Conejo, Zorro o Búho?",
+      "06-sizes": "De 16 a 40 fichas",
+      "07-win-dark": "Sin conexión ni anuncios"
+    },
+    "it": {
+      "01-look": "Guarda. Ricorda. Trova.",
+      "02-family": "Passa e gioca in famiglia",
+      "03-shapes": "Forme per i daltonici",
+      "04-roll": "Tira e trova la pedina",
+      "05-rivals": "Coniglio, Volpe o Gufo?",
+      "06-sizes": "Da 16 a 40 pedine",
+      "07-win-dark": "Offline, senza pubblicità"
+    },
+    "ko": {
+      "01-look": "보고, 기억하고, 찾아요",
+      "02-family": "기기 한 대로 온 가족이 함께해요",
+      "03-shapes": "색을 구분하기 어려워도 모양으로 즐겨요",
+      "04-roll": "주사위를 굴려 같은 색 말을 찾아요",
+      "05-rivals": "토끼, 여우, 부엉이와 대결해요",
+      "06-sizes": "말은 16개부터 40개까지",
+      "07-win-dark": "오프라인, 광고 없음"
+    },
+    "zh-Hant": {
+      "01-look": "看一看、記住、找出來",
+      "02-family": "一台裝置，全家輪流玩",
+      "03-shapes": "看形狀也能玩，不只靠顏色",
+      "04-roll": "擲骰子，找出同色棋子",
+      "05-rivals": "兔子、狐狸、貓頭鷹，選個對手",
+      "06-sizes": "16 到 40 顆棋子",
+      "07-win-dark": "離線可玩・沒有廣告"
+    },
+    "tr": {
+      "01-look": "Bak. Hatırla. Bul.",
+      "02-family": "Elden ele, ailece oyna",
+      "03-shapes": "Renk körleri için şekiller",
+      "04-roll": "Zarı at, aynı rengi bul",
+      "05-rivals": "Tavşan mı, Tilki mi, Baykuş mu?",
+      "06-sizes": "16’dan 40 piyona",
+      "07-win-dark": "Çevrimdışı. Reklamsız."
+    },
+    "nl-NL": {
+      "01-look": "Kijk. Onthoud. Vind het.",
+      "02-family": "Doorgeven en samen spelen",
+      "03-shapes": "Vormen voor kleurenblinden",
+      "04-roll": "Gooi en tik de juiste pion",
+      "05-rivals": "Konijn, Vos of Uil?",
+      "06-sizes": "16 tot 40 pionnen",
+      "07-win-dark": "Offline. Geen reclame."
+    },
+    "pl": {
+      "01-look": "Patrz, pamiętaj, znajdź",
+      "02-family": "Podaj dalej i graj z rodziną",
+      "03-shapes": "Kształty dla daltonistów",
+      "04-roll": "Rzuć kostką i wskaż pionek",
+      "05-rivals": "Królik, Lis czy Sowa?",
+      "06-sizes": "Od 16 do 40 pionków",
+      "07-win-dark": "Offline. Bez reklam."
+    }
+  }
+}

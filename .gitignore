@@ -47,3 +47,5 @@ yarn-error.*
 # screenshots (110 MB) - finals live in ~/Downloads/colorcatch-v1.1-screenshots and App Store Connect
 store-assets/screenshots/
 store-assets/screenshot-frames/
+store-assets/screenshots-ppo/
+store-assets/screenshot-frames-ppo/
