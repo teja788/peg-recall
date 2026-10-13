@@ -96,3 +96,25 @@ Read each community's self-promotion rules first; they change. Post once per com
 
 - **Apple Search Ads / paid installs:** about $2 per install against roughly $0.05 earned per install.
 - **Ads:** see the table above.
+
+## After 1.2.1 is live (approved Oct 14 2026)
+
+Each item needs the owner's OK before it is written to App Store Connect.
+
+1. **Featuring nomination**: "Now in 18 languages, 4 players". Submit at least 3 weeks ahead.
+2. **Product Page Optimization test**: the "Colorful first 3" screenshots plus the "Bright" icon (`store-assets/ppo-experiment.mjs`, dry-run by default).
+3. **Unlock purchase description**: change it to "3 and 4 players".
+4. **Custom product pages**, each linked to search keywords. Never claim the game improves memory.
+
+| Page | Linked searches | Caption angle | When |
+|---|---|---|---|
+| Seniors | memory games for seniors | Big pegs, calm pace | First batch |
+| Kids | memory game for kids | Bunny, colors | First batch |
+| Family / party | 4 player games, family games | Up to 4 players on one iPad | First batch |
+| No ads / offline | games without ads, offline games for kids | No ads, no Wi-Fi, no account | First batch |
+| Color-blind | color blind games | Shapes on every peg | First batch |
+| Road trip / travel | car games, travel games for kids | Play anywhere | Holidays |
+| Classroom / therapy | memory game for classroom, OT games | Turn-taking for up to 4 | Later |
+| Festivals | diwali / holi games | Pair with an India In-App Event | Seasonal |
+
+In 1.3, the WhatsApp share link should open the Family page.
