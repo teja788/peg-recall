@@ -18,6 +18,7 @@ import {
   persistable,
   sanitize,
   savedBeforeUnlock,
+  withTries,
   type CycleOptions,
   type Settings,
 } from './settingsModel';
@@ -92,6 +93,11 @@ export function createSettingsStore(storage: KeyValueStorage, opts: SettingsStor
             const apply: Partial<Settings> = {};
             for (const k of Object.keys(stored) as (keyof Settings)[]) {
               if (!touched.has(k)) (apply as Record<string, unknown>)[k] = stored[k];
+            }
+            // a free try played before a slow read landed is not a reason to
+            // forget the ones stored: both count
+            if (stored.triesUsed && touched.has('triesUsed')) {
+              apply.triesUsed = withTries(stored.triesUsed, getState().triesUsed);
             }
             touched.clear();
             setState({ ...apply, hydrated: true });

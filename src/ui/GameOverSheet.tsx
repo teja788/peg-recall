@@ -15,10 +15,22 @@ import { useTheme } from '../theme';
 import { useReduceMotion } from './feedback';
 import { isolate, joinNames, playerLabel } from './names';
 
+export interface UpsellCardProps {
+  title: string;
+  line: string;
+  /** the primary button: opens the Unlock sheet, or starts a free try */
+  action: string;
+  onAction: () => void;
+  /** "Not now": the card goes, the sheet stays */
+  onDismiss: () => void;
+}
+
 export interface GameOverSheetProps {
   state: GameState;
   onRematch: () => void;
   onHome: () => void;
+  /** at most one gentle card above the buttons (see `upsellCard`) */
+  upsell?: UpsellCardProps;
 }
 
 /**
@@ -56,7 +68,67 @@ export function suddenDeathLine(state: GameState): string | null {
   return trn('over.tied', main, { tally });
 }
 
-export function GameOverSheet({ state, onRematch, onHome }: GameOverSheetProps) {
+/** A quiet card inside the sheet: never a popup, never in the way of Play again. */
+function UpsellCard({ title, line, action, onAction, onDismiss }: UpsellCardProps) {
+  const t = useTheme();
+  return (
+    <View
+      style={{
+        backgroundColor: t.c.page,
+        borderRadius: t.radii.md,
+        borderWidth: 1,
+        borderColor: t.c.line,
+        padding: t.spacing.lg,
+        gap: t.spacing.sm,
+      }}
+    >
+      <Text style={{ ...t.type.label, color: t.c.text }}>{title}</Text>
+      <Text style={{ ...t.type.caption, color: t.c.textDim }}>{line}</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          gap: t.spacing.md,
+          marginTop: t.spacing.xs,
+        }}
+      >
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={action}
+          accessibilityHint={line}
+          onPress={onAction}
+          style={({ pressed }) => ({
+            minHeight: 44,
+            justifyContent: 'center',
+            paddingHorizontal: t.spacing.lg,
+            borderRadius: t.radii.pill,
+            backgroundColor: t.c.accent,
+            opacity: pressed ? 0.85 : 1,
+          })}
+        >
+          <Text style={{ ...t.type.label, color: t.c.accentInk }}>{action}</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={tr('upsell.notNow')}
+          onPress={onDismiss}
+          hitSlop={8}
+          style={({ pressed }) => ({
+            minHeight: 44,
+            justifyContent: 'center',
+            paddingHorizontal: t.spacing.sm,
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <Text style={{ ...t.type.label, color: t.c.textDim }}>{tr('upsell.notNow')}</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+export function GameOverSheet({ state, onRematch, onHome, upsell }: GameOverSheetProps) {
   const t = useTheme();
   const reduced = useReduceMotion();
   const insets = useSafeAreaInsets();
@@ -212,6 +284,8 @@ export function GameOverSheet({ state, onRematch, onHome }: GameOverSheetProps) 
               );
             })}
           </View>
+
+          {upsell ? <UpsellCard {...upsell} /> : null}
 
           <View style={{ gap: t.spacing.md }}>
             <Pressable

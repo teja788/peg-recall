@@ -31,6 +31,10 @@ export interface Settings {
   /** The one-time unlock (bought, restored or grandfathered): Big and Huge
    *  boards, Owl, 3 and 4 players. Only ever turned on; see `playable`. */
   unlocked: boolean;
+  /** Locked items whose one free game has been played (see `canTry`). */
+  triesUsed: Lockable[];
+  /** The "Ready for more?" card after a Classic win has been shown (once ever). */
+  moreOffered: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -45,6 +49,8 @@ export const DEFAULT_SETTINGS: Settings = {
   names: ['', '', '', ''],
   recentNames: [],
   unlocked: false,
+  triesUsed: [],
+  moreOffered: false,
 };
 
 /** Seats stored in `avatars` / `names` (the 4-player mode's count). */
@@ -59,8 +65,9 @@ export const BOARD_CYCLE: BoardSize[] = ['small', 'classic', 'big', 'huge'];
  */
 export const SETTINGS_KEY = 'pegrecall.settings.v1';
 /** Schema version written into the stored blob (1.0 wrote none = version 1;
- *  2 added `names`, 3 added `recentNames`, 4 added `unlocked`). */
-export const SETTINGS_VERSION = 4;
+ *  2 added `names`, 3 added `recentNames`, 4 added `unlocked`, 5 added
+ *  `triesUsed` and `moreOffered`). */
+export const SETTINGS_VERSION = 5;
 
 /* ------------------------------------------------------------ player names */
 
@@ -247,6 +254,11 @@ export function sanitize(raw: unknown): Partial<Settings> {
   if (typeof r.bonusTurnOnMatch === 'boolean') out.bonusTurnOnMatch = r.bonusTurnOnMatch;
   if (typeof r.kidMode === 'boolean') out.kidMode = r.kidMode;
   if (typeof r.unlocked === 'boolean') out.unlocked = r.unlocked;
+  if (typeof r.moreOffered === 'boolean') out.moreOffered = r.moreOffered;
+  if (Array.isArray(r.triesUsed)) {
+    // unknown entries drop out; a used try is never forgotten for a bad neighbour
+    out.triesUsed = LOCKABLES.filter((v) => (r.triesUsed as unknown[]).includes(v));
+  }
   if (BOARD_CYCLE.includes(r.boardSize as BoardSize)) out.boardSize = r.boardSize as BoardSize;
   if (['bunny', 'fox', 'owl'].includes(r.difficulty as string)) out.difficulty = r.difficulty as Difficulty;
   if (['ai', '2p', '3p', '4p'].includes(r.lastMode as string)) out.lastMode = r.lastMode as GameMode;
@@ -289,28 +301,46 @@ export function persistable(s: Settings): PersistedSettings {
     names: s.names,
     recentNames: s.recentNames,
     unlocked: s.unlocked,
+    triesUsed: s.triesUsed,
+    moreOffered: s.moreOffered,
   };
 }
 
 /* ------------------------------------------------------------------ unlock */
 
 /** What the unlock opens. Board sizes, opponents and modes share no names. */
-const LOCKED = new Set<string>(['big', 'huge', 'owl', '3p', '4p']);
+export type Lockable = 'big' | 'huge' | 'owl' | '3p' | '4p';
+const LOCKABLES: Lockable[] = ['big', 'huge', 'owl', '3p', '4p'];
+const LOCKED = new Set<string>(LOCKABLES);
+
+/** What decides whether a locked item can be played. */
+export type Access = Pick<Settings, 'unlocked' | 'triesUsed'>;
 
 /** true when `value` (a board size, opponent or mode) needs the unlock. */
 export function isLocked(unlocked: boolean, value: BoardSize | Difficulty | GameMode): boolean {
   return !unlocked && LOCKED.has(value);
 }
 
+/** true when `value` is locked but its one free game is still to be played. */
+export function canTry(s: Access, value: BoardSize | Difficulty | GameMode): boolean {
+  return isLocked(s.unlocked, value) && !s.triesUsed.includes(value as Lockable);
+}
+
+/** true when `value` can be picked and played: free, unlocked, or a try left. */
+export function isOpen(s: Access, value: BoardSize | Difficulty | GameMode): boolean {
+  return !isLocked(s.unlocked, value) || canTry(s, value);
+}
+
 /**
  * The settings a game is dealt with, and the choices the pickers show as
- * selected: a locked value saved earlier (a TestFlight build, a refund) falls
- * back to the nearest free one. The stored value is left alone.
+ * selected: a locked value with no free try left (saved earlier, a TestFlight
+ * build, a refund, a try already played) falls back to the nearest free one.
+ * The stored value is left alone.
  */
 export function playable<S extends Settings>(s: S): S {
   if (s.unlocked) return s;
-  const boardSize = isLocked(false, s.boardSize) ? 'classic' : s.boardSize;
-  const difficulty = isLocked(false, s.difficulty) ? 'fox' : s.difficulty;
+  const boardSize = isOpen(s, s.boardSize) ? s.boardSize : 'classic';
+  const difficulty = isOpen(s, s.difficulty) ? s.difficulty : 'fox';
   return boardSize === s.boardSize && difficulty === s.difficulty ? s : { ...s, boardSize, difficulty };
 }
 
@@ -324,7 +354,64 @@ export function savedBeforeUnlock(raw: unknown): boolean {
   return typeof v !== 'number' || v < 4;
 }
 
-/** 3 or 4 players without the unlock (a deep link, an old route) plays as 2. */
-export function playableMode(mode: GameMode, unlocked: boolean): GameMode {
-  return isLocked(unlocked, mode) ? '2p' : mode;
+/** 3 or 4 players without the unlock or a free try (a deep link, an old
+ *  route, a try already played) plays as 2. */
+export function playableMode(mode: GameMode, s: Access): GameMode {
+  return isOpen(s, mode) ? mode : '2p';
+}
+
+/**
+ * What a game started now from `mode` and the stored settings is dealt with,
+ * and the locked items it plays on a free try. Those tries are used up the
+ * moment the game starts (quitting does not give one back), and a rematch of
+ * a game that used one deals again from here, so it falls back to free values.
+ */
+export function deal<S extends Settings>(
+  mode: GameMode,
+  s: S,
+): { mode: GameMode; settings: S; tries: Lockable[] } {
+  const m = playableMode(mode, s);
+  const p = playable(s);
+  const used = [p.boardSize, m === 'ai' ? p.difficulty : null, m];
+  // playable() already dropped every locked value with no try left
+  const tries = LOCKABLES.filter((v) => used.includes(v) && isLocked(s.unlocked, v));
+  return { mode: m, settings: p, tries };
+}
+
+/** `triesUsed` after a game started on `tries`. */
+export function withTries(used: readonly Lockable[], tries: readonly Lockable[]): Lockable[] {
+  return LOCKABLES.filter((v) => used.includes(v) || tries.includes(v));
+}
+
+/* ------------------------------------------------------------------ upsell */
+
+/** The free tries the "Ready for more?" card offers: Big board, Owl. */
+export function moreToTry(s: Access): ('big' | 'owl')[] {
+  return (['big', 'owl'] as const).filter((v) => canTry(s, v));
+}
+
+/**
+ * The one card (if any) the game-over sheet shows under the scores. Never for
+ * an unlocked player, and never on the game-over where the rating prompt is
+ * asked for: that one wins.
+ *  - 'unlock': the game just played used a free try ("Liked it?").
+ *  - 'more': a person beat the computer on the Classic board, not on a try,
+ *    and Big or Owl still has its try; once ever (`moreOffered`).
+ */
+export function upsellCard(
+  s: Access & Pick<Settings, 'moreOffered'>,
+  game: { tries: number; humanWon: boolean; vsComputer: boolean; boardSize: BoardSize; reviewDue: boolean },
+): 'unlock' | 'more' | null {
+  if (s.unlocked || game.reviewDue) return null;
+  if (game.tries > 0) return 'unlock';
+  if (
+    game.humanWon &&
+    game.vsComputer &&
+    game.boardSize === 'classic' &&
+    !s.moreOffered &&
+    moreToTry(s).length > 0
+  ) {
+    return 'more';
+  }
+  return null;
 }

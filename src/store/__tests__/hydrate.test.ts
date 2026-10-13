@@ -144,7 +144,7 @@ test('A8: defaults are never written over stored settings before the read lands'
 
   assert.equal(storage.writes.length, 1);
   const written = JSON.parse(storage.writes[0][1]);
-  assert.equal(written.version, 4);
+  assert.equal(written.version, 5);
   assert.equal(written.kidMode, true);
   assert.equal(written.boardSize, 'huge', 'the stored settings survive the save');
   assert.deepEqual(written.avatars, ['cat', 'frog', 'bunny', 'fox']);
@@ -232,4 +232,16 @@ test('cycleAvatar with seats/avoid swaps with a seat not in play', async () => {
   await p;
   useS.getState().cycleAvatar(0, { seats: 1, avoid: ['owl'] }); // fox -> owl avoided -> bear (seat 3's)
   assert.deepEqual(useS.getState().avatars, ['bear', 'owl', 'fox', 'frog']);
+});
+
+test('a free try used while the read is still out adds to the stored ones', async () => {
+  const storage = new SlowStorage();
+  storage.data.set(SETTINGS_KEY, JSON.stringify({ version: 5, unlocked: false, triesUsed: ['owl'] }));
+  const useS = createSettingsStore(storage, { timeoutMs: 5, debounceMs: 1 });
+  await useS.getState().hydrate(); // times out
+  useS.getState().set('triesUsed', ['big']);
+  storage.release();
+  await tick(10);
+  assert.deepEqual(useS.getState().triesUsed, ['big', 'owl'], 'neither try comes back');
+  assert.deepEqual(JSON.parse(storage.writes[0][1]).triesUsed, ['big', 'owl']);
 });

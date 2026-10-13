@@ -16,8 +16,16 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useGame } from '../src/store/game';
-import { maybeRequestReview } from '../src/store/reviewPrompt';
-import { playable, playableMode, useSettings, type GameMode } from '../src/store/settings';
+import { maybeRequestReview, reviewDue } from '../src/store/reviewPrompt';
+import {
+  deal,
+  moreToTry,
+  upsellCard,
+  useSettings,
+  withTries,
+  type GameMode,
+  type Lockable,
+} from '../src/store/settings';
 import { PEG_PAINT, useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
 import { Board, MIN_BOARD, boardHeightRatio, boardTiltFor } from '../src/ui/Board';
@@ -27,6 +35,7 @@ import { PauseSheet } from '../src/ui/PauseSheet';
 import { PlayerTray, trayChromeWidth } from '../src/ui/PlayerTray';
 import { RevealCountdown } from '../src/ui/RevealCountdown';
 import { TurnBanner } from '../src/ui/TurnBanner';
+import { UnlockSheet } from '../src/ui/UnlockSheet';
 import { IconButton, PauseGlyph } from '../src/ui/controls';
 import { activePlayerSpec, availableColors, isHumanTurn, revealDurationMs } from '../src/ui/engine';
 import {
@@ -184,8 +193,9 @@ export default function GameScreen() {
   const win = useWindowDimensions();
   const reduced = useReduceMotion();
   const params = useLocalSearchParams<{ mode?: string }>();
+  /** the mode asked for; `deal` decides what is actually played */
+  const requested: GameMode = isMode(params.mode) ? params.mode : 'ai';
   const unlocked = useSettings((s) => s.unlocked);
-  const mode: GameMode = playableMode(isMode(params.mode) ? params.mode : 'ai', unlocked);
 
   const hydrated = useSettings((s) => s.hydrated);
   const showShapes = useSettings((s) => s.showShapes);
@@ -214,6 +224,11 @@ export default function GameScreen() {
    */
   const [frozen, setFrozen] = useState<GameState | null>(null);
   const started = useRef(false);
+  /** the locked items the game on the table plays on their free try */
+  const trial = useRef<Lockable[]>([]);
+  /** the game-over card (see `upsellCard`), for the game-over it was picked on */
+  const [upsell, setUpsell] = useState<{ key: string; card: 'unlock' | 'more'; more: ('big' | 'owl')[] } | null>(null);
+  const [unlocking, setUnlocking] = useState(false);
   const chime = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** measured height of the box the banner + board + die share (stacked
    *  layout), tagged with the window size it was measured at */
@@ -225,14 +240,27 @@ export default function GameScreen() {
   // Refresh keeps the ref but runs the cleanup below, which nulls the store —
   // so an empty store always means "no game running", whatever the ref says.
   const hasState = state != null;
+
+  /**
+   * A new game from the stored settings. A locked item with its free try left
+   * is played, and the try is used up right here, as the game starts.
+   */
+  const dealNew = useCallback(() => {
+    const s = useSettings.getState();
+    const d = deal(requested, s);
+    start(d.mode, d.settings);
+    trial.current = d.tries;
+    if (d.tries.length) s.set('triesUsed', withTries(s.triesUsed, d.tries));
+  }, [requested, start]);
+
   useEffect(() => {
     // a teardown on the way out empties the store too; that is not a cue to deal
     if (!hydrated || leaving) return;
     if (!hasState) started.current = false;
     if (started.current) return;
     started.current = true;
-    start(mode, playable(useSettings.getState()));
-  }, [hydrated, hasState, mode, start, leaving]);
+    dealNew();
+  }, [hydrated, hasState, dealNew, leaving]);
 
   useEffect(
     () => () => {
@@ -319,10 +347,52 @@ export default function GameScreen() {
     pause();
   }, [pause]);
 
-  /** Restart from the pause menu: a new seed, and the board running again. */
+  /** Play again / Restart: a new seed, and the board running again. A game
+   *  played on a free try is not replayed: it deals again from the settings,
+   *  which (the try now used) fall back to the free choices. */
   const restart = useCallback(() => {
-    rematch();
-  }, [rematch]);
+    setUnlocking(false);
+    if (trial.current.length) dealNew();
+    else rematch();
+  }, [rematch, dealNew]);
+
+  /* ----------------------------------------------- upsell card */
+
+  // Picked once per game-over, when it begins: what the card offers must not
+  // change under the player (nor vanish when the rating prompt marks itself).
+  useEffect(() => {
+    if (!overKey) return;
+    const g = useGame.getState().state;
+    if (!g || g.phase !== 'gameOver') return;
+    const s = useSettings.getState();
+    const won = humanWon(g);
+    const card = upsellCard(s, {
+      tries: trial.current.length,
+      humanWon: won,
+      vsComputer: g.config.players.some((p) => p.kind === 'ai'),
+      boardSize: g.config.boardSize,
+      reviewDue: reviewDue({
+        humanWon: won,
+        passAndPlay: g.config.players.filter((p) => p.kind === 'human').length > 1,
+      }),
+    });
+    setUpsell(card ? { key: overKey, card, more: moreToTry(s) } : null);
+    if (card === 'more') s.set('moreOffered', true);
+  }, [overKey]);
+
+  /** "Ready for more?" → straight into a game on the Big board and/or vs Owl. */
+  const tryMore = useCallback(
+    (more: ('big' | 'owl')[]) => {
+      // a second tap would land on the new game and deal it again without its try
+      if (useGame.getState().state?.phase !== 'gameOver') return;
+      const s = useSettings.getState();
+      if (more.includes('big')) s.set('boardSize', 'big');
+      if (more.includes('owl')) s.set('difficulty', 'owl');
+      setUpsell(null);
+      dealNew();
+    },
+    [dealNew],
+  );
 
   /* ------------------------------------------- leaving the game */
 
@@ -464,6 +534,8 @@ export default function GameScreen() {
   const canRoll = !leaving && view.phase === 'roll' && human && !busy && !paused;
   const canPick = !leaving && view.phase === 'pick' && human && !busy && !paused;
   const won = humanWon(view);
+  // never for an unlocked player (a purchase from the card hides it at once)
+  const card = !unlocked && upsell && upsell.key === overKey ? upsell.card : null;
 
   const trayCount = view.config.players.length;
   const stacked = L.mode === 'stacked';
@@ -612,7 +684,40 @@ export default function GameScreen() {
     ) : null}
 
     {view.phase === 'gameOver' ? (
-      <GameOverSheet state={view} onRematch={rematch} onHome={goHome} />
+      <GameOverSheet
+        state={view}
+        onRematch={restart}
+        onHome={goHome}
+        upsell={
+          card === 'unlock'
+            ? {
+                title: tr('upsell.likedTitle'),
+                line: tr('unlock.what'),
+                action: tr('upsell.look'),
+                onAction: () => setUnlocking(true),
+                onDismiss: () => setUpsell(null),
+              }
+            : card === 'more' && upsell
+              ? {
+                  title: tr('upsell.moreTitle'),
+                  line: tr(
+                    upsell.more.length > 1
+                      ? 'upsell.moreBoth'
+                      : upsell.more[0] === 'big'
+                        ? 'upsell.moreBig'
+                        : 'upsell.moreOwl',
+                  ),
+                  action: tr('upsell.moreButton'),
+                  onAction: () => tryMore(upsell.more),
+                  onDismiss: () => setUpsell(null),
+                }
+              : undefined
+        }
+      />
+    ) : null}
+
+    {unlocking && view.phase === 'gameOver' ? (
+      <UnlockSheet onClose={() => setUnlocking(false)} />
     ) : null}
 
     {/* while leaving, the menu stays up over the still frame it was

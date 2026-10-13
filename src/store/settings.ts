@@ -16,13 +16,19 @@ export {
   humanAvatarVsAi,
   isAnimalName,
   nameKey,
+  canTry,
+  deal,
   isLocked,
+  isOpen,
+  moreToTry,
   nameToStore,
   playable,
   playableMode,
   sanitize,
+  upsellCard,
+  withTries,
 } from './settingsModel';
-export type { CycleOptions, GameMode, Settings } from './settingsModel';
+export type { CycleOptions, GameMode, Lockable, Settings } from './settingsModel';
 export type { SettingsStore } from './settingsStore';
 
 // Stats persist through the same storage backend. stats.ts itself imports no

@@ -7,7 +7,8 @@ import { chevron, tr, trn } from '../src/i18n';
 import {
   BOARD_CYCLE,
   animalName,
-  isLocked,
+  canTry,
+  isOpen,
   nameKey,
   playable,
   useSettings,
@@ -38,6 +39,9 @@ export default function SettingsScreen() {
   const boardSize = useSettings((s) => playable(s).boardSize);
   const difficulty = useSettings((s) => playable(s).difficulty);
   const unlocked = useSettings((s) => s.unlocked);
+  const triesUsed = useSettings((s) => s.triesUsed);
+  // a locked option with its free try left plays like an open one
+  const access = { unlocked, triesUsed };
   const toggle = useSettings((s) => s.toggle);
   const setSetting = useSettings((s) => s.set);
   /** the Unlock sheet is up; 'restore' opens it on the restore question */
@@ -110,8 +114,9 @@ export default function SettingsScreen() {
               key={b}
               text={tr('board.withPegs', { name: tr(`board.${b}`), n: BOARD_SPECS[b].pegs })}
               selected={boardSize === b}
-              locked={isLocked(unlocked, b)}
-              onPress={() => (isLocked(unlocked, b) ? setSheet('unlock') : setSetting('boardSize', b))}
+              locked={!isOpen(access, b)}
+              trial={canTry(access, b)}
+              onPress={() => (isOpen(access, b) ? setSetting('boardSize', b) : setSheet('unlock'))}
             />
           ))}
         </View>
@@ -127,8 +132,9 @@ export default function SettingsScreen() {
               label={animalName(d)}
               hint={tr(`diffHint.${d}`)}
               selected={difficulty === d}
-              locked={isLocked(unlocked, d)}
-              onPress={() => (isLocked(unlocked, d) ? setSheet('unlock') : setSetting('difficulty', d))}
+              locked={!isOpen(access, d)}
+              trial={canTry(access, d)}
+              onPress={() => (isOpen(access, d) ? setSetting('difficulty', d) : setSheet('unlock'))}
             />
           ))}
         </View>

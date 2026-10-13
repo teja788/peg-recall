@@ -24,6 +24,18 @@ function appVersion(): string {
 }
 
 /**
+ * true when `maybeRequestReview` is about to ask on this game-over (iOS may
+ * still show nothing). The game-over upsell card stands aside then.
+ */
+export function reviewDue(opts: { humanWon: boolean; passAndPlay: boolean }): boolean {
+  try {
+    return Platform.OS !== 'web' && shouldAskForReview(useStats.getState(), opts, appVersion());
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Call at the end of a finished game (after it has been recorded). Resolves
  * true only when the native review sheet was requested. Never throws.
  */

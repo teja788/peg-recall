@@ -8,7 +8,8 @@ import { tr } from '../src/i18n';
 import {
   BOARD_CYCLE,
   animalName,
-  isLocked,
+  canTry,
+  isOpen,
   playable,
   useSettings,
   type GameMode,
@@ -80,6 +81,9 @@ export default function Home() {
   const boardSize = useSettings((s) => playable(s).boardSize);
   const difficulty = useSettings((s) => playable(s).difficulty);
   const unlocked = useSettings((s) => s.unlocked);
+  const triesUsed = useSettings((s) => s.triesUsed);
+  // a locked option with its free try left plays like an open one
+  const access = { unlocked, triesUsed };
   const toggle = useSettings((s) => s.toggle);
   const setSetting = useSettings((s) => s.set);
   const names = useSettings((s) => s.names);
@@ -118,10 +122,10 @@ export default function Home() {
   const choose = useCallback(
     (mode: GameMode) => {
       if (navigating.current) return;
-      if (isLocked(unlocked, mode)) setUnlocking(true);
+      if (!isOpen({ unlocked, triesUsed }, mode)) setUnlocking(true);
       else setSetup(mode);
     },
-    [unlocked],
+    [unlocked, triesUsed],
   );
 
   const play = useCallback(
@@ -221,7 +225,8 @@ export default function Home() {
           subtitle={subtitles['3p']}
           art={<BoardMini width={cardArt} colors={PREVIEWS['3p']} theme={t.scheme} />}
           onPress={() => choose('3p')}
-          locked={isLocked(unlocked, '3p')}
+          locked={!isOpen(access, '3p')}
+          trial={canTry(access, '3p')}
           style={cardStyle}
         />
         <ModeCard
@@ -229,7 +234,8 @@ export default function Home() {
           subtitle={subtitles['4p']}
           art={<BoardMini width={cardArt} colors={PREVIEWS['4p']} theme={t.scheme} />}
           onPress={() => choose('4p')}
-          locked={isLocked(unlocked, '4p')}
+          locked={!isOpen(access, '4p')}
+          trial={canTry(access, '4p')}
           style={cardStyle}
         />
 
@@ -246,9 +252,10 @@ export default function Home() {
                   title={tr(`board.${b}`)}
                   hint={tr('board.pegsShort', { n: pegs })}
                   label={tr('home.boardLabel', { name: tr(`board.${b}`), n: pegs })}
-                  locked={isLocked(unlocked, b)}
+                  locked={!isOpen(access, b)}
+                  trial={canTry(access, b)}
                   onPress={() =>
-                    isLocked(unlocked, b) ? setUnlocking(true) : setSetting('boardSize', b)
+                    isOpen(access, b) ? setSetting('boardSize', b) : setUnlocking(true)
                   }
                   art={
                     <BoardGlyph
@@ -274,9 +281,10 @@ export default function Home() {
                 title={animalName(d)}
                 hint={tr(`tier.${d}`)}
                 label={tr('home.opponentLabel', { name: animalName(d), tier: tr(`tier.${d}`) })}
-                locked={isLocked(unlocked, d)}
+                locked={!isOpen(access, d)}
+                trial={canTry(access, d)}
                 onPress={() =>
-                  isLocked(unlocked, d) ? setUnlocking(true) : setSetting('difficulty', d)
+                  isOpen(access, d) ? setSetting('difficulty', d) : setUnlocking(true)
                 }
                 art={<Avatar id={d} size={avatarSize} />}
               />

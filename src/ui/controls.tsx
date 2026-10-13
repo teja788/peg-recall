@@ -58,6 +58,37 @@ export function LockGlyph({ size, color }: { size: number; color: string }) {
   );
 }
 
+/** "Try free": the badge on a locked option whose one free game is still to
+ *  be played. Cut with an ellipsis rather than wrapped if a language runs long. */
+export function TryBadge({ small }: { small?: boolean }) {
+  const t = useTheme();
+  return (
+    <View
+      style={{
+        backgroundColor: t.c.accent,
+        borderRadius: t.radii.pill,
+        paddingHorizontal: small ? 6 : 8,
+        paddingVertical: small ? 1 : 2,
+        flexShrink: 1,
+      }}
+    >
+      <Text
+        numberOfLines={1}
+        maxFontSizeMultiplier={1.2}
+        style={{ fontSize: small ? 10 : 12, lineHeight: small ? 14 : 16, fontWeight: '700', color: t.c.accentInk }}
+      >
+        {tr('common.tryFree')}
+      </Text>
+    </View>
+  );
+}
+
+/** What VoiceOver says for an option: plain, locked, or with a free try. */
+function optionLabel(base: string, locked?: boolean, trial?: boolean): string {
+  if (locked) return tr('common.locked', { label: base });
+  return trial ? tr('common.tryLabel', { label: base }) : base;
+}
+
 /** 44 pt round button holding one glyph (speaker, gear, back…) or drawn icon. */
 export function IconButton({
   glyph,
@@ -117,6 +148,7 @@ export function Chip({
   onPress,
   selected,
   locked,
+  trial,
 }: {
   text: string;
   label?: string;
@@ -125,12 +157,14 @@ export function Chip({
   selected?: boolean;
   /** needs the unlock: a padlock, and a tap opens the Unlock sheet */
   locked?: boolean;
+  /** locked, but its one free game is still to be played: a "Try free" badge */
+  trial?: boolean;
 }) {
   const t = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={locked ? tr('common.locked', { label: label ?? text }) : (label ?? text)}
+      accessibilityLabel={optionLabel(label ?? text, locked, trial)}
       accessibilityHint={locked ? tr('common.lockedHint') : hint}
       accessibilityState={{ selected: !!selected }}
       onPress={onPress}
@@ -151,6 +185,7 @@ export function Chip({
     >
       {locked ? <LockGlyph size={14} color={t.c.textDim} /> : null}
       <Text style={{ ...t.type.label, color: selected ? t.c.accentInk : t.c.text }}>{text}</Text>
+      {trial ? <TryBadge small /> : null}
     </Pressable>
   );
 }
@@ -172,6 +207,7 @@ export function OptionPill({
   label,
   onPress,
   locked,
+  trial,
 }: {
   /** small drawing above the label — a board glyph or an avatar */
   art: React.ReactNode;
@@ -183,6 +219,8 @@ export function OptionPill({
   onPress: () => void;
   /** needs the unlock: a padlock badge, and a tap opens the Unlock sheet */
   locked?: boolean;
+  /** locked, but its one free game is still to be played: a "Try free" badge */
+  trial?: boolean;
 }) {
   const t = useTheme();
   const reduced = useReducedMotion();
@@ -207,11 +245,7 @@ export function OptionPill({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={
-        locked
-          ? tr('common.locked', { label: label ?? (hint ? `${title}, ${hint}` : title) })
-          : (label ?? (hint ? `${title}, ${hint}` : title))
-      }
+      accessibilityLabel={optionLabel(label ?? (hint ? `${title}, ${hint}` : title), locked, trial)}
       accessibilityHint={locked ? tr('common.lockedHint') : undefined}
       accessibilityState={{ selected }}
       onPress={onPress}
@@ -239,6 +273,12 @@ export function OptionPill({
             ]}
           >
             <LockGlyph size={11} color={t.c.textDim} />
+          </View>
+        ) : null}
+        {/* straddles the top edge, centred, so it never covers the art */}
+        {trial ? (
+          <View style={[styles.tryBadge, { top: -9 }]} pointerEvents="none">
+            <TryBadge small />
           </View>
         ) : null}
         <Text
@@ -281,6 +321,7 @@ export function ModeCard({
   onPress,
   style,
   locked,
+  trial,
 }: {
   title: string;
   subtitle: string;
@@ -290,12 +331,14 @@ export function ModeCard({
   style?: ViewStyle;
   /** needs the unlock: a padlock by the chevron, and a tap opens the Unlock sheet */
   locked?: boolean;
+  /** locked, but its one free game is still to be played: a "Try free" badge */
+  trial?: boolean;
 }) {
   const t = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={locked ? tr('common.locked', { label: title }) : title}
+      accessibilityLabel={optionLabel(title, locked, trial)}
       accessibilityHint={locked ? tr('common.lockedHint') : subtitle}
       onPress={onPress}
       style={({ pressed }) => [
@@ -312,7 +355,11 @@ export function ModeCard({
     >
       <View style={{ width: 72, alignItems: 'center', justifyContent: 'center' }}>{art}</View>
       <View style={{ flex: 1, marginLeft: t.spacing.lg }}>
-        <Text style={{ ...t.type.heading, color: t.c.text }}>{title}</Text>
+        {/* the badge rides on the title line, so the subtitle keeps its width */}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: t.spacing.sm }}>
+          <Text style={{ ...t.type.heading, color: t.c.text }}>{title}</Text>
+          {trial ? <TryBadge /> : null}
+        </View>
         <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: 2 }}>{subtitle}</Text>
       </View>
       {locked ? (
@@ -407,6 +454,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  tryBadge: {
+    position: 'absolute',
+    left: 2,
+    right: 2,
+    alignItems: 'center',
   },
   pill: {
     minHeight: 44,

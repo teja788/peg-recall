@@ -23,8 +23,17 @@ import {
   playableMode,
   sanitize,
   savedBeforeUnlock,
+  canTry,
+  deal,
+  isOpen,
+  moreToTry,
+  upsellCard,
+  withTries,
+  type Lockable,
   type Settings,
 } from '../settingsModel';
+
+const LOCKABLE_ALL: Lockable[] = ['big', 'huge', 'owl', '3p', '4p'];
 
 /** What `hydrate` does with whatever came back out of storage. */
 function hydrated(raw: string | null): Settings {
@@ -128,6 +137,8 @@ test('a round trip through persistable + sanitize is lossless', () => {
     lastMode: '2p',
     avatars: ['bear', 'cat', 'frog', 'fox'],
     names: ['Maya', 'Zoë 🦊', '', 'Ana'],
+    triesUsed: ['big', '4p'],
+    moreOffered: true,
   };
   assert.deepEqual(hydrated(JSON.stringify(persistable(tweaked))), tweaked);
 });
@@ -139,7 +150,7 @@ test('persistable writes only the stored fields, plus the schema version', () =>
     [...Object.keys(DEFAULT_SETTINGS), 'version'].sort(),
   );
   assert.equal(persistable(DEFAULT_SETTINGS).version, SETTINGS_VERSION);
-  assert.equal(SETTINGS_VERSION, 4);
+  assert.equal(SETTINGS_VERSION, 5);
 });
 
 /* ----------------------------------------------------------------- A18 */
@@ -184,6 +195,8 @@ test('A18: a v1 blob (no version, no names) hydrates with every field intact', (
     names: ['', '', '', ''],
     recentNames: [],
     unlocked: false,
+    triesUsed: [],
+    moreOffered: false,
   });
   assert.equal(SETTINGS_KEY, 'pegrecall.settings.v1', 'no key migration');
 });
@@ -200,7 +213,7 @@ test('A18: a current blob round-trips and the version field is ignored on read',
   const blob = {
     ...persistable({ ...DEFAULT_SETTINGS, names: ['Ann', 'Bo', 'Cy', 'Dee'], recentNames: ['Ann', 'Dee'] }),
   };
-  assert.equal(blob.version, 4);
+  assert.equal(blob.version, 5);
   assert.deepEqual(hydrated(JSON.stringify(blob)).recentNames, ['Ann', 'Dee']);
   assert.equal('version' in sanitize(blob), false, 'version never leaks into Settings');
   assert.deepEqual(hydrated(JSON.stringify(blob)).names, ['Ann', 'Bo', 'Cy', 'Dee']);
@@ -443,7 +456,8 @@ test('lock rules: Big, Huge, Owl, 3 and 4 players need the unlock', () => {
 });
 
 test('playable falls back to the nearest free value, never changes an unlocked one', () => {
-  const s: Settings = { ...DEFAULT_SETTINGS, boardSize: 'huge', difficulty: 'owl' };
+  // every free try already played
+  const s: Settings = { ...DEFAULT_SETTINGS, boardSize: 'huge', difficulty: 'owl', triesUsed: LOCKABLE_ALL };
   const p = playable(s);
   assert.equal(p.boardSize, 'classic');
   assert.equal(p.difficulty, 'fox');
@@ -451,9 +465,108 @@ test('playable falls back to the nearest free value, never changes an unlocked o
   assert.equal(playable({ ...s, unlocked: true }).boardSize, 'huge');
   const free = { ...DEFAULT_SETTINGS, boardSize: 'small' as const, difficulty: 'bunny' as const };
   assert.equal(playable(free), free, 'nothing locked: the same object back');
-  assert.equal(playableMode('3p', false), '2p');
-  assert.equal(playableMode('3p', true), '3p');
-  assert.equal(playableMode('4p', false), '2p');
-  assert.equal(playableMode('4p', true), '4p');
-  assert.equal(playableMode('ai', false), 'ai');
+  const tried = { unlocked: false, triesUsed: LOCKABLE_ALL };
+  const fresh = playable({ ...s, triesUsed: [] });
+  assert.equal(fresh.boardSize, 'huge', 'a try still left plays as chosen');
+  assert.equal(fresh.difficulty, 'owl');
+  assert.equal(playableMode('3p', { unlocked: false, triesUsed: [] }), '3p');
+  assert.equal(playableMode('3p', tried), '2p');
+  assert.equal(playableMode('3p', { ...tried, unlocked: true }), '3p');
+  assert.equal(playableMode('4p', tried), '2p');
+  assert.equal(playableMode('4p', { ...tried, unlocked: true }), '4p');
+  assert.equal(playableMode('ai', tried), 'ai');
+});
+
+/* ----------------------------------------------------------- free tries */
+
+test('old saves load with no tries used and the "more" card not yet shown', () => {
+  for (const raw of [{ version: 4, unlocked: false }, { version: 3 }, {}]) {
+    const s = hydrated(JSON.stringify(raw));
+    assert.deepEqual(s.triesUsed, []);
+    assert.equal(s.moreOffered, false);
+  }
+});
+
+test('sanitize: triesUsed keeps known items in a fixed order, drops junk', () => {
+  assert.deepEqual(sanitize({ triesUsed: ['4p', 'nope', 3, 'big', 'big'] }).triesUsed, ['big', '4p']);
+  assert.deepEqual(sanitize({ triesUsed: ['classic', 'fox', '2p'] }).triesUsed, [], 'free items never count');
+  assert.equal(sanitize({ triesUsed: 'big' }).triesUsed, undefined);
+  assert.equal(sanitize({ moreOffered: 'yes' }).moreOffered, undefined);
+});
+
+test('every locked item has one free try; free items and unlocked players have none', () => {
+  const fresh = { unlocked: false, triesUsed: [] as Lockable[] };
+  for (const v of LOCKABLE_ALL) {
+    assert.equal(canTry(fresh, v), true, v);
+    assert.equal(isOpen(fresh, v), true, v);
+    assert.equal(canTry({ unlocked: false, triesUsed: [v] }, v), false, v);
+    assert.equal(isOpen({ unlocked: false, triesUsed: [v] }, v), false, v);
+    assert.equal(canTry({ unlocked: true, triesUsed: [] }, v), false, `${v}: unlocked shows no try`);
+    assert.equal(isOpen({ unlocked: true, triesUsed: [v] }, v), true, v);
+  }
+  for (const v of ['small', 'classic', 'bunny', 'fox', 'ai', '2p'] as const) {
+    assert.equal(canTry(fresh, v), false, v);
+    assert.equal(isOpen({ unlocked: false, triesUsed: LOCKABLE_ALL }, v), true, v);
+  }
+});
+
+test('deal: a try is dealt as chosen and reported; each locked item in the game counts', () => {
+  const s: Settings = { ...DEFAULT_SETTINGS, boardSize: 'big', difficulty: 'owl' };
+  const ai = deal('ai', s);
+  assert.equal(ai.mode, 'ai');
+  assert.equal(ai.settings.boardSize, 'big');
+  assert.equal(ai.settings.difficulty, 'owl');
+  assert.deepEqual(ai.tries, ['big', 'owl']);
+  // Owl only matters against the computer
+  assert.deepEqual(deal('3p', s).tries, ['big', '3p']);
+  assert.deepEqual(deal('2p', { ...DEFAULT_SETTINGS, difficulty: 'owl' }).tries, []);
+  assert.deepEqual(deal('ai', DEFAULT_SETTINGS).tries, [], 'a free game uses no try');
+  assert.deepEqual(deal('4p', { ...s, unlocked: true }).tries, [], 'unlocked: nothing is a try');
+});
+
+test('deal: once a try is used, the next game falls back to the free choices', () => {
+  let s: Settings = { ...DEFAULT_SETTINGS, boardSize: 'huge', difficulty: 'owl' };
+  const first = deal('ai', s);
+  s = { ...s, triesUsed: withTries(s.triesUsed, first.tries) };
+  assert.deepEqual(s.triesUsed, ['huge', 'owl']);
+  const next = deal('ai', s);
+  assert.equal(next.settings.boardSize, 'classic');
+  assert.equal(next.settings.difficulty, 'fox');
+  assert.deepEqual(next.tries, []);
+  assert.equal(s.boardSize, 'huge', 'the stored choice is left alone');
+
+  s = { ...s, triesUsed: withTries(s.triesUsed, deal('3p', s).tries) };
+  assert.equal(deal('3p', s).mode, '2p', '3 players after its try plays as 2');
+  assert.deepEqual(deal('3p', s).tries, []);
+  assert.equal(deal('4p', s).mode, '4p', '4 players keeps its own try');
+});
+
+test('withTries: adds without repeats, in a fixed order', () => {
+  assert.deepEqual(withTries(['owl'], ['big', 'owl']), ['big', 'owl']);
+  assert.deepEqual(withTries([], []), []);
+});
+
+test('upsell cards: never for an unlocked player, never with the rating prompt', () => {
+  const s = { unlocked: false, triesUsed: [] as Lockable[], moreOffered: false };
+  const win = { tries: 0, humanWon: true, vsComputer: true, boardSize: 'classic' as const, reviewDue: false };
+  assert.equal(upsellCard(s, win), 'more');
+  assert.equal(upsellCard(s, { ...win, tries: 2 }), 'unlock', 'after a try: "Liked it?"');
+  assert.equal(upsellCard(s, { ...win, tries: 1, humanWon: false }), 'unlock', 'win or lose');
+  assert.equal(upsellCard({ ...s, unlocked: true }, win), null);
+  assert.equal(upsellCard({ ...s, unlocked: true }, { ...win, tries: 1 }), null);
+  assert.equal(upsellCard(s, { ...win, reviewDue: true }), null, 'the rating prompt wins');
+  assert.equal(upsellCard(s, { ...win, tries: 1, reviewDue: true }), null);
+});
+
+test('"Ready for more?": a win vs the computer on Classic, once, while Big or Owl has a try', () => {
+  const s = { unlocked: false, triesUsed: [] as Lockable[], moreOffered: false };
+  const win = { tries: 0, humanWon: true, vsComputer: true, boardSize: 'classic' as const, reviewDue: false };
+  assert.equal(upsellCard(s, { ...win, humanWon: false }), null, 'not after a loss');
+  assert.equal(upsellCard(s, { ...win, vsComputer: false }), null, 'not after pass and play');
+  assert.equal(upsellCard(s, { ...win, boardSize: 'small' }), null, 'Classic only');
+  assert.equal(upsellCard({ ...s, moreOffered: true }, win), null, 'once ever');
+  assert.deepEqual(moreToTry(s), ['big', 'owl']);
+  assert.deepEqual(moreToTry({ ...s, triesUsed: ['big'] }), ['owl'], 'only the tries still left');
+  assert.equal(upsellCard({ ...s, triesUsed: ['big'] }, win), 'more');
+  assert.equal(upsellCard({ ...s, triesUsed: ['big', 'owl'] }, win), null, 'nothing left to offer');
 });
