@@ -27,7 +27,7 @@ export type Difficulty = 'bunny' | 'fox' | 'owl';
 export type AvatarId = 'fox' | 'owl' | 'bear' | 'frog' | 'bunny' | 'cat';
 
 export interface PlayerSpec {
-  id: string;            // 'p1' | 'p2' | 'p3'
+  id: string;            // 'p1' | 'p2' | 'p3' | 'p4'
   kind: 'human' | 'ai';
   avatar: AvatarId;
   name?: string;         // optional, defaults to avatar display name
@@ -61,7 +61,7 @@ export type Phase =
 
 export interface GameConfig {
   boardSize: BoardSize;
-  players: PlayerSpec[];   // 1..3 entries; order = seat order
+  players: PlayerSpec[];   // 1..4 entries; order = seat order
   rules: Rules;
   seed: number;            // deterministic board + die sequence
 }

@@ -28,10 +28,11 @@ import { BOARD_SPECS, type AvatarId, type Difficulty, type PegColor } from '../s
  * mix up (blue/violet, red/green, violet/purple), and red never stands next to
  * purple.
  */
-const PREVIEWS: Record<'ai' | '2p' | '3p', (PegColor | null)[]> = {
+const PREVIEWS: Record<GameMode, (PegColor | null)[]> = {
   ai: ['yellow', null, 'violet', null, 'violet', null, 'red'],
   '2p': ['green', 'blue', null, 'green', null, 'purple', null],
   '3p': ['yellow', 'blue', 'red', null, 'purple', 'blue', null],
+  '4p': ['blue', 'green', null, 'yellow', 'green', null, 'yellow'],
 };
 
 /**
@@ -55,6 +56,7 @@ function modeSubtitles(
       : tr('home.opponentIs', { name: animalName(difficulty) }),
     '2p': named(0) || named(1) ? list([0, 1]) : tr('home.passAndPlay'),
     '3p': named(0) || named(1) || named(2) ? list([0, 1, 2]) : tr('home.aroundTable'),
+    '4p': [0, 1, 2, 3].some(named) ? list([0, 1, 2, 3]) : tr('home.aroundTable'),
   };
 }
 
@@ -220,6 +222,14 @@ export default function Home() {
           art={<BoardMini width={cardArt} colors={PREVIEWS['3p']} theme={t.scheme} />}
           onPress={() => choose('3p')}
           locked={isLocked(unlocked, '3p')}
+          style={cardStyle}
+        />
+        <ModeCard
+          title={tr('home.fourPlayers')}
+          subtitle={subtitles['4p']}
+          art={<BoardMini width={cardArt} colors={PREVIEWS['4p']} theme={t.scheme} />}
+          onPress={() => choose('4p')}
+          locked={isLocked(unlocked, '4p')}
           style={cardStyle}
         />
 

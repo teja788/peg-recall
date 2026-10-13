@@ -2,7 +2,7 @@
 
 ### Memory Chess
 
-A calm memory peg game for iPhone and iPad. Roll the colour die, find the matching peg on the round wooden board, keep it. Play against the computer (Bunny / Fox / Owl) or pass-and-play with 2 or 3 players.
+A calm memory peg game for iPhone and iPad. Roll the colour die, find the matching peg on the round wooden board, keep it. Play against the computer (Bunny / Fox / Owl) or pass-and-play with 2 to 4 players.
 
 Built with Expo SDK 55 (React Native 0.83), expo-router, react-native-reanimated 4, moti, react-native-svg, expo-audio, expo-haptics, zustand + expo-sqlite key-value store.
 

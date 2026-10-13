@@ -139,7 +139,7 @@ function seatsFor(mode: GameMode, s: Settings): PlayerSpec[] {
     if (name) you.name = name;
     return [you, { id: 'p2', kind: 'ai', avatar: aiAvatar, difficulty: s.difficulty as Difficulty }];
   }
-  const count = mode === '3p' ? 3 : 2;
+  const count = mode === '4p' ? 4 : mode === '3p' ? 3 : 2;
   return Array.from({ length: count }, (_, i) => {
     const seat: PlayerSpec = { id: `p${i + 1}`, kind: 'human', avatar: avatars[i] ?? AVATAR_CYCLE[i] };
     const name = nameFor(s, i);

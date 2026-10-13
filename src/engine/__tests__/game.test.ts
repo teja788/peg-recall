@@ -182,6 +182,24 @@ test('turn advances wrap around 3 players', () => {
   assert.deepEqual(seen, ['p1', 'p2', 'p3', 'p1', 'p2', 'p3']);
 });
 
+test('turn advances wrap around 4 players', () => {
+  const players = (['fox', 'owl', 'bear', 'frog'] as const).map((avatar, i) => ({
+    id: `p${i + 1}`,
+    kind: 'human' as const,
+    avatar,
+  }));
+  let s = startedGame(5, { players, rules: rules({ bonusTurnOnMatch: false }) });
+  const seen: string[] = [];
+  for (let i = 0; i < 8; i++) {
+    s = reduce(s, { type: 'ROLL' });
+    seen.push(activePlayerSpec(s).id);
+    const hidden = s.pegs.find((p) => p.state === 'hidden')!;
+    s = reduce(s, { type: 'PICK', pegIndex: hidden.index });
+    s = reduce(s, { type: 'RESULT_DONE' });
+  }
+  assert.deepEqual(seen, ['p1', 'p2', 'p3', 'p4', 'p1', 'p2', 'p3', 'p4']);
+});
+
 test('the die never lands on a dead color', () => {
   for (let seed = 0; seed < 30; seed++) {
     let s = startedGame(seed);

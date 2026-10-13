@@ -43,7 +43,7 @@ import { tr, trn } from '../src/i18n';
 import type { GameState, Peg, PegColor } from '../src/engine/types';
 
 function isMode(v: unknown): v is GameMode {
-  return v === 'ai' || v === '2p' || v === '3p';
+  return v === 'ai' || v === '2p' || v === '3p' || v === '4p';
 }
 
 /* ------------------------------------------------------------- proportions */
@@ -472,12 +472,15 @@ export default function GameScreen() {
   // (capped at 64 / 100 pt), so all three stay on one line on a 375-pt phone
   // and a long name ellipsizes instead of wrapping a tray onto a second row.
   // Past ~1.4x Dynamic Type they still wrap rather than clip.
+  // Four trays on a phone-width row leave no room for names: they go
+  // compact (avatar and score only; the banner says whose turn it is).
   // Side column: one tray per line, each the column's full width.
   const dense = stacked && trayCount > 2;
-  const traySize = L.px(dense ? 30 : 36);
   const trayGap = L.px(dense ? t.spacing.xs + 2 : t.spacing.sm);
   const trayRow = win.width - insets.left - insets.right - 2 * t.spacing.md - L.px(48) - t.spacing.sm;
   const trayShare = stacked ? (trayRow - trayGap * (trayCount - 1)) / trayCount : L.colW;
+  const compact = stacked && trayCount > 3 && trayShare - trayChromeWidth(L.px(30), L.scale, true) < 40;
+  const traySize = L.px(compact ? 26 : dense ? 30 : 36);
   const nameMaxWidth = Math.max(
     32,
     Math.min(
@@ -500,6 +503,7 @@ export default function GameScreen() {
       measureKey={measureKey}
       nameMaxWidth={nameMaxWidth}
       dense={dense}
+      compact={compact}
     />
   ));
 
@@ -696,7 +700,7 @@ export default function GameScreen() {
       >
         {pauseButton}
         {/* wraps rather than clipping: at the larger Dynamic Type sizes three
-            trays no longer fit across a phone on one line */}
+            (or four compact) trays no longer fit across a phone on one line */}
         <View
           style={{
             flex: 1,

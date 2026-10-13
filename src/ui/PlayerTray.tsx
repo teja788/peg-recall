@@ -29,6 +29,8 @@ const BORDER = 2;
 /** Dense (three-across) spacing: card side padding, avatar-to-text gap. */
 const DENSE_PAD = 6;
 const DENSE_GAP = 4;
+/** Compact (four-across) card side padding; the gap is DENSE_GAP. */
+const COMPACT_PAD = 4;
 
 /**
  * Width of everything in a tray except its text column: border, side padding,
@@ -73,6 +75,12 @@ export interface PlayerTrayProps {
   nameMaxWidth?: number;
   /** tighter padding and no "+n", for three trays sharing a phone-width row */
   dense?: boolean;
+  /**
+   * Avatar and score only — no name, no captured pegs — for four trays
+   * sharing a phone-width row. VoiceOver still reads the name (the label),
+   * and the turn banner names whose turn it is.
+   */
+  compact?: boolean;
 }
 
 /** The drop-in a captured peg makes as it lands in the tray. */
@@ -162,6 +170,7 @@ function PlayerTrayImpl({
   measureKey,
   nameMaxWidth,
   dense = false,
+  compact = false,
 }: PlayerTrayProps) {
   const t = useTheme();
   const name = playerLabel(spec);
@@ -216,56 +225,65 @@ function PlayerTrayImpl({
           backgroundColor: t.c.card,
           borderRadius: px(t.radii.md),
           paddingVertical: px(t.spacing.sm),
-          paddingHorizontal: px(dense ? DENSE_PAD : t.spacing.md),
+          paddingHorizontal: px(compact ? COMPACT_PAD : dense ? DENSE_PAD : t.spacing.md),
           shadowColor: t.c.accent,
         },
         animated,
       ]}
     >
       <Avatar id={spec.avatar} size={size} />
-      {/* minWidth 0 lets this column (and the name in it) shrink below its
-          content width, so a long name ellipsizes instead of pushing the
-          tray row onto a second line */}
-      <View style={{ marginLeft: px(dense ? DENSE_GAP : t.spacing.sm), flexShrink: 1, minWidth: 0 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', minWidth: 0 }}>
-          <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            maxFontSizeMultiplier={MAX_TEXT_SCALE}
-            style={{
-              ...captionType,
-              color: active ? t.c.accent : t.c.textDim,
-              flexShrink: 1,
-              minWidth: 0,
-              maxWidth: nameMaxWidth,
-            }}
-          >
-            {name}
-          </Text>
-          {spec.kind === 'ai' ? (
-            <Text maxFontSizeMultiplier={MAX_TEXT_SCALE} style={captionType}>
-              {' 🤖'}
+      {compact ? (
+        <Text
+          maxFontSizeMultiplier={MAX_TEXT_SCALE}
+          style={{ ...heading, color: t.c.text, marginLeft: px(DENSE_GAP) }}
+        >
+          {caption ?? score}
+        </Text>
+      ) : (
+        /* minWidth 0 lets this column (and the name in it) shrink below its
+            content width, so a long name ellipsizes instead of pushing the
+            tray row onto a second line */
+        <View style={{ marginLeft: px(dense ? DENSE_GAP : t.spacing.sm), flexShrink: 1, minWidth: 0 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', minWidth: 0 }}>
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              maxFontSizeMultiplier={MAX_TEXT_SCALE}
+              style={{
+                ...captionType,
+                color: active ? t.c.accent : t.c.textDim,
+                flexShrink: 1,
+                minWidth: 0,
+                maxWidth: nameMaxWidth,
+              }}
+            >
+              {name}
             </Text>
-          ) : null}
+            {spec.kind === 'ai' ? (
+              <Text maxFontSizeMultiplier={MAX_TEXT_SCALE} style={captionType}>
+                {' 🤖'}
+              </Text>
+            ) : null}
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexShrink: 1 }}>
+            <Text maxFontSizeMultiplier={MAX_TEXT_SCALE} style={{ ...heading, color: t.c.text }}>
+              {caption ?? score}
+            </Text>
+            {captured && captured.length > 0 ? (
+              <View style={{ marginLeft: px(dense ? DENSE_GAP : t.spacing.sm) }}>
+                <CapturedRow
+                  colors={captured}
+                  max={maxPegs}
+                  width={pegWidth}
+                  theme={t.scheme}
+                  ink={t.c.textDim}
+                  showExtra={!dense}
+                />
+              </View>
+            ) : null}
+          </View>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexShrink: 1 }}>
-          <Text maxFontSizeMultiplier={MAX_TEXT_SCALE} style={{ ...heading, color: t.c.text }}>
-            {caption ?? score}
-          </Text>
-          {captured && captured.length > 0 ? (
-            <View style={{ marginLeft: px(dense ? DENSE_GAP : t.spacing.sm) }}>
-              <CapturedRow
-                colors={captured}
-                max={maxPegs}
-                width={pegWidth}
-                theme={t.scheme}
-                ink={t.c.textDim}
-                showExtra={!dense}
-              />
-            </View>
-          ) : null}
-        </View>
-      </View>
+      )}
     </Animated.View>
   );
 

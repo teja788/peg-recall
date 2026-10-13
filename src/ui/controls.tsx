@@ -273,7 +273,7 @@ export function OptionPill({
   );
 }
 
-/** Big tappable card — the three modes on Home. A tap opens "Who's playing?". */
+/** Big tappable card — the modes on Home. A tap opens "Who's playing?". */
 export function ModeCard({
   title,
   subtitle,

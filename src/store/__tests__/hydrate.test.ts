@@ -119,7 +119,7 @@ test('A8: a read slower than the timeout is still applied', async () => {
   assert.equal(s.boardSize, 'huge');
   assert.equal(s.difficulty, 'owl');
   assert.equal(s.soundOn, false);
-  assert.deepEqual(s.names, ['Maya', 'Leo', '']);
+  assert.deepEqual(s.names, ['Maya', 'Leo', '', ''], 'a 3-seat save gains a blank 4th');
   await tick(10);
   assert.deepEqual(storage.writes, [], 'nothing changed, nothing written');
 });
@@ -140,14 +140,14 @@ test('A8: defaults are never written over stored settings before the read lands'
   const s = useS.getState();
   assert.equal(s.kidMode, true, 'what the player just did wins');
   assert.equal(s.boardSize, 'huge', 'every untouched field comes back from storage');
-  assert.deepEqual(s.names, ['Maya', 'Leo', '']);
+  assert.deepEqual(s.names, ['Maya', 'Leo', '', ''], 'a 3-seat save gains a blank 4th');
 
   assert.equal(storage.writes.length, 1);
   const written = JSON.parse(storage.writes[0][1]);
   assert.equal(written.version, 4);
   assert.equal(written.kidMode, true);
   assert.equal(written.boardSize, 'huge', 'the stored settings survive the save');
-  assert.deepEqual(written.avatars, ['cat', 'frog', 'bunny']);
+  assert.deepEqual(written.avatars, ['cat', 'frog', 'bunny', 'fox']);
 });
 
 test('A8: a change made before hydrate was even called still waits for the read', async () => {
@@ -159,7 +159,7 @@ test('A8: a change made before hydrate was even called still waits for the read'
   assert.deepEqual(storage.writes, []);
   storage.release();
   await tick(10);
-  assert.deepEqual(useS.getState().names, ['', '', 'Sam'], 'the typed names array wins as a whole');
+  assert.deepEqual(useS.getState().names, ['', '', 'Sam', ''], 'the typed names array wins as a whole');
   assert.equal(useS.getState().boardSize, 'huge');
   assert.equal(JSON.parse(storage.writes[0][1]).boardSize, 'huge');
 });
@@ -188,13 +188,13 @@ test('setName cleans, ignores bad seats, and cycleAvatar still skips taken anima
   useS.getState().setName(5, 'nobody');
   useS.getState().setName(-1, 'nobody');
   const { names } = useS.getState();
-  assert.equal(names.length, 3);
+  assert.equal(names.length, 4);
   assert.equal(names[0], 'Maya');
   assert.ok(Array.from(names[1]).length <= 12);
   assert.equal(names[2], '');
 
-  useS.getState().cycleAvatar(0); // fox -> owl is taken, bear taken -> frog
-  assert.equal(useS.getState().avatars[0], 'frog');
+  useS.getState().cycleAvatar(0); // fox -> owl, bear, frog are taken -> bunny
+  assert.equal(useS.getState().avatars[0], 'bunny');
 });
 
 test('rememberNames puts the seats in play at the front; forgetNames clears both', async () => {
@@ -216,11 +216,11 @@ test('rememberNames puts the seats in play at the front; forgetNames clears both
   assert.deepEqual(written.recentNames, ['Maya', 'Sam', 'Leo']);
 
   useS.getState().forgetNames();
-  assert.deepEqual(useS.getState().names, ['', '', '']);
+  assert.deepEqual(useS.getState().names, ['', '', '', '']);
   assert.deepEqual(useS.getState().recentNames, []);
   await tick(10);
   const after = JSON.parse(storage.writes[storage.writes.length - 1][1]);
-  assert.deepEqual(after.names, ['', '', '']);
+  assert.deepEqual(after.names, ['', '', '', '']);
   assert.deepEqual(after.recentNames, []);
 });
 
@@ -231,5 +231,5 @@ test('cycleAvatar with seats/avoid swaps with a seat not in play', async () => {
   storage.release();
   await p;
   useS.getState().cycleAvatar(0, { seats: 1, avoid: ['owl'] }); // fox -> owl avoided -> bear (seat 3's)
-  assert.deepEqual(useS.getState().avatars, ['bear', 'owl', 'fox']);
+  assert.deepEqual(useS.getState().avatars, ['bear', 'owl', 'fox', 'frog']);
 });

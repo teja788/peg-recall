@@ -9,7 +9,7 @@
 import type { AvatarId, BoardSize, Difficulty } from '../engine/types';
 import { everyLanguage, tr } from '../i18n';
 
-export type GameMode = 'ai' | '2p' | '3p';
+export type GameMode = 'ai' | '2p' | '3p' | '4p';
 
 export interface Settings {
   soundOn: boolean;
@@ -19,9 +19,9 @@ export interface Settings {
   bonusTurnOnMatch: boolean;
   kidMode: boolean;
   lastMode: GameMode;
-  /** Seat avatars, index 0..2. Seat 1 is the computer in `ai` mode. */
+  /** Seat avatars, index 0..3. Seat 1 is the computer in `ai` mode. */
   avatars: AvatarId[];
-  /** Typed player names, index 0..2 like `avatars`. '' = use the animal's name.
+  /** Typed player names, index 0..3 like `avatars`. '' = use the animal's name.
    *  Always stored already cleaned (see `cleanName`). */
   names: string[];
   /** Names typed in past games, most recent first (see `addRecentNames`):
@@ -29,7 +29,7 @@ export interface Settings {
    *  distinct ignoring case, at most RECENT_MAX. */
   recentNames: string[];
   /** The one-time unlock (bought, restored or grandfathered): Big and Huge
-   *  boards, Owl, 3 players. Only ever turned on; see `playable`. */
+   *  boards, Owl, 3 and 4 players. Only ever turned on; see `playable`. */
   unlocked: boolean;
 }
 
@@ -41,11 +41,14 @@ export const DEFAULT_SETTINGS: Settings = {
   bonusTurnOnMatch: true,
   kidMode: false,
   lastMode: 'ai',
-  avatars: ['fox', 'owl', 'bear'],
-  names: ['', '', ''],
+  avatars: ['fox', 'owl', 'bear', 'frog'],
+  names: ['', '', '', ''],
   recentNames: [],
   unlocked: false,
 };
+
+/** Seats stored in `avatars` / `names` (the 4-player mode's count). */
+const SEATS = 4;
 
 export const AVATAR_CYCLE: AvatarId[] = ['fox', 'owl', 'bear', 'frog', 'bunny', 'cat'];
 export const BOARD_CYCLE: BoardSize[] = ['small', 'classic', 'big', 'huge'];
@@ -202,7 +205,7 @@ export interface CycleOptions {
 /**
  * The avatars after `seat` taps its animal: the next animal in AVATAR_CYCLE
  * that no other seat in play is wearing. An animal held by a seat that is NOT
- * in play is swapped over, so the three stored avatars always stay distinct.
+ * in play is swapped over, so the four stored avatars always stay distinct.
  * Returns the input unchanged when there is nothing to move to.
  */
 export function nextAvatars(
@@ -246,15 +249,20 @@ export function sanitize(raw: unknown): Partial<Settings> {
   if (typeof r.unlocked === 'boolean') out.unlocked = r.unlocked;
   if (BOARD_CYCLE.includes(r.boardSize as BoardSize)) out.boardSize = r.boardSize as BoardSize;
   if (['bunny', 'fox', 'owl'].includes(r.difficulty as string)) out.difficulty = r.difficulty as Difficulty;
-  if (['ai', '2p', '3p'].includes(r.lastMode as string)) out.lastMode = r.lastMode as GameMode;
-  if (Array.isArray(r.avatars) && r.avatars.length === 3) {
+  if (['ai', '2p', '3p', '4p'].includes(r.lastMode as string)) out.lastMode = r.lastMode as GameMode;
+  // up to 1.2.0 there were three seats: a saved 3-entry list keeps its seats
+  // and gains a fourth (a free animal, no name)
+  if (Array.isArray(r.avatars) && (r.avatars.length === 3 || r.avatars.length === SEATS)) {
     const av = r.avatars.filter((a): a is AvatarId => AVATAR_CYCLE.includes(a as AvatarId));
     // two seats wearing the same animal could not be told apart in the trays
-    if (av.length === 3 && new Set(av).size === 3) out.avatars = av;
+    if (av.length === r.avatars.length && new Set(av).size === av.length) {
+      while (av.length < SEATS) av.push(AVATAR_CYCLE.find((a) => !av.includes(a))!);
+      out.avatars = av;
+    }
   }
-  if (Array.isArray(r.names) && r.names.length === 3) {
+  if (Array.isArray(r.names) && (r.names.length === 3 || r.names.length === SEATS)) {
     // one bad entry blanks that seat only; it never voids the other names
-    out.names = r.names.map(cleanName);
+    out.names = [...r.names.map(cleanName), '', ''].slice(0, SEATS);
   }
   if (Array.isArray(r.recentNames)) {
     // re-run through the same rules as a fresh game: bad entries just drop out
@@ -287,7 +295,7 @@ export function persistable(s: Settings): PersistedSettings {
 /* ------------------------------------------------------------------ unlock */
 
 /** What the unlock opens. Board sizes, opponents and modes share no names. */
-const LOCKED = new Set<string>(['big', 'huge', 'owl', '3p']);
+const LOCKED = new Set<string>(['big', 'huge', 'owl', '3p', '4p']);
 
 /** true when `value` (a board size, opponent or mode) needs the unlock. */
 export function isLocked(unlocked: boolean, value: BoardSize | Difficulty | GameMode): boolean {
@@ -316,7 +324,7 @@ export function savedBeforeUnlock(raw: unknown): boolean {
   return typeof v !== 'number' || v < 4;
 }
 
-/** 3 players without the unlock (a deep link, an old route) plays as 2. */
+/** 3 or 4 players without the unlock (a deep link, an old route) plays as 2. */
 export function playableMode(mode: GameMode, unlocked: boolean): GameMode {
   return isLocked(unlocked, mode) ? '2p' : mode;
 }

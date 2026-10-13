@@ -61,9 +61,9 @@ test('sanitize keeps good fields and drops everything else', () => {
       kidMode: true,
       boardSize: 'huge',
       difficulty: 'owl',
-      lastMode: '3p',
-      avatars: ['cat', 'frog', 'bunny'],
-      names: ['Maya', '', 'Leo'],
+      lastMode: '4p',
+      avatars: ['cat', 'frog', 'bunny', 'fox'],
+      names: ['Maya', '', 'Leo', 'Ana'],
     }),
     {
       soundOn: false,
@@ -72,9 +72,9 @@ test('sanitize keeps good fields and drops everything else', () => {
       kidMode: true,
       boardSize: 'huge',
       difficulty: 'owl',
-      lastMode: '3p',
-      avatars: ['cat', 'frog', 'bunny'],
-      names: ['Maya', '', 'Leo'],
+      lastMode: '4p',
+      avatars: ['cat', 'frog', 'bunny', 'fox'],
+      names: ['Maya', '', 'Leo', 'Ana'],
     },
   );
 });
@@ -85,7 +85,7 @@ test('sanitize rejects wrong types, unknown values and junk', () => {
     showShapes: 1,
     boardSize: 'enormous',
     difficulty: 'dragon',
-    lastMode: '4p',
+    lastMode: '5p',
     avatars: ['fox', 'owl'],          // wrong length
     kidMode: null,
     somethingElse: 'ignored',
@@ -126,8 +126,8 @@ test('a round trip through persistable + sanitize is lossless', () => {
     boardSize: 'small',
     difficulty: 'bunny',
     lastMode: '2p',
-    avatars: ['bear', 'cat', 'frog'],
-    names: ['Maya', 'Zoë 🦊', ''],
+    avatars: ['bear', 'cat', 'frog', 'fox'],
+    names: ['Maya', 'Zoë 🦊', '', 'Ana'],
   };
   assert.deepEqual(hydrated(JSON.stringify(persistable(tweaked))), tweaked);
 });
@@ -147,8 +147,22 @@ test('persistable writes only the stored fields, plus the schema version', () =>
 test('A18: duplicate avatars are rejected', () => {
   assert.deepEqual(sanitize({ avatars: ['fox', 'fox', 'owl'] }), {});
   assert.deepEqual(sanitize({ avatars: ['cat', 'owl', 'cat'] }), {});
-  assert.deepEqual(sanitize({ avatars: ['cat', 'owl', 'fox'] }), { avatars: ['cat', 'owl', 'fox'] });
-  assert.deepEqual(sanitize({ avatars: ['cat', 'owl', 'fox', 'bear'] }), {}, 'still exactly three seats');
+  assert.deepEqual(sanitize({ avatars: ['cat', 'owl', 'fox', 'cat'] }), {});
+  assert.deepEqual(sanitize({ avatars: ['cat', 'owl', 'fox', 'bear'] }), {
+    avatars: ['cat', 'owl', 'fox', 'bear'],
+  });
+  assert.deepEqual(sanitize({ avatars: ['cat', 'owl', 'fox', 'bear', 'frog'] }), {}, 'four seats at most');
+  assert.deepEqual(sanitize({ avatars: ['cat', 'owl'] }), {});
+});
+
+test('3-seat avatars and names saved before 4 players load as four seats', () => {
+  const s = sanitize({ avatars: ['fox', 'owl', 'bear'], names: ['Maya', '', 'Leo'] });
+  assert.deepEqual(s.avatars, ['fox', 'owl', 'bear', 'frog'], 'the 4th takes a free animal');
+  assert.deepEqual(s.names, ['Maya', '', 'Leo', '']);
+  const busy = sanitize({ avatars: ['frog', 'fox', 'owl'] }).avatars!;
+  assert.deepEqual(busy, ['frog', 'fox', 'owl', 'bear']);
+  assert.equal(new Set(busy).size, 4);
+  assert.deepEqual(sanitize({ names: ['', '', '', '', ''] }), {}, 'four names at most');
 });
 
 test('A18: a v1 blob (no version, no names) hydrates with every field intact', () => {
@@ -164,7 +178,13 @@ test('A18: a v1 blob (no version, no names) hydrates with every field intact', (
     avatars: ['cat', 'frog', 'bunny'],
   };
   const s = hydrated(JSON.stringify(v1));
-  assert.deepEqual(s, { ...v1, names: ['', '', ''], recentNames: [], unlocked: false });
+  assert.deepEqual(s, {
+    ...v1,
+    avatars: ['cat', 'frog', 'bunny', 'fox'],
+    names: ['', '', '', ''],
+    recentNames: [],
+    unlocked: false,
+  });
   assert.equal(SETTINGS_KEY, 'pegrecall.settings.v1', 'no key migration');
 });
 
@@ -172,18 +192,18 @@ test('A18: a v2 blob (names, no recentNames) loads with no chips', () => {
   const v2 = { version: 2, ...DEFAULT_SETTINGS, names: ['Ann', 'Bo', ''] } as Record<string, unknown>;
   delete v2.recentNames;
   const s = hydrated(JSON.stringify(v2));
-  assert.deepEqual(s.names, ['Ann', 'Bo', '']);
+  assert.deepEqual(s.names, ['Ann', 'Bo', '', '']);
   assert.deepEqual(s.recentNames, []);
 });
 
 test('A18: a current blob round-trips and the version field is ignored on read', () => {
   const blob = {
-    ...persistable({ ...DEFAULT_SETTINGS, names: ['Ann', 'Bo', 'Cy'], recentNames: ['Ann', 'Dee'] }),
+    ...persistable({ ...DEFAULT_SETTINGS, names: ['Ann', 'Bo', 'Cy', 'Dee'], recentNames: ['Ann', 'Dee'] }),
   };
   assert.equal(blob.version, 4);
   assert.deepEqual(hydrated(JSON.stringify(blob)).recentNames, ['Ann', 'Dee']);
   assert.equal('version' in sanitize(blob), false, 'version never leaks into Settings');
-  assert.deepEqual(hydrated(JSON.stringify(blob)).names, ['Ann', 'Bo', 'Cy']);
+  assert.deepEqual(hydrated(JSON.stringify(blob)).names, ['Ann', 'Bo', 'Cy', 'Dee']);
   // a future version still yields whatever fields it shares with this one
   assert.equal(sanitize({ version: 9, boardSize: 'small' }).boardSize, 'small');
 });
@@ -191,22 +211,22 @@ test('A18: a current blob round-trips and the version field is ignored on read',
 /* --------------------------------------------------------------- names */
 
 test('names default to blank (= the animal)', () => {
-  assert.deepEqual(DEFAULT_SETTINGS.names, ['', '', '']);
+  assert.deepEqual(DEFAULT_SETTINGS.names, ['', '', '', '']);
   assert.equal(NAME_MAX, 12);
   assert.equal(NAME_INPUT_MAX, 24);
 });
 
 test('sanitize: a bad name entry blanks that seat only', () => {
-  assert.deepEqual(sanitize({ names: ['Maya', 42, null] }).names, ['Maya', '', '']);
-  assert.deepEqual(sanitize({ names: ['  Maya  ', '\u202EevilLeo', 'A\u0000B'] }).names, ['Maya', 'evilLeo', 'AB']);
+  assert.deepEqual(sanitize({ names: ['Maya', 42, null, 'Leo'] }).names, ['Maya', '', '', 'Leo']);
+  assert.deepEqual(sanitize({ names: ['  Maya  ', '\u202EevilLeo', 'A\u0000B'] }).names, ['Maya', 'evilLeo', 'AB', '']);
   assert.deepEqual(
     sanitize({ names: ['An extremely long name indeed', 'x', 'y'] }).names,
-    ['An extremely', 'x', 'y'],
+    ['An extremely', 'x', 'y', ''],
   );
 });
 
 test('sanitize: names of the wrong shape are dropped, never voiding other fields', () => {
-  for (const names of [['a', 'b'], ['a', 'b', 'c', 'd'], 'Maya', { 0: 'a' }, null]) {
+  for (const names of [['a', 'b'], ['a', 'b', 'c', 'd', 'e'], 'Maya', { 0: 'a' }, null]) {
     const out = sanitize({ names, boardSize: 'small' });
     assert.equal('names' in out, false, JSON.stringify(names));
     assert.equal(out.boardSize, 'small');
@@ -412,8 +432,8 @@ test('a stored unlocked flag round-trips', () => {
   assert.equal(sanitize({ unlocked: 'yes' }).unlocked, undefined, 'junk is dropped');
 });
 
-test('lock rules: Big, Huge, Owl and 3 players need the unlock', () => {
-  for (const v of ['big', 'huge', 'owl', '3p'] as const) {
+test('lock rules: Big, Huge, Owl, 3 and 4 players need the unlock', () => {
+  for (const v of ['big', 'huge', 'owl', '3p', '4p'] as const) {
     assert.equal(isLocked(false, v), true, v);
     assert.equal(isLocked(true, v), false, v);
   }
@@ -433,5 +453,7 @@ test('playable falls back to the nearest free value, never changes an unlocked o
   assert.equal(playable(free), free, 'nothing locked: the same object back');
   assert.equal(playableMode('3p', false), '2p');
   assert.equal(playableMode('3p', true), '3p');
+  assert.equal(playableMode('4p', false), '2p');
+  assert.equal(playableMode('4p', true), '4p');
   assert.equal(playableMode('ai', false), 'ai');
 });

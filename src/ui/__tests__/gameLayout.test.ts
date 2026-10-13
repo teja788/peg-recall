@@ -69,7 +69,7 @@ test('an iPad in landscape moves the chrome to a side column', () => {
     [1133, 744],
     [1194, 759], // Safari's toolbars
   ]) {
-    for (const players of [2, 3]) {
+    for (const players of [2, 3, 4]) {
       const L = at(w, h, { players });
       assert.equal(L.mode, 'side', `${w}x${h} ${players}p`);
       // the disc uses (nearly) the full height, or the full width left over
@@ -82,10 +82,12 @@ test('an iPad in landscape moves the chrome to a side column', () => {
 });
 
 test('a phone on its side gets a real board, not the 180 pt floor', () => {
-  const L = at(852, 393, { players: 3, insets: { top: 0, bottom: 21, left: 59, right: 59 } });
-  assert.notEqual(L.mode, 'stacked');
-  assert.ok(L.width > 300, `${L.width}`);
-  assert.ok(!L.overflows);
+  for (const players of [3, 4]) {
+    const L = at(852, 393, { players, insets: { top: 0, bottom: 21, left: 59, right: 59 } });
+    assert.notEqual(L.mode, 'stacked', `${players}p`);
+    assert.ok(L.width > 300, `${players}p: ${L.width}`);
+    assert.ok(!L.overflows, `${players}p`);
+  }
 });
 
 test('the stacked layout refines against the measured box, never past its cap', () => {

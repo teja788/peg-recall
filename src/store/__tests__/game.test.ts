@@ -325,6 +325,11 @@ test('typed names go on human seats only; the computer keeps its animal', () => 
   const three = configFor('3p', named, 1).players;
   assert.deepEqual(three.map((p) => p.name), ['Maya', 'Leo', 'Sam']);
 
+  const four = configFor('4p', settings({ names: ['Maya', 'Leo', 'Sam', 'Ana'] }), 1).players;
+  assert.deepEqual(four.map((p) => p.name), ['Maya', 'Leo', 'Sam', 'Ana']);
+  assert.deepEqual(four.map((p) => p.id), ['p1', 'p2', 'p3', 'p4']);
+  assert.equal(new Set(four.map((p) => p.avatar)).size, 4, 'four different animals');
+
   const two = configFor('2p', settings({ names: ['', 'Leo', 'Sam'] }), 1).players;
   assert.equal(two.length, 2);
   assert.equal('name' in two[0], false, 'blank = no name, so the tray shows the animal');

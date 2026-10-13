@@ -54,14 +54,15 @@ import { useTheme } from '../theme';
 import { useReduceMotion } from './feedback';
 import { CHIPS_SHOWN, chipTarget, inLineup, seatLabel } from './lineup';
 
-const SEATS: Record<GameMode, number> = { ai: 1, '2p': 2, '3p': 3 };
+const SEATS: Record<GameMode, number> = { ai: 1, '2p': 2, '3p': 3, '4p': 4 };
 const MODE_TITLE = {
   ai: 'players.modeAi',
   '2p': 'home.twoPlayers',
   '3p': 'home.threePlayers',
+  '4p': 'home.fourPlayers',
 } as const satisfies Record<GameMode, string>;
 const AVATAR_SIZE = 44;
-/** Past this the rows stop growing: three of them share the sheet on an SE. */
+/** Past this the rows stop growing: four of them share the sheet on an SE. */
 const MAX_SCALE = 1.6;
 /** Wider than this the sheet stops being a bottom sheet and floats centred. */
 const TABLET = 700;
@@ -108,7 +109,7 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
   // What is being typed, per seat, until it is committed. A seat with no edit
   // shows its stored name, or its animal's — so while a seat is on its default
   // the text follows the animal when the avatar changes.
-  const [edits, setEdits] = useState<(string | null)[]>([null, null, null]);
+  const [edits, setEdits] = useState<(string | null)[]>([null, null, null, null]);
   const [focused, setFocused] = useState<number | null>(null);
   const lastFocus = useRef<{ seat: number; at: number } | null>(null);
   const inputs = useRef<(TextInput | null)[]>([]);
@@ -132,7 +133,7 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
   );
 
   /** Every seat's name as it would be stored right now, edits included. */
-  const storedNow = [0, 1, 2].map((seat) =>
+  const storedNow = [0, 1, 2, 3].map((seat) =>
     edits[seat] != null ? nameToStore(edits[seat], shown(seat)) : (names[seat] ?? ''),
   );
 
@@ -165,7 +166,7 @@ export function PlayersSheet({ mode, onPlay, onClose }: PlayersSheetProps) {
     for (let seat = 0; seat < seats; seat++) {
       if (edits[seat] != null) setName(seat, nameToStore(edits[seat], shown(seat)));
     }
-    setEdits([null, null, null]);
+    setEdits([null, null, null, null]);
     rememberNames(seats);
     Keyboard.dismiss();
     onPlay();
