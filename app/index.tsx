@@ -74,6 +74,7 @@ export default function Home() {
   const t = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const side = Math.max(insets.left, insets.right);
   const { height } = useWindowDimensions();
   const compact = height < SHORT_SCREEN;
   const soundOn = useSettings((s) => s.soundOn);
@@ -151,7 +152,7 @@ export default function Home() {
           justifyContent: 'flex-end',
           gap: t.spacing.sm,
           paddingTop: insets.top + t.spacing.sm,
-          paddingHorizontal: t.spacing.lg,
+          paddingHorizontal: t.spacing.lg + side,
         }}
       >
         <IconButton
@@ -176,7 +177,7 @@ export default function Home() {
 
       <ScrollView
         contentContainerStyle={{
-          paddingHorizontal: t.spacing.xl,
+          paddingHorizontal: t.spacing.xl + side,
           paddingBottom: insets.bottom + t.spacing.lg,
           gap,
           flexGrow: 1,

@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AppState,
   BackHandler,
+  I18nManager,
   Platform,
   StyleSheet,
   Text,
@@ -191,6 +192,11 @@ export default function GameScreen() {
   const t = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  // iOS swaps paddingLeft/Right in RTL, but insets are physical edges (the
+  // iPhone Duo's island is on one side): pre-swap so each lands on its edge.
+  const swap = I18nManager.isRTL && I18nManager.doLeftAndRightSwapInRTL;
+  const padL = swap ? insets.right : insets.left;
+  const padR = swap ? insets.left : insets.right;
   const win = useWindowDimensions();
   const reduced = useReduceMotion();
   const params = useLocalSearchParams<{ mode?: string }>();
@@ -767,8 +773,8 @@ export default function GameScreen() {
             flexDirection: 'row',
             paddingTop: insets.top + L.edge,
             paddingBottom: insets.bottom + L.edge,
-            paddingLeft: insets.left + L.edge,
-            paddingRight: insets.right + L.edge,
+            paddingLeft: padL + L.edge,
+            paddingRight: padR + L.edge,
             columnGap: L.edge,
             // keeps the board's zIndex in here; see the stacked layout below
             zIndex: 0,
@@ -815,8 +821,8 @@ export default function GameScreen() {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          paddingLeft: insets.left + t.spacing.md,
-          paddingRight: insets.right + t.spacing.md,
+          paddingLeft: padL + t.spacing.md,
+          paddingRight: padR + t.spacing.md,
           paddingTop: L.px(t.spacing.xs),
           gap: t.spacing.sm,
         }}
@@ -870,8 +876,8 @@ export default function GameScreen() {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          paddingLeft: insets.left + t.spacing.md,
-          paddingRight: insets.right + t.spacing.md,
+          paddingLeft: padL + t.spacing.md,
+          paddingRight: padR + t.spacing.md,
           paddingBottom: insets.bottom + t.spacing.xs,
         }}
       >

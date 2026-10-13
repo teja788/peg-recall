@@ -30,6 +30,7 @@ export default function SettingsScreen() {
   const t = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const side = Math.max(insets.left, insets.right);
   // per-slice selectors: subscribing to the whole store re-renders this screen
   // on any unrelated settings write
   const soundOn = useSettings((s) => s.soundOn);
@@ -55,7 +56,7 @@ export default function SettingsScreen() {
           flexDirection: 'row',
           alignItems: 'center',
           gap: t.spacing.sm,
-          paddingHorizontal: t.spacing.md,
+          paddingHorizontal: t.spacing.md + side,
           paddingVertical: t.spacing.sm,
         }}
       >
@@ -76,6 +77,7 @@ export default function SettingsScreen() {
       <ScrollView
         contentContainerStyle={{
           padding: t.spacing.lg,
+          paddingHorizontal: t.spacing.lg + side,
           paddingBottom: insets.bottom + t.spacing.xxl,
           gap: t.spacing.md,
         }}

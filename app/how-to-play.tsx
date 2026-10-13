@@ -44,6 +44,7 @@ export default function HowToPlayScreen() {
   const t = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const side = Math.max(insets.left, insets.right);
   const bonusTurnOnMatch = useSettings((s) => s.bonusTurnOnMatch);
   const kidMode = useSettings((s) => s.kidMode);
 
@@ -77,7 +78,7 @@ export default function HowToPlayScreen() {
           flexDirection: 'row',
           alignItems: 'center',
           gap: t.spacing.sm,
-          paddingHorizontal: t.spacing.md,
+          paddingHorizontal: t.spacing.md + side,
           paddingVertical: t.spacing.sm,
         }}
       >
@@ -95,6 +96,7 @@ export default function HowToPlayScreen() {
         contentContainerStyle={{
           ...column,
           padding: t.spacing.lg,
+          paddingHorizontal: t.spacing.lg + side,
           paddingBottom: insets.bottom + t.spacing.xxl,
           gap: t.spacing.md,
         }}
