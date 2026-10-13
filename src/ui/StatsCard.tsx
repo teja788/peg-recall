@@ -4,7 +4,7 @@ import { Linking, Platform, Pressable, Text, View } from 'react-native';
 
 import type { Difficulty } from '../engine/types';
 import { WRITE_REVIEW_URL } from '../store/reviewPrompt';
-import { percent, tr, trn } from '../i18n';
+import { chevron, percent, tr, trn } from '../i18n';
 import { animalName } from '../store/settings';
 import { statsLabel, useStats } from '../store/stats';
 import { useTheme } from '../theme';
@@ -271,7 +271,7 @@ export function RateRow() {
         </Text>
       </View>
       <Text allowFontScaling={false} style={{ fontSize: 22, color: t.c.textDim }}>
-        ›
+        {chevron('›')}
       </Text>
     </Pressable>
   );

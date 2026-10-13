@@ -4,7 +4,7 @@ import React from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { tr } from '../src/i18n';
+import { chevron, tr } from '../src/i18n';
 import { useSettings } from '../src/store/settings';
 import { useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
@@ -76,15 +76,16 @@ export default function HowToPlayScreen() {
           ...column,
           flexDirection: 'row',
           alignItems: 'center',
+          gap: t.spacing.sm,
           paddingHorizontal: t.spacing.md,
           paddingVertical: t.spacing.sm,
         }}
       >
-        <IconButton glyph="‹" label={tr('howto.close')} onPress={close} tone="filled" />
+        <IconButton glyph={chevron('‹')} label={tr('howto.close')} onPress={close} tone="filled" />
         <Text
           accessibilityRole="header"
           maxFontSizeMultiplier={MAX_SCALE}
-          style={{ ...t.type.title, color: t.c.onBackdrop, marginLeft: t.spacing.sm }}
+          style={{ ...t.type.title, color: t.c.onBackdrop }}
         >
           {tr('howto.title')}
         </Text>

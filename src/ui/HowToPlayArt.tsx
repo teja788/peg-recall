@@ -119,7 +119,7 @@ function MiniBoard({
   }, [colors.length, width]);
 
   return (
-    <View style={{ width, height: m.height, pointerEvents: 'none' }}>
+    <View style={{ width, height: m.height, pointerEvents: 'none', direction: 'ltr' }}>
       <View style={{ position: 'absolute', left: 0, top: m.overhang }}>
         <PerspectiveBoard
           width={width}

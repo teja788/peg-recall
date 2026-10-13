@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
-import { tr } from '../i18n';
+import { chevron, tr } from '../i18n';
 import { useTheme } from '../theme';
 
 /** The two bars of a pause button. Drawn, not typed: ⏸ renders as a colour
@@ -321,7 +321,7 @@ export function ModeCard({
         </View>
       ) : null}
       <Text allowFontScaling={false} style={{ fontSize: 22, color: t.c.textDim }}>
-        ›
+        {chevron('›')}
       </Text>
     </Pressable>
   );

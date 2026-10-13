@@ -5,7 +5,7 @@
  */
 
 import type { AvatarId } from '../engine/types';
-import { tr } from '../i18n';
+import { isRtl, tr } from '../i18n';
 import { AVATAR_CYCLE, animalName } from '../store/settingsModel';
 
 /** The name a seat goes by: its typed name, else its animal ("Fox", "Fuchs"). */
@@ -34,12 +34,13 @@ const PDI = '⁩';
 
 /**
  * An RTL name dropped into a left-to-right sentence can drag the punctuation
- * after it (",", "and", "'s turn") to the wrong side. First-strong isolates
- * fence it off. Plain names are returned untouched so ordinary strings stay
- * readable.
+ * after it (",", "and", "'s turn") to the wrong side, and so can a Latin name
+ * in the Arabic UI ("Maya، Leo" would read in the wrong order). First-strong
+ * isolates fence it off. Names that run the UI's way are returned untouched so
+ * ordinary strings stay readable.
  */
 export function isolate(name: string): string {
-  return hasRtl(name) ? FSI + name + PDI : name;
+  return hasRtl(name) !== isRtl() ? FSI + name + PDI : name;
 }
 
 /** "Maya", "Maya and Leo", "Maya, Leo and Sam" (in the app's language). */

@@ -6,7 +6,7 @@
  */
 import { getLocales } from 'expo-localization';
 
-import { pickLang, setLang } from './index';
+import { isRtl, lang, pickLang, setLang } from './index';
 
 try {
   // web only: ?lang=de opens the app in that language (testing, links)
@@ -14,4 +14,12 @@ try {
   setLang(pickLang([asked, ...getLocales().map((l) => l.languageTag)]));
 } catch {
   /* no locale info: stay in English */
+}
+
+// Arabic: on iOS the layout mirrors by itself (ar is in app.json's
+// supportedLocales, so React Native's I18nManager.isRTL is set at launch). The
+// web needs the page told; boards stay left to right (direction: 'ltr').
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = lang();
+  document.documentElement.dir = isRtl() ? 'rtl' : 'ltr';
 }

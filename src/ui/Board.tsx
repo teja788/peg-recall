@@ -348,7 +348,7 @@ function BoardImpl({
         ref={boardRef}
         onLayout={onBoardLayout}
         accessibilityLabel={tr('game.board', { n: pegCount })}
-        style={{ width, height: m.height }}
+        style={{ width, height: m.height, direction: 'ltr' }}
       >
         {/* the disc */}
         <View style={{ position: 'absolute', left: 0, top: m.overhang }}>

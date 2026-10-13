@@ -6,7 +6,7 @@ import { DICTS, LANGS, pickLang, pluralCategory, setLang, tr, trn, type Key } fr
 const placeholders = (s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
 
 const dict = (lang: string): Record<string, string> => DICTS[lang as keyof typeof DICTS];
-const isExtraPlural = (k: string) => /\.(few|many)$/.test(k);
+const isExtraPlural = (k: string) => /\.(two|few|many)$/.test(k);
 
 test('every language has exactly the English keys (plus extra plural forms), none empty', () => {
   const keys = Object.keys(DICTS.en).sort();
@@ -23,12 +23,12 @@ test('every language has the plural forms it needs (CLDR), and no others', () =>
     const rules = new Intl.PluralRules(lang);
     const needs = Array.from({ length: 1001 }, (_, n) => rules.select(n));
     for (const base of bases) {
-      for (const form of ['few', 'many'] as const) {
+      for (const form of ['two', 'few', 'many'] as const) {
         assert.equal(`${base}.${form}` in dict(lang), needs.includes(form), `${lang} ${base}.${form}`);
       }
     }
     for (const k of Object.keys(dict(lang)).filter(isExtraPlural)) {
-      assert.ok(bases.includes(k.replace(/\.(few|many)$/, '')), `${lang} ${k}: not a plural key`);
+      assert.ok(bases.includes(k.replace(/\.(two|few|many)$/, '')), `${lang} ${k}: not a plural key`);
     }
   }
 });
@@ -53,8 +53,11 @@ test('the plural fallback (no Intl.PluralRules on Hermes) agrees with CLDR', () 
 test('{placeholders} match the English ones', () => {
   for (const lang of LANGS) {
     for (const k of Object.keys(dict(lang))) {
-      const source = DICTS.en[k.replace(/\.(few|many)$/, '.other') as Key];
-      assert.deepEqual(new Set(placeholders(dict(lang)[k])), new Set(placeholders(source)), `${lang} ${k}`);
+      const source = DICTS.en[k.replace(/\.(two|few|many)$/, '.other') as Key];
+      const expected = new Set(placeholders(source));
+      // Arabic's one and two are words of their own (قطعة واحدة, قطعتان): no {n}
+      if (lang === 'ar' && /\.(one|two)$/.test(k)) expected.delete('n');
+      assert.deepEqual(new Set(placeholders(dict(lang)[k])), expected, `${lang} ${k}`);
     }
   }
 });
@@ -83,6 +86,13 @@ test('pickLang: first supported preferred locale, else English', () => {
   assert.equal(pickLang(['tr-TR']), 'tr');
   assert.equal(pickLang(['nl-BE']), 'nl');
   assert.equal(pickLang(['pl-PL']), 'pl');
+  assert.equal(pickLang(['hi-IN']), 'hi');
+  assert.equal(pickLang(['ru-RU']), 'ru');
+  assert.equal(pickLang(['vi-VN']), 'vi');
+  assert.equal(pickLang(['id-ID']), 'id');
+  assert.equal(pickLang(['th-TH']), 'th');
+  assert.equal(pickLang(['ar-SA']), 'ar');
+  assert.equal(pickLang(['ar-EG', 'en']), 'ar');
 });
 
 test('tr / trn fill placeholders in the current language', () => {
@@ -102,6 +112,32 @@ test('tr / trn fill placeholders in the current language', () => {
     );
     setLang('ko');
     assert.equal(trn('pegs', 1), '말 1개', 'one form everywhere');
+    setLang('ru');
+    assert.deepEqual(
+      [1, 2, 5, 11, 21, 22, 25].map((n) => trn('pegs', n)),
+      ['1 фишка', '2 фишки', '5 фишек', '11 фишек', '21 фишка', '22 фишки', '25 фишек'],
+    );
+    setLang('ar');
+    assert.deepEqual(
+      [1, 2, 3, 11, 100].map((n) => trn('pegs', n)),
+      ['قطعة واحدة', 'قطعتان', '3 قطع', '11 قطعة', '100 قطعة'],
+      'Arabic: dual, and Western digits',
+    );
+    assert.equal(tr('game.board', { n: 1234 }), 'لوحة دائرية، 1,234 قطعة');
+    setLang('hi');
+    assert.equal(trn('pegs', 0), '0 गोटी', 'Hindi: zero is singular');
+  } finally {
+    setLang('en');
+  }
+});
+
+test('Arabic UI: Latin names are isolated, Arabic ones are not', async () => {
+  const { isolate, joinNames } = await import('../../ui/names');
+  try {
+    setLang('ar');
+    assert.equal(isolate('Maya'), '⁨Maya⁩');
+    assert.equal(isolate('مريم'), 'مريم');
+    assert.equal(joinNames(['الثعلب', 'Leo', 'مريم']), 'الثعلب، ⁨Leo⁩ ومريم');
   } finally {
     setLang('en');
   }

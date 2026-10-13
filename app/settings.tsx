@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { tr, trn } from '../src/i18n';
+import { chevron, tr, trn } from '../src/i18n';
 import {
   BOARD_CYCLE,
   animalName,
@@ -50,19 +50,20 @@ export default function SettingsScreen() {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
+          gap: t.spacing.sm,
           paddingHorizontal: t.spacing.md,
           paddingVertical: t.spacing.sm,
         }}
       >
         <IconButton
-          glyph="‹"
+          glyph={chevron('‹')}
           label={tr('settings.close')}
           onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
           tone="filled"
         />
         <Text
           accessibilityRole="header"
-          style={{ ...t.type.title, color: t.c.onBackdrop, marginLeft: t.spacing.sm }}
+          style={{ ...t.type.title, color: t.c.onBackdrop }}
         >
           {tr('settings.title')}
         </Text>
@@ -279,7 +280,7 @@ function UnlockRow({
           </Text>
         </View>
         <Text allowFontScaling={false} style={{ fontSize: 22, color: t.c.textDim }}>
-          ›
+          {chevron('›')}
         </Text>
       </Pressable>
       {unlocked ? null : <PillButton text={tr('unlock.restore')} onPress={() => onOpen('restore')} />}
