@@ -118,3 +118,28 @@ Each item needs the owner's OK before it is written to App Store Connect.
 | Festivals | diwali / holi games | Pair with an India In-App Event | Seasonal |
 
 In 1.3, the WhatsApp share link should open the Family page.
+
+## From the Oct 2026 growth research (`reports/Color Catch growth research.md`)
+
+**In progress (owner picked Oct 14):**
+- In-app events for Diwali and Children's Day, plus the featuring nomination. Deadline Oct 24.
+- en-GB keywords that differ from en-US.
+- Unlock pricing: searchable purchase name, India ₹99, Family Sharing.
+- 48-hour free-unlock offer code promo.
+- Screenshots for the 6 new languages.
+- Shorts and Reels clips.
+- An in-app event calendar for the year.
+- Seasonal custom pages: Road trip, Classroom, Festivals.
+
+**Noted for later (not started):**
+1. Ship 1.2.1, then get 5–10 honest US ratings from friends and reply to every review.
+2. Accessibility Nutrition Labels in App Store Connect, after testing each one on the iPad.
+3. Product Page Optimization test: the "Colorful first 3" screenshots plus the Bright icon.
+4. First batch of custom product pages: Seniors, Kids, Family, No ads, Color-blind.
+5. Free unlock codes for teachers, OTs, senior-activity staff and small family creators. Test one redemption first.
+6. Google Play right after 1.3. The Families program brings Teacher Approved review; Hindi isn't a supported language for it.
+7. Reddit posts (allowed slots only), the Golden Carers forum, and one press pitch built on the color-blind shapes, all at the Play or web launch.
+8. Game #2, then a cross-app "Family Pass" lifetime unlock. Consider a subscription only at about 5 games.
+9. Code ideas from the research: a guided first game against Bunny, a "Take your time" look option, a home-screen widget, and the tip jar moved after purchase.
+
+**Don't do:** Apple Search Ads, Amazon Appstore (closed), Poki/CrazyGames (they force ads), Apple Arcade, TikTok as the main channel, Product Hunt, a subscription now, paid influencers.
