@@ -3,7 +3,7 @@
     "name": "Color Catch",
     "slug": "pegrecall",
     "scheme": "pegrecall",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -51,7 +51,8 @@
         {
           "supportedLocales": ["en", "de", "fr", "pt", "ja", "es", "it", "ko", "zh-Hant", "tr", "nl", "pl"]
         }
-      ]
+      ],
+      ["./plugins/withAlternateIcons", { "Bright": "./assets/icon-bright.png" }]
     ],
     "experiments": {
       "typedRoutes": false

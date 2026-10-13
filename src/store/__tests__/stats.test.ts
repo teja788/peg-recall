@@ -265,16 +265,13 @@ test('sanitizeStats: bad entries are dropped or repaired, the rest kept', () => 
 
 /* ----------------------------------------------------- shouldAskForReview */
 
-test('shouldAskForReview: 3 games, 2 days, once per version, happy ending only', () => {
+test('shouldAskForReview: 2 games, once per version, happy ending only', () => {
   const happy = { humanWon: true, passAndPlay: false };
   let s: Stats = EMPTY_STATS;
   s = applyGameResult(s, vsFox(true), DAY1);
+  assert.equal(shouldAskForReview(s, happy, '1.1.0'), false, '1 game');
   s = applyGameResult(s, vsFox(true), DAY1);
-  assert.equal(shouldAskForReview(s, happy, '1.1.0'), false, '2 games');
-  s = applyGameResult(s, vsFox(true), DAY1);
-  assert.equal(shouldAskForReview(s, happy, '1.1.0'), false, '3 games but 1 day');
-  s = applyGameResult(s, vsFox(true), DAY2);
-  assert.equal(shouldAskForReview(s, happy, '1.1.0'), true);
+  assert.equal(shouldAskForReview(s, happy, '1.1.0'), true, '2 games on one day');
 
   assert.equal(shouldAskForReview(s, { humanWon: false, passAndPlay: false }, '1.1.0'), false, 'lost to the computer');
   assert.equal(shouldAskForReview(s, { humanWon: false, passAndPlay: true }, '1.1.0'), true, 'pass and play');
