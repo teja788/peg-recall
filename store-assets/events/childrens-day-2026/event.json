@@ -1,0 +1,48 @@
+{
+  "slug": "childrens-day-2026",
+  "referenceName": "Children's Day India 2026 kids vs grown-ups",
+  "badge": "CHALLENGE",
+  "deepLink": null,
+  "purchaseRequirement": null,
+  "primaryLocale": "en-US",
+  "priority": "NORMAL",
+  "purpose": "APPROPRIATE_FOR_ALL_USERS",
+  "territorySchedules": [
+    {
+      "territories": [
+        "IND"
+      ],
+      "publishStart": "2026-11-02T18:30:00Z",
+      "eventStart": "2026-11-09T18:30:00Z",
+      "eventEnd": "2026-11-16T18:30:00Z"
+    }
+  ],
+  "media": {
+    "EVENT_CARD": "event-card.png",
+    "EVENT_DETAILS_PAGE": "event-details.png"
+  },
+  "localizations": {
+    "en-US": {
+      "name": "Kids vs Grown-Ups",
+      "shortDescription": "Children's Day: can the kids beat the grown-ups?",
+      "longDescription": "Kids and grown-ups take turns on one iPhone or iPad. Look at the pegs, roll a color, find it. Most pegs wins!"
+    },
+    "en-GB": {
+      "name": "Kids vs Grown-Ups",
+      "shortDescription": "Children's Day: can the kids beat the grown-ups?",
+      "longDescription": "Kids and grown-ups take turns on one iPhone or iPad. Look at the pegs, roll a colour, find it. Most pegs wins!"
+    },
+    "hi": {
+      "name": "बच्चे बनाम बड़े",
+      "shortDescription": "बाल दिवस: क्या बच्चे बड़ों को हरा पाएँगे?",
+      "longDescription": "बच्चे-बड़े, एक iPhone या iPad पर बारी-बारी खेलो। गोटियाँ देखो, पासा फेंको, रंग ढूँढो। सबसे ज़्यादा गोटियों वाला जीतेगा!"
+    }
+  },
+  "notes": [
+    "India only: Children's Day (Bal Diwas) is Nov 14 in India. Times are UTC: the event runs Nov 10 00:00 to Nov 17 00:00 IST.",
+    "publishStart is 7 days before the start (Apple allows up to 14).",
+    "No player count in the copy beyond 'take turns on one iPhone or iPad': true on 1.2.0 and 1.2.1. No prices, no purchase needed.",
+    "The name says 'Kids vs Grown-Ups', not 'for kids' (guideline 2.3.8 concerns 'for kids' wording in metadata).",
+    "No deepLink (see diwali-2026/event.json)."
+  ]
+}

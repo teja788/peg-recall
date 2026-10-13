@@ -1,0 +1,89 @@
+{
+  "slug": "diwali-2026",
+  "referenceName": "Diwali 2026 family game night",
+  "badge": "SPECIAL_EVENT",
+  "deepLink": null,
+  "purchaseRequirement": null,
+  "primaryLocale": "en-US",
+  "priority": "HIGH",
+  "purpose": "APPROPRIATE_FOR_ALL_USERS",
+  "territorySchedules": [
+    {
+      "territories": [
+        "IND",
+        "NPL",
+        "LKA",
+        "SGP",
+        "MYS",
+        "MUS",
+        "FJI",
+        "TTO",
+        "GUY",
+        "SUR",
+        "ARE",
+        "QAT",
+        "OMN",
+        "KWT",
+        "BHR",
+        "GBR",
+        "USA",
+        "CAN",
+        "AUS",
+        "NZL",
+        "ZAF",
+        "KEN"
+      ],
+      "publishStart": "2026-10-22T18:30:00Z",
+      "eventStart": "2026-10-31T18:30:00Z",
+      "eventEnd": "2026-11-12T18:30:00Z"
+    }
+  ],
+  "media": {
+    "EVENT_CARD": "event-card.png",
+    "EVENT_DETAILS_PAGE": "event-details.png"
+  },
+  "localizations": {
+    "en-US": {
+      "name": "Diwali Family Game Night",
+      "shortDescription": "Pass one iPhone or iPad around: 2 or more players",
+      "longDescription": "Light the diyas and gather the family. Look at the pegs, roll a color, find it. Most pegs wins. No ads, plays offline."
+    },
+    "en-GB": {
+      "name": "Diwali Family Games Night",
+      "shortDescription": "Pass one iPhone or iPad round: 2 or more players",
+      "longDescription": "Light the diyas and gather the family. Look at the pegs, roll a colour, find it. Most pegs wins. No ads, plays offline."
+    },
+    "hi": {
+      "name": "दिवाली फ़ैमिली गेम नाइट",
+      "shortDescription": "एक iPhone या iPad, 2 या ज़्यादा खिलाड़ी",
+      "longDescription": "दीये जलाओ, सबको बुलाओ। गोटियाँ देखो, पासा फेंको, रंग ढूँढो। सबसे ज़्यादा गोटियों वाला जीतेगा। विज्ञापन नहीं, ऑफ़लाइन।"
+    },
+    "fr-FR": {
+      "name": "Jeux en famille pour Diwali",
+      "shortDescription": "À 2 ou plus, sur un seul iPhone ou iPad",
+      "longDescription": "Allume les diyas. Regarde les pions, lance le dé et trouve la couleur. Qui en a le plus gagne. Sans pub, hors ligne."
+    },
+    "de-DE": {
+      "name": "Diwali-Familienspieleabend",
+      "shortDescription": "Ab 2 Personen an einem iPhone oder iPad",
+      "longDescription": "Zünde die Diyas an! Merk dir die Spielsteine, würfle, finde die Farbe. Wer die meisten hat, gewinnt. Werbefrei, offline."
+    },
+    "es-MX": {
+      "name": "Juegos en familia para Diwali",
+      "shortDescription": "2 o más jugadores en un solo iPhone o iPad",
+      "longDescription": "Enciende diyas en familia. Mira las fichas, lanza el dado y busca. ¡Gana quien tenga más! Sin anuncios, sin conexión."
+    },
+    "pt-BR": {
+      "name": "Jogos em família no Diwali",
+      "shortDescription": "2 ou mais jogadores no mesmo iPhone ou iPad",
+      "longDescription": "Acenda diyas em família. Olhe os pinos, role o dado, ache a cor. Quem pegar mais vence! Sem anúncios, funciona offline."
+    }
+  },
+  "notes": [
+    "Times are UTC: the event runs Nov 1 00:00 to Nov 13 00:00 India time (IST = UTC+5:30); Diwali is Nov 8 2026.",
+    "publishStart is 9 days before the start (Apple allows up to 14). Submit by Oct 18 (2 weeks before the start), right after 1.2.1 is approved, so review (about 1 day) finishes before publishStart.",
+    "Copy says '2 or more players', true on 1.2.0 (2 Players free, 3 Players paid) and on 1.2.1 (2 to 4). No prices, no purchase needed for the event, so purchaseRequirement stays empty.",
+    "No deepLink: app/game.tsx exists (pegrecall://game?mode=2p would open a 2-player game), but it skips Home's 'Who's playing?' sheet and is untested on a device. Without a deep link the event opens the app on Home, where 2/3/4 Players are.",
+    "Media has no text (Apple: avoid text and logos in event media). Same two images for every locale."
+  ]
+}
