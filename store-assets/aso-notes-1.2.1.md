@@ -84,3 +84,40 @@ Not applied, on purpose:
 - promotionalText in all 20 locales is now about 1.2.1: up to 4 players and the new languages.
   None of them still says "New in 1.2 … 3 players".
 - hi keeps the आप register in the listing (the UI uses तुम).
+
+## en-GB keywords: no overlap with en-US (Oct 14 2026)
+
+en-GB is the second indexed locale in India, France, Germany, Brazil, Mexico, Indonesia, Vietnam,
+Thailand and Saudi Arabia (MobileAction, Apr 2026), and it is the UK's main locale. Words only form
+phrases inside one locale, so en-GB now uses English words that en-US doesn't have.
+
+| | Old | New |
+|---|---|---|
+| Subtitle | Kids & Family: Pass and Play | Colour Matching: Kids & Family |
+| Keywords | colour,toddler,preschool,senior,concentration,two,player,dice,brain,offline,match,pair,recall,board (99 B) | pairs,card,flip,elderly,adults,alzheimers,children,dice,blind,local,multiplayer,find,classic (92 B) |
+
+The keywords repeat no word (or plural) from en-US's name, subtitle or keywords, and no word from
+en-GB's own name or subtitle. "Kids" and "Family" stay in the subtitle: the rule only covers the
+keyword field, and "kids" is what makes "memory/matching game for kids" possible in India.
+
+Evidence (gb/in = UK/India store; med = median ratings of the top 10, lower = easier):
+- **colour + memory + game:** "colour memory game" is in UK autocomplete, med 2 (gb), 0 (in).
+- **matching + game + kids:** "matching game for kids" med 0 (gb), 0 (in). "memory games for kids"
+  med 315 (gb), 6 (in). "matching games for adults" is in UK autocomplete.
+- **pairs:** "kids pairs" med 0 (gb), "pairs game" med 32 (in), "matching pairs game" in UK autocomplete.
+- **card, flip:** "memory card game" med 118 (gb), 0 (in). "card matching game" med 459 (gb).
+  "memory card flip game" is in US autocomplete.
+- **elderly:** "games for elderly" med 75 (gb). **alzheimers:** "alzheimers games" med 1 (gb).
+- **blind:** "colour blind games" med 3 (gb). Accurate because of Shapes on Pegs.
+- **dice:** "dice game for kids" med 213 (gb). **children:** "children games" in India autocomplete.
+- **local, multiplayer:** "local multiplayer games" in UK autocomplete (pass-and-play is local).
+- **adults:** "memory games for adults" is in UK, India and France autocomplete but strong (in med 3858).
+- **find, classic:** fillers ("find the pairs", "memory game classic"), not measured.
+- Dropped as weak: recall (UK autocomplete is all recall/AI apps), "memory chess" (no autocomplete
+  in gb or in), "pass and play games" (med 22.5k gb).
+
+Caveat: the MobileAction table lists no storefront that indexes both en-US and en-GB, so en-US words
+are not searchable in India, the UK or France at all. Because of the no-overlap rule, en-GB has lost
+`player`, `toddler`, `preschool`, `offline`, `brain` and `board` in those stores. The biggest loss is
+`player`: "memory game 2 player" is in UK autocomplete with med 74 (gb) and 431 (in). If that matters
+more than strict de-duplication, swap `find,classic` for `players,4` (89 bytes).
