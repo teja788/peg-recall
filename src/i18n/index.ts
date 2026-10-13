@@ -68,7 +68,8 @@ export function chevron(g: '‹' | '›'): string {
 export function pickLang(tags: readonly (string | null | undefined)[]): Lang {
   for (const tag of tags) {
     const code = String(tag ?? '').toLowerCase().split(/[-_]/)[0];
-    if (code in DICTS) return code as Lang;
+    // own keys only: "constructor" or "__proto__" is not a language
+    if (Object.prototype.hasOwnProperty.call(DICTS, code)) return code as Lang;
   }
   return 'en';
 }
@@ -124,12 +125,24 @@ export function trn(base: PluralBase, n: number, vars?: Vars): string {
 }
 
 /** Western digits everywhere (Arabic too): scores and counts drawn outside
- *  tr() are plain numbers, and the two must match. */
-const numberLocale = () => `${current}-u-nu-latn`;
+ *  tr() are plain numbers, and the two must match. `-u-nu-latn` asks for them;
+ *  `latin` makes sure, for an engine that ignores the extension. */
+const formats = new Map<string, Intl.NumberFormat>();
+function numberFormat(style: 'decimal' | 'percent'): Intl.NumberFormat {
+  const k = `${current}:${style}`;
+  let f = formats.get(k);
+  if (!f) {
+    const opts = style === 'percent' ? { style, maximumFractionDigits: 0 } : undefined;
+    f = new Intl.NumberFormat(`${current}-u-nu-latn`, opts);
+    formats.set(k, f);
+  }
+  return f;
+}
+const latin = (s: string) => s.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660));
 
 function formatNumber(n: number): string {
   try {
-    return new Intl.NumberFormat(numberLocale()).format(n);
+    return latin(numberFormat('decimal').format(n));
   } catch {
     return String(n);
   }
@@ -138,7 +151,7 @@ function formatNumber(n: number): string {
 /** 0.73 → "73%" / "73 %", as the language writes it. */
 export function percent(x: number): string {
   try {
-    return new Intl.NumberFormat(numberLocale(), { style: 'percent', maximumFractionDigits: 0 }).format(x);
+    return latin(numberFormat('percent').format(x));
   } catch {
     return `${Math.round(x * 100)}%`;
   }

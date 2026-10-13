@@ -19,6 +19,21 @@ import { shouldAskForReview } from './statsModel';
 /** For a "Rate Color Catch" row in Settings (opens the App Store review page). */
 export const WRITE_REVIEW_URL = 'https://apps.apple.com/app/id6813625311?action=write-review';
 
+/**
+ * Whether iOS can show the rating sheet at all (false on TestFlight and on
+ * web), asked once at load so `reviewDue` can answer synchronously. Until it
+ * answers, nothing is "due".
+ */
+let available = false;
+Promise.resolve()
+  .then(() => StoreReview.isAvailableAsync())
+  .then(
+    (v) => {
+      available = v;
+    },
+    () => {},
+  );
+
 function appVersion(): string {
   return Constants.expoConfig?.version ?? 'unknown';
 }
@@ -29,7 +44,9 @@ function appVersion(): string {
  */
 export function reviewDue(opts: { humanWon: boolean; passAndPlay: boolean }): boolean {
   try {
-    return Platform.OS !== 'web' && shouldAskForReview(useStats.getState(), opts, appVersion());
+    return (
+      Platform.OS !== 'web' && available && shouldAskForReview(useStats.getState(), opts, appVersion())
+    );
   } catch {
     return false;
   }

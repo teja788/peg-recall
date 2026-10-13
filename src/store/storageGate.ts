@@ -12,6 +12,9 @@
  *    even late, so the caller can still apply it.
  *  - `write` is held until that real read has settled. Nothing is ever written
  *    over a stored value nobody has looked at yet.
+ *  - A read that FAILED (rather than finding nothing) blocks writes for the
+ *    session: the stored blob may hold what the defaults would erase (an early
+ *    player's grandfathered unlock), so play carries on in memory only.
  *
  * Pure TypeScript over a `KeyValueStorage`, so tests drive it with a fake.
  */
@@ -44,7 +47,8 @@ export interface StorageGate {
    * 'read' if the value arrived within `timeoutMs`, else 'timeout'.
    * `onSettled` runs exactly once, when the real read finishes — possibly after
    * the timeout — with the stored string, or null if there is none or the read
-   * failed. Only the first call's `onSettled` is used.
+   * failed (after which nothing is ever written). Only the first call's
+   * `onSettled` is used.
    */
   hydrate: (onSettled: (raw: string | null) => void) => Promise<'read' | 'timeout'>;
   /**
@@ -66,12 +70,14 @@ export function createStorageGate({
   timers = REAL_TIMERS,
 }: StorageGateOptions): StorageGate {
   let settled = false;
+  /** the read errored: what is stored is unknown, so nothing is written over it */
+  let readFailed = false;
   let started: Promise<'read' | 'timeout'> | null = null;
   let pending: (() => string) | null = null;
   let timer: unknown = null;
 
   function flushSoon() {
-    if (!settled || !pending) return;
+    if (!settled || readFailed || !pending) return;
     if (timer != null) timers.clearTimeout(timer);
     timer = timers.setTimeout(() => {
       timer = null;
@@ -101,13 +107,16 @@ export function createStorageGate({
       let read: Promise<string | null>;
       try {
         read = Promise.resolve(storage.getItem(key));
-      } catch {
-        read = Promise.resolve(null);
+      } catch (e) {
+        read = Promise.reject(e);
       }
       const real = read
         .then(
           (v) => (typeof v === 'string' ? v : null),
-          () => null,
+          () => {
+            readFailed = true;
+            return null;
+          },
         )
         .then((raw) => {
           settled = true;

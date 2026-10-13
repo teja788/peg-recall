@@ -7,7 +7,7 @@
  */
 
 import type { AvatarId, BoardSize, Difficulty } from '../engine/types';
-import { everyLanguage, tr } from '../i18n';
+import { DICTS, everyLanguage, tr } from '../i18n';
 
 export type GameMode = 'ai' | '2p' | '3p' | '4p';
 
@@ -146,12 +146,15 @@ function animalWords(avatar: AvatarId): string[] {
   return everyLanguage(`animal.${avatar}`).filter(Boolean).map(nameKey);
 }
 
-const ANIMAL_WORDS = new Set(AVATAR_CYCLE.flatMap(animalWords));
-
-/** "fox", "FOX", " Fox ", "Fuchs" — any of the six animal names, in any
- *  language the app speaks, whatever the case. */
+/** "fox", "FOX", " Fox ", "Fuchs" on a German phone — any of the six animal
+ *  names in the app's language or in English, whatever the case. Other
+ *  languages' animal words are real names here: a Russian "Мишка" or a
+ *  Vietnamese "Thỏ" typed on an English phone is somebody's name. */
 export function isAnimalName(name: string): boolean {
-  return ANIMAL_WORDS.has(nameKey(name));
+  const key = nameKey(name);
+  return AVATAR_CYCLE.some(
+    (a) => key === nameKey(animalName(a)) || key === nameKey(DICTS.en[`animal.${a}`]),
+  );
 }
 
 /**
@@ -392,19 +395,22 @@ export function moreToTry(s: Access): ('big' | 'owl')[] {
 
 /**
  * The one card (if any) the game-over sheet shows under the scores. Never for
- * an unlocked player, and never on the game-over where the rating prompt is
- * asked for: that one wins.
- *  - 'unlock': the game just played used a free try ("Liked it?").
+ * an unlocked player.
+ *  - 'unlock': the game just played used a free try ("Liked it?"). This one
+ *    beats the rating prompt, which waits for the next game-over (the game
+ *    screen does not ask for a review after a try).
  *  - 'more': a person beat the computer on the Classic board, not on a try,
- *    and Big or Owl still has its try; once ever (`moreOffered`).
+ *    and Big or Owl still has its try; once ever (`moreOffered`). Not on the
+ *    game-over where the rating prompt is asked for: that one wins.
  */
 export function upsellCard(
   s: Access & Pick<Settings, 'moreOffered'>,
   game: { tries: number; humanWon: boolean; vsComputer: boolean; boardSize: BoardSize; reviewDue: boolean },
 ): 'unlock' | 'more' | null {
-  if (s.unlocked || game.reviewDue) return null;
+  if (s.unlocked) return null;
   if (game.tries > 0) return 'unlock';
   if (
+    !game.reviewDue &&
     game.humanWon &&
     game.vsComputer &&
     game.boardSize === 'classic' &&

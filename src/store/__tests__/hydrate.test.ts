@@ -78,7 +78,7 @@ test('gate: no write reaches storage before the real read settles', async () => 
   assert.deepEqual(storage.writes, [['k', 'merged']], 'flushed once, with the latest state');
 });
 
-test('gate: a failed read settles as "nothing stored" and unblocks writes', async () => {
+test('gate: a failed read settles as "nothing stored" but blocks writes for the session', async () => {
   const storage = new SlowStorage();
   storage.failReads = true;
   const gate = createStorageGate({ storage, key: 'k', timeoutMs: 50, debounceMs: 1 });
@@ -88,8 +88,36 @@ test('gate: a failed read settles as "nothing stored" and unblocks writes', asyn
   storage.release();
   assert.equal(await p, 'read');
   assert.deepEqual(seen, [null]);
+  gate.write(() => 'y');
+  await tick(10);
+  assert.deepEqual(storage.writes, [], 'what is stored is unknown: never written over');
+});
+
+test('gate: a genuine "nothing stored" (fresh install) still writes', async () => {
+  const storage = new SlowStorage();
+  const gate = createStorageGate({ storage, key: 'k', timeoutMs: 50, debounceMs: 1 });
+  const p = gate.hydrate(() => {});
+  storage.release();
+  await p;
+  gate.write(() => 'x');
   await tick(10);
   assert.deepEqual(storage.writes, [['k', 'x']]);
+});
+
+test('a failed read never overwrites a grandfathered blob (iOS 15 has no AppTransaction)', async () => {
+  const storage = new SlowStorage();
+  storage.failReads = true;
+  const blob = JSON.stringify({ version: 2, boardSize: 'huge' });
+  storage.data.set(SETTINGS_KEY, blob);
+  const useS = createSettingsStore(storage, { debounceMs: 1 });
+  const h = useS.getState().hydrate();
+  storage.release();
+  await h;
+  useS.getState().toggle('soundOn');
+  await tick(10);
+  assert.equal(useS.getState().soundOn, !DEFAULT_SETTINGS.soundOn, 'the change still applies in memory');
+  assert.deepEqual(storage.writes, []);
+  assert.equal(storage.data.get(SETTINGS_KEY), blob);
 });
 
 test('gate: hydrate is idempotent', async () => {

@@ -76,7 +76,16 @@ export function ParentalGate({ onPass, onCancel }: { onPass: () => void; onCance
           {tr('gate.wrong')}
         </Text>
       ) : null}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.sm, maxWidth: 3 * 72 + 2 * 8 }}>
+      {/* a keypad reads 1-2-3 in every language, Arabic too */}
+      <View
+        style={{
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: t.spacing.sm,
+          maxWidth: 3 * 72 + 2 * 8,
+          direction: 'ltr',
+        }}
+      >
         {KEYS.map((k) => (
           <Pressable
             key={k}

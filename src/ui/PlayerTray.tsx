@@ -235,7 +235,7 @@ function PlayerTrayImpl({
       {compact ? (
         <Text
           maxFontSizeMultiplier={MAX_TEXT_SCALE}
-          style={{ ...heading, color: t.c.text, marginLeft: px(DENSE_GAP) }}
+          style={{ ...heading, color: t.c.text, marginStart: px(DENSE_GAP) }}
         >
           {caption ?? score}
         </Text>
@@ -243,7 +243,7 @@ function PlayerTrayImpl({
         /* minWidth 0 lets this column (and the name in it) shrink below its
             content width, so a long name ellipsizes instead of pushing the
             tray row onto a second line */
-        <View style={{ marginLeft: px(dense ? DENSE_GAP : t.spacing.sm), flexShrink: 1, minWidth: 0 }}>
+        <View style={{ marginStart: px(dense ? DENSE_GAP : t.spacing.sm), flexShrink: 1, minWidth: 0 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', minWidth: 0 }}>
             <Text
               numberOfLines={1}
@@ -270,7 +270,7 @@ function PlayerTrayImpl({
               {caption ?? score}
             </Text>
             {captured && captured.length > 0 ? (
-              <View style={{ marginLeft: px(dense ? DENSE_GAP : t.spacing.sm) }}>
+              <View style={{ marginStart: px(dense ? DENSE_GAP : t.spacing.sm) }}>
                 <CapturedRow
                   colors={captured}
                   max={maxPegs}

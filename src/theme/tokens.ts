@@ -76,7 +76,7 @@ export const LIGHT: Surfaces = {
   pegDown: '#D9D0C3',
   pegHole: '#E9E2D6',
   text: '#2B2622',
-  textDim: '#7A6F63',
+  textDim: '#72675B', // 4.9:1 on bg (AA)
   accent: '#0072B2',
   accentInk: '#FFFDF8',
   line: '#E2D9CB',

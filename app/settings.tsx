@@ -279,7 +279,7 @@ function UnlockRow({
           opacity: pressed ? 0.7 : 1,
         })}
       >
-        <View style={{ flex: 1, paddingRight: t.spacing.md }}>
+        <View style={{ flex: 1, paddingEnd: t.spacing.md }}>
           <Text style={{ ...t.type.body, color: t.c.text }}>{tr('unlock.title')}</Text>
           <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: 2 }}>
             {tr(unlocked ? 'unlock.doneRow' : 'unlock.what')}

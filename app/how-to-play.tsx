@@ -116,8 +116,8 @@ export default function HowToPlayScreen() {
               flexDirection: 'row',
               alignItems: 'center',
               paddingVertical: t.spacing.md,
-              paddingLeft: t.spacing.sm,
-              paddingRight: t.spacing.lg,
+              paddingStart: t.spacing.sm,
+              paddingEnd: t.spacing.lg,
               gap: t.spacing.sm,
             }}
           >
@@ -231,8 +231,8 @@ function RowCard({ rows }: { rows: Tip[] }) {
             alignItems: 'center',
             gap: t.spacing.sm,
             paddingVertical: t.spacing.md,
-            paddingLeft: t.spacing.sm,
-            paddingRight: t.spacing.lg,
+            paddingStart: t.spacing.sm,
+            paddingEnd: t.spacing.lg,
             borderTopWidth: i === 0 ? 0 : 1,
             borderTopColor: t.c.line,
           }}

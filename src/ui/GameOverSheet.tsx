@@ -1,6 +1,14 @@
 import { Avatar } from '@art';
-import React, { useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  AccessibilityInfo,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -29,7 +37,7 @@ export interface GameOverSheetProps {
   state: GameState;
   onRematch: () => void;
   onHome: () => void;
-  /** at most one gentle card above the buttons (see `upsellCard`) */
+  /** at most one gentle card under the buttons (see `upsellCard`) */
   upsell?: UpsellCardProps;
 }
 
@@ -82,7 +90,9 @@ function UpsellCard({ title, line, action, onAction, onDismiss }: UpsellCardProp
         gap: t.spacing.sm,
       }}
     >
-      <Text style={{ ...t.type.label, color: t.c.text }}>{title}</Text>
+      <Text accessibilityRole="header" style={{ ...t.type.label, color: t.c.text }}>
+        {title}
+      </Text>
       <Text style={{ ...t.type.caption, color: t.c.textDim }}>{line}</Text>
       <View
         style={{
@@ -96,7 +106,6 @@ function UpsellCard({ title, line, action, onAction, onDismiss }: UpsellCardProp
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={action}
-          accessibilityHint={line}
           onPress={onAction}
           style={({ pressed }) => ({
             minHeight: 44,
@@ -135,6 +144,19 @@ export function GameOverSheet({ state, onRematch, onHome, upsell }: GameOverShee
   // driven by hand rather than by `entering`: layout animations do not fire
   // reliably on every target, and a sheet that never appears is a dead end
   const enter = useSharedValue(0);
+  const playAgain = useRef<View>(null);
+
+  /** "Not now": the card goes, and VoiceOver lands on Play again rather than
+   *  wherever iOS puts it when the focused button disappears */
+  const dismiss = () => {
+    upsell?.onDismiss();
+    setTimeout(() => {
+      const el = playAgain.current;
+      if (!el) return;
+      if (Platform.OS === 'web') (el as unknown as HTMLElement).focus?.();
+      else AccessibilityInfo.sendAccessibilityEvent(el, 'focus');
+    }, 50);
+  };
 
   useEffect(() => {
     enter.value = withTiming(1, {
@@ -259,7 +281,7 @@ export function GameOverSheet({ state, onRematch, onHome, upsell }: GameOverShee
                       color: t.c.text,
                       flex: 1,
                       minWidth: 0,
-                      marginLeft: t.spacing.md,
+                      marginStart: t.spacing.md,
                     }}
                   >
                     {name}
@@ -285,10 +307,9 @@ export function GameOverSheet({ state, onRematch, onHome, upsell }: GameOverShee
             })}
           </View>
 
-          {upsell ? <UpsellCard {...upsell} /> : null}
-
           <View style={{ gap: t.spacing.md }}>
             <Pressable
+              ref={playAgain}
               accessibilityRole="button"
               accessibilityLabel={tr('over.playAgain')}
               onPress={onRematch}
@@ -320,6 +341,10 @@ export function GameOverSheet({ state, onRematch, onHome, upsell }: GameOverShee
               <Text style={{ ...t.type.heading, color: t.c.text }}>{tr('common.home')}</Text>
             </Pressable>
           </View>
+
+          {/* under the buttons: with four players on a small phone, a card
+              above them pushed Play again and Home off the screen */}
+          {upsell ? <UpsellCard {...upsell} onDismiss={dismiss} /> : null}
         </ScrollView>
       </Animated.View>
     </Animated.View>

@@ -269,7 +269,7 @@ export function OptionPill({
           <View
             style={[
               styles.lockBadge,
-              { backgroundColor: t.c.card, borderColor: t.c.line, top: t.spacing.xs, right: t.spacing.xs },
+              { backgroundColor: t.c.card, borderColor: t.c.line, top: t.spacing.xs, end: t.spacing.xs },
             ]}
           >
             <LockGlyph size={11} color={t.c.textDim} />
@@ -281,8 +281,11 @@ export function OptionPill({
             <TryBadge small />
           </View>
         ) : null}
+        {/* shrinks a little rather than truncating ("Большая", "Khó"); iOS only */}
         <Text
           numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}
           maxFontSizeMultiplier={1.3}
           style={{
             ...t.type.caption,
@@ -297,6 +300,8 @@ export function OptionPill({
         {hint ? (
           <Text
             numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.8}
             maxFontSizeMultiplier={1.3}
             style={{
               fontSize: 11,
@@ -354,7 +359,7 @@ export function ModeCard({
       ]}
     >
       <View style={{ width: 72, alignItems: 'center', justifyContent: 'center' }}>{art}</View>
-      <View style={{ flex: 1, marginLeft: t.spacing.lg }}>
+      <View style={{ flex: 1, marginStart: t.spacing.lg }}>
         {/* the badge rides on the title line, so the subtitle keeps its width */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: t.spacing.sm }}>
           <Text style={{ ...t.type.heading, color: t.c.text }}>{title}</Text>
@@ -363,7 +368,7 @@ export function ModeCard({
         <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: 2 }}>{subtitle}</Text>
       </View>
       {locked ? (
-        <View style={{ marginRight: t.spacing.sm }}>
+        <View style={{ marginEnd: t.spacing.sm }}>
           <LockGlyph size={18} color={t.c.textDim} />
         </View>
       ) : null}
@@ -408,7 +413,7 @@ export function ToggleRow({
         },
       ]}
     >
-      <View style={{ flex: 1, paddingRight: t.spacing.md }}>
+      <View style={{ flex: 1, paddingEnd: t.spacing.md }}>
         <Text style={{ ...t.type.body, color: t.c.text }}>{title}</Text>
         {subtitle ? (
           <Text style={{ ...t.type.caption, color: t.c.textDim, marginTop: 2 }}>{subtitle}</Text>

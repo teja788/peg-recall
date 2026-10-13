@@ -364,11 +364,28 @@ test('animal names count in every language the app speaks', () => {
   assert.equal(nameToStore('hibou', 'owl'), '');
   assert.equal(nameToStore('フクロウ', 'owl'), '');
   assert.equal(nameToStore('Eule', 'fox'), 'Eule', "another animal's name is a real name here");
-  for (const n of ['Fuchs', 'Zorro', 'Búho', 'coniglio', 'Grenouille', 'Gato', 'ネコ']) {
-    assert.equal(isAnimalName(n), true, n);
+});
+
+test('a "played before" chip skips animal names of the app\'s language and English only', () => {
+  // the chips: English animal words never, other languages' only in that language
+  assert.deepEqual(addRecentNames([], ['Mia', 'Fox', 'Leon']), ['Mia', 'Leon']);
+  assert.equal(isAnimalName('Eule'), false, 'a German word is a name on an English phone');
+  // Мишка, Котик, Зайчик, Gấu, Thỏ, Mèo are real names outside ru / vi
+  const real = ['Мишка', 'Котик', 'Зайчик', 'Gấu', 'Thỏ', 'Mèo'];
+  assert.deepEqual(addRecentNames([], real), real);
+  try {
+    setLang('de');
+    for (const n of ['Fuchs', 'EULE', 'Fox', 'owl']) assert.equal(isAnimalName(n), true, n);
+    assert.deepEqual(addRecentNames([], ['Mia', 'Eule', 'Leon', 'Мишка']), ['Mia', 'Leon', 'Мишка']);
+    setLang('ru');
+    assert.deepEqual(addRecentNames([], ['Мишка', 'котик', 'Bear', 'Thỏ']), ['Thỏ']);
+    setLang('vi');
+    assert.deepEqual(addRecentNames([], ['Gấu', 'Thỏ', 'Mèo', 'Зайчик']), ['Зайчик']);
+  } finally {
+    setLang('en');
   }
-  // and never saved as a "played before" chip
-  assert.deepEqual(addRecentNames([], ['Mia', 'Eule', 'Leon']), ['Mia', 'Leon']);
+  // a stats key still treats the seat's own animal in any language as the animal
+  assert.equal(nameToStore('Мишка', 'bear'), '');
 });
 
 test('Turkish names compare the same on every device (İ/i, I/ı), whatever the app language', () => {
@@ -380,9 +397,6 @@ test('Turkish names compare the same on every device (İ/i, I/ı), whatever the 
     assert.equal(nameKey('Işıl'), nameKey('IŞIL'));
     assert.notEqual(nameKey('Işıl'), nameKey('İpek'));
     assert.deepEqual(addRecentNames(['ipek', 'Işıl'], ['İpek', 'IŞIL', 'Emir']), ['İpek', 'IŞIL', 'Emir']);
-    for (const n of ['Kedi', 'KEDİ', 'kedi', 'BAYKUŞ', 'baykuş', 'Ayı', 'AYI', 'TAVŞAN']) {
-      assert.equal(isAnimalName(n), true, n);
-    }
     assert.equal(nameToStore('KEDİ', 'cat'), '');
     assert.equal(nameToStore('AYI', 'bear'), '');
     assert.equal(nameToStore('İpek', 'cat'), 'İpek');
@@ -392,6 +406,9 @@ test('Turkish names compare the same on every device (İ/i, I/ı), whatever the 
   try {
     setLang('tr');
     check();
+    for (const n of ['Kedi', 'KEDİ', 'kedi', 'BAYKUŞ', 'baykuş', 'Ayı', 'AYI', 'TAVŞAN']) {
+      assert.equal(isAnimalName(n), true, n);
+    }
   } finally {
     setLang('en');
   }
@@ -546,7 +563,7 @@ test('withTries: adds without repeats, in a fixed order', () => {
   assert.deepEqual(withTries([], []), []);
 });
 
-test('upsell cards: never for an unlocked player, never with the rating prompt', () => {
+test('upsell cards: never for an unlocked player; "Liked it?" beats the rating prompt', () => {
   const s = { unlocked: false, triesUsed: [] as Lockable[], moreOffered: false };
   const win = { tries: 0, humanWon: true, vsComputer: true, boardSize: 'classic' as const, reviewDue: false };
   assert.equal(upsellCard(s, win), 'more');
@@ -554,8 +571,22 @@ test('upsell cards: never for an unlocked player, never with the rating prompt',
   assert.equal(upsellCard(s, { ...win, tries: 1, humanWon: false }), 'unlock', 'win or lose');
   assert.equal(upsellCard({ ...s, unlocked: true }, win), null);
   assert.equal(upsellCard({ ...s, unlocked: true }, { ...win, tries: 1 }), null);
-  assert.equal(upsellCard(s, { ...win, reviewDue: true }), null, 'the rating prompt wins');
-  assert.equal(upsellCard(s, { ...win, tries: 1, reviewDue: true }), null);
+  assert.equal(upsellCard(s, { ...win, reviewDue: true }), null, 'the rating prompt beats "Ready for more?"');
+  assert.equal(upsellCard(s, { ...win, tries: 1, reviewDue: true }), 'unlock', 'a try beats the rating prompt');
+});
+
+test('"Ready for more?" plays Big + Owl once, without storing them', () => {
+  // the game screen's tryMore: deal('ai', { ...stored, boardSize: 'big', difficulty: 'owl' })
+  let s: Settings = { ...DEFAULT_SETTINGS, difficulty: 'bunny' };
+  const tried = deal('ai', { ...s, boardSize: 'big', difficulty: 'owl' });
+  assert.equal(tried.settings.boardSize, 'big');
+  assert.equal(tried.settings.difficulty, 'owl');
+  assert.deepEqual(tried.tries, ['big', 'owl'], 'both tries are used up');
+  s = { ...s, triesUsed: withTries(s.triesUsed, tried.tries) };
+  const next = deal('ai', s);
+  assert.equal(next.settings.difficulty, 'bunny', 'a Bunny player is not moved to Fox');
+  assert.equal(next.settings.boardSize, 'classic');
+  assert.deepEqual(next.tries, []);
 });
 
 test('"Ready for more?": a win vs the computer on Classic, once, while Big or Owl has a try', () => {

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { DICTS, LANGS, pickLang, pluralCategory, setLang, tr, trn, type Key } from '../index';
+import { DICTS, LANGS, percent, pickLang, pluralCategory, setLang, tr, trn, type Key } from '../index';
 
 const placeholders = (s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
 
@@ -69,6 +69,26 @@ test('plural keys come in .one / .other pairs', () => {
   }
 });
 
+test('pickLang: only real languages, never an Object.prototype key', () => {
+  for (const tag of ['constructor', 'toString-US', '__proto__', 'hasOwnProperty']) {
+    assert.equal(pickLang([tag]), 'en', tag);
+  }
+  assert.equal(pickLang(['constructor', 'ar-EG']), 'ar');
+});
+
+test('numbers: Western digits in every language, Arabic included', () => {
+  try {
+    for (const l of LANGS) {
+      setLang(l);
+      assert.match(tr('game.board', { n: 1234 }), /[0-9]/, l);
+      assert.doesNotMatch(tr('game.board', { n: 1234 }) + percent(0.73), /[٠-٩۰-۹]/, l);
+      assert.match(percent(0.73), /73/, l);
+    }
+  } finally {
+    setLang('en');
+  }
+});
+
 test('pickLang: first supported preferred locale, else English', () => {
   assert.equal(pickLang(['de-AT', 'en-US']), 'de');
   assert.equal(pickLang(['sv-SE', 'fr-CA']), 'fr');
@@ -123,7 +143,7 @@ test('tr / trn fill placeholders in the current language', () => {
       ['قطعة واحدة', 'قطعتان', '3 قطع', '11 قطعة', '100 قطعة'],
       'Arabic: dual, and Western digits',
     );
-    assert.equal(tr('game.board', { n: 1234 }), 'لوحة دائرية، 1,234 قطعة');
+    assert.equal(tr('game.board', { n: 1234 }), 'لوحة دائرية، عدد القطع: 1,234');
     setLang('hi');
     assert.equal(trn('pegs', 0), '0 गोटी', 'Hindi: zero is singular');
   } finally {

@@ -25,6 +25,7 @@ import {
   withTries,
   type GameMode,
   type Lockable,
+  type Settings,
 } from '../src/store/settings';
 import { PEG_PAINT, useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
@@ -223,6 +224,8 @@ export default function GameScreen() {
    * the store — this is what stays on screen during the exit transition.
    */
   const [frozen, setFrozen] = useState<GameState | null>(null);
+  /** `leaving`, but set at once: a second tap in the same frame sees it */
+  const leavingNow = useRef(false);
   const started = useRef(false);
   /** the locked items the game on the table plays on their free try */
   const trial = useRef<Lockable[]>([]);
@@ -244,14 +247,18 @@ export default function GameScreen() {
   /**
    * A new game from the stored settings. A locked item with its free try left
    * is played, and the try is used up right here, as the game starts.
+   * `once` plays this game on other choices without storing them.
    */
-  const dealNew = useCallback(() => {
-    const s = useSettings.getState();
-    const d = deal(requested, s);
-    start(d.mode, d.settings);
-    trial.current = d.tries;
-    if (d.tries.length) s.set('triesUsed', withTries(s.triesUsed, d.tries));
-  }, [requested, start]);
+  const dealNew = useCallback(
+    (once?: Partial<Pick<Settings, 'boardSize' | 'difficulty'>>) => {
+      const s = useSettings.getState();
+      const d = deal(requested, { ...s, ...once });
+      start(d.mode, d.settings);
+      trial.current = d.tries;
+      if (d.tries.length) s.set('triesUsed', withTries(s.triesUsed, d.tries));
+    },
+    [requested, start],
+  );
 
   useEffect(() => {
     // a teardown on the way out empties the store too; that is not a cue to deal
@@ -300,6 +307,9 @@ export default function GameScreen() {
   const reviewedKey = useRef<string | null>(null);
   useEffect(() => {
     if (!overKey || leaving || reviewedKey.current === overKey) return;
+    // a game played on a free try gets the "Liked it?" card instead; the
+    // rating waits for the next game-over
+    if (trial.current.length) return;
     const id = setTimeout(() => {
       const g = useGame.getState().state;
       if (!g || g.phase !== 'gameOver' || AppState.currentState !== 'active') return;
@@ -330,8 +340,11 @@ export default function GameScreen() {
    *  call, or the guard below (which only sees rendered state) would catch our
    *  own navigation and re-open the pause menu instead of letting us out. */
   const goHome = useCallback(() => {
+    // a second tap would freeze the emptied store and draw nothing on the way out
+    if (leavingNow.current) return;
+    leavingNow.current = true;
     if (chime.current) clearTimeout(chime.current);
-    setFrozen(useGame.getState().state);
+    setFrozen((cur) => cur ?? useGame.getState().state);
     setLeaving(true);
     teardown();
   }, [teardown]);
@@ -351,6 +364,7 @@ export default function GameScreen() {
    *  played on a free try is not replayed: it deals again from the settings,
    *  which (the try now used) fall back to the free choices. */
   const restart = useCallback(() => {
+    if (leavingNow.current) return; // never a new game mid-exit
     setUnlocking(false);
     if (trial.current.length) dealNew();
     else rematch();
@@ -380,16 +394,18 @@ export default function GameScreen() {
     if (card === 'more') s.set('moreOffered', true);
   }, [overKey]);
 
-  /** "Ready for more?" → straight into a game on the Big board and/or vs Owl. */
+  /** "Ready for more?" → straight into a game on the Big board and/or vs Owl.
+   *  Only this game: the stored choices stay, so Play again after the try goes
+   *  back to them (a Bunny player is not left on Fox). */
   const tryMore = useCallback(
     (more: ('big' | 'owl')[]) => {
       // a second tap would land on the new game and deal it again without its try
-      if (useGame.getState().state?.phase !== 'gameOver') return;
-      const s = useSettings.getState();
-      if (more.includes('big')) s.set('boardSize', 'big');
-      if (more.includes('owl')) s.set('difficulty', 'owl');
+      if (leavingNow.current || useGame.getState().state?.phase !== 'gameOver') return;
       setUpsell(null);
-      dealNew();
+      dealNew({
+        ...(more.includes('big') ? { boardSize: 'big' as const } : {}),
+        ...(more.includes('owl') ? { difficulty: 'owl' as const } : {}),
+      });
     },
     [dealNew],
   );
@@ -552,7 +568,9 @@ export default function GameScreen() {
   const trayRow = win.width - insets.left - insets.right - 2 * t.spacing.md - L.px(48) - t.spacing.sm;
   const trayShare = stacked ? (trayRow - trayGap * (trayCount - 1)) / trayCount : L.colW;
   const compact = stacked && trayCount > 3 && trayShare - trayChromeWidth(L.px(30), L.scale, true) < 40;
-  const traySize = L.px(compact ? 26 : dense ? 30 : 36);
+  // the narrowest phones (320 pt) fit four chips on one row only smaller
+  const tight = compact && trayShare < 58;
+  const traySize = L.px(compact ? (tight ? 22 : 26) : dense ? 30 : 36);
   const nameMaxWidth = Math.max(
     32,
     Math.min(
@@ -813,7 +831,7 @@ export default function GameScreen() {
             flexWrap: 'wrap',
             justifyContent: 'flex-end',
             alignItems: 'center',
-            columnGap: trayGap,
+            columnGap: tight ? L.px(t.spacing.xs) : trayGap,
             rowGap: L.px(t.spacing.xs),
             flexShrink: 1,
           }}

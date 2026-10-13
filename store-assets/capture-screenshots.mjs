@@ -8,7 +8,8 @@
  *   node store-assets/capture-screenshots.mjs --set=ppo    # PPO treatment set (see SET below)
  *   --no-compose skips stage 2 (while reshooting single frames)
  *
- * --locale (en, de, fr, pt, ja, es, it; default en) runs the app in that
+ * --locale (en, de, fr, pt, ja, es, it, ko, zh, tr, nl, pl, hi, ru, vi, id, th, ar;
+ * default en) runs the app in that
  * language (the browser's navigator.language) with names natural to it, and
  * writes the frames to screenshot-frames/<locale>/<device>/ (en keeps
  * screenshot-frames/<device>/). The app's own strings (src/i18n) drive it.
@@ -87,6 +88,12 @@ const NAMES = {
   tr: ['İpek', 'Emir', 'Nine'],
   nl: ['Emma', 'Daan', 'Oma'],
   pl: ['Zosia', 'Antek', 'Babcia'],
+  hi: ['अनन्या', 'आरव', 'दादी'],
+  ru: ['Маша', 'Ваня', 'Бабушка'],
+  vi: ['Linh', 'Minh', 'Bà'],
+  id: ['Aisyah', 'Rafa', 'Nenek'],
+  th: ['น้ำ', 'ภูมิ', 'ยาย'],
+  ar: ['مريم', 'يوسف', 'جدتي'],
 }[LOCALE];
 
 /* ------------------------------------------------------------------ devices */
