@@ -15,3 +15,12 @@ PLAN.md
 /ios
 /android
 .DS_Store
+
+# never upload secrets or research notes
+*.p8
+*.p12
+*.key
+*.pem
+.env*
+research_notes/
+reports/

@@ -97,7 +97,7 @@ Read each community's self-promotion rules first; they change. Post once per com
 - **Apple Search Ads / paid installs:** about $2 per install against roughly $0.05 earned per install.
 - **Ads:** see the table above.
 
-## After 1.2.1 is live (approved Oct 14 2026)
+## After 1.2.1 is live (tasks the owner approved on Oct 14 2026)
 
 Each item needs the owner's OK before it is written to App Store Connect.
 
