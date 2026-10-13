@@ -258,11 +258,10 @@ export function sanitizeStats(raw: unknown): Stats {
 /* ---------------------------------------------------------- review prompt */
 
 /**
- * Ask for an App Store rating once the player has finished a second game,
- * never twice for the same app version, and only on a happy ending (a human
- * won, or a pass-and-play game among people finished). Few players come back
- * on a second day (App Analytics, Oct 2026), so the ask happens in the first
- * session.
+ * Ask for an App Store rating after a second game with a happy ending (a human
+ * won, or a pass-and-play game among people finished), or after any fifth
+ * game, never twice for the same app version. Few players come back on a
+ * second day (App Analytics, Oct 2026), so the ask happens in the first session.
  */
 export function shouldAskForReview(
   stats: Stats,
@@ -270,8 +269,7 @@ export function shouldAskForReview(
   appVersion: string,
 ): boolean {
   return (
-    stats.gamesFinished >= 2 &&
     stats.reviewAskedVersion !== appVersion &&
-    (opts.humanWon || opts.passAndPlay)
+    (stats.gamesFinished >= 5 || (stats.gamesFinished >= 2 && (opts.humanWon || opts.passAndPlay)))
   );
 }
