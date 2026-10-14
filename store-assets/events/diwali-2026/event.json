@@ -2,7 +2,7 @@
   "slug": "diwali-2026",
   "referenceName": "Diwali 2026 family game night",
   "badge": "SPECIAL_EVENT",
-  "deepLink": null,
+  "deepLink": "pegrecall:///",
   "purchaseRequirement": "NO_COST_ASSOCIATED",
   "primaryLocale": "en-US",
   "priority": "HIGH",

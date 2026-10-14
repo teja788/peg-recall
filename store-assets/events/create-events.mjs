@@ -121,7 +121,7 @@ for (const e of events) {
     console.log(`  = event exists: ${ev.id} (${ev.attributes.eventState})`);
     // fill fields added to event.json after the event was created (review needs purchaseRequirement)
     const fix = {};
-    if (e.purchaseRequirement && ev.attributes.purchaseRequirement !== e.purchaseRequirement) fix.purchaseRequirement = e.purchaseRequirement;
+    for (const k of ['purchaseRequirement', 'deepLink']) if (e[k] && ev.attributes[k] !== e[k]) fix[k] = e[k];
     if (Object.keys(fix).length) await write('PATCH', `/v1/appEvents/${ev.id}`, { data: { type: 'appEvents', id: ev.id, attributes: fix } });
   }
   else {
