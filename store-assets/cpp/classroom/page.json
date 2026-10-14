@@ -1,0 +1,57 @@
+{
+  "_note": "Custom product page (create after 1.2.1 is live). 'shots' maps each store shot to its source frame; style+captions are compose-screenshots.mjs input (see ../README.md).",
+  "referenceName": "Classroom and therapy",
+  "season": "Back to school (Aug-Sep, Jan); any time for therapists",
+  "linkedSearches": ["memory game for classroom", "OT games", "turn taking games"],
+  "angle": "Take turns, up to 4 players, shapes for color-blind players, no accounts or data",
+  "promotionalText": {
+    "en-US": "Take turns around one iPad: 2 players free, 3 or 4 with the one-time unlock. Shapes on every peg for color-blind players. No ads, no accounts, no data collected.",
+    "en-GB": "Take turns around one iPad: 2 players free, 3 or 4 with the one-time unlock. Shapes on every peg for colour-blind players. No ads, no accounts, no data collected.",
+    "hi": "एक iPad पर बारी-बारी से खेलें: 2 खिलाड़ी मुफ़्त; 3–4 के लिए एक बार अनलॉक करें। कलर-ब्लाइंड खिलाड़ियों के लिए गोटियों पर आकार। विज्ञापन, अकाउंट या डेटा संग्रह नहीं।"
+  },
+  "keywords": {
+    "en-US": ["classroom", "teacher", "therapy", "turn"],
+    "en-GB": ["classroom", "teacher", "therapy", "turn"],
+    "hi": ["कक्षा", "शिक्षक"]
+  },
+  "shots": {
+    "01-turns": "08-four",
+    "02-shapes": "06-shapes",
+    "03-look": "01-look",
+    "04-roll": "02-roll",
+    "05-pace": "05-sizes",
+    "06-private": "07-win-dark"
+  },
+  "style": {
+    "font": "../../fonts/Nunito.ttf",
+    "text": "#2B2622",
+    "background": ["#FBF6EC", "#EFE3CF"],
+    "dots": ["#CE1202", "#F0E442", "#009E73", "#0072B2", "#6201DA", "#CC79A7"]
+  },
+  "captions": {
+    "en-US": {
+      "01-turns": "Take turns: up to 4 players",
+      "02-shapes": "Shapes for color-blind players",
+      "03-look": "Look. Remember. Find it.",
+      "04-roll": "Roll the die, then find the peg",
+      "05-pace": "Longer look time, 4 board sizes",
+      "06-private": "No accounts, no ads, no data collected"
+    },
+    "en-GB": {
+      "01-turns": "Take turns: up to 4 players",
+      "02-shapes": "Shapes for colour-blind players",
+      "03-look": "Look. Remember. Find it.",
+      "04-roll": "Roll the die, then find the peg",
+      "05-pace": "Longer look time, 4 board sizes",
+      "06-private": "No accounts, no ads, no data collected"
+    },
+    "hi": {
+      "01-turns": "बारी-बारी से, 4 खिलाड़ी तक",
+      "02-shapes": "कलर-ब्लाइंड के लिए आकार",
+      "03-look": "देखो। याद रखो। ढूँढो।",
+      "04-roll": "पासा फेंको, फिर गोटी ढूँढो",
+      "05-pace": "देखने का ज़्यादा समय, बोर्ड के 4 साइज़",
+      "06-private": "कोई अकाउंट, विज्ञापन या डेटा संग्रह नहीं"
+    }
+  }
+}

@@ -209,10 +209,26 @@ async function tap(page, label) {
 }
 
 const PEG_RE = tpl('game.peg');
-// every plural form the language has (Polish: 1 pionek, 3 pionki, 5 pionków)
-const PEGS_RE = ['one', 'few', 'many', 'other']
+// every plural form the language has (Polish: 1 pionek, 3 pionki, 5 pionków);
+// Arabic spells some out with no digit ("قطعتان" = 2 pegs), so each carries its count
+const FORM_N = { zero: 0, one: 1, two: 2 };
+const PEGS_RE = ['zero', 'one', 'two', 'few', 'many', 'other']
   .filter((f) => `pegs.${f}` in i18n.DICTS[LOCALE])
-  .map((f) => tpl(`pegs.${f}`));
+  .map((f) => ({ re: tpl(`pegs.${f}`), n: FORM_N[f] }));
+const pegCount = (x) => {
+  for (const { re, n } of PEGS_RE) {
+    const m = re.exec(x);
+    if (m) return m.groups?.n != null ? Number(m.groups.n) : n;
+  }
+  return null;
+};
+/** "5 seconds" -> 5, also for forms with no digit (Arabic "ثانيتان" = 2). */
+const secondsOf = (x) => {
+  const d = /\d+/.exec(x);
+  if (d) return Number(d[0]);
+  const f = ['zero', 'one', 'two'].find((k) => i18n.DICTS[LOCALE][`seconds.${k}`] === x);
+  return f ? FORM_N[f] : null;
+};
 const RESULT = new Set([T('game.match'), T('game.miss')]);
 const HIDDEN = T('game.pegHidden');
 const TAKEN = T('game.pegTaken');
@@ -248,12 +264,12 @@ function readState(ls) {
     }
     // "Fox, computer, 3 pegs" / "Maya, Bear, 2 pegs, their turn"
     const parts = l.split(', ');
-    const score = parts.map((x) => PEGS_RE.map((re) => re.exec(x)).find(Boolean)).find(Boolean);
-    if (score && parts.length > 1 && !BOARD_RE.test(l)) {
+    const score = parts.map(pegCount).find((n) => n != null);
+    if (score != null && parts.length > 1 && !BOARD_RE.test(l)) {
       trays.push({
         name: parts[0],
         ai: parts.includes(T('common.computer')),
-        score: Number(score.groups.n),
+        score,
         active: parts.includes(T('game.theirTurn')),
       });
     }
@@ -265,7 +281,7 @@ function readState(ls) {
   const find = banner && FIND_RE.exec(banner);
   const ring = ls.map((l) => REVEAL_RE.exec(l)).find(Boolean);
   return {
-    countdown: ring ? Number(/\d+/.exec(ring.groups.seconds)[0]) : null,
+    countdown: ring ? secondsOf(ring.groups.seconds) : null,
     pegs,
     trays,
     banner,

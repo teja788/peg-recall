@@ -131,6 +131,60 @@
       "05-sizes": "Od 16 do 40 pionków",
       "06-shapes": "Kształty dla daltonistów",
       "07-win-dark": "Offline. Bez reklam."
+    },
+    "hi": {
+      "01-look": "देखो। याद रखो। ढूँढो।",
+      "02-roll": "पासा फेंको, गोटी चुनो",
+      "03-family": "पूरे परिवार के साथ बारी-बारी से खेलो",
+      "04-rivals": "खरगोश, लोमड़ी या उल्लू?",
+      "05-sizes": "16 से 40 गोटियाँ",
+      "06-shapes": "कलर-ब्लाइंड के लिए आकार",
+      "07-win-dark": "ऑफ़लाइन। कोई विज्ञापन नहीं।"
+    },
+    "ru": {
+      "01-look": "Смотри. Запомни. Найди.",
+      "02-roll": "Брось кубик. Найди фишку.",
+      "03-family": "По очереди всей семьёй",
+      "04-rivals": "Зайчик, Лиса или Сова?",
+      "05-sizes": "От 16 до 40 фишек",
+      "06-shapes": "Фигуры для дальтоников",
+      "07-win-dark": "Офлайн. Без рекламы."
+    },
+    "vi": {
+      "01-look": "Nhìn. Nhớ. Tìm.",
+      "02-roll": "Tung xúc xắc, chọn quân",
+      "03-family": "Chuyền tay, cả nhà cùng chơi",
+      "04-rivals": "Thỏ, Cáo hay Cú?",
+      "05-sizes": "Từ 16 đến 40 quân",
+      "06-shapes": "Hình cho người mù màu",
+      "07-win-dark": "Không cần mạng. Không quảng cáo."
+    },
+    "id": {
+      "01-look": "Lihat. Ingat. Temukan.",
+      "02-roll": "Lempar dadu, pilih pionnya",
+      "03-family": "Gantian main bareng keluarga",
+      "04-rivals": "Kelinci, Rubah, atau Burung Hantu?",
+      "05-sizes": "Dari 16 sampai 40 pion",
+      "06-shapes": "Bentuk untuk pemain buta warna",
+      "07-win-dark": "Offline. Tanpa iklan."
+    },
+    "th": {
+      "01-look": "ดู จำ แล้วหาให้เจอ",
+      "02-roll": "ทอยลูกเต๋า แล้วเลือกหมุด",
+      "03-family": "ผลัดกันเล่นทั้งครอบครัว",
+      "04-rivals": "กระต่าย จิ้งจอก หรือนกฮูก?",
+      "05-sizes": "ตั้งแต่ 16 ถึง 40 หมุด",
+      "06-shapes": "รูปทรงสำหรับคนตาบอดสี",
+      "07-win-dark": "ออฟไลน์ ไม่มีโฆษณา"
+    },
+    "ar-SA": {
+      "01-look": "انظر. تذكّر. اعثر عليها.",
+      "02-roll": "ارمِ النرد واختر القطعة",
+      "03-family": "العبوا بالتناوب مع العائلة",
+      "04-rivals": "الأرنب أم الثعلب أم البومة؟",
+      "05-sizes": "من 16 إلى 40 قطعة",
+      "06-shapes": "أشكال لمن يصعب عليه تمييز الألوان",
+      "07-win-dark": "بدون إنترنت. بلا إعلانات."
     }
   }
 }

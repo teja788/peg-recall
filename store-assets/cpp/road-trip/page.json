@@ -1,0 +1,47 @@
+{
+  "_note": "Custom product page (create after 1.2.1 is live). 'shots' maps each store shot to its source frame; style+captions are compose-screenshots.mjs input (see ../README.md).",
+  "referenceName": "Road trip",
+  "season": "School holidays: summer, Thanksgiving to New Year, spring break",
+  "linkedSearches": ["car games", "travel games for kids", "games for plane"],
+  "angle": "Offline, play anywhere, pass the phone",
+  "promotionalText": {
+    "en-US": "Car rides, flights and waiting rooms: Color Catch plays fully offline. Pass one phone around or play the computer. No ads, no account, no Wi-Fi needed.",
+    "en-GB": "Car journeys, flights and waiting rooms: Color Catch plays fully offline. Pass one phone around or play the computer. No ads, no account, no Wi-Fi needed."
+  },
+  "keywords": {
+    "en-US": ["travel", "car", "plane", "trip"],
+    "en-GB": ["travel", "car", "plane", "journey"]
+  },
+  "shots": {
+    "01-offline": "01-look",
+    "02-pass": "03-family",
+    "03-roll": "02-roll",
+    "04-rivals": "04-rivals",
+    "05-sizes": "05-sizes",
+    "06-dark": "07-win-dark"
+  },
+  "style": {
+    "font": "../../fonts/Nunito.ttf",
+    "text": "#2B2622",
+    "background": ["#FBF6EC", "#EFE3CF"],
+    "dots": ["#CE1202", "#F0E442", "#009E73", "#0072B2", "#6201DA", "#CC79A7"]
+  },
+  "captions": {
+    "en-US": {
+      "01-offline": "Plays offline, anywhere you go",
+      "02-pass": "Pass the phone, take turns",
+      "03-roll": "Roll a color. Find the peg.",
+      "04-rivals": "Solo? Play Bunny, Fox or Owl",
+      "05-sizes": "Quick games or long ones",
+      "06-dark": "No Wi-Fi, no ads, no account"
+    },
+    "en-GB": {
+      "01-offline": "Plays offline, anywhere you go",
+      "02-pass": "Pass the phone, take turns",
+      "03-roll": "Roll a colour. Find the peg.",
+      "04-rivals": "Solo? Play Bunny, Fox or Owl",
+      "05-sizes": "Quick games or long ones",
+      "06-dark": "No Wi-Fi, no ads, no account"
+    }
+  }
+}

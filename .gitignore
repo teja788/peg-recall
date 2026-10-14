@@ -49,4 +49,7 @@ store-assets/screenshots/
 store-assets/screenshot-frames/
 store-assets/screenshots-ppo/
 store-assets/screenshot-frames-ppo/
+# custom product page screenshots (rebuild: store-assets/cpp/README.md); page.json + README stay tracked
+store-assets/cpp/*/*/
+store-assets/screenshot-frames-cpp/
 store-assets/promo/codes*.txt

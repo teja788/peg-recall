@@ -1,0 +1,57 @@
+{
+  "_note": "Custom product page (create after 1.2.1 is live). 'shots' maps each store shot to its source frame; style+captions are compose-screenshots.mjs input (see ../README.md).",
+  "referenceName": "Festival",
+  "season": "Diwali (Oct-Nov), Children's Day (Nov 14, India), Holi (Mar); pair with an India in-app event",
+  "linkedSearches": ["diwali games", "holi games", "children's day games"],
+  "angle": "Family game night, colors",
+  "promotionalText": {
+    "en-US": "Diwali, Holi or Children's Day game night: roll a color, find the peg, pass the phone. Plays offline, with no ads and no account.",
+    "en-GB": "Diwali, Holi or Children's Day game night: roll a colour, find the peg, pass the phone. Plays offline, with no ads and no account.",
+    "hi": "दिवाली, होली या बाल दिवस की गेम नाइट: पासा फेंको, उसी रंग की गोटी ढूँढो और फ़ोन आगे बढ़ाओ। ऑफ़लाइन खेलो, बिना विज्ञापन या अकाउंट के।"
+  },
+  "keywords": {
+    "en-US": ["diwali", "holi", "festival"],
+    "en-GB": ["diwali", "holi", "festival"],
+    "hi": ["दिवाली", "होली", "त्योहार"]
+  },
+  "shots": {
+    "01-colors": "01-look",
+    "02-family": "03-family",
+    "03-four": "08-four",
+    "04-roll": "02-roll",
+    "05-rivals": "04-rivals",
+    "06-win": "07-win-dark"
+  },
+  "style": {
+    "font": "../../fonts/Nunito.ttf",
+    "text": "#2B2622",
+    "background": ["#FBF6EC", "#EFE3CF"],
+    "dots": ["#CE1202", "#F0E442", "#009E73", "#0072B2", "#6201DA", "#CC79A7"]
+  },
+  "captions": {
+    "en-US": {
+      "01-colors": "A festival of colors on one board",
+      "02-family": "Family game night, one phone",
+      "03-four": "Up to 4 players, pass and play",
+      "04-roll": "Roll a color. Catch the peg.",
+      "05-rivals": "Bunny, Fox or Owl: pick a rival",
+      "06-win": "Confetti for every winner"
+    },
+    "en-GB": {
+      "01-colors": "A festival of colours on one board",
+      "02-family": "Family game night, one phone",
+      "03-four": "Up to 4 players, pass and play",
+      "04-roll": "Roll a colour. Catch the peg.",
+      "05-rivals": "Bunny, Fox or Owl: pick a rival",
+      "06-win": "Confetti for every winner"
+    },
+    "hi": {
+      "01-colors": "एक बोर्ड पर रंगों का त्योहार",
+      "02-family": "एक फ़ोन पर परिवार की गेम नाइट",
+      "03-four": "4 खिलाड़ी तक, बारी-बारी से",
+      "04-roll": "पासा फेंको, गोटी पकड़ो",
+      "05-rivals": "खरगोश, लोमड़ी या उल्लू?",
+      "06-win": "हर जीत पर कंफ़ेटी"
+    }
+  }
+}
