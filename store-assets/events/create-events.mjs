@@ -195,7 +195,6 @@ if (argv.includes('--nomination')) {
         attributes: { ...attributes, submitted: false },
         relationships: {
           relatedApps: { data: [{ type: 'apps', id: APP }] },
-          inAppEvents: { data: ids.map((id) => ({ type: 'appEvents', id })) },
         },
       },
     }, 'nomination');
