@@ -66,11 +66,37 @@ Submit yourself. You can also paste the same text into the form by hand.
 {
   "name": "Color Catch 1.2.1: 4 players and 18 languages",
   "type": "APP_ENHANCEMENTS",
-  "description": "Color Catch is a wooden peg memory game that families play together on one iPhone or iPad. Version 1.2.1 brings it to the whole table, and to more of the world.\n\nAccessibility first: every color also has its own shape (circle, triangle, square, star, heart, diamond) on the pegs and on the die, so color-blind players can play the whole game by shape. VoiceOver reads out every peg and announces turns, rolls and matches. The game supports Dynamic Type, Dark Mode and Reduce Motion, and every control is a single tap, with no dragging.\n\nLocalization: the interface now speaks 18 languages, including Hindi and right-to-left Arabic, and the store listing is localized for 20 locales.\n\nFamily play: 2 to 4 players pass one device around the table, or play the computer at three levels (Bunny, Fox and Owl). It works fully offline, with no ads and no account, and collects no data. Two-player games are always free. One purchase, shared through Family Sharing, unlocks 3 and 4 players, the Big and Huge boards and Owl, and each of these can be tried once for free first.\n\nIn-app events: Diwali Family Game Night (Nov 1-12) and Kids vs Grown-Ups for Children's Day in India (Nov 10-16).",
+  "description": "Color Catch is a wooden peg memory game families play together on one iPhone or iPad. Version 1.2.1 brings it to the whole table and to more of the world.\n\nAccessibility: every color also has its own shape on the pegs and the die, so color-blind players can play by shape. VoiceOver reads every peg and announces turns and matches. Dynamic Type, Dark Mode and Reduce Motion are supported, and every control is a single tap.\n\nLocalization: the interface speaks 18 languages, including Hindi and right-to-left Arabic; the store listing covers 20 locales.\n\nFamily play: 2 to 4 players pass one device around, or play the computer at three levels. Fully offline, no ads, no account, no data collected. One purchase, shared with Family Sharing, unlocks 3 and 4 players, bigger boards and the hardest opponent, and each can be tried free once.\n\nIn-app events: Diwali Family Game Night (Nov 1-12) and Kids vs Grown-Ups for Children's Day in India (Nov 10-16).",
   "publishStartDate": "2026-11-01T00:00:00Z",
-  "deviceFamilies": ["IPHONE", "IPAD"],
-  "locales": ["en-US", "en-GB", "es-MX", "de-DE", "fr-FR", "pt-BR", "ja", "es-ES", "it", "ko", "zh-Hant", "tr", "nl-NL", "pl", "hi", "ru", "vi", "id", "th", "ar-SA"],
-  "supplementalMaterialsUris": ["https://teja788.github.io/peg-recall/"],
+  "deviceFamilies": [
+    "IPHONE",
+    "IPAD"
+  ],
+  "locales": [
+    "en-US",
+    "en-GB",
+    "es-MX",
+    "de-DE",
+    "fr-FR",
+    "pt-BR",
+    "ja",
+    "es-ES",
+    "it",
+    "ko",
+    "zh-Hant",
+    "tr",
+    "nl-NL",
+    "pl",
+    "hi",
+    "ru",
+    "vi",
+    "id",
+    "th",
+    "ar-SA"
+  ],
+  "supplementalMaterialsUris": [
+    "https://teja788.github.io/peg-recall/"
+  ],
   "hasInAppEvents": true,
   "launchInSelectMarketsFirst": false,
   "preOrderEnabled": false,
