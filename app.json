@@ -52,7 +52,8 @@
           "supportedLocales": ["en", "de", "fr", "pt", "ja", "es", "it", "ko", "zh-Hant", "tr", "nl", "pl", "hi", "ru", "vi", "id", "th", "ar"]
         }
       ],
-      ["./plugins/withAlternateIcons", { "Bright": "./assets/icon-bright.png" }]
+      ["./plugins/withAlternateIcons", { "Bright": "./assets/icon-bright.png" }],
+      "./plugins/withPodsDeploymentTarget"
     ],
     "experiments": {
       "typedRoutes": false
