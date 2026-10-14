@@ -117,7 +117,13 @@ const toSubmit = new Set(); // events still to be reviewed
 for (const e of events) {
   console.log(`# ${e.slug} (${e.badge})`);
   let ev = existing.find((x) => x.attributes.referenceName === e.referenceName);
-  if (ev) console.log(`  = event exists: ${ev.id} (${ev.attributes.eventState})`);
+  if (ev) {
+    console.log(`  = event exists: ${ev.id} (${ev.attributes.eventState})`);
+    // fill fields added to event.json after the event was created (review needs purchaseRequirement)
+    const fix = {};
+    if (e.purchaseRequirement && ev.attributes.purchaseRequirement !== e.purchaseRequirement) fix.purchaseRequirement = e.purchaseRequirement;
+    if (Object.keys(fix).length) await write('PATCH', `/v1/appEvents/${ev.id}`, { data: { type: 'appEvents', id: ev.id, attributes: fix } });
+  }
   else {
     const attributes = { referenceName: e.referenceName, badge: e.badge, primaryLocale: e.primaryLocale, priority: e.priority, purpose: e.purpose, territorySchedules: e.territorySchedules };
     if (e.deepLink) attributes.deepLink = e.deepLink;

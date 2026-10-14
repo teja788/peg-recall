@@ -3,7 +3,7 @@
   "referenceName": "Diwali 2026 family game night",
   "badge": "SPECIAL_EVENT",
   "deepLink": null,
-  "purchaseRequirement": null,
+  "purchaseRequirement": "NO_COST_ASSOCIATED",
   "primaryLocale": "en-US",
   "priority": "HIGH",
   "purpose": "APPROPRIATE_FOR_ALL_USERS",
