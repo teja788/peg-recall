@@ -5,8 +5,8 @@
   "linkedSearches": ["car games", "travel games for kids", "games for plane"],
   "angle": "Offline, play anywhere, pass the phone",
   "promotionalText": {
-    "en-US": "Car rides, flights and waiting rooms: Color Catch plays fully offline. Pass one phone around or play the computer. No ads, no account, no Wi-Fi needed.",
-    "en-GB": "Car journeys, flights and waiting rooms: Color Catch plays fully offline. Pass one phone around or play the computer. No ads, no account, no Wi-Fi needed."
+    "en-US": "Car rides, flights and waiting rooms: Color Catch plays fully offline. Pass one phone around or play the computer. No account, no Wi-Fi needed.",
+    "en-GB": "Car journeys, flights and waiting rooms: Color Catch plays fully offline. Pass one phone around or play the computer. No account, no Wi-Fi needed."
   },
   "keywords": {
     "en-US": ["travel", "car", "plane", "trip"],
@@ -33,7 +33,7 @@
       "03-roll": "Roll a color. Find the peg.",
       "04-rivals": "Solo? Play Bunny, Fox or Owl",
       "05-sizes": "Quick games or long ones",
-      "06-dark": "No Wi-Fi, no ads, no account"
+      "06-dark": "No Wi-Fi, no account needed"
     },
     "en-GB": {
       "01-offline": "Plays offline, anywhere you go",
@@ -41,7 +41,7 @@
       "03-roll": "Roll a colour. Find the peg.",
       "04-rivals": "Solo? Play Bunny, Fox or Owl",
       "05-sizes": "Quick games or long ones",
-      "06-dark": "No Wi-Fi, no ads, no account"
+      "06-dark": "No Wi-Fi, no account needed"
     }
   }
 }

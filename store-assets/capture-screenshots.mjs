@@ -538,7 +538,7 @@ const CAPTURE = {
     throw new Error('no Owl frame for shot 4');
   },
 
-  /** 5 - Settings: kid mode on, board sizes 16 to 40, Huge picked. */
+  /** 5 - Board sizes 16 to 40, Huge picked: Settings (iPhone), Home (iPad). */
   async 5(page, dev, dir) {
     // a family that has played a few evenings, so Stats is not an empty card
     const now = Date.now();
@@ -560,8 +560,21 @@ const CAPTURE = {
       finishedDays: [],
       reviewAskedVersion: null,
     };
-    await seed(page, { boardSize: 'huge', kidMode: true, difficulty: 'bunny' }, stats);
-    await goto(page, '/settings');
+    await seed(page, { boardSize: 'huge', difficulty: 'bunny', names: NAMES }, stats);
+    // the Kid mode row stays out of frame: App Review reads "kid" words in
+    // screenshots as "made for children" (2.3.8, Oct 2026). iPad Settings
+    // doesn't scroll, so iPad shows Home's board picker (its shot 4 is in-game)
+    if (dev.rivalsInGame) {
+      await goto(page, '/');
+    } else {
+      await goto(page, '/settings');
+      await page.evaluate((label) => {
+        const el = [...document.querySelectorAll('div')].find((d) => d.children.length === 0 && d.textContent.trim() === label);
+        let sc = el.parentElement;
+        while (sc && !(sc.scrollHeight > sc.clientHeight + 5 && getComputedStyle(sc).overflowY !== 'visible')) sc = sc.parentElement;
+        sc.scrollTop += el.getBoundingClientRect().top - sc.getBoundingClientRect().top - 16;
+      }, T('board.size'));
+    }
     await sleep(900);
     await shoot(page, dir, '05-sizes');
   },
@@ -926,13 +939,13 @@ if (stage === 'all') {
 // only runs on the English frames
 if (!process.exitCode && LOCALE === 'en' && !args.includes('--no-compose')) {
   let captions = path.join(HERE, 'captions.json');
+  // every listing also carries a 6.9" set composed from the 6.5" frames;
+  // compose skips symlinked folders, so copy
+  for (const lang of ['', ...i18n.LANGS.filter((l) => l !== 'en')]) {
+    const from = path.join(RAW_ROOT, lang, 'iphone-6.5');
+    if (existsSync(from)) await cp(from, path.join(RAW_ROOT, lang, 'iphone-6.9'), { recursive: true });
+  }
   if (SET) {
-    // the control listing also carries a 6.9" set composed from the 6.5" frames;
-    // compose skips symlinked folders, so copy
-    for (const lang of ['', ...i18n.LANGS.filter((l) => l !== 'en')]) {
-      const from = path.join(RAW_ROOT, lang, 'iphone-6.5');
-      if (existsSync(from)) await cp(from, path.join(RAW_ROOT, lang, 'iphone-6.9'), { recursive: true });
-    }
     // the control's translated captions under the treatment's file names
     const spec = JSON.parse(readFileSync(captions, 'utf8'));
     for (const [locale, caps] of Object.entries(spec.captions)) {

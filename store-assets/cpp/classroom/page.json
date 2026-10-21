@@ -5,9 +5,9 @@
   "linkedSearches": ["memory game for classroom", "OT games", "turn taking games"],
   "angle": "Take turns, up to 4 players, shapes for color-blind players, no accounts or data",
   "promotionalText": {
-    "en-US": "Take turns around one iPad: 2 players free, 3 or 4 with the one-time unlock. Shapes on every peg for color-blind players. No ads, no accounts, no data collected.",
-    "en-GB": "Take turns around one iPad: 2 players free, 3 or 4 with the one-time unlock. Shapes on every peg for colour-blind players. No ads, no accounts, no data collected.",
-    "hi": "एक iPad पर बारी-बारी से खेलें: 2 खिलाड़ी मुफ़्त; 3–4 के लिए एक बार अनलॉक करें। कलर-ब्लाइंड खिलाड़ियों के लिए गोटियों पर आकार। विज्ञापन, अकाउंट या डेटा संग्रह नहीं।"
+    "en-US": "Take turns around one iPad: 2 players included, 3 or 4 with the one-time unlock. Shapes on every peg for color-blind players. No accounts, no data collected.",
+    "en-GB": "Take turns around one iPad: 2 players included, 3 or 4 with the one-time unlock. Shapes on every peg for colour-blind players. No accounts, no data collected.",
+    "hi": "एक iPad पर बारी-बारी से खेलें: 2 खिलाड़ी शामिल; 3–4 खिलाड़ी एक बार के अनलॉक से। कलर-ब्लाइंड खिलाड़ियों के लिए गोटियों पर आकार। कोई अकाउंट या डेटा संग्रह नहीं।"
   },
   "keywords": {
     "en-US": ["classroom", "teacher", "therapy", "turn"],
@@ -35,7 +35,7 @@
       "03-look": "Look. Remember. Find it.",
       "04-roll": "Roll the die, then find the peg",
       "05-pace": "Longer look time, 4 board sizes",
-      "06-private": "No accounts, no ads, no data collected"
+      "06-private": "No accounts, no data collected"
     },
     "en-GB": {
       "01-turns": "Take turns: up to 4 players",
@@ -43,7 +43,7 @@
       "03-look": "Look. Remember. Find it.",
       "04-roll": "Roll the die, then find the peg",
       "05-pace": "Longer look time, 4 board sizes",
-      "06-private": "No accounts, no ads, no data collected"
+      "06-private": "No accounts, no data collected"
     },
     "hi": {
       "01-turns": "बारी-बारी से, 4 खिलाड़ी तक",
@@ -51,7 +51,7 @@
       "03-look": "देखो। याद रखो। ढूँढो।",
       "04-roll": "पासा फेंको, फिर गोटी ढूँढो",
       "05-pace": "देखने का ज़्यादा समय, बोर्ड के 4 साइज़",
-      "06-private": "कोई अकाउंट, विज्ञापन या डेटा संग्रह नहीं"
+      "06-private": "कोई अकाउंट या डेटा संग्रह नहीं"
     }
   }
 }
