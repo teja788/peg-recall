@@ -1,13 +1,13 @@
 {
   "_note": "Custom product page (create after 1.2.1 is live). 'shots' maps each store shot to its source frame; style+captions are compose-screenshots.mjs input (see ../README.md).",
   "referenceName": "Festival",
-  "season": "Diwali (Oct-Nov), Children's Day (Nov 14, India), Holi (Mar); pair with an India in-app event",
-  "linkedSearches": ["diwali games", "holi games", "children's day games"],
+  "season": "Diwali (Oct-Nov), Holi (Mar); pair with an India in-app event",
+  "linkedSearches": ["diwali games", "holi games", "family game night"],
   "angle": "Family game night, colors",
   "promotionalText": {
-    "en-US": "Diwali or Holi game night: roll a color, find the peg, pass the phone. 2 players included, 3 or 4 with the one-time unlock. Plays offline, no account.",
-    "en-GB": "Diwali or Holi game night: roll a colour, find the peg, pass the phone. 2 players included, 3 or 4 with the one-time unlock. Plays offline, no account.",
-    "hi": "दिवाली या होली की गेम नाइट: पासा फेंको, उसी रंग की गोटी ढूँढो और फ़ोन आगे बढ़ाओ। 2 खिलाड़ी शामिल; 3–4 खिलाड़ी एक बार के अनलॉक से। ऑफ़लाइन, बिना अकाउंट।"
+    "en-US": "Diwali or Holi game night: roll a color, find the peg, pass the phone. 2 players included; 3–4 players, bigger boards and Owl with the one-time unlock. Plays offline.",
+    "en-GB": "Diwali or Holi game night: roll a colour, find the peg, pass the phone. 2 players included; 3–4 players, bigger boards and Owl with the one-time unlock. Plays offline.",
+    "hi": "दिवाली या होली की गेम नाइट: पासा फेंको, गोटी ढूँढो, फ़ोन आगे बढ़ाओ। 2 खिलाड़ी शामिल; 3–4 खिलाड़ी, बड़े बोर्ड और उल्लू एक बार के अनलॉक से। ऑफ़लाइन।"
   },
   "keywords": {
     "en-US": ["diwali", "holi", "festival"],

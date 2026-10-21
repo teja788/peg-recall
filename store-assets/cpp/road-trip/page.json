@@ -2,11 +2,11 @@
   "_note": "Custom product page (create after 1.2.1 is live). 'shots' maps each store shot to its source frame; style+captions are compose-screenshots.mjs input (see ../README.md).",
   "referenceName": "Road trip",
   "season": "School holidays: summer, Thanksgiving to New Year, spring break",
-  "linkedSearches": ["car games", "travel games for kids", "games for plane"],
+  "linkedSearches": ["car games", "travel games", "games for plane"],
   "angle": "Offline, play anywhere, pass the phone",
   "promotionalText": {
-    "en-US": "Car rides, flights and waiting rooms: Color Catch plays fully offline. Pass one phone around or play the computer. No account, no Wi-Fi needed.",
-    "en-GB": "Car journeys, flights and waiting rooms: Color Catch plays fully offline. Pass one phone around or play the computer. No account, no Wi-Fi needed."
+    "en-US": "Car rides, flights, waiting rooms: plays offline. Pass one phone or play the computer. 2 players included; 3–4 players, bigger boards and Owl with the one-time unlock.",
+    "en-GB": "Car journeys, flights, waiting rooms: plays offline. Pass one phone or play the computer. 2 players included; 3–4 players, bigger boards and Owl with the one-time unlock."
   },
   "keywords": {
     "en-US": ["travel", "car", "plane", "trip"],
