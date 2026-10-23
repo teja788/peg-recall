@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Color Catch - Play</title>
+<meta name="description" content="Color Catch: a wooden peg game for iPhone and iPad. Roll a color, remember where it was, catch the most pegs.">
+<meta name="apple-itunes-app" content="app-id=6813625311">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Color Catch">
+<meta property="og:title" content="Color Catch">
+<meta property="og:description" content="Roll a color. Remember where it was. Catch the most pegs! On iPhone and iPad.">
+<meta property="og:url" content="https://teja788.github.io/peg-recall/play">
+<meta property="og:image" content="https://teja788.github.io/peg-recall/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A round wooden board with colored pegs">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+  // iPhone and iPad go straight to the App Store. iPadOS Safari says
+  // "Macintosh", so a Mac UA with a touch screen counts as an iPad.
+  (function () {
+    var ua = navigator.userAgent || '';
+    var ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    if (ios) location.replace('https://apps.apple.com/app/id6813625311');
+  })();
+</script>
+<style>
+  :root {
+    --page: #F6F1E8;
+    --card: #FFFDF8;
+    --text: #2B2622;
+    --dim: #6B6158;
+    --line: #E3DACB;
+    --accent: #0072B2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: #1E1B18;
+      --card: #2A2622;
+      --text: #EDE6DA;
+      --dim: #A79C8E;
+      --line: #3A342E;
+      --accent: #56B4E9;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    padding: 40px 18px 64px;
+    background: var(--page);
+    color: var(--text);
+    font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 40rem; margin: 0 auto; }
+  h1 { font-size: 32px; line-height: 1.15; margin: 0 0 4px; }
+  .sub { color: var(--dim); margin: 0 0 24px; font-size: 19px; }
+  .pegs { display: flex; gap: 10px; margin-bottom: 22px; }
+  .peg { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(0,0,0,.12); }
+  .note {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 0 0 24px;
+    font-weight: 600;
+  }
+  .shots { display: flex; gap: 14px; margin: 0 0 24px; }
+  .shots img {
+    flex: 1 1 0; min-width: 0; height: auto;
+    border-radius: 16px;
+    border: 1px solid var(--line);
+  }
+  .links { display: flex; flex-wrap: wrap; gap: 12px; margin: 28px 0 0; }
+  .links a {
+    display: inline-block;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 18px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  footer {
+    margin-top: 40px; padding-top: 18px;
+    border-top: 1px solid var(--line);
+    color: var(--dim); font-size: 15px;
+  }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="pegs" aria-hidden="true">
+    <span class="peg" style="background:#CE1202"></span>
+    <span class="peg" style="background:#6201DA"></span>
+    <span class="peg" style="background:#0072B2"></span>
+    <span class="peg" style="background:#009E73"></span>
+    <span class="peg" style="background:#F0E442"></span>
+    <span class="peg" style="background:#CC79A7"></span>
+  </div>
+
+  <h1>Color Catch</h1>
+  <p class="sub">Roll a color. Remember where it was. Catch the most pegs!</p>
+
+  <p class="note">Color Catch is on iPhone and iPad. Android is coming soon.</p>
+
+  <div class="shots">
+    <img src="./shot-look.jpg" width="416" height="900" alt="The board with every peg's color showing, before they turn face-down">
+    <img src="./shot-family.jpg" width="416" height="900" alt="Three players taking turns, the pegs face-down and the die ready to roll">
+  </div>
+
+  <div class="links">
+    <a href="https://apps.apple.com/app/id6813625311">Get it on the App Store</a>
+    <a href="./">About the game</a>
+  </div>
+
+  <footer>
+    <p>Contact: <a href="mailto:ravibitspilani@gmail.com">ravibitspilani@gmail.com</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
