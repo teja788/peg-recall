@@ -182,7 +182,8 @@ for (const t of TREATMENTS) {
       },
     })).data;
   }
-  if (!t.shots) continue; // the icon treatment keeps the original screenshots
+  // Apple refuses a test whose treatments have different locales, so the icon
+  // treatment gets the same localizations, without sets (original screenshots).
   const locs = tr.id.startsWith('DRYRUN') ? [] : await getAll(`/v1/appStoreVersionExperimentTreatments/${tr.id}/appStoreVersionExperimentTreatmentLocalizations?limit=50`);
   for (const locale of [...new Set(sets.map((s) => s.locale))]) {
     let loc = locs.find((l) => l.attributes.locale === locale);
@@ -195,7 +196,7 @@ for (const t of TREATMENTS) {
         },
       })).data;
     }
-    for (const s of sets.filter((x) => x.locale === locale)) await uploadSet(loc.id, s);
+    if (t.shots) for (const s of sets.filter((x) => x.locale === locale)) await uploadSet(loc.id, s);
   }
 }
 
