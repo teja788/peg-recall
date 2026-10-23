@@ -132,6 +132,11 @@ export const hi: Strings = {
   'share.title': 'Color Catch · {board} बोर्ड',
   'share.rolls': '{n} बार पासा फेंककर {pegs}',
   'share.cta': 'क्या तुम इसे हरा सकते हो?',
+  'share.titleDaily': 'Color Catch #{n} · आज का बोर्ड',
+  'share.short': 'शेयर करो',
+  'daily.title': 'आज का बोर्ड #{n}',
+  'daily.sub': 'आज सबके लिए एक ही बोर्ड',
+  'daily.done': 'आज {pegs} · लगातार {streak} दिन',
 
   'pause.title': 'खेल रुका है',
   'pause.body': 'बोर्ड थमा हुआ है — कोई झाँक नहीं रहा।',

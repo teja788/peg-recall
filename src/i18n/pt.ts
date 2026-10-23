@@ -130,6 +130,11 @@ export const pt: Strings = {
   'share.title': 'Color Catch · tabuleiro {board}',
   'share.rolls': '{pegs} em {n} jogadas',
   'share.cta': 'Consegue fazer melhor?',
+  'share.titleDaily': 'Color Catch #{n} · tabuleiro do dia',
+  'share.short': 'Compartilhar',
+  'daily.title': 'Tabuleiro do dia #{n}',
+  'daily.sub': 'O mesmo tabuleiro para todos hoje',
+  'daily.done': '{pegs} hoje · sequência {streak}',
 
   'pause.title': 'Pausado',
   'pause.body': 'O tabuleiro está congelado. Ninguém espia!',

@@ -129,6 +129,11 @@ export const it: Strings = {
   'share.title': 'Color Catch · tabellone {board}',
   'share.rolls': '{pegs} in {n} lanci',
   'share.cta': 'Riesci a fare meglio?',
+  'share.titleDaily': 'Color Catch #{n} · tabellone del giorno',
+  'share.short': 'Condividi',
+  'daily.title': 'Tabellone del giorno #{n}',
+  'daily.sub': 'Oggi lo stesso tabellone per tutti',
+  'daily.done': '{pegs} oggi · serie {streak}',
 
   'pause.title': 'In pausa',
   'pause.body': 'Il tabellone è fermo: niente sbirciatine.',

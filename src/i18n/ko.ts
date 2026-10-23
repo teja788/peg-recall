@@ -134,6 +134,11 @@ export const ko: Strings = {
   'share.title': 'Color Catch · {board} 판',
   'share.rolls': '주사위 {n}번에 {pegs}',
   'share.cta': '이길 수 있어요?',
+  'share.titleDaily': 'Color Catch #{n} · 오늘의 판',
+  'share.short': '공유',
+  'daily.title': '오늘의 판 #{n}',
+  'daily.sub': '오늘은 모두 같은 판이에요',
+  'daily.done': '오늘 {pegs} · 연속 {streak}일',
 
   'pause.title': '일시 정지',
   'pause.body': '판이 멈췄어요. 아무도 못 봐요.',

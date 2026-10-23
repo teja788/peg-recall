@@ -132,6 +132,11 @@ export const zh: Strings = {
   'share.title': 'Color Catch · {board}棋盤',
   'share.rolls': '{pegs}，擲了 {n} 次骰子',
   'share.cta': '你能超越嗎？',
+  'share.titleDaily': 'Color Catch #{n} · 今日棋盤',
+  'share.short': '分享',
+  'daily.title': '今日棋盤 #{n}',
+  'daily.sub': '今天大家玩同一個棋盤',
+  'daily.done': '今天 {pegs} · 連續 {streak} 天',
 
   'pause.title': '暫停中',
   'pause.body': '遊戲暫停了，沒有人能偷看棋盤。',

@@ -27,6 +27,8 @@ const COMPUTER = '🤖';
 
 /** What a share needs from a finished game: plain data, so it can be stored. */
 export interface ShareResult {
+  /** the daily board's number, when it was one */
+  daily?: number;
   board: BoardSize;
   /** seat order */
   players: { name?: string; avatar: AvatarId; ai: boolean; score: number; won: boolean }[];
@@ -66,7 +68,7 @@ export function shareText(r: ShareResult): string {
     .join(' · ');
   const pegs = tr('board.pegsShort', { n: BOARD_SPECS[r.board].pegs });
   return [
-    `🎯 ${tr('share.title', { board: tr(`board.${r.board}`) })}`,
+    `🎯 ${r.daily != null ? tr('share.titleDaily', { n: r.daily }) : tr('share.title', { board: tr(`board.${r.board}`) })}`,
     `🏆 ${headline} ${scores}`,
     `${COLOR_ROW} ${tr('share.rolls', { pegs, n: r.rolls })}`,
     `${tr('share.cta')} 👉 ${PLAY_URL}`,

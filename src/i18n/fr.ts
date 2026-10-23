@@ -130,6 +130,11 @@ export const fr: Strings = {
   'share.title': 'Color Catch · plateau {board}',
   'share.rolls': '{pegs} en {n} lancers',
   'share.cta': 'Tu peux faire mieux ?',
+  'share.titleDaily': 'Color Catch #{n} · plateau du jour',
+  'share.short': 'Partager',
+  'daily.title': 'Plateau du jour #{n}',
+  'daily.sub': 'Le même plateau pour tout le monde aujourd’hui',
+  'daily.done': '{pegs} aujourd’hui · série {streak}',
 
   'pause.title': 'Pause',
   'pause.body': 'Le plateau est figé, personne ne triche.',

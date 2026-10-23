@@ -134,6 +134,11 @@ export const tr: Strings = {
   'share.title': 'Color Catch · {board} tahta',
   'share.rolls': '{n} atışta {pegs}',
   'share.cta': 'Bunu geçebilir misin?',
+  'share.titleDaily': 'Color Catch #{n} · günün tahtası',
+  'share.short': 'Paylaş',
+  'daily.title': 'Günün tahtası #{n}',
+  'daily.sub': 'Bugün herkese aynı tahta',
+  'daily.done': 'Bugün {pegs} · seri {streak}',
 
   'pause.title': 'Duraklatıldı',
   'pause.body': 'Tahta dondu, kimse bakamaz.',

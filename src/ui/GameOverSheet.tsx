@@ -38,6 +38,8 @@ export interface UpsellCardProps {
 
 export interface GameOverSheetProps {
   state: GameState;
+  /** the daily board's number, when this was it (the share says so) */
+  daily?: number;
   onRematch: () => void;
   onHome: () => void;
   /** at most one gentle card under the buttons (see `upsellCard`) */
@@ -150,7 +152,7 @@ function UpsellCard({ title, line, action, onAction, onDismiss }: UpsellCardProp
   );
 }
 
-export function GameOverSheet({ state, onRematch, onHome, upsell }: GameOverSheetProps) {
+export function GameOverSheet({ state, daily, onRematch, onHome, upsell }: GameOverSheetProps) {
   const t = useTheme();
   const reduced = useReduceMotion();
   const insets = useSafeAreaInsets();
@@ -340,7 +342,7 @@ export function GameOverSheet({ state, onRematch, onHome, upsell }: GameOverShee
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={tr('share.button')}
-              onPress={() => void shareMessage(shareText(resultOf(state)))}
+              onPress={() => void shareMessage(shareText({ ...resultOf(state), daily }))}
               style={({ pressed }) => [
                 styles.btn,
                 {

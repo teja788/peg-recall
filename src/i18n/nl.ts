@@ -130,6 +130,11 @@ export const nl: Strings = {
   'share.title': 'Color Catch · bord {board}',
   'share.rolls': '{pegs} in {n} worpen',
   'share.cta': 'Kun jij dit verslaan?',
+  'share.titleDaily': 'Color Catch #{n} · bord van de dag',
+  'share.short': 'Delen',
+  'daily.title': 'Bord van de dag #{n}',
+  'daily.sub': 'Vandaag hetzelfde bord voor iedereen',
+  'daily.done': '{pegs} vandaag · reeks {streak}',
 
   'pause.title': 'Pauze',
   'pause.body': 'Het bord staat stil – niemand kan spieken.',

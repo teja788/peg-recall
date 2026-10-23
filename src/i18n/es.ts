@@ -133,6 +133,11 @@ export const es: Strings = {
   'share.title': 'Color Catch · tablero {board}',
   'share.rolls': '{pegs} en {n} tiradas',
   'share.cta': '¿Puedes superarlo?',
+  'share.titleDaily': 'Color Catch #{n} · tablero del día',
+  'share.short': 'Compartir',
+  'daily.title': 'Tablero del día #{n}',
+  'daily.sub': 'Hoy, el mismo tablero para todos',
+  'daily.done': '{pegs} hoy · racha {streak}',
 
   'pause.title': 'En pausa',
   'pause.body': 'El tablero está congelado: nadie puede espiar.',

@@ -131,6 +131,11 @@ export const vi: Strings = {
   'share.title': 'Color Catch · bàn {board}',
   'share.rolls': '{pegs} sau {n} lượt tung',
   'share.cta': 'Bạn có vượt qua được không?',
+  'share.titleDaily': 'Color Catch #{n} · bàn hôm nay',
+  'share.short': 'Chia sẻ',
+  'daily.title': 'Bàn hôm nay #{n}',
+  'daily.sub': 'Hôm nay ai cũng chơi cùng một bàn',
+  'daily.done': 'Hôm nay {pegs} · chuỗi {streak}',
 
   'pause.title': 'Tạm dừng',
   'pause.body': 'Bàn chơi đang dừng — không ai nhìn trộm đâu.',

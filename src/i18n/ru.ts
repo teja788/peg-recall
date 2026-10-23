@@ -140,6 +140,11 @@ export const ru: Strings = {
   'share.title': 'Color Catch · поле «{board}»',
   'share.rolls': '{pegs}, бросков: {n}',
   'share.cta': 'Сможешь лучше?',
+  'share.titleDaily': 'Color Catch #{n} · поле дня',
+  'share.short': 'Поделиться',
+  'daily.title': 'Поле дня #{n}',
+  'daily.sub': 'Сегодня у всех одно и то же поле',
+  'daily.done': 'Сегодня {pegs} · серия {streak}',
 
   'pause.title': 'Пауза',
   'pause.body': 'Поле замерло — никто не подглядывает.',

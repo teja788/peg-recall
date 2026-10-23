@@ -191,8 +191,11 @@ interface GameStore {
   feedback: MoveFeedback;
   /** the pause menu is up: no AI timers fire and no move is accepted */
   paused: boolean;
+  /** the daily board's number while that board is on the table; a rematch
+   *  or restart deals an ordinary game */
+  daily: number | null;
 
-  start: (mode: GameMode, settings: Settings, seed?: number) => void;
+  start: (mode: GameMode, settings: Settings, seed?: number, daily?: number) => void;
   dispatch: (action: GameAction) => void;
   rematch: () => void;
   pause: () => void;
@@ -212,11 +215,12 @@ let recordedGeneration = -1;
  * final result is recorded. Rematch, restart and start all bump `generation`,
  * so each board can be recorded at most once however it is re-dispatched.
  */
-function recordFinished(state: GameState) {
+function recordFinished(state: GameState, daily: number | null) {
   if (recordedGeneration === generation) return;
   recordedGeneration = generation;
   try {
     useStats.getState().recordGame(state);
+    if (daily != null) useStats.getState().recordDaily(daily, state);
   } catch {
     /* stats must never break the end of a game */
   }
@@ -302,8 +306,9 @@ export const useGame = create<GameStore>((setState, getState) => {
     busy: false,
     feedback: null,
     paused: false,
+    daily: null,
 
-    start: (mode, settings, seed) => {
+    start: (mode, settings, seed, daily) => {
       generation += 1;
       clearTimers();
       // one reading of the clock: two would seed the board and the AI from
@@ -311,7 +316,7 @@ export const useGame = create<GameStore>((setState, getState) => {
       const gameSeed = seed ?? clock.now();
       rng = { seed: aiSeedFor(gameSeed), counter: 0 };
       const state = createGame(configFor(mode, settings, gameSeed));
-      setState({ state, ais: freshBrains(state), busy: false, feedback: null, paused: false });
+      setState({ state, ais: freshBrains(state), busy: false, feedback: null, paused: false, daily: daily ?? null });
     },
 
     dispatch: (action) => {
@@ -330,7 +335,7 @@ export const useGame = create<GameStore>((setState, getState) => {
         clearTimers();
         // RESTART is reachable from the pause menu, so it has to lift the pause
         // as well — otherwise the new board opens frozen.
-        setState({ ais: freshBrains(next), busy: false, feedback: null, paused: false });
+        setState({ ais: freshBrains(next), busy: false, feedback: null, paused: false, daily: null });
         return;
       }
 
@@ -340,7 +345,7 @@ export const useGame = create<GameStore>((setState, getState) => {
       }
 
       if (next.phase === 'gameOver' && prev.phase !== 'gameOver') {
-        recordFinished(next);
+        recordFinished(next, getState().daily);
       }
 
       // a sudden-death mini-board is a new board: new pegs, new brains
@@ -388,7 +393,7 @@ export const useGame = create<GameStore>((setState, getState) => {
     teardown: () => {
       generation += 1;
       clearTimers();
-      setState({ state: null, ais: {}, busy: false, feedback: null, paused: false });
+      setState({ state: null, ais: {}, busy: false, feedback: null, paused: false, daily: null });
     },
   };
 });

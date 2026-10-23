@@ -132,6 +132,11 @@ export const th: Strings = {
   'share.title': 'Color Catch · กระดาน{board}',
   'share.rolls': '{pegs} จากการทอย {n} ครั้ง',
   'share.cta': 'ทำได้ดีกว่านี้ไหม',
+  'share.titleDaily': 'Color Catch #{n} · กระดานวันนี้',
+  'share.short': 'แชร์',
+  'daily.title': 'กระดานวันนี้ #{n}',
+  'daily.sub': 'วันนี้ทุกคนเล่นกระดานเดียวกัน',
+  'daily.done': 'วันนี้ {pegs} · ติดกัน {streak} วัน',
 
   'pause.title': 'หยุดพัก',
   'pause.body': 'กระดานหยุดนิ่ง — ไม่มีใครแอบดูได้',

@@ -12,10 +12,12 @@
 import { create } from 'zustand';
 
 import type { GameState } from '../engine/types';
+import { resultOf } from '../ui/shareText';
 import type { KeyValueStorage } from './storage';
 import { createStorageGate, parseJson, type GateTimers, type StorageGate } from './storageGate';
 import {
   STATS_KEY,
+  applyDailyResult,
   applyGameResult,
   emptyStats,
   sanitizeStats,
@@ -27,12 +29,13 @@ export {
   MAX_PLAYERS,
   STATS_KEY,
   applyGameResult,
+  dailyNumber,
   playerKey,
   sanitizeStats,
   shouldAskForReview,
   statsLabel,
 } from './statsModel';
-export type { PlayerStats, Stats, VsAiStats, WinRecord } from './statsModel';
+export type { DailyStats, PlayerStats, Stats, VsAiStats, WinRecord } from './statsModel';
 
 export interface StatsStore extends Stats {
   hydrated: boolean;
@@ -41,6 +44,8 @@ export interface StatsStore extends Stats {
   /** Fold a finished game in. Anything but a game-over state is ignored, and
    *  the same state object is only ever counted once. */
   recordGame: (state: GameState, now?: number) => void;
+  /** Fold a finished daily board (number `n`) into `daily`. */
+  recordDaily: (n: number, state: GameState) => void;
   markReviewAsked: (version: string) => void;
   reset: () => void;
   /** Hand the store its storage backend (first call wins). */
@@ -57,12 +62,13 @@ export interface StatsStoreOptions {
 
 function statsOf(s: Stats): Stats {
   return {
-    version: 1,
+    version: 2,
     players: s.players,
     vsAi: s.vsAi,
     gamesFinished: s.gamesFinished,
     finishedDays: s.finishedDays,
     reviewAskedVersion: s.reviewAskedVersion,
+    daily: s.daily,
   };
 }
 
@@ -157,6 +163,15 @@ export function createStatsStore(opts: StatsStoreOptions = {}) {
           recorded.add(state);
           const at = now ?? opts.now?.() ?? Date.now();
           update((s) => applyGameResult(s, state, at));
+        } catch {
+          /* stats must never break the end of a game */
+        }
+      },
+
+      recordDaily: (n, state) => {
+        try {
+          if (state?.phase !== 'gameOver') return;
+          update((s) => applyDailyResult(s, n, resultOf(state)));
         } catch {
           /* stats must never break the end of a game */
         }

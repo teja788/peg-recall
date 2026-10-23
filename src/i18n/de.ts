@@ -129,6 +129,11 @@ export const de: Strings = {
   'share.title': 'Color Catch · Brett {board}',
   'share.rolls': '{pegs} in {n} Würfen',
   'share.cta': 'Kannst du das schlagen?',
+  'share.titleDaily': 'Color Catch #{n} · Brett des Tages',
+  'share.short': 'Teilen',
+  'daily.title': 'Brett des Tages #{n}',
+  'daily.sub': 'Heute für alle dasselbe Brett',
+  'daily.done': '{pegs} heute · Serie {streak}',
 
   'pause.title': 'Pause',
   'pause.body': 'Das Brett ist eingefroren – keiner kann spicken.',

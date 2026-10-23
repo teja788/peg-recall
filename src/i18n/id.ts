@@ -131,6 +131,11 @@ export const id: Strings = {
   'share.title': 'Color Catch · papan {board}',
   'share.rolls': '{pegs} dalam {n} lemparan',
   'share.cta': 'Bisa kalahkan ini?',
+  'share.titleDaily': 'Color Catch #{n} · papan hari ini',
+  'share.short': 'Bagikan',
+  'daily.title': 'Papan hari ini #{n}',
+  'daily.sub': 'Hari ini semua main papan yang sama',
+  'daily.done': 'Hari ini {pegs} · beruntun {streak}',
 
   'pause.title': 'Dijeda',
   'pause.body': 'Papan dibekukan — tidak ada yang mengintip.',

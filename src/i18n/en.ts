@@ -141,6 +141,11 @@ export const en = {
   'share.title': 'Color Catch · {board} board',
   'share.rolls': '{pegs} in {n} rolls',
   'share.cta': 'Can you beat that?',
+  'share.titleDaily': "Color Catch #{n} · today's board",
+  'share.short': 'Share',
+  'daily.title': "Today's board #{n}",
+  'daily.sub': 'The same board for everyone today',
+  'daily.done': '{pegs} today · streak {streak}',
 
   // pause
   'pause.title': 'Paused',

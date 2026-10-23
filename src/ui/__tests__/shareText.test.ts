@@ -56,7 +56,13 @@ const cases: [string, ShareResult][] = [
     },
   ],
   ['four long names, all tied', four],
+  ['daily board', { ...vsFox, daily: 29 }],
 ];
+
+test('the daily board says its number', () => {
+  setLang('en');
+  assert.equal(shareText({ ...vsFox, daily: 29 }).split('\n')[0], "🎯 Color Catch #29 · today's board");
+});
 
 test('English: four lines, the plan layout', () => {
   setLang('en');

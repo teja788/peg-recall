@@ -131,6 +131,11 @@ export const ja: Strings = {
   'share.title': 'Color Catch・{board}ボード',
   'share.rolls': '{pegs}・サイコロ{n}かい',
   'share.cta': 'これにかてるかな？',
+  'share.titleDaily': 'Color Catch #{n}・きょうのボード',
+  'share.short': 'シェア',
+  'daily.title': 'きょうのボード #{n}',
+  'daily.sub': 'きょうはみんなおなじボード',
+  'daily.done': 'きょう{pegs}・{streak}にちれんぞく',
 
   'pause.title': 'ポーズ中',
   'pause.body': 'ボードはとまっているよ。だれものぞけないよ。',

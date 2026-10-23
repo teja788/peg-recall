@@ -8,7 +8,9 @@ import {
   EMPTY_STATS,
   MAX_PLAYERS,
   STATS_KEY,
+  applyDailyResult,
   applyGameResult,
+  dailyNumber,
   emptyStats,
   localDay,
   playerKey,
@@ -260,7 +262,8 @@ test('sanitizeStats: bad entries are dropped or repaired, the rest kept', () => 
   assert.equal(out.gamesFinished, 0);
   assert.deepEqual(out.finishedDays, ['2026-09-20', '2026-09-21']);
   assert.equal(out.reviewAskedVersion, null);
-  assert.equal(out.version, 1);
+  assert.equal(out.version, 2, 'a v1 blob comes out as the current schema');
+  assert.equal(out.daily, null);
 });
 
 /* ----------------------------------------------------- shouldAskForReview */
@@ -378,4 +381,78 @@ test('store: markReviewAsked and reset', async () => {
   assert.equal(useS.getState().reviewAskedVersion, '1.1.0', 'reset does not re-arm the review prompt');
   await tick(10);
   assert.equal(JSON.parse(storage.data.get(STATS_KEY)!).gamesFinished, 0);
+});
+
+/* ------------------------------------------------------------ daily board */
+
+const dailyGame = (seed: number) =>
+  createGame({ boardSize: 'classic', players: [human('p1', 'bear'), ai('fox')], rules: { ...DEFAULT_RULES }, seed });
+
+test('dailyNumber: one board per local day, a new one the next day', () => {
+  assert.equal(dailyNumber(new Date(2026, 8, 24, 0, 1).getTime()), 0, 'launch day is #0');
+  const morning = dailyNumber(new Date(2026, 9, 23, 0, 5).getTime());
+  const night = dailyNumber(new Date(2026, 9, 23, 23, 55).getTime());
+  const tomorrow = dailyNumber(new Date(2026, 9, 24, 8, 0).getTime());
+  assert.equal(morning, 29);
+  assert.equal(night, morning);
+  assert.equal(tomorrow, morning + 1);
+  // across a DST change (late October / early November) it still steps by one a day
+  assert.equal(dailyNumber(new Date(2026, 10, 2, 12).getTime()), 39);
+  const colours = (n: number) => dailyGame(n).pegs.map((p) => p.color).join();
+  assert.equal(colours(morning), colours(night), 'same day, same board');
+  assert.notEqual(colours(tomorrow), colours(morning), 'next day, another board');
+});
+
+const daily = (score: number, won: boolean) => ({
+  board: 'classic' as const,
+  players: [
+    { avatar: 'bear' as const, ai: false, score, won },
+    { avatar: 'fox' as const, ai: true, score: 25 - score, won: !won },
+  ],
+  suddenDeath: false,
+  rolls: 40,
+});
+
+test('applyDailyResult: the best game of the day, and a streak of days in a row', () => {
+  let s = applyDailyResult(EMPTY_STATS, 10, daily(9, false));
+  assert.deepEqual([s.daily?.n, s.daily?.streak, s.daily?.best.daily], [10, 1, 10]);
+  s = applyDailyResult(s, 10, daily(14, true));
+  assert.equal(s.daily?.best.players[0].score, 14, 'a better game replaces it');
+  assert.equal(applyDailyResult(s, 10, daily(12, true)), s, 'a worse one does not');
+  s = applyDailyResult(s, 11, daily(8, false));
+  assert.deepEqual([s.daily?.streak, s.daily?.bestStreak], [2, 2]);
+  s = applyDailyResult(s, 13, daily(8, false));
+  assert.deepEqual([s.daily?.streak, s.daily?.bestStreak], [1, 2], 'a missed day starts again');
+  assert.equal(applyDailyResult(s, 12, daily(20, true)), s, 'the clock went back');
+});
+
+test('stats v2: a v1 blob hydrates with no daily board; a v2 one keeps it', async () => {
+  const v1: Record<string, unknown> = { ...applyGameResult(EMPTY_STATS, vsFox(true, 'Maya'), DAY1), version: 1 };
+  delete v1.daily;
+  const storage = new MemStorage();
+  storage.data.set(STATS_KEY, JSON.stringify(v1));
+  const useS = createStatsStore({ storage, timeoutMs: 50, debounceMs: 1 });
+  await useS.getState().hydrate();
+  assert.equal(useS.getState().daily, null);
+  assert.equal(useS.getState().players['name:maya'].wins, 1, 'the v1 stats survive');
+
+  const g: GameState = { ...dailyGame(29), phase: 'gameOver', winnerIds: ['p1'], scores: { p1: 14, p2: 11 }, turn: 33 };
+  useS.getState().recordDaily(29, g);
+  await tick(10);
+  const stored = JSON.parse(storage.data.get(STATS_KEY)!);
+  assert.equal(stored.version, 2);
+  assert.equal(stored.daily.n, 29);
+
+  const fresh = createStatsStore({ storage, timeoutMs: 50, debounceMs: 1 });
+  await fresh.getState().hydrate();
+  const d = fresh.getState().daily;
+  assert.deepEqual([d?.n, d?.streak, d?.best.daily, d?.best.rolls], [29, 1, 29, 33]);
+  assert.deepEqual(
+    d?.best.players.map((p) => [p.score, p.ai, p.won]),
+    [
+      [14, false, true],
+      [11, true, false],
+    ],
+  );
+  assert.equal(sanitizeStats({ daily: { n: 3, best: { board: 'nope', players: [] } } }).daily, null, 'garbage dropped');
 });

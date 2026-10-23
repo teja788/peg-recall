@@ -140,6 +140,11 @@ export const pl: Strings = {
   'share.title': 'Color Catch · plansza {board}',
   'share.rolls': '{pegs} w {n} rzutach',
   'share.cta': 'Dasz radę lepiej?',
+  'share.titleDaily': 'Color Catch #{n} · plansza dnia',
+  'share.short': 'Udostępnij',
+  'daily.title': 'Plansza dnia #{n}',
+  'daily.sub': 'Dziś ta sama plansza dla wszystkich',
+  'daily.done': 'Dziś {pegs} · seria {streak}',
 
   'pause.title': 'Pauza',
   'pause.body': 'Plansza zamarła – nikt nie podgląda.',

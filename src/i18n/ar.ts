@@ -144,6 +144,11 @@ export const ar: Strings = {
   'share.title': 'Color Catch · لوحة {board}',
   'share.rolls': '{pegs} في {n} رمية',
   'share.cta': 'هل يمكنك أن تتفوّق؟',
+  'share.titleDaily': 'Color Catch ⁦#{n}⁩ · لوحة اليوم',
+  'share.short': 'مشاركة',
+  'daily.title': 'لوحة اليوم ⁦#{n}⁩',
+  'daily.sub': 'اللوحة نفسها للجميع اليوم',
+  'daily.done': 'اليوم: {pegs} · سلسلة {streak}',
 
   'pause.title': 'إيقاف مؤقت',
   'pause.body': 'اللوحة متوقفة — لا أحد يختلس النظر.',
