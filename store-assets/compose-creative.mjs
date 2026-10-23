@@ -44,7 +44,7 @@ body{margin:0;width:3840px;height:2560px;overflow:hidden;background:linear-gradi
   font-family:N,-apple-system,'Hiragino Sans','Apple SD Gothic Neo','PingFang TC',sans-serif;color:${style.text}}
 .dots{position:absolute;top:150px;width:100%;text-align:center}
 .dots i{display:inline-block;width:44px;height:44px;border-radius:50%;margin:0 18px}
-h1{position:absolute;top:240px;width:100%;margin:0;text-align:center;font-size:210px;font-weight:900;letter-spacing:-2px}
+h1{position:absolute;top:240px;width:100%;margin:0;text-align:center;font-size:210px;font-weight:900;letter-spacing:-2px;white-space:nowrap}
 .row{position:absolute;top:620px;width:100%;display:flex;justify-content:center;gap:170px}
 img{height:1860px;border-radius:110px;border:22px solid #2B2622;box-shadow:0 40px 90px rgba(60,40,20,.28)}
 </style>
@@ -57,6 +57,11 @@ const shoot = async (html, w, h, file) => {
   const page = await browser.newPage({ viewport: { width: w, height: h } });
   await page.setContent(html, { waitUntil: 'load' });
   await page.evaluate(() => document.fonts.ready);
+  // one line, never over the phones: shrink a long headline (Tamil) until it fits
+  await page.evaluate(() => {
+    const h = document.querySelector('h1');
+    for (let fs = 210; h && h.scrollWidth > 3600 && fs > 100; fs -= 6) h.style.fontSize = `${fs}px`;
+  });
   await page.screenshot({ path: file });
   await page.close();
   execFileSync('python3', ['-c', 'import sys;from PIL import Image;Image.open(sys.argv[1]).convert("RGB").save(sys.argv[1])', file]);
