@@ -126,6 +126,10 @@ export const pt: Strings = {
   'over.winner': 'venceu',
   'over.playAgain': 'Jogar de novo',
   'over.backHome': 'Voltar ao início',
+  'share.button': 'Compartilhar resultado',
+  'share.title': 'Color Catch · tabuleiro {board}',
+  'share.rolls': '{pegs} em {n} jogadas',
+  'share.cta': 'Consegue fazer melhor?',
 
   'pause.title': 'Pausado',
   'pause.body': 'O tabuleiro está congelado. Ninguém espia!',

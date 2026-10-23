@@ -130,6 +130,10 @@ export const tr: Strings = {
   'over.winner': 'kazandı',
   'over.playAgain': 'Tekrar oyna',
   'over.backHome': 'Ana ekrana dön',
+  'share.button': 'Sonucu paylaş',
+  'share.title': 'Color Catch · {board} tahta',
+  'share.rolls': '{n} atışta {pegs}',
+  'share.cta': 'Bunu geçebilir misin?',
 
   'pause.title': 'Duraklatıldı',
   'pause.body': 'Tahta dondu, kimse bakamaz.',

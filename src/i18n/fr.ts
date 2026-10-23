@@ -126,6 +126,10 @@ export const fr: Strings = {
   'over.winner': 'gagnant',
   'over.playAgain': 'Rejouer',
   'over.backHome': 'Retour à l’accueil',
+  'share.button': 'Partager le résultat',
+  'share.title': 'Color Catch · plateau {board}',
+  'share.rolls': '{pegs} en {n} lancers',
+  'share.cta': 'Tu peux faire mieux ?',
 
   'pause.title': 'Pause',
   'pause.body': 'Le plateau est figé, personne ne triche.',

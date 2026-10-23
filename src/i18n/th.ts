@@ -128,6 +128,10 @@ export const th: Strings = {
   'over.winner': 'ผู้ชนะ',
   'over.playAgain': 'เล่นอีกครั้ง',
   'over.backHome': 'กลับหน้าหลัก',
+  'share.button': 'แชร์ผลลัพธ์',
+  'share.title': 'Color Catch · กระดาน{board}',
+  'share.rolls': '{pegs} จากการทอย {n} ครั้ง',
+  'share.cta': 'ทำได้ดีกว่านี้ไหม',
 
   'pause.title': 'หยุดพัก',
   'pause.body': 'กระดานหยุดนิ่ง — ไม่มีใครแอบดูได้',

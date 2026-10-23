@@ -130,6 +130,10 @@ export const ko: Strings = {
   'over.winner': '승리',
   'over.playAgain': '한 번 더',
   'over.backHome': '홈으로',
+  'share.button': '결과 공유하기',
+  'share.title': 'Color Catch · {board} 판',
+  'share.rolls': '주사위 {n}번에 {pegs}',
+  'share.cta': '이길 수 있어요?',
 
   'pause.title': '일시 정지',
   'pause.body': '판이 멈췄어요. 아무도 못 봐요.',

@@ -125,6 +125,10 @@ export const it: Strings = {
   'over.winner': 'vince',
   'over.playAgain': 'Gioca ancora',
   'over.backHome': 'Torna alla home',
+  'share.button': 'Condividi il risultato',
+  'share.title': 'Color Catch · tabellone {board}',
+  'share.rolls': '{pegs} in {n} lanci',
+  'share.cta': 'Riesci a fare meglio?',
 
   'pause.title': 'In pausa',
   'pause.body': 'Il tabellone è fermo: niente sbirciatine.',

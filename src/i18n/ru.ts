@@ -136,6 +136,10 @@ export const ru: Strings = {
   'over.winner': 'победитель',
   'over.playAgain': 'Ещё раз',
   'over.backHome': 'На главную',
+  'share.button': 'Поделиться результатом',
+  'share.title': 'Color Catch · поле «{board}»',
+  'share.rolls': '{pegs}, бросков: {n}',
+  'share.cta': 'Сможешь лучше?',
 
   'pause.title': 'Пауза',
   'pause.body': 'Поле замерло — никто не подглядывает.',

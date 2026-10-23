@@ -125,6 +125,10 @@ export const de: Strings = {
   'over.winner': 'gewonnen',
   'over.playAgain': 'Nochmal spielen',
   'over.backHome': 'Zurück zum Start',
+  'share.button': 'Ergebnis teilen',
+  'share.title': 'Color Catch · Brett {board}',
+  'share.rolls': '{pegs} in {n} Würfen',
+  'share.cta': 'Kannst du das schlagen?',
 
   'pause.title': 'Pause',
   'pause.body': 'Das Brett ist eingefroren – keiner kann spicken.',

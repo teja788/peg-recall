@@ -127,6 +127,10 @@ export const id: Strings = {
   'over.winner': 'pemenang',
   'over.playAgain': 'Main lagi',
   'over.backHome': 'Kembali ke beranda',
+  'share.button': 'Bagikan hasil',
+  'share.title': 'Color Catch · papan {board}',
+  'share.rolls': '{pegs} dalam {n} lemparan',
+  'share.cta': 'Bisa kalahkan ini?',
 
   'pause.title': 'Dijeda',
   'pause.body': 'Papan dibekukan — tidak ada yang mengintip.',

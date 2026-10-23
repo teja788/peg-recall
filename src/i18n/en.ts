@@ -137,6 +137,10 @@ export const en = {
   'over.winner': 'winner',
   'over.playAgain': 'Play again',
   'over.backHome': 'Back to home',
+  'share.button': 'Share result',
+  'share.title': 'Color Catch · {board} board',
+  'share.rolls': '{pegs} in {n} rolls',
+  'share.cta': 'Can you beat that?',
 
   // pause
   'pause.title': 'Paused',

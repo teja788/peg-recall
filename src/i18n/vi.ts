@@ -127,6 +127,10 @@ export const vi: Strings = {
   'over.winner': 'thắng',
   'over.playAgain': 'Chơi lại',
   'over.backHome': 'Về trang chủ',
+  'share.button': 'Chia sẻ kết quả',
+  'share.title': 'Color Catch · bàn {board}',
+  'share.rolls': '{pegs} sau {n} lượt tung',
+  'share.cta': 'Bạn có vượt qua được không?',
 
   'pause.title': 'Tạm dừng',
   'pause.body': 'Bàn chơi đang dừng — không ai nhìn trộm đâu.',

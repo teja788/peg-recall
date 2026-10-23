@@ -126,6 +126,10 @@ export const nl: Strings = {
   'over.winner': 'winnaar',
   'over.playAgain': 'Nog een keer',
   'over.backHome': 'Terug naar begin',
+  'share.button': 'Uitslag delen',
+  'share.title': 'Color Catch · bord {board}',
+  'share.rolls': '{pegs} in {n} worpen',
+  'share.cta': 'Kun jij dit verslaan?',
 
   'pause.title': 'Pauze',
   'pause.body': 'Het bord staat stil – niemand kan spieken.',

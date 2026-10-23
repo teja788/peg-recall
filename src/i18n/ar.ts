@@ -140,6 +140,10 @@ export const ar: Strings = {
   'over.winner': 'الفائز',
   'over.playAgain': 'العب مجددًا',
   'over.backHome': 'العودة إلى الرئيسية',
+  'share.button': 'مشاركة النتيجة',
+  'share.title': 'Color Catch · لوحة {board}',
+  'share.rolls': '{pegs} في {n} رمية',
+  'share.cta': 'هل يمكنك أن تتفوّق؟',
 
   'pause.title': 'إيقاف مؤقت',
   'pause.body': 'اللوحة متوقفة — لا أحد يختلس النظر.',

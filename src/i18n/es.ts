@@ -129,6 +129,10 @@ export const es: Strings = {
   'over.winner': 'ganó',
   'over.playAgain': 'Jugar otra vez',
   'over.backHome': 'Volver al inicio',
+  'share.button': 'Compartir resultado',
+  'share.title': 'Color Catch · tablero {board}',
+  'share.rolls': '{pegs} en {n} tiradas',
+  'share.cta': '¿Puedes superarlo?',
 
   'pause.title': 'En pausa',
   'pause.body': 'El tablero está congelado: nadie puede espiar.',

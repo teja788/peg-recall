@@ -127,6 +127,10 @@ export const ja: Strings = {
   'over.winner': 'かち',
   'over.playAgain': 'もういちど',
   'over.backHome': 'ホームにもどる',
+  'share.button': 'けっかをシェア',
+  'share.title': 'Color Catch・{board}ボード',
+  'share.rolls': '{pegs}・サイコロ{n}かい',
+  'share.cta': 'これにかてるかな？',
 
   'pause.title': 'ポーズ中',
   'pause.body': 'ボードはとまっているよ。だれものぞけないよ。',

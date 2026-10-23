@@ -128,6 +128,10 @@ export const hi: Strings = {
   'over.winner': 'विजेता',
   'over.playAgain': 'फिर से खेलो',
   'over.backHome': 'होम पर वापस',
+  'share.button': 'नतीजा शेयर करो',
+  'share.title': 'Color Catch · {board} बोर्ड',
+  'share.rolls': '{n} बार पासा फेंककर {pegs}',
+  'share.cta': 'क्या तुम इसे हरा सकते हो?',
 
   'pause.title': 'खेल रुका है',
   'pause.body': 'बोर्ड थमा हुआ है — कोई झाँक नहीं रहा।',

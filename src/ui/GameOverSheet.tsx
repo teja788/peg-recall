@@ -2,9 +2,11 @@ import { Avatar } from '@art';
 import React, { useEffect, useRef } from 'react';
 import {
   AccessibilityInfo,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   View,
@@ -21,7 +23,8 @@ import type { GameState, PlayerSpec } from '../engine/types';
 import { tr, trn } from '../i18n';
 import { useTheme } from '../theme';
 import { useReduceMotion } from './feedback';
-import { isolate, joinNames, playerLabel } from './names';
+import { isolate, playerLabel } from './names';
+import { headlineFor, resultOf, shareText } from './shareText';
 
 export interface UpsellCardProps {
   title: string;
@@ -50,10 +53,20 @@ export interface GameOverSheetProps {
  */
 export function gameOverHeadline(state: GameState): string {
   const winners = state.config.players.filter((p) => state.winnerIds.includes(p.id));
-  if (winners.length === 0) return tr('over.none');
-  if (winners.length > 1) return tr('over.share', { names: joinNames(winners.map(playerLabel)) });
-  const name = isolate(playerLabel(winners[0]));
-  return tr(state.suddenDeath ? 'over.winsSudden' : 'over.wins', { name });
+  return headlineFor(winners.map(playerLabel), state.suddenDeath);
+}
+
+/**
+ * The system share sheet (WhatsApp on top on iOS). On the web it is
+ * navigator.share; a browser without it gets WhatsApp's own link instead.
+ */
+export async function shareMessage(message: string): Promise<void> {
+  try {
+    await Share.share({ message });
+  } catch (e) {
+    if (Platform.OS !== 'web' || (e as { name?: string })?.name === 'AbortError') return;
+    Linking.openURL(`https://wa.me/?text=${encodeURIComponent(message)}`).catch(() => {});
+  }
 }
 
 /** The seats that played the sudden-death board, or [] if there was none. */
@@ -323,6 +336,22 @@ export function GameOverSheet({ state, onRematch, onHome, upsell }: GameOverShee
               ]}
             >
               <Text style={{ ...t.type.heading, color: t.c.accentInk }}>{tr('over.playAgain')}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={tr('share.button')}
+              onPress={() => void shareMessage(shareText(resultOf(state)))}
+              style={({ pressed }) => [
+                styles.btn,
+                {
+                  borderRadius: t.radii.lg,
+                  borderWidth: 2,
+                  borderColor: t.c.accent,
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
+            >
+              <Text style={{ ...t.type.heading, color: t.c.accent }}>{tr('share.button')}</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"

@@ -128,6 +128,10 @@ export const zh: Strings = {
   'over.winner': '獲勝',
   'over.playAgain': '再玩一次',
   'over.backHome': '回到主畫面',
+  'share.button': '分享結果',
+  'share.title': 'Color Catch · {board}棋盤',
+  'share.rolls': '{pegs}，擲了 {n} 次骰子',
+  'share.cta': '你能超越嗎？',
 
   'pause.title': '暫停中',
   'pause.body': '遊戲暫停了，沒有人能偷看棋盤。',
