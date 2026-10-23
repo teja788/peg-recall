@@ -105,3 +105,10 @@ Rough total: **~2½ days of build work** (3 with analytics) + 1 TestFlight round
 
 - The PPO test "Colorful first 3 + Bright icon" (uploading Oct 23; then owner submits and starts it).
 - Custom product pages: Seniors, Kids, Family, No ads, Color-blind. Submit them together with the PPO test to save a review round. The Family page URL is the one S3 links to.
+
+## 8. Before the 1.3 screenshot upload (found Oct 24)
+
+- Reshoot the en, fr and pt frames for 1.3 anyway: they predate the 4-player home card and will lack the daily board card. Use neutral player names (no Nana / Mamie / Vovó) in `capture-screenshots.mjs`, then recompose every locale that uses them (en-*, fr-*, pt-*, the PPO set).
+- `src/i18n/nb.ts` `board.huge` 'Kjempestort' is cut off on the iPhone board tile: use 'Kjempe' and update the `no` description to match.
+- cs caption 03-family: no-break space after the one-letter "s" ("s celou").
+- Recompose `hi` screenshots: Indic captions now get line-height 1.32 (two lines collided at 1.08).
