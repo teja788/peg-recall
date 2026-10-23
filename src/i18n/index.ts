@@ -8,6 +8,9 @@
  */
 
 import { ar } from './ar';
+import { bn } from './bn';
+import { cs } from './cs';
+import { da } from './da';
 import { de } from './de';
 import { en } from './en';
 import { es } from './es';
@@ -16,13 +19,20 @@ import { hi } from './hi';
 import { id } from './id';
 import { it } from './it';
 import { ja } from './ja';
+import { kn } from './kn';
 import { ko } from './ko';
+import { mr } from './mr';
+import { nb } from './nb';
 import { nl } from './nl';
 import { pl } from './pl';
 import { pt } from './pt';
 import { ru } from './ru';
+import { sv } from './sv';
+import { ta } from './ta';
+import { te } from './te';
 import { th } from './th';
 import { tr as trDict } from './tr';
+import { uk } from './uk';
 import { vi } from './vi';
 import { zh } from './zh';
 
@@ -34,7 +44,10 @@ type PluralBase = { [K in Key]: K extends `${infer B}.one` ? B : never }[Key];
 export type Strings = Record<Key, string> & Partial<Record<`${PluralBase}.${'two' | 'few' | 'many'}`, string>>;
 
 /** zh is Traditional Chinese (zh-Hant), used for every Chinese locale. */
-export const DICTS = { en, de, fr, pt, ja, es, it, ko, zh, tr: trDict, nl, pl, hi, ru, vi, id, th, ar } satisfies Record<
+export const DICTS = {
+  en, de, fr, pt, ja, es, it, ko, zh, tr: trDict, nl, pl, hi, ru, vi, id, th, ar,
+  te, ta, kn, bn, mr, sv, da, nb, uk, cs,
+} satisfies Record<
   string,
   Strings
 >;
@@ -67,7 +80,9 @@ export function chevron(g: '‹' | '›'): string {
  *  "zh-…" → zh, which is Traditional Chinese), else English. */
 export function pickLang(tags: readonly (string | null | undefined)[]): Lang {
   for (const tag of tags) {
-    const code = String(tag ?? '').toLowerCase().split(/[-_]/)[0];
+    let code = String(tag ?? '').toLowerCase().split(/[-_]/)[0];
+    // Norwegian: iOS says nb-NO, but some devices and browsers say no / nn
+    if (code === 'no' || code === 'nn') code = 'nb';
     // own keys only: "constructor" or "__proto__" is not a language
     if (Object.prototype.hasOwnProperty.call(DICTS, code)) return code as Lang;
   }
@@ -103,7 +118,11 @@ export function pluralCategory(l: Lang, n: number): PluralCategory {
       if (n === 1) return 'one';
       return d >= 2 && d <= 4 && (h < 12 || h > 14) ? 'few' : 'many';
     }
-    if (l === 'ru') {
+    if (l === 'cs') {
+      if (n === 1) return 'one';
+      return n >= 2 && n <= 4 ? 'few' : 'other';
+    }
+    if (l === 'ru' || l === 'uk') {
       if (d === 1 && h !== 11) return 'one';
       return d >= 2 && d <= 4 && (h < 12 || h > 14) ? 'few' : 'many';
     }
@@ -112,7 +131,7 @@ export function pluralCategory(l: Lang, n: number): PluralCategory {
       if (n === 2) return 'two';
       return h >= 3 && h <= 10 ? 'few' : h >= 11 ? 'many' : 'other';
     }
-    return n === 1 || ((l === 'fr' || l === 'pt' || l === 'hi') && n === 0) ? 'one' : 'other';
+    return n === 1 || ((l === 'fr' || l === 'pt' || l === 'hi' || l === 'bn' || l === 'kn') && n === 0) ? 'one' : 'other';
   }
 }
 

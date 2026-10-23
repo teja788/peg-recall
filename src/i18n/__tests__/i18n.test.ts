@@ -91,11 +91,11 @@ test('numbers: Western digits in every language, Arabic included', () => {
 
 test('pickLang: first supported preferred locale, else English', () => {
   assert.equal(pickLang(['de-AT', 'en-US']), 'de');
-  assert.equal(pickLang(['sv-SE', 'fr-CA']), 'fr');
+  assert.equal(pickLang(['fi-FI', 'fr-CA']), 'fr');
   assert.equal(pickLang(['pt-PT']), 'pt');
   assert.equal(pickLang(['es_MX']), 'es');
   assert.equal(pickLang(['ja']), 'ja');
-  assert.equal(pickLang(['sv-SE', 'fi']), 'en');
+  assert.equal(pickLang(['fi-FI', 'hu']), 'en');
   assert.equal(pickLang([]), 'en');
   assert.equal(pickLang([null, undefined, '']), 'en');
   // Traditional Chinese for every Chinese locale, Simplified included
@@ -111,6 +111,17 @@ test('pickLang: first supported preferred locale, else English', () => {
   assert.equal(pickLang(['vi-VN']), 'vi');
   assert.equal(pickLang(['id-ID']), 'id');
   assert.equal(pickLang(['th-TH']), 'th');
+  assert.equal(pickLang(['te-IN']), 'te');
+  assert.equal(pickLang(['ta-IN']), 'ta');
+  assert.equal(pickLang(['kn-IN']), 'kn');
+  assert.equal(pickLang(['bn-BD']), 'bn');
+  assert.equal(pickLang(['mr-IN']), 'mr');
+  assert.equal(pickLang(['sv-SE']), 'sv');
+  assert.equal(pickLang(['da-DK']), 'da');
+  assert.equal(pickLang(['nb-NO']), 'nb');
+  assert.equal(pickLang(['no-NO']), 'nb');
+  assert.equal(pickLang(['uk-UA']), 'uk');
+  assert.equal(pickLang(['cs-CZ']), 'cs');
   assert.equal(pickLang(['ar-SA']), 'ar');
   assert.equal(pickLang(['ar-EG', 'en']), 'ar');
 });

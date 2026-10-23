@@ -195,6 +195,132 @@
       "05-sizes": "من 16 إلى 40 قطعة",
       "06-shapes": "أشكال لمن يصعب عليه تمييز الألوان",
       "07-win-dark": "العب في أي مكان، حتى بدون إنترنت"
+    },
+    "bn-BD": {
+      "01-look": "দেখো। মনে রাখো। খোঁজো।",
+      "02-roll": "পাশা চালো, গুটি বাছো",
+      "03-family": "পুরো পরিবার মিলে পালা করে খেলো",
+      "04-rivals": "খরগোশ, শিয়াল না পেঁচা?",
+      "05-sizes": "16 থেকে 40টি গুটি",
+      "06-shapes": "বর্ণান্ধদের জন্য আকার",
+      "07-win-dark": "যেখানে খুশি খেলো, অফলাইনেও"
+    },
+    "cs": {
+      "01-look": "Dívej se. Pamatuj si. Najdi.",
+      "02-roll": "Hoď kostkou, najdi kolíček",
+      "03-family": "Na střídačku s celou rodinou",
+      "04-rivals": "Zajíček, Liška, nebo Sova?",
+      "05-sizes": "Od 16 do 40 kolíčků",
+      "06-shapes": "Tvary pro barvoslepé",
+      "07-win-dark": "Hraj kdekoli, i offline"
+    },
+    "da": {
+      "01-look": "Kig. Husk. Find.",
+      "02-roll": "Slå en farve. Vælg brikken.",
+      "03-family": "På skift med familien",
+      "04-rivals": "Kanin, Ræv eller Ugle?",
+      "05-sizes": "Fra 16 til 40 brikker",
+      "06-shapes": "Former for farveblinde",
+      "07-win-dark": "Spil overalt, også offline"
+    },
+    "en-AU": {
+      "01-look": "Look. Remember. Find it.",
+      "02-roll": "Roll a colour. Pick the peg.",
+      "03-family": "Pass and play with the family",
+      "04-rivals": "Bunny, Fox or Owl: pick a rival",
+      "05-sizes": "From 16 pegs to 40",
+      "06-shapes": "Shapes for colour-blind players",
+      "07-win-dark": "Play anywhere, even offline"
+    },
+    "en-CA": {
+      "01-look": "Look. Remember. Find it.",
+      "02-roll": "Roll a colour. Pick the peg.",
+      "03-family": "Pass and play with the family",
+      "04-rivals": "Bunny, Fox or Owl: pick a rival",
+      "05-sizes": "From 16 pegs to 40",
+      "06-shapes": "Shapes for colour-blind players",
+      "07-win-dark": "Play anywhere, even offline"
+    },
+    "fr-CA": {
+      "01-look": "Regarde. Retiens. Trouve.",
+      "02-roll": "Lance le dé, trouve le pion",
+      "03-family": "À tour de rôle, en famille",
+      "04-rivals": "Lapin, Renard ou Hibou ?",
+      "05-sizes": "De 16 à 40 pions",
+      "06-shapes": "Des formes pour les daltoniens",
+      "07-win-dark": "Partout, même hors ligne"
+    },
+    "kn-IN": {
+      "01-look": "ನೋಡಿ. ನೆನಪಿಡಿ. ಹುಡುಕಿ.",
+      "02-roll": "ದಾಳ ಹಾಕಿ, ಕಾಯಿ ಆರಿಸಿ",
+      "03-family": "ಕುಟುಂಬದೊಂದಿಗೆ ಸರದಿಯಂತೆ ಆಡಿ",
+      "04-rivals": "ಮೊಲ, ನರಿ ಅಥವಾ ಗೂಬೆ?",
+      "05-sizes": "16ರಿಂದ 40 ಕಾಯಿಗಳು",
+      "06-shapes": "ಬಣ್ಣಗುರುಡರಿಗೆ ಆಕಾರಗಳು",
+      "07-win-dark": "ಎಲ್ಲಿಯಾದರೂ ಆಡಿ, ಆಫ್‌ಲೈನ್‌ನಲ್ಲೂ"
+    },
+    "mr-IN": {
+      "01-look": "बघा. लक्षात ठेवा. शोधा.",
+      "02-roll": "फासा टाका, सोंगटी निवडा",
+      "03-family": "सगळं कुटुंब मिळून, आळीपाळीने",
+      "04-rivals": "ससा, कोल्हा की घुबड?",
+      "05-sizes": "16 ते 40 सोंगट्या",
+      "06-shapes": "रंगांधळ्यांसाठी आकार",
+      "07-win-dark": "कुठेही खेळा, ऑफलाइनसुद्धा"
+    },
+    "no": {
+      "01-look": "Se. Husk. Finn.",
+      "02-roll": "Slå en farge. Velg brikken.",
+      "03-family": "Etter tur med familien",
+      "04-rivals": "Kanin, Rev eller Ugle?",
+      "05-sizes": "Fra 16 til 40 brikker",
+      "06-shapes": "Former for fargeblinde",
+      "07-win-dark": "Spill overalt, også offline"
+    },
+    "pt-PT": {
+      "01-look": "Olha. Memoriza. Encontra.",
+      "02-roll": "Lança o dado. Escolhe o pino.",
+      "03-family": "Um ecrã, a família toda",
+      "04-rivals": "Coelho, Raposa ou Coruja?",
+      "05-sizes": "De 16 a 40 pinos",
+      "06-shapes": "Formas para daltónicos",
+      "07-win-dark": "Em todo o lado, mesmo offline"
+    },
+    "sv": {
+      "01-look": "Titta. Kom ihåg. Hitta.",
+      "02-roll": "Slå en färg. Välj pjäsen.",
+      "03-family": "Turas om med familjen",
+      "04-rivals": "Kanin, Räv eller Uggla?",
+      "05-sizes": "Från 16 till 40 pjäser",
+      "06-shapes": "Former för färgblinda",
+      "07-win-dark": "Spela var som helst, offline"
+    },
+    "ta-IN": {
+      "01-look": "பாருங்கள். நினைவில் வையுங்கள். தேடுங்கள்.",
+      "02-roll": "பகடை உருட்டி, காயைத் தொடுங்கள்",
+      "03-family": "குடும்பத்துடன் மாறி மாறி விளையாடுங்கள்",
+      "04-rivals": "முயல், நரி அல்லது ஆந்தை?",
+      "05-sizes": "16 முதல் 40 காய்கள் வரை",
+      "06-shapes": "நிறக்குருடு உள்ளவர்களுக்கு வடிவங்கள்",
+      "07-win-dark": "எங்கும் விளையாடுங்கள், இணையம் இல்லாமலும்"
+    },
+    "te-IN": {
+      "01-look": "చూడండి. గుర్తుంచుకోండి. వెతకండి.",
+      "02-roll": "పాచిక వేయండి, కాయను ఎంచుకోండి",
+      "03-family": "కుటుంబమంతా కలిసి వంతులవారీగా",
+      "04-rivals": "కుందేలు, నక్క లేదా గుడ్లగూబ?",
+      "05-sizes": "16 నుంచి 40 కాయల వరకు",
+      "06-shapes": "రంగులు గుర్తించడం కష్టమైతే ఆకారాలు",
+      "07-win-dark": "ఎక్కడైనా ఆడండి, ఆఫ్‌లైన్‌లో కూడా"
+    },
+    "uk": {
+      "01-look": "Дивись. Запам’ятай. Знайди.",
+      "02-roll": "Кинь кубик. Знайди фішку.",
+      "03-family": "По черзі всією родиною",
+      "04-rivals": "Зайчик, Лисичка чи Сова?",
+      "05-sizes": "Від 16 до 40 фішок",
+      "06-shapes": "Фігури для дальтоніків",
+      "07-win-dark": "Грай будь-де, навіть офлайн"
     }
   }
 }

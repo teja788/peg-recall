@@ -1,0 +1,80 @@
+{
+  "_note": "Custom product page (create after 1.2.1 is live). 'shots' maps each store shot to its source frame; style+captions are compose-screenshots.mjs input (see ../README.md).",
+  "referenceName": "Offline",
+  "season": "Evergreen (first batch)",
+  "linkedSearches": [
+    "offline games",
+    "games without wifi"
+  ],
+  "angle": "No Wi-Fi needed. No account.",
+  "promotionalText": {
+    "en-US": "No Wi-Fi needed, no account: play on a plane, a train or anywhere. No data collected. 3 and 4 players, Big and Huge boards and Owl come with the one-time unlock.",
+    "en-GB": "No Wi-Fi needed, no account: play on a plane, a train or anywhere. No data collected. 3 and 4 players, Big and Huge boards and Owl come with the one-time unlock.",
+    "hi": "Wi-Fi की ज़रूरत नहीं, कोई अकाउंट नहीं: सफ़र में या कहीं भी खेलें। कोई डेटा इकट्ठा नहीं। 3 और 4 खिलाड़ी, बड़ा और विशाल बोर्ड और उल्लू एक बार के अनलॉक से मिलते हैं।"
+  },
+  "keywords": {
+    "en-US": [
+      "offline"
+    ],
+    "en-GB": [
+      "offline"
+    ],
+    "hi": []
+  },
+  "needsKeywordField": {},
+  "_keywordNote": "Links \"offline\" only. Never link or add \"ads\" on any page: it reads as \"no ads\" (2.3.7, the 1.2.1 rejection).",
+  "shots": {
+    "01-offline": "01-look",
+    "02-roll": "02-roll",
+    "03-pass": "03-family",
+    "04-rivals": "04-rivals",
+    "05-sizes": "05-sizes",
+    "06-shapes": "06-shapes",
+    "07-private": "07-win-dark"
+  },
+  "style": {
+    "font": "../../fonts/Nunito.ttf",
+    "text": "#2B2622",
+    "background": [
+      "#FBF6EC",
+      "#EFE3CF"
+    ],
+    "dots": [
+      "#CE1202",
+      "#F0E442",
+      "#009E73",
+      "#0072B2",
+      "#6201DA",
+      "#CC79A7"
+    ]
+  },
+  "captions": {
+    "en-US": {
+      "01-offline": "No Wi-Fi needed. Play anywhere.",
+      "02-roll": "Roll a color. Find the peg.",
+      "03-pass": "Pass and play, take turns",
+      "04-rivals": "Solo? Play Bunny, Fox or Owl",
+      "05-sizes": "Quick games or long ones",
+      "06-shapes": "Shapes for color-blind players",
+      "07-private": "No account, no data collected"
+    },
+    "en-GB": {
+      "01-offline": "No Wi-Fi needed. Play anywhere.",
+      "02-roll": "Roll a colour. Find the peg.",
+      "03-pass": "Pass and play, take turns",
+      "04-rivals": "Solo? Play Bunny, Fox or Owl",
+      "05-sizes": "Quick games or long ones",
+      "06-shapes": "Shapes for colour-blind players",
+      "07-private": "No account, no data collected"
+    },
+    "hi": {
+      "01-offline": "Wi-Fi की ज़रूरत नहीं, कहीं भी खेलो",
+      "02-roll": "पासा फेंको, गोटी ढूँढो",
+      "03-pass": "बारी-बारी से खेलो",
+      "04-rivals": "खरगोश, लोमड़ी या उल्लू?",
+      "05-sizes": "छोटे खेल या लंबे खेल",
+      "06-shapes": "कलर-ब्लाइंड के लिए आकार",
+      "07-private": "कोई अकाउंट नहीं, कोई डेटा नहीं"
+    }
+  }
+}

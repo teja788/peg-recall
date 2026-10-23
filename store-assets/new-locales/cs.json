@@ -1,0 +1,39 @@
+{
+  "locale": "cs",
+  "uiFile": "cs",
+  "listing": {
+    "name": "Color Catch: Hra na paměť",
+    "nameFallback": "Color Catch: Pamatuj si barvy",
+    "subtitle": "Rodina a přátelé na střídačku",
+    "description": "Hra na paměť s dřevěnými kolíčky, kterou hraje rodina s přáteli spolu, v jakémkoli věku. Podívej se na barevné kolíčky, zapamatuj si, kde stojí, hoď kostkou a najdi správnou barvu. Vyhrává ten, kdo nasbírá nejvíc kolíčků.\n\nBarevné kolíčky stojí na kulatém dřevěném hracím plánu. Máš pár vteřin na prohlédnutí, pak všechny kolíčky vypadají jako obyčejné dřevo. Hoď kostkou, padne barva, a klepni na kolíček, který má podle tebe tu barvu. Trefa? Kolíček jde k tobě do misky. Vedle? Na chvíli ukáže všem svou barvu a zase se schová – takže se něco dozví celý stůl. Když je plán prázdný, vyhrává nejplnější miska.\n\nHra na Klasickém plánu trvá tři až čtyři minuty. Hraješ poprvé? Klepni na ? na úvodní obrazovce: čtyři krátké kroky – Dívej se, Hoď, Najdi, Vyhraj.\n\nPROTI POČÍTAČI NEBO SPOLU\n- Hraj proti počítači na třech úrovních: Zajíček je snadný a hodně zapomíná, Liška si pamatuje zhruba půlku plánu a Sova skoro všechno.\n- Pro 2 až 4 hráče stačí podávat si jeden iPhone nebo iPad. Žádné druhé zařízení, žádné pozvánky, žádné čekání.\n- Napiš jméno každého hráče, nebo hraj bez klávesnice za zvířátko – Lišku, Sovu, Méďu, Žabku, Zajíčka nebo Kočku. Jména, která už jste použili, se vrátí na jedno klepnutí a Hrát znovu ponechá stejné hráče.\n\nKDO VEDE\n- Výhry a odehrané hry každého hráče podle jména, s procentem výher.\n- Tvoje skóre proti Zajíčkovi, Lišce a Sově, s aktuální a nejlepší sérií výher.\n- Statistiky zůstávají v tvém zařízení a kdykoli je můžeš vynulovat.\n\nPLÁN, KTERÝ ROSTE S TEBOU\n- Malý (16 kolíčků) na pohodový začátek, Klasický (25), Velký (36) a Obří (40), když chceš pořádnou výzvu.\n- Dětský režim dá víc času na prohlédnutí plánu a z remízy udělá společnou výhru. Jinak remízu rozhodne rozstřel na malinkém plánu.\n- Tah navíc po trefě je na začátku zapnutý, přesně podle původních pravidel – a můžeš ho vypnout.\n- Plán vyplní obrazovku na každém iPhonu i iPadu.\n\nPŘÍJEMNÁ PRO OČI I PRO VŠECHNY\n- Šest výrazných barev – červená, žlutá, zelená, modrá, fialová a růžová – na teplém dřevěném plánu.\n- Splývají ti některé barvy? Zapni v Nastavení Tvary na kolíčcích a každá barva dostane svůj tvar – kruh, trojúhelník, čtverec, hvězdu, srdce, kosočtverec – na kolíčcích i na kostce, takže celou hru můžeš hrát jen podle tvarů.\n- Světlý i tmavý režim, Dynamic Type, popisky VoiceOver na každém kolíčku s předčítáním tahů, hodů a tref a podpora funkce Omezit pohyb.\n- Velká tlačítka, jen klepání. Žádné tažení ani dlouhé podržení.\n\nV KLIDU, BEZ RUŠENÍ\n- Žádný účet, žádná registrace, žádný e-mail.\n- Zdarma: Malý a Klasický plán, hra proti Zajíčkovi a Lišce a hra pro 2 hráče. Jeden volitelný jednorázový nákup v aplikaci odemkne Velký a Obří plán, Sovu a hru pro 3 a 4 hráče. Volitelné spropitné podpoří hru a nic neodemyká. Před každým nákupem se objeví krátká otázka jen pro dospělé.\n- Nesbíráme žádná data. Jména a statistiky se ukládají jen v tvém zařízení. Žádné analytické, reklamní ani sledovací nástroje.\n- Funguje úplně offline – v letadle, v autě, kdekoli.\n- Tiché cvakání a cinknutí při trefě, vypneš jedním klepnutím.\n\nPro iPhone a iPad. Hodnocení 4+.\n\nDotazy a nápady: ravibitspilani@gmail.com",
+    "keywords": "pexeso,hry,pro,dva,hráče,deskové,společenské,kostka,barvy,kolíčky,logické,offline,bez,wifi",
+    "promotionalText": "Nově česky! Hra ve čtyřech na jednom iPhonu nebo iPadu (3 a 4 hráči jsou součástí jednorázového nákupu). Bez účtu a bez sběru dat.",
+    "privacyPolicyUrl": "https://teja788.github.io/peg-recall/privacy.html",
+    "supportUrl": "https://teja788.github.io/peg-recall/support.html",
+    "marketingUrl": "https://teja788.github.io/peg-recall/"
+  },
+  "captions": {
+    "01-look": "Dívej se. Pamatuj si. Najdi.",
+    "02-roll": "Hoď kostkou, najdi kolíček",
+    "03-family": "Na střídačku s celou rodinou",
+    "04-rivals": "Zajíček, Liška, nebo Sova?",
+    "05-sizes": "Od 16 do 40 kolíčků",
+    "06-shapes": "Tvary pro barvoslepé",
+    "07-win-dark": "Hraj kdekoli, i offline"
+  },
+  "research": {
+    "topSuggestions": [
+      "pexeso",
+      "pexeso pro dva",
+      "pexeso pro děti",
+      "emoji pexeso",
+      "animal pexeso",
+      "hry pro dva",
+      "hry pro dva hráče",
+      "hry pro dva bez wifi",
+      "hry pro dva online",
+      "ludo go! – deskové hry"
+    ],
+    "chosenKeywordsWhy": "\"pexeso\" is the strongest autocomplete root (10 suggestions, incl. \"pexeso pro dva\") with a weak top 10 (median 10 ratings). It is the generic Czech word for the hidden-match memory game; this is a peg board, not cards, so it is a keyword only, never in name/subtitle/description.\n\"hry pro dva\" (+ \"hráče\", \"bez wifi\") has demand but a strong top 10 (median ~480): hry,pro,dva,hráče,bez,wifi in keywords cover all three suggested phrases cheaply.\n\"hra na paměť\" (generic, not the memory® mark) goes in the name; deskové/společenské/logické (board/party/logic games), kostka, barvy, kolíčky, offline fill the rest. \"bez\" is only for \"bez wifi\", never \"bez reklam\"."
+  }
+}

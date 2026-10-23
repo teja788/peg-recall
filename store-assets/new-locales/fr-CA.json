@@ -1,0 +1,31 @@
+{
+  "locale": "fr-CA",
+  "listing": {
+    "name": "Color Catch: Jeu de mémoire",
+    "nameFallback": "Color Catch: Jeux de mémoire",
+    "subtitle": "Jeux en famille et entre amis",
+    "keywords": "paires,2,joueurs,dés,couleurs,pions,plateau,bois,hors,ligne,société,mémo,concentration,adultes",
+    "promotionalText": "À 2, 3 ou 4 sur un iPhone ou iPad, ou contre le Lapin, le Renard et le Hibou. Les parties à 3 et 4, les plateaux Grand et Géant et le Hibou font partie de l’achat unique.",
+    "description": "Le jeu de mémoire aux pions de bois colorés, auquel on joue ensemble en famille ou entre amis, à tout âge. Regarde les couleurs, retiens leur place, lance le dé et retrouve la bonne couleur. Celui qui ramasse le plus de pions gagne.\n\nDes pions colorés se dressent sur un plateau rond en bois. Tu as quelques secondes pour les observer, puis ils redeviennent tous du simple bois. Lance le dé : il tombe sur une couleur, et tu touches le pion qui, selon toi, porte cette couleur. Bonne réponse? Le pion rejoint ta réserve. Raté? Il montre sa couleur à tout le monde un instant avant de se cacher à nouveau – toute la table en profite. Quand le plateau est vide, le joueur qui a le plus de pions l’emporte.\n\nUne partie sur le plateau Classique dure trois ou quatre minutes. C’est ta première fois? Touche le ? sur l’écran d’accueil : quatre étapes courtes – Regarde, Lance, Trouve, Gagne.\n\nSEUL OU À PLUSIEURS\n- Affronte l’ordinateur sur trois niveaux : le Lapin est facile et oublie beaucoup, le Renard retient environ la moitié du plateau, et le Hibou se souvient de presque tout.\n- De 2 à 4 joueurs, on se passe un seul iPhone ou iPad. Pas de deuxième appareil, pas d’invitation, pas d’attente.\n- Écris le prénom de chaque joueur, ou joue sans clavier dans la peau d’un animal : renard, hibou, ours, grenouille, lapin ou chat. Les prénoms déjà utilisés reviennent d’une simple touche, et la revanche se joue avec les mêmes joueurs.\n\nQUI MÈNE?\n- Victoires et parties jouées pour chaque joueur, par prénom, avec le taux de victoire.\n- Ta fiche contre le Lapin, le Renard et le Hibou, avec ta série de victoires en cours et ta meilleure série.\n- Les statistiques restent sur ton appareil, et tu peux les remettre à zéro en tout temps.\n\nUN PLATEAU QUI GRANDIT AVEC TOI\n- Petit (16 pions) pour débuter en douceur, Classique (25), Grand (36) et Géant (40) pour un vrai défi.\n- Le mode enfant laisse plus de temps pour regarder le plateau et transforme une égalité en victoire partagée. Sinon, l’égalité se départage en mort subite sur un mini-plateau.\n- Le tour bonus après une bonne réponse, tiré des règles d’origine, est activé au départ – et tu peux le désactiver.\n- Le plateau remplit l’écran sur tous les iPhone et iPad.\n\nAGRÉABLE POUR LES YEUX, ET POUR TOUT LE MONDE\n- Six couleurs vives – rouge, jaune, vert, bleu, violet et mauve – sur un chaleureux plateau en bois.\n- Tu as du mal à distinguer certaines couleurs? Active « Formes sur les pions » dans les réglages : chaque couleur porte sa propre forme – rond, triangle, carré, étoile, cœur, losange – sur les pions et sur le dé, et toute la partie peut se jouer avec les formes.\n- Modes clair et sombre, taille de texte dynamique, VoiceOver sur chaque pion avec annonce des tours, des lancers et des bonnes réponses, et prise en charge de Réduire les animations.\n- De grandes zones à toucher, rien d’autre. Pas de glisser, pas d’appui long.\n\nPENSÉ POUR JOUER TRANQUILLE\n- Pas de compte, pas d’inscription, pas d’adresse courriel.\n- Gratuit sur les plateaux Petit et Classique, contre le Lapin et le Renard, et à 2 joueurs. Un achat intégré facultatif débloque les plateaux Grand et Géant, le Hibou et les parties à 3 et 4 joueurs. Les pourboires facultatifs soutiennent le jeu et ne débloquent rien. Chaque achat est protégé par une petite question réservée aux adultes.\n- Aucune donnée collectée. Les prénoms et les statistiques restent uniquement sur ton appareil. Aucun outil d’analyse, de publicité ou de suivi.\n- Fonctionne entièrement hors ligne – en avion, en auto, au chalet, partout.\n- Des clics doux et un carillon à chaque bonne réponse, coupés d’une seule touche.\n\nConçu pour iPhone et iPad. Classé 4+.\n\nQuestions ou idées : ravibitspilani@gmail.com",
+    "privacyPolicyUrl": "https://teja788.github.io/peg-recall/privacy.html",
+    "supportUrl": "https://teja788.github.io/peg-recall/support.html",
+    "marketingUrl": "https://teja788.github.io/peg-recall/"
+  },
+  "captions": {
+    "01-look": "Regarde. Retiens. Trouve.",
+    "02-roll": "Lance le dé, trouve le pion",
+    "03-family": "À tour de rôle, en famille",
+    "04-rivals": "Lapin, Renard ou Hibou ?",
+    "05-sizes": "De 16 à 40 pions",
+    "06-shapes": "Des formes pour les daltoniens",
+    "07-win-dark": "Partout, même hors ligne"
+  },
+  "research": {
+    "topSuggestions": [
+      "jeu de mémoire",
+      "jeu de mémoire pour enfants - shubi",
+      "jeux en famille"
+    ],
+    "chosenKeywordsWhy": "CA French autocomplete is thin: only \"jeu de mémoire\" and \"jeux en famille\" complete, so they become name and subtitle. The \"jeu de mémoire\" top 10 is moderate (median ~1,040 ratings, several titles under 100). Keywords reuse the fr-FR board-game nouns (paires, dés, pions, plateau, bois, hors ligne, société) plus concentration and adultes; \"memory\" is kept out (Ravensburger mark)."
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "locale": "sv",
+  "uiFile": "sv",
+  "listing": {
+    "name": "Color Catch: Minnesspel",
+    "nameFallback": "Color Catch: Minnesspel i trä",
+    "subtitle": "Sällskapsspel för familjen",
+    "keywords": "brädspel,spel,två,2,spelare,tärning,färger,koncentration,parspel,par,offline,pjäser,vänner",
+    "promotionalText": "Nu på svenska! Spela mot Kanin, Räv eller Uggla, eller turas om med 2 till 4 spelare på en iPhone eller iPad. Uggla, 3 och 4 spelare ingår i engångsköpet. Inget konto.",
+    "description": "Minnesspelet med träpjäser som familj och vänner spelar tillsammans, i alla åldrar. Titta på de färgade pjäserna, kom ihåg var de står, slå sedan tärningen och hitta färgen. Flest pjäser vinner.\n\nFärgade pjäser står på en rund spelplan i trä. Du får några sekunder att titta, sedan blir alla pjäser vanligt trä. Slå tärningen, den landar på en färg, och tryck på pjäsen du tror har den färgen. Rätt? Då hamnar pjäsen i din skål. Fel? Då visar den sin färg för alla en kort stund innan den göms igen – så hela bordet lär sig något. När spelplanen är tom vinner den fullaste skålen.\n\nEn omgång på Klassisk tar tre eller fyra minuter. Ny här? Tryck på ? på startsidan för fyra korta steg: Titta, Slå, Hitta, Vinn.\n\nSPELA ENSAM ELLER TILLSAMMANS\n- Spela mot datorn på tre nivåer. Kanin är lätt och glömmer mycket, Räv minns ungefär halva spelplanen och Uggla minns nästan allt.\n- Skicka runt en iPhone eller iPad för 2 till 4 spelare. Ingen andra enhet, inga inbjudningar, ingen väntan.\n- Skriv varje spelares namn, eller hoppa över tangentbordet och spela som ett djur: räv, uggla, björn, groda, kanin eller katt. Namn du använt förut kommer tillbaka som knappar, och Spela igen behåller samma spelare.\n\nSE VEM SOM LEDER\n- Vinster och spelade omgångar för varje spelare, med namn och vinstprocent.\n- Ditt resultat mot Kanin, Räv och Uggla, med nuvarande och bästa vinstsvit.\n- Statistiken stannar på din enhet, och du kan nollställa den när du vill.\n\nEN SPELPLAN SOM VÄXER MED DIG\n- Liten (16 pjäser) för en lugn start, Klassisk (25), Stor (36) och Jättestor (40) när du vill ha en riktig utmaning.\n- Barnläge ger längre tid att titta på spelplanen och gör oavgjort till delad vinst. Annars avgörs lika i en avgörande runda på en minispelplan.\n- Extratur vid rätt är på från start, precis som i originalreglerna – och du kan stänga av den.\n- Spelplanen fyller skärmen på alla iPhone- och iPad-modeller.\n\nSKÖNT FÖR ÖGONEN, OCH FÖR ALLA\n- Sex klara färger – röd, gul, grön, blå, lila och rosa – på en varm spelplan i trä.\n- Färgblind, eller svårt att skilja två färger åt? Slå på Former på pjäser så får varje färg en egen form – cirkel, triangel, kvadrat, stjärna, hjärta, romb – på pjäserna och på tärningen, så att hela spelet kan spelas efter form.\n- Ljust och mörkt läge, Dynamisk text, VoiceOver-etiketter på varje pjäs med upplästa turer, slag och träffar, samt stöd för Minska rörelse.\n- Stora tryckytor, bara tryck. Inget dra-och-släpp, inga långa tryck.\n\nLUGNT OCH STILLSAMT\n- Inget konto, ingen registrering, ingen e-postadress.\n- Gratis att spela på spelplanerna Liten och Klassisk, mot Kanin och Räv, och med 2 spelare. Ett valfritt engångsköp i appen låser upp spelplanerna Stor och Jättestor, Uggla och spel med 3 och 4 spelare. Frivilliga bidrag stöder spelet och låser inte upp något. Köp skyddas av en snabb fråga som bara vuxna ska svara på.\n- Ingen data samlas in. Spelarnamn och statistik sparas bara på din enhet. Inga analys-, reklam- eller spårningsverktyg.\n- Fungerar helt offline – på flyget, i bilen, var som helst.\n- Mjuka klick och en klang vid rätt, av med ett tryck.\n\nByggt för iPhone och iPad. Åldersgräns 4+.\n\nFrågor eller idéer: ravibitspilani@gmail.com",
+    "privacyPolicyUrl": "https://teja788.github.io/peg-recall/privacy.html",
+    "supportUrl": "https://teja788.github.io/peg-recall/support.html",
+    "marketingUrl": "https://teja788.github.io/peg-recall/"
+  },
+  "captions": {
+    "01-look": "Titta. Kom ihåg. Hitta.",
+    "02-roll": "Slå en färg. Välj pjäsen.",
+    "03-family": "Turas om med familjen",
+    "04-rivals": "Kanin, Räv eller Uggla?",
+    "05-sizes": "Från 16 till 40 pjäser",
+    "06-shapes": "Former för färgblinda",
+    "07-win-dark": "Spela var som helst, offline"
+  },
+  "research": {
+    "topSuggestions": [
+      "minnesspel (10 app-name completions: koncentration, pairify, för barn…)",
+      "spel för två (9 completions, top-10 median 657 ratings)",
+      "sällskapsspel (10 completions, top-10 median 5 ratings)"
+    ],
+    "chosenKeywordsWhy": "minnesspel has real autocomplete demand and a weak local top 10 (median 213, mostly English titles), so it anchors the name. sällskapsspel has demand and an almost empty top 10 (median 5): it leads the subtitle. Keywords cover the spel/två/2/spelare combos (spel för två is searched, \"för\" comes from the subtitle), brädspel, tärning, färger, the classic game names koncentration/parspel/par, and offline/trä/pjäser."
+  }
+}

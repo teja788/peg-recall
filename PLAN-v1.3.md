@@ -1,100 +1,107 @@
-# Color Catch v1.3: WhatsApp-shareable results
+# Color Catch v1.3: share, daily board, and real numbers
 
-Date: 2026-10-07. Status: **plan, waiting on the owner's decisions (section 2)**. Build starts after 1.2.0 clears review. Other growth ideas: `GROWTH-IDEAS.md`.
+Date: 2026-10-23 (replaces the Oct 7 draft). Status: **plan, waiting on the owner's decisions (section 2)**. Hindi, the old 1.3.1, already shipped in 1.2.1. Other ideas: `GROWTH-IDEAS.md`.
 
-## 1. Goal
+## 1. Why these four things
 
-Turn every finished game into a neat WhatsApp message that makes a friend or relative want to play. Downloads are the bottleneck (27 new in 30 days, half from India), and a share in a family group is the cheapest recommendation there is.
+App Store Connect, Sep 22 – Oct 21 (opt-in devices only):
 
-What success looks like 4 weeks after 1.3 is live: new downloads per week at least double the 1.2 baseline (`downloads.mjs`).
+| Number | Value | What it says |
+|---|---|---|
+| Impressions → page views | 7.9K → 149 (2%) | The store page is the weak spot. The PPO test (running, store-only) works on this. |
+| First-time downloads | 72 (~4/day this week) | Growing, but small. |
+| Day-1 to day-28 retention | under 4% | Most players never come back. Nothing pulls them back tomorrow. |
+| Purchases | 0 | We can't tell whether anyone opens the unlock sheet. |
+
+So 1.3 does four things:
+1. **Bring players back tomorrow:** a daily board (S2).
+2. **Let players bring friends:** a WhatsApp-ready result (S1 + S3).
+3. **Measure the funnel:** anonymous analytics (S4).
+4. **Clean up the words App Review flags in screenshots:** "Kid mode", "Try free" (S5).
+
+Success 4 weeks after 1.3 is live: day-7 retention above 10%, new downloads per week doubled against the 1.2.1 week (`downloads.mjs`), and a first funnel count of unlock-sheet opens.
 
 ## 2. Decisions needed (owner)
 
 | # | Decision | Recommendation |
 |---|---|---|
-| D1 | Ship the **daily board** (same board for everyone each day, Wordle-style) in 1.3, or only "share this game"? | **Yes, both.** The daily number ("#12") is what makes people compare and share again tomorrow. |
-| D2 | Do shared messages include **player names**? | **Yes, but off for the computer, and kids can be "Player 2".** Names make it personal; the share is always started by the user. |
-| D3 | Where does the link go? | **Our site page** (`/play`), not the App Store directly: iPhone/iPad → App Store, Android → "coming soon" + a free web board later. Most Indian friends are on Android. |
-| D4 | Parental gate before sharing? | **No.** The app is not in the Kids Category (gate rule 1.3 doesn't apply), and nothing leaves the device except what the user sends. |
-| D5 | Hindi in the same build? | **Decided 2026-10-07: Hindi comes after 1.3, as 1.3.1** (section 7). D1–D4 are still open. |
+| D1 | Ship the **daily board** (same board for everyone each day, Wordle-style)? | **Yes.** It is the only item aimed at the 4% retention. |
+| D2 | Do shared messages include **player names**? | **Yes**, except the computer's. Kids can be "Player 2". The user starts every share. |
+| D3 | Where does the shared link go? | **Our `/play` page** with a preview card. iPhone/iPad goes on to the Family custom product page; Android shows "coming soon". |
+| D4 | Add **anonymous analytics** (PostHog)? | **Yes, anonymous only:** no person profiles, no session replay, no advertising ID, 6 events. The App Privacy label changes from "Data Not Collected" to "Usage Data, not linked to you". |
+| D5 | New names for **"Kid mode"** and the **"Try free"** badge? | **"Gentle mode"** and **"Try once"**. |
+
+D4 is the only one that changes a promise on the store page; say no and 1.3 still ships the rest.
 
 ## 3. What gets built
 
 ### S1. "Share result" on the game-over sheet (~½ day)
 
 - New button under "Play again" in `src/ui/GameOverSheet.tsx`.
-- `Share.share({ message })` from react-native: built in, no new dependency, opens the iOS share sheet with WhatsApp on top. On web, react-native-web uses `navigator.share`; fallback is `https://wa.me/?text=…` via `Linking`.
-- A pure `shareText(state, locale)` in a new `src/ui/shareText.ts`, so it's unit-testable without React.
-
-Message (English example; ≤ 6 lines, so it reads as one bubble without "Read more"):
-
-```
-🎯 Color Catch · Classic board
-🏆 Maya wins! Maya 14 · Fox 11
-🟥🟨🟩🟦🟪💗 25 pegs in 18 rolls
-Can you beat us? 👉 https://teja788.github.io/peg-recall/play
-```
-
-Daily board version:
+- `Share.share({ message })` from react-native (no new dependency; WhatsApp sits at the top of the iOS share sheet). On web: `navigator.share`, falling back to `https://wa.me/?text=…`.
+- A pure `shareText(state, locale)` in `src/ui/shareText.ts`, so it's unit-testable.
+- At most 6 lines, so WhatsApp shows it as one bubble:
 
 ```
 🎯 Color Catch #12 · daily board
 🟥🟨🟩🟦🟪💗 Found 23/25 in 14 rolls
-Beat my memory 👉 https://teja788.github.io/peg-recall/play
+Can you beat me? 👉 https://teja788.github.io/peg-recall/play
 ```
 
-- Color row: the six peg colors as emoji, in palette order (red 🟥, yellow 🟨, green 🟩, blue 🟦, violet 🟪, pink 💗; there is no pink square, so use the heart).
-- All text goes through `tr()`, in all 12 language files (13 UI languages). Numbers and names via the existing `isolate()` / `playerLabel()` so right-to-left and long names stay intact.
-- Sudden-death and shared-win cases reuse `gameOverHeadline()`.
+- All text goes through `tr()` in all 19 UI languages, and names and numbers through `isolate()` / `playerLabel()` (Arabic is RTL).
 
 ### S2. Daily board (~1 day)
 
-- Home gets a "Today's board #N" button (Classic, solo vs Fox, free for everyone, so it never sits behind the unlock).
-- `seed = daysSince(2026-09-24)` (launch day) → same board and same die order for everyone that day. The engine already takes `config.seed` (`src/engine/types.ts`).
-- The result is stored locally (best per day, plus a streak). No server, so App Privacy stays "Data Not Collected".
-- Played today already → the button shows the result and "Share" instead of "Play".
+- Home gets "Today's board #N": Classic board, solo vs Fox, always free (never behind the unlock).
+- `seed = daysSince(2026-09-24)` gives everyone the same board and die order that day. The engine already takes `config.seed`.
+- Best result and a streak are stored on the device. No server.
+- Already played today: the button shows the result and "Share".
 
-### S3. A link that works from WhatsApp (~2 h)
+### S3. `/play` link page (~2 h)
 
-- New `docs/play.html` on the existing GitHub Pages site (`teja788.github.io/peg-recall`).
-- **Open Graph tags** (`og:title`, `og:description`, `og:image` = the 1.2 header image at 1200×630), so WhatsApp shows a big colorful card instead of a bare link. This is what makes the share look neat.
-- On iPhone/iPad, redirect to `https://apps.apple.com/app/id6813625311`, plus a Smart App Banner (`apple-itunes-app` meta).
-- On Android and desktop, show "Color Catch is on iPhone and iPad. Android is coming soon," with screenshots (and later the free web board, idea 2.2 in `GROWTH-IDEAS.md`).
-- Also fix `docs/index.html`: it has no App Store link today.
+- `docs/play.html` on GitHub Pages, with Open Graph tags (the 1.2 header image at 1200×630), so WhatsApp shows a big colorful card.
+- iPhone/iPad: redirect to the Family custom product page URL (or the plain App Store page until that page is live), plus a Smart App Banner.
+- Android/desktop: "Color Catch is on iPhone and iPad. Android is coming soon," with screenshots.
+- Add an App Store link to `docs/index.html` (it has none).
+
+### S4. Anonymous analytics, if D4 = yes (~½ day + privacy updates)
+
+- `posthog-react-native` (Expo-supported), set up with `personProfiles: 'never'`, autocapture off and session replay off.
+- 6 events: `game_started` (mode, board), `game_finished`, `daily_played`, `unlock_sheet_opened` (which locked item led there), `purchase_started`, `purchase_result` (bought / cancelled / failed).
+- Events are queued offline and sent later, so "Play anywhere, even offline" still holds.
+- Update `docs/privacy.html` and the App Privacy answers in App Store Connect before submitting.
+
+### S5. Wording clean-up (~1 h)
+
+- "Kid mode" → D5 name, in all 19 languages (`settings.kid`, `howto.kidTitle`, `howto.footnote`). The internal setting key stays, so saved settings carry over.
+- "Try free" / "one game, free" → "Try once" / "one game to try".
+- Then screenshots may show the Settings row again.
 
 ## 4. Checks
 
-- `shareText()` unit tests: every language, 1/2/3 players, a tie, sudden death, daily board, a long name, and a length budget (≤ 300 chars).
-- i18n test: the new keys exist in all languages (the existing `src/i18n/__tests__` pattern).
-- Daily seed test: the same date gives the same board, and the next day gives a different one.
-- Web smoke test: game over → Share → the text is right.
-- iPad TestFlight (owner): share to WhatsApp, then check the preview card and that the link opens the App Store. Then share to a family member on Android and confirm the page looks fine.
-- WhatsApp preview check before release: paste the `/play` link into a chat and confirm the image card shows.
+- Unit tests: `shareText()` (every language, 1–4 players, a tie, sudden death, daily board, a long name, ≤ 300 chars), the daily seed (same date = same board, next day = different), the i18n keys in all languages.
+- Web smoke test: game over → Share → the text is right; the daily board opens; analytics events appear in PostHog.
+- iPad TestFlight (owner): share to WhatsApp, check the preview card, check the link opens the App Store; play the daily board two days running.
+- Full guideline audit of every locale, image and in-app text before submitting (as for 1.2.1).
 
 ## 5. Release
 
 1. Bump to 1.3.0, then `npm test` and `tsc`.
-2. EAS build, then TestFlight, then the owner's iPad check (section 4).
-3. Update the "What's New" text in 14 languages: "Share your result on WhatsApp + a new board every day".
-4. Submit 1.3.0. Then publish an In-App Event "Daily board" (free, shows in search).
-5. Measure weekly with `downloads.mjs` against the baseline in `GROWTH-IDEAS.md`.
+2. EAS build with the default Xcode 26 image, then TestFlight, then the owner's iPad check.
+3. What's New in 20 languages: "Share your result on WhatsApp, plus a new board every day".
+4. Audit, then submit 1.3.0. After approval, an In-App Event "Daily board".
+5. Weekly check: `downloads.mjs` plus App Analytics retention, and the PostHog funnel.
 
-Rough total: **~2 days** of build work + 1 build/TestFlight round.
+Rough total: **~2½ days of build work** (3 with analytics) + 1 TestFlight round + 1–2 days of review.
 
 ## 6. Not in 1.3 (on purpose)
 
-- An image card for the share (needs `react-native-view-shot` + `expo-sharing`). The text + OG preview card covers it; add later if shares look plain.
-- Leaderboards or accounts: these need a server and data collection, which breaks "Data Not Collected".
-- Hindi: 1.3.1 (section 7).
+- **Expo SDK upgrade (55 → 58)** for Xcode 27 and full-screen on iPhone Duo. Apple will at some point require the iOS 27 SDK for new uploads (it usually announces this for spring), so plan it as **1.4**, with a launch test on an iOS 27 device.
+- An image card for the share (`react-native-view-shot`). The text plus the preview card is enough to start.
+- Leaderboards or accounts: these need a server and personal data.
+- Google Play: right after 1.3 (`GROWTH-IDEAS.md` §6).
 
-## 7. Next: v1.3.1 Hindi (decided, after 1.3)
+## 7. Store work that runs alongside (no build)
 
-Why: India is the top country (12 of 27 downloads), and none of the 13 UI languages is Indian. Few memory games have a Hindi store page.
-
-1. **UI:** a new `src/i18n/hi.ts` with every key, the 1.3 share and daily-board text included. Check button and pill fit, since Devanagari runs taller. Check the font: Nunito has no Devanagari, so confirm the system fallback renders cleanly on iPad.
-2. **Store listing:** an `hi` locale in `store-assets/listing.json`. Research keywords in Hindi and Hinglish, not translations (the per-country keyword method in the ship-ios-app skill). Use a unique store name with a fallback ready.
-3. **Screenshots + images:** Hindi frames (`screenshot-frames/hi/`), captions in `captions.json`, and a `search-hi.png` via `compose-creative.mjs`.
-4. **Review:** Codex review of the Hindi text, plus a native speaker in the family. Use warm, simple words for kids and grandparents.
-5. **Release:** 1.3.1, then build, TestFlight, then the owner's iPad check in Hindi (iPad Settings → Apps → Color Catch → Language, or `?lang=hi` on web), then submit.
-
-Rough size: ~1 day. Telugu and Tamil can follow the same steps if Hindi moves downloads.
+- The PPO test "Colorful first 3 + Bright icon" (uploading Oct 23; then owner submits and starts it).
+- Custom product pages: Seniors, Kids, Family, No ads, Color-blind. Submit them together with the PPO test to save a review round. The Family page URL is the one S3 links to.

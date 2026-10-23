@@ -1,0 +1,88 @@
+{
+  "_note": "Custom product page (create after 1.2.1 is live). 'shots' maps each store shot to its source frame; style+captions are compose-screenshots.mjs input (see ../README.md).",
+  "referenceName": "Big pegs, easy pace",
+  "season": "Evergreen (first batch)",
+  "linkedSearches": [
+    "games for grandparents",
+    "senior games",
+    "games for elderly",
+    "games for adults"
+  ],
+  "angle": "Big pegs, Huge board, Bunny goes easy, longer look and shared wins (Settings). Never name the audience.",
+  "promotionalText": {
+    "en-US": "Big pegs and Bunny, who goes easy. Settings offer a longer look and shared wins on a tie. 3 and 4 players, Big and Huge boards and Owl come with the one-time unlock.",
+    "en-GB": "Big pegs and Bunny, who goes easy. Settings offer a longer look and shared wins on a tie. 3 and 4 players, Big and Huge boards and Owl come with the one-time unlock.",
+    "hi": "बड़ी गोटियाँ और आसान खरगोश। सेटिंग्स में देखने का ज़्यादा समय और बराबरी पर साझा जीत। 3 और 4 खिलाड़ी, बड़ा और विशाल बोर्ड और उल्लू एक बार के अनलॉक से मिलते हैं।"
+  },
+  "keywords": {
+    "en-US": [
+      "grandparents"
+    ],
+    "en-GB": [
+      "grandparents"
+    ],
+    "hi": [
+      "elderly",
+      "adults"
+    ]
+  },
+  "needsKeywordField": {
+    "en-US": [
+      "senior"
+    ],
+    "en-GB": [
+      "senior"
+    ]
+  },
+  "_keywordNote": "en-GB also indexes \"elderly\" and \"adults\" (hi-only for Seniors in the README table). Owner may assign them to this page for en-GB too.",
+  "shots": {
+    "01-look": "01-look",
+    "02-gentle": "05-sizes",
+    "03-roll": "02-roll",
+    "04-together": "03-family",
+    "05-shapes": "06-shapes",
+    "06-win": "07-win-dark"
+  },
+  "style": {
+    "font": "../../fonts/Nunito.ttf",
+    "text": "#2B2622",
+    "background": [
+      "#FBF6EC",
+      "#EFE3CF"
+    ],
+    "dots": [
+      "#CE1202",
+      "#F0E442",
+      "#009E73",
+      "#0072B2",
+      "#6201DA",
+      "#CC79A7"
+    ]
+  },
+  "captions": {
+    "en-US": {
+      "01-look": "Big pegs, bright colors",
+      "02-gentle": "A gentle rival, 4 board sizes",
+      "03-roll": "Roll the die, then find the peg",
+      "04-together": "Play together, take turns",
+      "05-shapes": "Shapes on pegs, if you like",
+      "06-win": "Confetti for every winner"
+    },
+    "en-GB": {
+      "01-look": "Big pegs, bright colours",
+      "02-gentle": "A gentle rival, 4 board sizes",
+      "03-roll": "Roll the die, then find the peg",
+      "04-together": "Play together, take turns",
+      "05-shapes": "Shapes on pegs, if you like",
+      "06-win": "Confetti for every winner"
+    },
+    "hi": {
+      "01-look": "बड़ी गोटियाँ, चमकीले रंग",
+      "02-gentle": "आसान खरगोश, बोर्ड के 4 साइज़",
+      "03-roll": "पासा फेंको, फिर गोटी ढूँढो",
+      "04-together": "साथ मिलकर, बारी-बारी से",
+      "05-shapes": "चाहो तो गोटियों पर आकार",
+      "06-win": "हर जीत पर कंफ़ेटी"
+    }
+  }
+}

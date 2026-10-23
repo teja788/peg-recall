@@ -1,7 +1,9 @@
 /**
  * App Store creative assets (Oct 2026): product page header + search results.
  *
- *   node store-assets/compose-creative.mjs
+ *   node store-assets/compose-creative.mjs [locale ...]
+ *
+ * With locales given, only those search images are written (header untouched).
  *
  * header.png      3840x1646 (21:9), the board on the table, no text, all locales.
  * <locale>.png    3840x2560 (3:2), localized headline (captions "01-look") over three
@@ -59,7 +61,10 @@ const shoot = async (html, w, h, file) => {
   await page.close();
   execFileSync('python3', ['-c', 'import sys;from PIL import Image;Image.open(sys.argv[1]).convert("RGB").save(sys.argv[1])', file]);
 };
-await shoot(header, 3840, 1646, path.join(out, 'header.png'));
-for (const locale of Object.keys(captions.captions)) await shoot(search(locale), 3840, 2560, path.join(out, `search-${locale}.png`));
+const only = process.argv.slice(2);
+for (const l of only) if (!captions.captions[l]) throw new Error(`no captions for ${l}`);
+const locales = only.length ? only : Object.keys(captions.captions);
+if (!only.length) await shoot(header, 3840, 1646, path.join(out, 'header.png'));
+for (const locale of locales) await shoot(search(locale), 3840, 2560, path.join(out, `search-${locale}.png`));
 await browser.close();
-console.log(`wrote header + ${Object.keys(captions.captions).length} search assets to ${out}`);
+console.log(`wrote ${only.length ? '' : 'header + '}${locales.length} search assets to ${out}`);

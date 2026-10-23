@@ -1,0 +1,33 @@
+{
+  "locale": "pt-PT",
+  "listing": {
+    "name": "Color Catch: Jogo da Memória",
+    "nameFallback": "Color Catch: Memória a Cores",
+    "subtitle": "Jogos em família e com amigos",
+    "keywords": "2,jogadores,pares,cores,dados,pinos,tabuleiro,madeira,offline,avós,concentração,adultos,peças",
+    "promotionalText": "De 2 a 4 jogadores no mesmo iPhone ou iPad, ou contra o Coelho, a Raposa e a Coruja. 3 e 4 jogadores, os tabuleiros Grande e Gigante e a Coruja vêm com a compra única.",
+    "description": "O jogo da memória com pinos de madeira para jogar em família e com amigos, em qualquer idade. Olha para os pinos coloridos, memoriza onde está cada um, lança o dado e encontra a cor. Ganha quem juntar mais pinos.\n\nOs pinos coloridos estão de pé num tabuleiro redondo de madeira. Tens alguns segundos para olhar e depois todos passam a ser madeira lisa. Lança o dado: sai uma cor, e tocas no pino que achas que é dessa cor. Acertaste? O pino vai para a tua bandeja. Falhaste? Ele mostra a cor a todos por um instante antes de se esconder outra vez, e toda a mesa fica a saber alguma coisa. Quando o tabuleiro fica vazio, ganha a bandeja mais cheia.\n\nUma partida no tabuleiro Clássico demora três ou quatro minutos. É a primeira vez? Toca no ? no ecrã inicial para veres quatro passos curtos: Olhe, Role, Ache, Vença.\n\nJOGA SOZINHO OU ACOMPANHADO\n- Joga contra o computador em três níveis: o Coelho é fácil e esquece-se de muita coisa, a Raposa lembra-se de mais ou menos metade do tabuleiro e a Coruja lembra-se de quase tudo.\n- De 2 a 4 jogadores, a passar um único iPhone ou iPad de mão em mão. Sem segundo aparelho, sem convites, sem esperas.\n- Escreve o nome de cada jogador ou joga sem teclado como um animal: raposa, coruja, urso, sapo, coelho ou gato. Os nomes já usados voltam com um toque, e a desforra mantém os mesmos jogadores.\n\nQUEM ESTÁ A GANHAR?\n- Vitórias e partidas de cada jogador, pelo nome, com a percentagem de vitórias.\n- O teu historial contra o Coelho, a Raposa e a Coruja, com a sequência de vitórias atual e a melhor.\n- As estatísticas ficam no teu aparelho e podes repô-las a zero quando quiseres.\n\nUM TABULEIRO QUE CRESCE CONTIGO\n- Pequeno (16 pinos) para começar com calma, Clássico (25), Grande (36) e Gigante (40) para um verdadeiro desafio.\n- O Modo criança dá mais tempo para olhar para o tabuleiro e transforma o empate numa vitória de todos. Fora dele, o empate decide-se num minitabuleiro, em morte súbita.\n- A jogada extra ao acertar vem ligada de início, como na regra original, e podes desligá-la.\n- O tabuleiro ocupa o ecrã todo em qualquer iPhone ou iPad.\n\nFÁCIL DE VER, PARA TODOS\n- Seis cores fortes (vermelho, amarelo, verde, azul, roxo e rosa) num tabuleiro de madeira acolhedor.\n- És daltónico ou tens dificuldade em distinguir duas cores? Liga as Formas nos pinos nos Ajustes e cada cor ganha a sua (círculo, triângulo, quadrado, estrela, coração e losango) nos pinos e no dado. Podes jogar a partida inteira só pelas formas.\n- Modo claro e escuro, texto dinâmico, VoiceOver em cada pino com anúncio da vez, do dado e dos acertos, e suporte para Reduzir movimento.\n- Botões grandes, só toques. Nada de arrastar, nada de toques longos.\n\nFEITO PARA JOGAR COM CALMA\n- Sem conta, sem registo, sem e-mail.\n- Grátis nos tabuleiros Pequeno e Clássico, contra o Coelho e a Raposa, e para 2 jogadores. Uma compra opcional desbloqueia os tabuleiros Grande e Gigante, a Coruja e os modos para 3 e 4 jogadores. As gorjetas opcionais apoiam o jogo e não desbloqueiam nada. Cada compra passa primeiro por uma pergunta rápida só para adultos.\n- Não recolhemos dados. Os nomes e as estatísticas ficam só no teu aparelho. Sem ferramentas de análise, publicidade ou rastreio.\n- Funciona totalmente offline: no avião, no carro, em qualquer lado.\n- Cliques suaves e um sininho ao acertar, que se desligam com um toque.\n\nFeito para iPhone e iPad. Classificação 4+.\n\nDúvidas ou ideias? ravibitspilani@gmail.com",
+    "privacyPolicyUrl": "https://teja788.github.io/peg-recall/privacy.html",
+    "supportUrl": "https://teja788.github.io/peg-recall/support.html",
+    "marketingUrl": "https://teja788.github.io/peg-recall/"
+  },
+  "captions": {
+    "01-look": "Olha. Memoriza. Encontra.",
+    "02-roll": "Lança o dado. Escolhe o pino.",
+    "03-family": "Um ecrã, a família toda",
+    "04-rivals": "Coelho, Raposa ou Coruja?",
+    "05-sizes": "De 16 a 40 pinos",
+    "06-shapes": "Formas para daltónicos",
+    "07-win-dark": "Em todo o lado, mesmo offline"
+  },
+  "research": {
+    "topSuggestions": [
+      "jogo da memória",
+      "jogo da memória - jogo para 2",
+      "jogos de memoria",
+      "jogos de 2",
+      "jogo da memória. pares memo"
+    ],
+    "chosenKeywordsWhy": "PT autocomplete completes \"jogo da memória\", \"jogos de memoria\" and \"jogos de 2\"; name + subtitle cover jogo/jogos/memória/família and keywords add 2 + jogadores for the 2-player phrases. The \"jogo da memória\" top 10 is soft (median ~890 ratings, the pure memory-game titles 10–211), so the name keeps that exact phrase. Rest: pares, cores, dados, pinos, tabuleiro, madeira, offline, peças (PT word for game pieces), avós, adultos."
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "_note": "Custom product page (create after 1.2.1 is live). 'shots' maps each store shot to its source frame; style+captions are compose-screenshots.mjs input (see ../README.md).",
+  "referenceName": "Color-blind",
+  "season": "Evergreen (first batch)",
+  "linkedSearches": [
+    "colorblind games",
+    "colour blind games"
+  ],
+  "angle": "A shape on every peg, so colors that look alike can still be told apart",
+  "promotionalText": {
+    "en-US": "Turn on Shapes on pegs in Settings and every color gets its own shape too. 3 and 4 players, Big and Huge boards and Owl come with the one-time unlock.",
+    "en-GB": "Turn on Shapes on pegs in Settings and every colour gets its own shape too. 3 and 4 players, Big and Huge boards and Owl come with the one-time unlock.",
+    "hi": "सेटिंग्स में \"गोटियों पर आकार\" चालू करें: हर रंग का अपना आकार। 3 और 4 खिलाड़ी, बड़ा और विशाल बोर्ड और उल्लू एक बार के अनलॉक से मिलते हैं।"
+  },
+  "keywords": {
+    "en-US": [
+      "colorblind"
+    ],
+    "en-GB": [
+      "colorblind"
+    ],
+    "hi": []
+  },
+  "needsKeywordField": {
+    "en-US": [
+      "colour"
+    ],
+    "en-GB": [
+      "colour"
+    ]
+  },
+  "_keywordNote": "\"colorblind\" is in the en-US and en-GB keyword fields of listing.json from 1.3 on (Oct 23 2026): it can be linked only once 1.3 is live with it (check GET searchKeywords). \"colour\" is in no field (the en-GB subtitle has \"Colour\").",
+  "shots": {
+    "01-shapes": "06-shapes",
+    "02-look": "01-look",
+    "03-roll": "02-roll",
+    "04-pass": "03-family",
+    "05-rivals": "04-rivals",
+    "06-win": "07-win-dark"
+  },
+  "style": {
+    "font": "../../fonts/Nunito.ttf",
+    "text": "#2B2622",
+    "background": [
+      "#FBF6EC",
+      "#EFE3CF"
+    ],
+    "dots": [
+      "#CE1202",
+      "#F0E442",
+      "#009E73",
+      "#0072B2",
+      "#6201DA",
+      "#CC79A7"
+    ]
+  },
+  "captions": {
+    "en-US": {
+      "01-shapes": "Shapes for color-blind players",
+      "02-look": "Look. Remember. Find it.",
+      "03-roll": "Roll a color. Find the peg.",
+      "04-pass": "Pass and play, take turns",
+      "05-rivals": "Solo? Play Bunny, Fox or Owl",
+      "06-win": "Confetti for every winner"
+    },
+    "en-GB": {
+      "01-shapes": "Shapes for colour-blind players",
+      "02-look": "Look. Remember. Find it.",
+      "03-roll": "Roll a colour. Find the peg.",
+      "04-pass": "Pass and play, take turns",
+      "05-rivals": "Solo? Play Bunny, Fox or Owl",
+      "06-win": "Confetti for every winner"
+    },
+    "hi": {
+      "01-shapes": "कलर-ब्लाइंड के लिए आकार",
+      "02-look": "देखो। याद रखो। ढूँढो।",
+      "03-roll": "पासा फेंको, गोटी ढूँढो",
+      "04-pass": "बारी-बारी से खेलो",
+      "05-rivals": "खरगोश, लोमड़ी या उल्लू?",
+      "06-win": "हर जीत पर कंफ़ेटी"
+    }
+  }
+}

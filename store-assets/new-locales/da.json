@@ -1,0 +1,33 @@
+{
+  "locale": "da",
+  "uiFile": "da",
+  "listing": {
+    "name": "Color Catch: Huskespil",
+    "nameFallback": "Color Catch: Huskespil i træ",
+    "subtitle": "Brætspil for familie og venner",
+    "keywords": "hukommelsesspil,spil,to,2,spillere,terning,farver,koncentration,par,offline,brikker,selskabsspil",
+    "promotionalText": "Nu på dansk! Spil mod Kanin, Ræv eller Ugle, eller skiftes med 2 til 4 spillere på én iPhone eller iPad. Ugle, 3 og 4 spillere følger med engangskøbet. Ingen konto.",
+    "description": "Huskespillet med træbrikker, som familie og venner spiller sammen, i alle aldre. Kig på de farvede brikker, husk, hvor de står, slå så med terningen, og find farven. Flest brikker vinder.\n\nFarvede brikker står på et rundt bræt af træ. Du får et par sekunder til at kigge, så bliver alle brikker til almindeligt træ. Slå med terningen, den lander på en farve, og tryk på den brik, du tror har den farve. Rigtigt? Så ryger brikken over i din skål. Forkert? Så viser den sin farve for alle et øjeblik, før den gemmer sig igen – så hele bordet lærer noget. Når brættet er tomt, vinder den fyldigste skål.\n\nEt spil på Klassisk tager tre-fire minutter. Ny? Tryk på ? på startsiden for fire korte trin: Kig, Slå, Find, Vind.\n\nSPIL ALENE ELLER SAMMEN\n- Spil mod computeren på tre niveauer. Kanin er let og glemmer meget, Ræv husker cirka halvdelen af brættet, og Ugle husker næsten alt.\n- Send én iPhone eller iPad rundt til 2 til 4 spillere. Ingen ekstra enhed, ingen invitationer, ingen ventetid.\n- Skriv hver spillers navn, eller spring tastaturet over, og spil som et dyr: ræv, ugle, bjørn, frø, kanin eller kat. Navne, du har brugt før, kommer tilbage som knapper, og Spil igen beholder de samme spillere.\n\nSE, HVEM DER FØRER\n- Sejre og spillede spil for hver spiller, med navn og sejrsprocent.\n- Dit resultat mod Kanin, Ræv og Ugle, med nuværende og bedste sejrsstime.\n- Statistikken bliver på din enhed, og du kan nulstille den når som helst.\n\nET BRÆT, DER VOKSER MED DIG\n- Lille (16 brikker) til en blid start, Klassisk (25), Stort (36) og Kæmpe (40), når du vil have en rigtig udfordring.\n- Børnetilstand giver længere tid til at kigge på brættet og gør uafgjort til en delt sejr. Ellers afgøres uafgjort med et omspil på et minibræt.\n- Ekstra tur ved rigtigt gæt er slået til fra start, ligesom i de oprindelige regler – og du kan slå den fra.\n- Brættet fylder skærmen på alle iPhone- og iPad-modeller.\n\nGODT FOR ØJNENE, OG FOR ALLE\n- Seks klare farver – rød, gul, grøn, blå, lilla og lyserød – på et varmt træbræt.\n- Farveblind, eller svært ved at skelne to farver? Slå Former på brikker til, så får hver farve sin egen form – cirkel, trekant, firkant, stjerne, hjerte, rombe – på brikkerne og på terningen, så hele spillet kan spilles efter form.\n- Lys og mørk tilstand, Dynamisk tekst, VoiceOver-etiketter på hver brik med oplæste ture, slag og træffere samt understøttelse af Reducer bevægelse.\n- Store felter, kun tryk. Ingen træk-og-slip, ingen lange tryk.\n\nSTILLE OG ROLIGT\n- Ingen konto, ingen tilmelding, ingen e-mailadresse.\n- Gratis at spille på brætterne Lille og Klassisk, mod Kanin og Ræv og med 2 spillere. Ét valgfrit engangskøb i appen låser op for brætterne Stort og Kæmpe, Ugle og spil med 3 og 4 spillere. Frivillige bidrag støtter spillet og låser ikke noget op. Køb ligger bag et hurtigt spørgsmål, som kun voksne skal svare på.\n- Ingen data indsamles. Spillernavne og statistik gemmes kun på din enhed. Ingen analyse-, reklame- eller sporingsværktøjer.\n- Virker helt offline – i flyet, i bilen, overalt.\n- Bløde klik og en klokke ved et rigtigt gæt, slås fra med ét tryk.\n\nLavet til iPhone og iPad. Aldersgrænse 4+.\n\nSpørgsmål eller idéer: ravibitspilani@gmail.com",
+    "privacyPolicyUrl": "https://teja788.github.io/peg-recall/privacy.html",
+    "supportUrl": "https://teja788.github.io/peg-recall/support.html",
+    "marketingUrl": "https://teja788.github.io/peg-recall/"
+  },
+  "captions": {
+    "01-look": "Kig. Husk. Find.",
+    "02-roll": "Slå en farve. Vælg brikken.",
+    "03-family": "På skift med familien",
+    "04-rivals": "Kanin, Ræv eller Ugle?",
+    "05-sizes": "Fra 16 til 40 brikker",
+    "06-shapes": "Former for farveblinde",
+    "07-win-dark": "Spil overalt, også offline"
+  },
+  "research": {
+    "topSuggestions": [
+      "huskespil (exact term in autocomplete; top-10 median 658)",
+      "spil for 2 (exact term in autocomplete; crowded, top-10 median 4980)",
+      "hukommelse → hukommelsestræning (training term, skipped: no benefit claims)",
+      "familiespil (no autocomplete; results are doll-house apps)"
+    ],
+    "chosenKeywordsWhy": "huskespil is the Danish word people type and its top 10 is beatable (median 658, mostly English memory apps), so it anchors the name. brætspil + familie + venner fit exactly in the 30-char subtitle, and \"for\" there completes \"spil for 2\"/\"spil for to\" with the keywords spil/2/to/spillere. hukommelsesspil is the longer generic synonym (not the trademark); koncentration/par are the classic game names; terning, farver, brikker, offline, selskabsspil describe the game."
+  }
+}

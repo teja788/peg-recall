@@ -1,0 +1,81 @@
+{
+  "_note": "Custom product page (create after 1.2.1 is live). 'shots' maps each store shot to its source frame; style+captions are compose-screenshots.mjs input (see ../README.md).",
+  "referenceName": "Gentle games",
+  "season": "Evergreen (first batch)",
+  "linkedSearches": [
+    "toddler games",
+    "preschool games"
+  ],
+  "angle": "Short, gentle games: Small board, Bunny, shapes, confetti. Never caption the audience; Kid mode row never in frame.",
+  "promotionalText": {
+    "en-US": "Short, gentle games: roll the die, find the peg, enjoy the confetti. Bunny goes easy. 3 and 4 players, Big and Huge boards and Owl come with the one-time unlock.",
+    "en-GB": "Short, gentle games: roll the die, find the peg, enjoy the confetti. Bunny goes easy. 3 and 4 players, Big and Huge boards and Owl come with the one-time unlock.",
+    "hi": "छोटे, आसान खेल: पासा फेंको, गोटी ढूँढो, कंफ़ेटी का मज़ा लो। खरगोश आराम से खेलता है। 3 और 4 खिलाड़ी, बड़ा और विशाल बोर्ड और उल्लू एक बार के अनलॉक से मिलते हैं।"
+  },
+  "keywords": {
+    "en-US": [],
+    "en-GB": [],
+    "hi": []
+  },
+  "needsKeywordField": {
+    "en-US": [
+      "toddler",
+      "preschool"
+    ],
+    "en-GB": [
+      "toddler",
+      "preschool"
+    ]
+  },
+  "_keywordNote": "toddler and preschool were removed from the keyword fields in the 1.2.1 resubmit (2.3.8). Owner decides whether to add them back; until then the page has no linked keyword.",
+  "shots": {
+    "01-roll": "02-roll",
+    "02-look": "01-look",
+    "03-shapes": "06-shapes",
+    "04-gentle": "05-sizes",
+    "05-win": "07-win-dark",
+    "06-turns": "03-family"
+  },
+  "style": {
+    "font": "../../fonts/Nunito.ttf",
+    "text": "#2B2622",
+    "background": [
+      "#FBF6EC",
+      "#EFE3CF"
+    ],
+    "dots": [
+      "#CE1202",
+      "#F0E442",
+      "#009E73",
+      "#0072B2",
+      "#6201DA",
+      "#CC79A7"
+    ]
+  },
+  "captions": {
+    "en-US": {
+      "01-roll": "Roll a color. Find the peg.",
+      "02-look": "Look. Remember. Find it.",
+      "03-shapes": "A shape for every color",
+      "04-gentle": "Bunny goes easy on you",
+      "05-win": "Confetti for every winner",
+      "06-turns": "Take turns, pass and play"
+    },
+    "en-GB": {
+      "01-roll": "Roll a colour. Find the peg.",
+      "02-look": "Look. Remember. Find it.",
+      "03-shapes": "A shape for every colour",
+      "04-gentle": "Bunny goes easy on you",
+      "05-win": "Confetti for every winner",
+      "06-turns": "Take turns, pass and play"
+    },
+    "hi": {
+      "01-roll": "पासा फेंको, गोटी ढूँढो",
+      "02-look": "देखो। याद रखो। ढूँढो।",
+      "03-shapes": "हर रंग का अपना आकार",
+      "04-gentle": "खरगोश आराम से खेलता है",
+      "05-win": "हर जीत पर कंफ़ेटी",
+      "06-turns": "बारी लो, आगे बढ़ाओ"
+    }
+  }
+}

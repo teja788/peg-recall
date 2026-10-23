@@ -1,0 +1,104 @@
+{
+  "_note": "Custom product page (create after 1.2.1 is live). 'shots' maps each store shot to its source frame; style+captions are compose-screenshots.mjs input (see ../README.md).",
+  "referenceName": "Family and party",
+  "season": "Evergreen (first batch)",
+  "linkedSearches": [
+    "2 player games",
+    "board games",
+    "dice games",
+    "pass and play"
+  ],
+  "angle": "Up to 4 players on one device, pass and play, family game night",
+  "promotionalText": {
+    "en-US": "Family game night on one iPhone or iPad: roll the die, find the peg, pass it on. 3 and 4 players, Big and Huge boards and Owl come with the one-time unlock.",
+    "en-GB": "Family game night on one iPhone or iPad: roll the die, find the peg, pass it on. 3 and 4 players, Big and Huge boards and Owl come with the one-time unlock.",
+    "hi": "एक iPhone या iPad पर परिवार की गेम नाइट: पासा फेंको, गोटी ढूँढो, आगे बढ़ाओ। 3 और 4 खिलाड़ी, बड़ा और विशाल बोर्ड और उल्लू एक बार के अनलॉक से मिलते हैं।"
+  },
+  "keywords": {
+    "en-US": [
+      "2",
+      "player",
+      "board",
+      "dice"
+    ],
+    "en-GB": [
+      "dice",
+      "pass",
+      "board"
+    ],
+    "hi": [
+      "4",
+      "players",
+      "पासा",
+      "जोड़ी"
+    ]
+  },
+  "needsKeywordField": {
+    "en-US": [
+      "two",
+      "pass",
+      "play"
+    ],
+    "en-GB": [
+      "2",
+      "two",
+      "player",
+      "play"
+    ]
+  },
+  "_keywordNote": "en-GB also indexes \"4\" and \"players\" (hi-only for Family in the README table). \"pass\" and \"play\" are in the en-US subtitle, which may already be indexed: check GET searchKeywords before adding them.",
+  "shots": {
+    "01-four": "08-four",
+    "02-pass": "03-family",
+    "03-roll": "02-roll",
+    "04-look": "01-look",
+    "05-rivals": "04-rivals",
+    "06-sizes": "05-sizes",
+    "07-win": "07-win-dark"
+  },
+  "style": {
+    "font": "../../fonts/Nunito.ttf",
+    "text": "#2B2622",
+    "background": [
+      "#FBF6EC",
+      "#EFE3CF"
+    ],
+    "dots": [
+      "#CE1202",
+      "#F0E442",
+      "#009E73",
+      "#0072B2",
+      "#6201DA",
+      "#CC79A7"
+    ]
+  },
+  "captions": {
+    "en-US": {
+      "01-four": "Up to 4 players, one screen",
+      "02-pass": "Pass and play, take turns",
+      "03-roll": "Roll the die. Find the peg.",
+      "04-look": "Look. Remember. Find it.",
+      "05-rivals": "Solo? Play Bunny, Fox or Owl",
+      "06-sizes": "4 board sizes, 16 to 40 pegs",
+      "07-win": "Confetti for every winner"
+    },
+    "en-GB": {
+      "01-four": "Up to 4 players, one screen",
+      "02-pass": "Pass and play, take turns",
+      "03-roll": "Roll the die. Find the peg.",
+      "04-look": "Look. Remember. Find it.",
+      "05-rivals": "Solo? Play Bunny, Fox or Owl",
+      "06-sizes": "4 board sizes, 16 to 40 pegs",
+      "07-win": "Confetti for every winner"
+    },
+    "hi": {
+      "01-four": "एक स्क्रीन पर 4 खिलाड़ी तक",
+      "02-pass": "बारी-बारी से खेलो",
+      "03-roll": "पासा फेंको, गोटी ढूँढो",
+      "04-look": "देखो। याद रखो। ढूँढो।",
+      "05-rivals": "खरगोश, लोमड़ी या उल्लू?",
+      "06-sizes": "बोर्ड के 4 साइज़, 16 से 40 गोटियाँ",
+      "07-win": "हर जीत पर कंफ़ेटी"
+    }
+  }
+}
