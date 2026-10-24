@@ -4,7 +4,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { tr } from '../src/i18n';
+import { tr, trn } from '../src/i18n';
 import {
   BOARD_CYCLE,
   animalName,
@@ -14,10 +14,13 @@ import {
   useSettings,
   type GameMode,
 } from '../src/store/settings';
+import { dailyNumber, useStats } from '../src/store/stats';
 import { useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
 import { BoardGlyph, BoardMini } from '../src/ui/BoardMini';
 import { IconButton, ModeCard, OptionPill, QuestionGlyph } from '../src/ui/controls';
+import { shareMessage } from '../src/ui/GameOverSheet';
+import { shareText } from '../src/ui/shareText';
 import { joinNames, playerLabel } from '../src/ui/names';
 import { PlayersSheet } from '../src/ui/PlayersSheet';
 import { UnlockSheet } from '../src/ui/UnlockSheet';
@@ -29,6 +32,7 @@ import { BOARD_SPECS, type AvatarId, type Difficulty, type PegColor } from '../s
  * mix up (blue/violet, red/green, violet/purple), and red never stands next to
  * purple.
  */
+const DAILY_PREVIEW: (PegColor | null)[] = ['purple', 'yellow', 'green', null, 'blue', 'yellow', null];
 const PREVIEWS: Record<GameMode, (PegColor | null)[]> = {
   ai: ['yellow', null, 'violet', null, 'violet', null, 'red'],
   '2p': ['green', 'blue', null, 'green', null, 'purple', null],
@@ -90,6 +94,10 @@ export default function Home() {
   const names = useSettings((s) => s.names);
   const avatars = useSettings((s) => s.avatars);
   const subtitles = modeSubtitles(names, avatars, difficulty);
+  const today = dailyNumber(Date.now());
+  // played today already: the card shows the result and shares it
+  const daily = useStats((s) => (s.daily?.n === today ? s.daily : null));
+  const dailyScore = daily?.best.players.find((p) => !p.ai)?.score ?? 0;
 
   // A second tap lands before the push has rendered, and the stack ends up two
   // game screens deep — Back then drops you onto another game instead of Home.
@@ -207,6 +215,22 @@ export default function Home() {
           )}
         </View>
 
+        <ModeCard
+          title={tr('daily.title', { n: today })}
+          subtitle={
+            daily
+              ? tr('daily.done', { pegs: trn('pegs', dailyScore), streak: daily.streak })
+              : tr('daily.sub')
+          }
+          art={<BoardMini width={cardArt} colors={DAILY_PREVIEW} theme={t.scheme} />}
+          action={daily ? tr('share.short') : undefined}
+          onPress={() =>
+            daily
+              ? void shareMessage(shareText(daily.best))
+              : go({ pathname: '/game', params: { mode: 'ai', daily: '1' } })
+          }
+          style={cardStyle}
+        />
         <ModeCard
           title={tr('home.vsComputer')}
           subtitle={subtitles.ai}

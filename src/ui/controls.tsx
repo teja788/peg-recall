@@ -327,9 +327,12 @@ export function ModeCard({
   style,
   locked,
   trial,
+  action,
 }: {
   title: string;
   subtitle: string;
+  /** a word in place of the chevron ("Share"): what a tap does */
+  action?: string;
   /** a little board thumbnail on the left */
   art: React.ReactNode;
   onPress: () => void;
@@ -343,7 +346,7 @@ export function ModeCard({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={optionLabel(title, locked, trial)}
+      accessibilityLabel={action ? `${title}, ${action}` : optionLabel(title, locked, trial)}
       accessibilityHint={locked ? tr('common.lockedHint') : subtitle}
       onPress={onPress}
       style={({ pressed }) => [
@@ -372,9 +375,13 @@ export function ModeCard({
           <LockGlyph size={18} color={t.c.textDim} />
         </View>
       ) : null}
-      <Text allowFontScaling={false} style={{ fontSize: 22, color: t.c.textDim }}>
-        {chevron('›')}
-      </Text>
+      {action ? (
+        <Text style={{ ...t.type.label, color: t.c.accent, marginStart: t.spacing.sm }}>{action}</Text>
+      ) : (
+        <Text allowFontScaling={false} style={{ fontSize: 22, color: t.c.textDim }}>
+          {chevron('›')}
+        </Text>
+      )}
     </Pressable>
   );
 }

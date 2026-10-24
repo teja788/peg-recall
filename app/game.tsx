@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useGame } from '../src/store/game';
 import { maybeRequestReview, reviewDue } from '../src/store/reviewPrompt';
+import { dailyNumber } from '../src/store/stats';
 import {
   deal,
   moreToTry,
@@ -199,9 +200,11 @@ export default function GameScreen() {
   const padR = swap ? insets.left : insets.right;
   const win = useWindowDimensions();
   const reduced = useReduceMotion();
-  const params = useLocalSearchParams<{ mode?: string }>();
+  const params = useLocalSearchParams<{ mode?: string; daily?: string }>();
   /** the mode asked for; `deal` decides what is actually played */
   const requested: GameMode = isMode(params.mode) ? params.mode : 'ai';
+  /** Home's "Today's board": the first game here is the daily board */
+  const isDaily = params.daily === '1';
   const unlocked = useSettings((s) => s.unlocked);
 
   const hydrated = useSettings((s) => s.hydrated);
@@ -210,6 +213,7 @@ export default function GameScreen() {
   const toggleSetting = useSettings((s) => s.toggle);
 
   const state = useGame((s) => s.state);
+  const daily = useGame((s) => s.daily);
   const busy = useGame((s) => s.busy);
   const feedback = useGame((s) => s.feedback);
   const paused = useGame((s) => s.paused);
@@ -256,8 +260,16 @@ export default function GameScreen() {
    * `once` plays this game on other choices without storing them.
    */
   const dealNew = useCallback(
-    (once?: Partial<Pick<Settings, 'boardSize' | 'difficulty'>>) => {
+    (once?: Partial<Pick<Settings, 'boardSize' | 'difficulty'>>, daily = false) => {
       const s = useSettings.getState();
+      if (daily) {
+        // Classic vs Fox on the standard rules, never behind the unlock, and
+        // seeded by the day: the same board and dice for everyone
+        const n = dailyNumber(Date.now());
+        start('ai', { ...s, boardSize: 'classic', difficulty: 'fox', bonusTurnOnMatch: true, kidMode: false }, n, n);
+        trial.current = [];
+        return;
+      }
       const d = deal(requested, { ...s, ...once });
       start(d.mode, d.settings);
       trial.current = d.tries;
@@ -272,8 +284,8 @@ export default function GameScreen() {
     if (!hasState) started.current = false;
     if (started.current) return;
     started.current = true;
-    dealNew();
-  }, [hydrated, hasState, dealNew, leaving]);
+    dealNew(undefined, isDaily);
+  }, [hydrated, hasState, dealNew, leaving, isDaily]);
 
   useEffect(
     () => () => {
@@ -710,6 +722,7 @@ export default function GameScreen() {
     {view.phase === 'gameOver' ? (
       <GameOverSheet
         state={view}
+        daily={daily ?? undefined}
         onRematch={restart}
         onHome={goHome}
         upsell={

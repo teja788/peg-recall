@@ -11,7 +11,8 @@
 
 import type { AvatarId, Difficulty, GameState, PlayerSpec } from '../engine/types';
 import { playerLabel } from '../ui/names';
-import { AVATAR_CYCLE, cleanName, nameKey, nameToStore } from './settingsModel';
+import type { ShareResult } from '../ui/shareText';
+import { AVATAR_CYCLE, BOARD_CYCLE, cleanName, nameKey, nameToStore } from './settingsModel';
 
 export interface WinRecord {
   played: number;
@@ -30,8 +31,20 @@ export interface VsAiStats extends WinRecord {
   bestStreak: number;
 }
 
+/** The daily board (PLAN-v1.3 S2): Classic, solo vs Fox, the same for everyone that day. */
+export interface DailyStats {
+  /** board number of the last daily board played (see `dailyNumber`) */
+  n: number;
+  /** that day's best game, for the Home card and its Share */
+  best: ShareResult;
+  /** days in a row with the daily board played, ending on day `n` */
+  streak: number;
+  bestStreak: number;
+}
+
 export interface Stats {
-  version: 1;
+  /** 1: up to 1.2; 2 added `daily` */
+  version: 2;
   /** human seats only, keyed by `playerKey` */
   players: Record<string, PlayerStats>;
   vsAi: Record<Difficulty, VsAiStats>;
@@ -40,6 +53,7 @@ export interface Stats {
   finishedDays: string[];
   /** app version the review prompt was last shown for */
   reviewAskedVersion: string | null;
+  daily: DailyStats | null;
 }
 
 export const STATS_KEY = 'pegrecall.stats.v1';
@@ -57,12 +71,13 @@ function emptyVsAi(): VsAiStats {
 /** A fresh, mutable empty record. */
 export function emptyStats(): Stats {
   return {
-    version: 1,
+    version: 2,
     players: {},
     vsAi: { bunny: emptyVsAi(), fox: emptyVsAi(), owl: emptyVsAi() },
     gamesFinished: 0,
     finishedDays: [],
     reviewAskedVersion: null,
+    daily: null,
   };
 }
 
@@ -189,6 +204,35 @@ export function applyGameResult(stats: Stats, state: GameState, now: number): St
   };
 }
 
+/* -------------------------------------------------------------- daily board */
+
+/** Launch day, board #0. */
+const DAILY_EPOCH = Date.UTC(2026, 8, 24);
+
+/** Days since launch (2026-09-24) on the local calendar: today's board number
+ *  and its seed, so everyone gets the same board and dice that day. */
+export function dailyNumber(now: number): number {
+  const d = new Date(now);
+  return Math.max(0, Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - DAILY_EPOCH) / 86_400_000));
+}
+
+const me = (r: ShareResult) => r.players.find((p) => !p.ai);
+
+/** Fold a finished daily board in: the day's best game, and the streak. */
+export function applyDailyResult(stats: Stats, n: number, result: ShareResult): Stats {
+  const prev = stats.daily;
+  const best = { ...result, daily: n };
+  if (prev && prev.n === n) {
+    const a = me(best);
+    const b = me(prev.best);
+    const better = !!a && (!b || a.score > b.score || (a.score === b.score && a.won && !b.won));
+    return better ? { ...stats, daily: { ...prev, best } } : stats;
+  }
+  if (prev && prev.n > n) return stats; // the clock went back
+  const streak = prev && prev.n === n - 1 ? prev.streak + 1 : 1;
+  return { ...stats, daily: { n, best, streak, bestStreak: Math.max(prev?.bestStreak ?? 0, streak) } };
+}
+
 /* -------------------------------------------------------------- sanitizing */
 
 function count(v: unknown): number {
@@ -205,6 +249,32 @@ function sanitizeWinRecord(r: Record<string, unknown>): WinRecord {
 }
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+function sanitizeShareResult(v: unknown): ShareResult | null {
+  if (!isRecord(v) || !BOARD_CYCLE.includes(v.board as ShareResult['board']) || !Array.isArray(v.players)) return null;
+  const players = v.players
+    .filter(isRecord)
+    .filter((p) => AVATAR_CYCLE.includes(p.avatar as AvatarId))
+    .slice(0, 4)
+    .map((p) => {
+      const name = cleanName(p.name);
+      return {
+        ...(name ? { name } : {}),
+        avatar: p.avatar as AvatarId,
+        ai: p.ai === true,
+        score: count(p.score),
+        won: p.won === true,
+      };
+    });
+  if (players.length === 0) return null;
+  return {
+    ...(typeof v.daily === 'number' ? { daily: count(v.daily) } : {}),
+    board: v.board as ShareResult['board'],
+    players,
+    suddenDeath: v.suddenDeath === true,
+    rolls: count(v.rolls),
+  };
+}
 
 /** Whatever came out of storage, as a well-formed Stats (bad parts dropped). */
 export function sanitizeStats(raw: unknown): Stats {
@@ -252,6 +322,16 @@ export function sanitizeStats(raw: unknown): Stats {
   }
 
   if (typeof raw.reviewAskedVersion === 'string') out.reviewAskedVersion = raw.reviewAskedVersion;
+
+  // version 1 had no daily board: it stays null
+  if (isRecord(raw.daily)) {
+    const best = sanitizeShareResult(raw.daily.best);
+    if (best) {
+      const n = count(raw.daily.n);
+      const streak = Math.max(1, count(raw.daily.streak));
+      out.daily = { n, best: { ...best, daily: n }, streak, bestStreak: Math.max(count(raw.daily.bestStreak), streak) };
+    }
+  }
   return out;
 }
 
