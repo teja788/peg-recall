@@ -8,6 +8,13 @@ import type { Strings } from './index';
 // Western digits with the counter টি ("16টি গুটি"), as the app shows them.
 export const bn: Strings = {
   'common.close': 'বন্ধ করো',
+  'reminder.ask': 'কাল মনে করিয়ে দেব?',
+  'reminder.yes': 'হ্যাঁ',
+  'reminder.on': 'রিমাইন্ডার চালু। কাল দেখা হবে!',
+  'reminder.blocked': 'Color Catch-এর নোটিফিকেশন বন্ধ আছে। iOS সেটিংসে গিয়ে চালু করতে পারো।',
+  'reminder.title': 'রোজকার রিমাইন্ডার',
+  'reminder.hint': 'নতুন আজকের বোর্ড তৈরি হলে একটা নোটিফিকেশন',
+  'reminder.body': 'আজকের বোর্ড #{n} তৈরি',
   'common.cancel': 'বাতিল',
   'common.continue': 'এগিয়ে যাও',
   'common.done': 'হয়ে গেছে',

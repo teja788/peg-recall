@@ -10,6 +10,13 @@ import type { Strings } from './index';
 // No "memory" (a trademark): the game is "гра на пам’ять".
 export const uk: Strings = {
   'common.close': 'Закрити',
+  'reminder.ask': 'Нагадати завтра?',
+  'reminder.yes': 'Так',
+  'reminder.on': 'Нагадування ввімкнено. До завтра!',
+  'reminder.blocked': 'Сповіщення Color Catch вимкнено. Їх можна дозволити в Параметрах iOS.',
+  'reminder.title': 'Щоденне нагадування',
+  'reminder.hint': 'Сповіщення, коли готове нове поле дня',
+  'reminder.body': 'Поле дня #{n} уже готове',
   'common.cancel': 'Скасувати',
   'common.continue': 'Далі',
   'common.done': 'Готово',

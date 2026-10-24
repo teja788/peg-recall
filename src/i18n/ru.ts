@@ -7,6 +7,13 @@ import type { Strings } from './index';
 // fractions only. Every board has 16/25/36/40 pegs: all "many" (фишек).
 export const ru: Strings = {
   'common.close': 'Закрыть',
+  'reminder.ask': 'Напомнить завтра?',
+  'reminder.yes': 'Да',
+  'reminder.on': 'Напоминание включено. До завтра!',
+  'reminder.blocked': 'Уведомления Color Catch выключены. Их можно разрешить в Настройках iOS.',
+  'reminder.title': 'Ежедневное напоминание',
+  'reminder.hint': 'Уведомление, когда готово новое поле дня',
+  'reminder.body': 'Поле дня #{n} уже готово',
   'common.cancel': 'Отмена',
   'common.continue': 'Продолжить',
   'common.done': 'Готово',

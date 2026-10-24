@@ -11,6 +11,13 @@ import type { Strings } from './index';
 // so there is no .many. No "memory" (a trademark): the game is "hra na paměť".
 export const cs: Strings = {
   'common.close': 'Zavřít',
+  'reminder.ask': 'Připomenout zítra?',
+  'reminder.yes': 'Ano',
+  'reminder.on': 'Připomínka je zapnutá. Tak zítra!',
+  'reminder.blocked': 'Oznámení pro Color Catch jsou vypnutá. Můžeš je povolit v Nastavení iOS.',
+  'reminder.title': 'Denní připomínka',
+  'reminder.hint': 'Oznámení, když je připravený nový plán dne',
+  'reminder.body': 'Plán dne #{n} je připravený',
   'common.cancel': 'Zrušit',
   'common.continue': 'Pokračovat',
   'common.done': 'Hotovo',

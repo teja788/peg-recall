@@ -6,6 +6,13 @@
 export const en = {
   // shared
   'common.close': 'Close',
+  'reminder.ask': 'Remind me tomorrow?',
+  'reminder.yes': 'Yes',
+  'reminder.on': 'Reminder on. See you tomorrow!',
+  'reminder.blocked': 'Notifications are off for Color Catch. You can allow them in iOS Settings.',
+  'reminder.title': 'Daily reminder',
+  'reminder.hint': 'A notification when a new daily board is ready',
+  'reminder.body': "Today's board #{n} is ready",
   'common.cancel': 'Cancel',
   'common.continue': 'Continue',
   'common.done': 'Done',

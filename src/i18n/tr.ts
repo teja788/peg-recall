@@ -7,6 +7,13 @@ import type { Strings } from './index';
  */
 export const tr: Strings = {
   'common.close': 'Kapat',
+  'reminder.ask': 'Yarın hatırlatayım mı?',
+  'reminder.yes': 'Evet',
+  'reminder.on': 'Hatırlatıcı açık. Yarın görüşürüz!',
+  'reminder.blocked': 'Color Catch bildirimleri kapalı. iOS Ayarlar’dan izin verebilirsin.',
+  'reminder.title': 'Günlük hatırlatıcı',
+  'reminder.hint': 'Yeni günün tahtası hazır olunca bir bildirim',
+  'reminder.body': 'Günün tahtası #{n} hazır',
   'common.cancel': 'Vazgeç',
   'common.continue': 'Devam',
   'common.done': 'Tamam',

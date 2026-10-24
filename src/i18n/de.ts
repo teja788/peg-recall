@@ -2,6 +2,13 @@ import type { Strings } from './index';
 
 export const de: Strings = {
   'common.close': 'Schließen',
+  'reminder.ask': 'Morgen erinnern?',
+  'reminder.yes': 'Ja',
+  'reminder.on': 'Erinnerung an. Bis morgen!',
+  'reminder.blocked': 'Mitteilungen für Color Catch sind aus. Du kannst sie in den iOS-Einstellungen erlauben.',
+  'reminder.title': 'Tägliche Erinnerung',
+  'reminder.hint': 'Eine Mitteilung, wenn ein neues Brett des Tages bereit ist',
+  'reminder.body': 'Brett des Tages #{n} ist bereit',
   'common.cancel': 'Abbrechen',
   'common.continue': 'Weiter',
   'common.done': 'Fertig',

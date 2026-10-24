@@ -3,6 +3,13 @@ import type { Strings } from './index';
 /** Brazilian Portuguese, used for every pt locale. */
 export const pt: Strings = {
   'common.close': 'Fechar',
+  'reminder.ask': 'Lembrar você amanhã?',
+  'reminder.yes': 'Sim',
+  'reminder.on': 'Lembrete ativado. Até amanhã!',
+  'reminder.blocked': 'As notificações do Color Catch estão desativadas. Você pode permiti-las nos Ajustes do iOS.',
+  'reminder.title': 'Lembrete diário',
+  'reminder.hint': 'Um aviso quando houver um novo tabuleiro do dia',
+  'reminder.body': 'O tabuleiro do dia #{n} está pronto',
   'common.cancel': 'Cancelar',
   'common.continue': 'Continuar',
   'common.done': 'Pronto',

@@ -5,6 +5,13 @@ import type { Strings } from './index';
 // "สี" + name (สีแดง). No plural forms: .one and .other match.
 export const th: Strings = {
   'common.close': 'ปิด',
+  'reminder.ask': 'เตือนพรุ่งนี้ไหม?',
+  'reminder.yes': 'ได้เลย',
+  'reminder.on': 'เปิดการเตือนแล้ว เจอกันพรุ่งนี้!',
+  'reminder.blocked': 'การแจ้งเตือนของ Color Catch ปิดอยู่ คุณเปิดได้ในการตั้งค่า iOS',
+  'reminder.title': 'เตือนรายวัน',
+  'reminder.hint': 'แจ้งเตือนเมื่อกระดานวันใหม่พร้อม',
+  'reminder.body': 'กระดานวันนี้ #{n} พร้อมแล้ว',
   'common.cancel': 'ยกเลิก',
   'common.continue': 'ต่อไป',
   'common.done': 'เสร็จ',

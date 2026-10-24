@@ -3,6 +3,13 @@ import type { Strings } from './index';
 /** Dutch, "je". No "memory" (a trademark in the Netherlands and Belgium). */
 export const nl: Strings = {
   'common.close': 'Sluiten',
+  'reminder.ask': 'Morgen een herinnering?',
+  'reminder.yes': 'Ja',
+  'reminder.on': 'Herinnering aan. Tot morgen!',
+  'reminder.blocked': 'Meldingen voor Color Catch staan uit. Je kunt ze toestaan in de iOS-instellingen.',
+  'reminder.title': 'Dagelijkse herinnering',
+  'reminder.hint': 'Een melding als er een nieuw bord van de dag klaarstaat',
+  'reminder.body': 'Bord van de dag #{n} staat klaar',
   'common.cancel': 'Annuleer',
   'common.continue': 'Verder',
   'common.done': 'Klaar',

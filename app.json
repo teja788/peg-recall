@@ -54,7 +54,8 @@
       ],
       ["./plugins/withAlternateIcons", { "Bright": "./assets/icon-bright.png" }],
       "./plugins/withPodsDeploymentTarget",
-      "./plugins/withExpoRouterXcode27Fix"
+      "./plugins/withExpoRouterXcode27Fix",
+      "./plugins/withoutPushEntitlement"
     ],
     "experiments": {
       "typedRoutes": false

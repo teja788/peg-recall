@@ -8,6 +8,13 @@ import type { Strings } from './index';
 // many (11–99) and other (0, 100+) the singular.
 export const ar: Strings = {
   'common.close': 'إغلاق',
+  'reminder.ask': 'نذكّرك غدًا؟',
+  'reminder.yes': 'نعم',
+  'reminder.on': 'التذكير مفعّل. نراك غدًا!',
+  'reminder.blocked': 'إشعارات Color Catch متوقفة. يمكنك السماح بها من إعدادات iOS.',
+  'reminder.title': 'تذكير يومي',
+  'reminder.hint': 'إشعار عندما تصبح لوحة يوم جديدة جاهزة',
+  'reminder.body': 'لوحة اليوم ⁦#{n}⁩ جاهزة',
   'common.cancel': 'إلغاء',
   'common.continue': 'متابعة',
   'common.done': 'تم',

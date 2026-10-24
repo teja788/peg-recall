@@ -172,7 +172,7 @@ test('A8: defaults are never written over stored settings before the read lands'
 
   assert.equal(storage.writes.length, 1);
   const written = JSON.parse(storage.writes[0][1]);
-  assert.equal(written.version, 5);
+  assert.equal(written.version, 6);
   assert.equal(written.kidMode, true);
   assert.equal(written.boardSize, 'huge', 'the stored settings survive the save');
   assert.deepEqual(written.avatars, ['cat', 'frog', 'bunny', 'fox']);

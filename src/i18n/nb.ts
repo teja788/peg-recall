@@ -12,6 +12,13 @@ import type { Strings } from './index';
  */
 export const nb: Strings = {
   'common.close': 'Lukk',
+  'reminder.ask': 'Påminn meg i morgen?',
+  'reminder.yes': 'Ja',
+  'reminder.on': 'Påminnelse på. Vi ses i morgen!',
+  'reminder.blocked': 'Varslinger for Color Catch er slått av. Du kan tillate dem i iOS-innstillinger.',
+  'reminder.title': 'Daglig påminnelse',
+  'reminder.hint': 'Et varsel når dagens nye brett er klart',
+  'reminder.body': 'Dagens brett #{n} er klart',
   'common.cancel': 'Avbryt',
   'common.continue': 'Fortsett',
   'common.done': 'Ferdig',

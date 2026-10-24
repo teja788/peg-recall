@@ -4,6 +4,13 @@ import type { Strings } from './index';
 // quân cờ), the die is "xúc xắc". No plural forms: .one and .other match.
 export const vi: Strings = {
   'common.close': 'Đóng',
+  'reminder.ask': 'Nhắc bạn vào ngày mai?',
+  'reminder.yes': 'Có',
+  'reminder.on': 'Đã bật nhắc nhở. Hẹn gặp ngày mai!',
+  'reminder.blocked': 'Thông báo của Color Catch đang tắt. Bạn có thể cho phép trong Cài đặt iOS.',
+  'reminder.title': 'Nhắc nhở hằng ngày',
+  'reminder.hint': 'Thông báo khi có bàn mới mỗi ngày',
+  'reminder.body': 'Bàn hôm nay #{n} đã sẵn sàng',
   'common.cancel': 'Hủy',
   'common.continue': 'Tiếp tục',
   'common.done': 'Xong',

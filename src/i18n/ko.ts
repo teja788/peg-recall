@@ -7,6 +7,13 @@ import type { Strings } from './index';
  */
 export const ko: Strings = {
   'common.close': '닫기',
+  'reminder.ask': '내일 알려 드릴까요?',
+  'reminder.yes': '네',
+  'reminder.on': '알림을 켰어요. 내일 만나요!',
+  'reminder.blocked': 'Color Catch 알림이 꺼져 있어요. iOS 설정에서 허용할 수 있어요.',
+  'reminder.title': '매일 알림',
+  'reminder.hint': '새 오늘의 판이 준비되면 알려 드려요',
+  'reminder.body': '오늘의 판 #{n} 준비 완료!',
   'common.cancel': '취소',
   'common.continue': '계속',
   'common.done': '완료',
