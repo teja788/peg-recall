@@ -272,4 +272,8 @@ export const nb: Strings = {
   'daily.title': 'Dagens brett #{n}',
   'daily.sub': 'Samme brett for alle i dag',
   'daily.done': '{pegs} i dag · {streak} på rad',
+  'daily.weekend': 'Helg: det store brettet for alle',
+  'daily.doneBest': '{pegs} i dag · {streak} på rad · best {best}',
+  'daily.inARow.one': '{n} dag på rad!',
+  'daily.inARow.other': '{n} dager på rad!',
 };

@@ -269,4 +269,8 @@ export const ta: Strings = {
   'daily.title': 'இன்றைய பலகை #{n}',
   'daily.sub': 'இன்று எல்லோருக்கும் ஒரே பலகை',
   'daily.done': 'இன்று {pegs} · தொடர்ந்து {streak} நாள்',
+  'daily.weekend': 'வார இறுதி: எல்லோருக்கும் பெரிய பலகை',
+  'daily.doneBest': 'இன்று {pegs} · தொடர்ந்து {streak} நாள் · சிறந்தது {best}',
+  'daily.inARow.one': 'தொடர்ந்து {n} நாள்!',
+  'daily.inARow.other': 'தொடர்ந்து {n} நாள்!',
 };

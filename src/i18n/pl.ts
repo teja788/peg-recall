@@ -145,6 +145,12 @@ export const pl: Strings = {
   'daily.title': 'Plansza dnia #{n}',
   'daily.sub': 'Dziś ta sama plansza dla wszystkich',
   'daily.done': 'Dziś {pegs} · seria {streak}',
+  'daily.weekend': 'Weekend: duża plansza dla wszystkich',
+  'daily.doneBest': 'Dziś {pegs} · seria {streak} · rekord {best}',
+  'daily.inARow.one': '{n} dzień z rzędu!',
+  'daily.inARow.few': '{n} dni z rzędu!',
+  'daily.inARow.many': '{n} dni z rzędu!',
+  'daily.inARow.other': '{n} dnia z rzędu!',
 
   'pause.title': 'Pauza',
   'pause.body': 'Plansza zamarła – nikt nie podgląda.',

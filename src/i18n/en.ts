@@ -146,6 +146,10 @@ export const en = {
   'daily.title': "Today's board #{n}",
   'daily.sub': 'The same board for everyone today',
   'daily.done': '{pegs} today · streak {streak}',
+  'daily.weekend': 'Weekend: the Big board for everyone',
+  'daily.doneBest': '{pegs} today · streak {streak} · best {best}',
+  'daily.inARow.one': '{n} day in a row!',
+  'daily.inARow.other': '{n} days in a row!',
 
   // pause
   'pause.title': 'Paused',

@@ -136,6 +136,10 @@ export const ja: Strings = {
   'daily.title': 'きょうのボード #{n}',
   'daily.sub': 'きょうはみんなおなじボード',
   'daily.done': 'きょう{pegs}・{streak}にちれんぞく',
+  'daily.weekend': 'しゅうまつは みんなで大きいボード',
+  'daily.doneBest': 'きょう{pegs}・{streak}にちれんぞく・さいこう{best}',
+  'daily.inARow.one': '{n}にちれんぞく！',
+  'daily.inARow.other': '{n}にちれんぞく！',
 
   'pause.title': 'ポーズ中',
   'pause.body': 'ボードはとまっているよ。だれものぞけないよ。',

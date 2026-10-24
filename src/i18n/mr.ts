@@ -270,4 +270,8 @@ export const mr: Strings = {
   'daily.title': 'आजचा बोर्ड #{n}',
   'daily.sub': 'आज सगळ्यांसाठी एकच बोर्ड',
   'daily.done': 'आज {pegs} · सलग {streak} दिवस',
+  'daily.weekend': 'वीकेंड: सगळ्यांसाठी मोठा बोर्ड',
+  'daily.doneBest': 'आज {pegs} · सलग {streak} दिवस · सर्वोत्तम {best}',
+  'daily.inARow.one': 'सलग {n} दिवस!',
+  'daily.inARow.other': 'सलग {n} दिवस!',
 };

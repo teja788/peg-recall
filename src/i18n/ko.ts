@@ -139,6 +139,10 @@ export const ko: Strings = {
   'daily.title': '오늘의 판 #{n}',
   'daily.sub': '오늘은 모두 같은 판이에요',
   'daily.done': '오늘 {pegs} · 연속 {streak}일',
+  'daily.weekend': '주말: 모두 함께 대형 판',
+  'daily.doneBest': '오늘 {pegs} · 연속 {streak}일 · 최고 {best}',
+  'daily.inARow.one': '{n}일 연속!',
+  'daily.inARow.other': '{n}일 연속!',
 
   'pause.title': '일시 정지',
   'pause.body': '판이 멈췄어요. 아무도 못 봐요.',

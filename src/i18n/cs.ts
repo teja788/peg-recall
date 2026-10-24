@@ -279,4 +279,9 @@ export const cs: Strings = {
   'daily.title': 'Plán dne #{n}',
   'daily.sub': 'Dnes mají všichni stejný plán',
   'daily.done': 'Dnes {pegs} · série {streak}',
+  'daily.weekend': 'Víkend: velký plán pro všechny',
+  'daily.doneBest': 'Dnes {pegs} · série {streak} · rekord {best}',
+  'daily.inARow.one': '{n} den v řadě!',
+  'daily.inARow.few': '{n} dny v řadě!',
+  'daily.inARow.other': '{n} dní v řadě!',
 };

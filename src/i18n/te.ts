@@ -268,4 +268,8 @@ export const te: Strings = {
   'daily.title': 'ఈరోజు బోర్డు #{n}',
   'daily.sub': 'ఈరోజు అందరికీ ఒకే బోర్డు',
   'daily.done': 'ఈరోజు {pegs} · వరుసగా {streak} రోజులు',
+  'daily.weekend': 'వారాంతం: అందరికీ పెద్ద బోర్డు',
+  'daily.doneBest': 'ఈరోజు {pegs} · వరుసగా {streak} రోజులు · బెస్ట్ {best}',
+  'daily.inARow.one': 'వరుసగా {n} రోజు!',
+  'daily.inARow.other': 'వరుసగా {n} రోజులు!',
 };

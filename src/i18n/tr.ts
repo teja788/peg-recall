@@ -139,6 +139,10 @@ export const tr: Strings = {
   'daily.title': 'Günün tahtası #{n}',
   'daily.sub': 'Bugün herkese aynı tahta',
   'daily.done': 'Bugün {pegs} · seri {streak}',
+  'daily.weekend': 'Hafta sonu: herkese büyük tahta',
+  'daily.doneBest': 'Bugün {pegs} · seri {streak} · en iyi {best}',
+  'daily.inARow.one': '{n} gün üst üste!',
+  'daily.inARow.other': '{n} gün üst üste!',
 
   'pause.title': 'Duraklatıldı',
   'pause.body': 'Tahta dondu, kimse bakamaz.',

@@ -136,6 +136,10 @@ export const id: Strings = {
   'daily.title': 'Papan hari ini #{n}',
   'daily.sub': 'Hari ini semua main papan yang sama',
   'daily.done': 'Hari ini {pegs} · beruntun {streak}',
+  'daily.weekend': 'Akhir pekan: papan besar untuk semua',
+  'daily.doneBest': 'Hari ini {pegs} · beruntun {streak} · terbaik {best}',
+  'daily.inARow.one': '{n} hari berturut-turut!',
+  'daily.inARow.other': '{n} hari berturut-turut!',
 
   'pause.title': 'Dijeda',
   'pause.body': 'Papan dibekukan — tidak ada yang mengintip.',

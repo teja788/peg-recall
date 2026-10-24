@@ -137,6 +137,10 @@ export const hi: Strings = {
   'daily.title': 'आज का बोर्ड #{n}',
   'daily.sub': 'आज सबके लिए एक ही बोर्ड',
   'daily.done': 'आज {pegs} · लगातार {streak} दिन',
+  'daily.weekend': 'वीकेंड: सबके लिए बड़ा बोर्ड',
+  'daily.doneBest': 'आज {pegs} · लगातार {streak} दिन · बेस्ट {best}',
+  'daily.inARow.one': 'लगातार {n} दिन!',
+  'daily.inARow.other': 'लगातार {n} दिन!',
 
   'pause.title': 'खेल रुका है',
   'pause.body': 'बोर्ड थमा हुआ है — कोई झाँक नहीं रहा।',

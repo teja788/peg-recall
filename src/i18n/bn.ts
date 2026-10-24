@@ -268,4 +268,8 @@ export const bn: Strings = {
   'daily.title': 'আজকের বোর্ড #{n}',
   'daily.sub': 'আজ সবার জন্য একই বোর্ড',
   'daily.done': 'আজ {pegs} · টানা {streak} দিন',
+  'daily.weekend': 'সপ্তাহান্ত: সবার জন্য বড় বোর্ড',
+  'daily.doneBest': 'আজ {pegs} · টানা {streak} দিন · সেরা {best}',
+  'daily.inARow.one': 'টানা {n} দিন!',
+  'daily.inARow.other': 'টানা {n} দিন!',
 };

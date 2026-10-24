@@ -135,6 +135,10 @@ export const pt: Strings = {
   'daily.title': 'Tabuleiro do dia #{n}',
   'daily.sub': 'O mesmo tabuleiro para todos hoje',
   'daily.done': '{pegs} hoje · sequência {streak}',
+  'daily.weekend': 'Fim de semana: o tabuleiro grande para todos',
+  'daily.doneBest': '{pegs} hoje · sequência {streak} · recorde {best}',
+  'daily.inARow.one': '{n} dia seguido!',
+  'daily.inARow.other': '{n} dias seguidos!',
 
   'pause.title': 'Pausado',
   'pause.body': 'O tabuleiro está congelado. Ninguém espia!',

@@ -29,6 +29,8 @@ export {
   MAX_PLAYERS,
   STATS_KEY,
   applyGameResult,
+  dailyBoard,
+  dailyMilestone,
   dailyNumber,
   playerKey,
   sanitizeStats,

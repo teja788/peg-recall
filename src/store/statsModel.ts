@@ -9,7 +9,7 @@
  * the computer also feed a per-difficulty record with a win streak.
  */
 
-import type { AvatarId, Difficulty, GameState, PlayerSpec } from '../engine/types';
+import type { AvatarId, BoardSize, Difficulty, GameState, PlayerSpec } from '../engine/types';
 import { playerLabel } from '../ui/names';
 import type { ShareResult } from '../ui/shareText';
 import { AVATAR_CYCLE, BOARD_CYCLE, cleanName, nameKey, nameToStore } from './settingsModel';
@@ -31,7 +31,7 @@ export interface VsAiStats extends WinRecord {
   bestStreak: number;
 }
 
-/** The daily board (PLAN-v1.3 S2): Classic, solo vs Fox, the same for everyone that day. */
+/** The daily board (PLAN-v1.3 S2): Classic (Big at weekends), solo vs Fox, the same for everyone that day. */
 export interface DailyStats {
   /** board number of the last daily board played (see `dailyNumber`) */
   n: number;
@@ -214,6 +214,19 @@ const DAILY_EPOCH = Date.UTC(2026, 8, 24);
 export function dailyNumber(now: number): number {
   const d = new Date(now);
   return Math.max(0, Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - DAILY_EPOCH) / 86_400_000));
+}
+
+/** Board #n's board: Big on a Saturday or Sunday (playable without the unlock,
+ *  for the daily game only), else Classic. #0, 2026-09-24, was a Thursday. */
+export function dailyBoard(n: number): BoardSize {
+  const weekday = (4 + n) % 7;
+  return weekday === 6 || weekday === 0 ? 'big' : 'classic';
+}
+
+/** The streak to celebrate on board #n's game-over: 3, 7, 14 or 30 days, only
+ *  on the day it was reached (`daily` is the stats after that game). */
+export function dailyMilestone(daily: DailyStats | null, n: number): number | null {
+  return daily?.n === n && [3, 7, 14, 30].includes(daily.streak) ? daily.streak : null;
 }
 
 const me = (r: ShareResult) => r.players.find((p) => !p.ai);

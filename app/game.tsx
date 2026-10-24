@@ -18,9 +18,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useGame } from '../src/store/game';
 import { maybeRequestReview, reviewDue } from '../src/store/reviewPrompt';
-import { dailyNumber } from '../src/store/stats';
+import { dailyBoard, dailyNumber } from '../src/store/stats';
 import {
   deal,
+  isLocked,
   moreToTry,
   upsellCard,
   useSettings,
@@ -263,10 +264,10 @@ export default function GameScreen() {
     (once?: Partial<Pick<Settings, 'boardSize' | 'difficulty'>>, daily = false) => {
       const s = useSettings.getState();
       if (daily) {
-        // Classic vs Fox on the standard rules, never behind the unlock, and
-        // seeded by the day: the same board and dice for everyone
+        // Classic (Big at weekends) vs Fox on the standard rules, never behind
+        // the unlock, and seeded by the day: the same board and dice for everyone
         const n = dailyNumber(Date.now());
-        start('ai', { ...s, boardSize: 'classic', difficulty: 'fox', bonusTurnOnMatch: true, kidMode: false }, n, n);
+        start('ai', { ...s, boardSize: dailyBoard(n), difficulty: 'fox', bonusTurnOnMatch: true, kidMode: false }, n, n);
         trial.current = [];
         return;
       }
@@ -384,7 +385,10 @@ export default function GameScreen() {
   const restart = useCallback(() => {
     if (leavingNow.current) return; // never a new game mid-exit
     setUnlocking(false);
-    if (trial.current.length) dealNew();
+    // a weekend daily is on the Big board for everyone; replaying it is not
+    const g = useGame.getState();
+    const lockedDaily = g.daily != null && !!g.state && isLocked(useSettings.getState().unlocked, g.state.config.boardSize);
+    if (trial.current.length || lockedDaily) dealNew();
     else rematch();
   }, [rematch, dealNew]);
 

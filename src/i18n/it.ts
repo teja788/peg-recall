@@ -134,6 +134,10 @@ export const it: Strings = {
   'daily.title': 'Tabellone del giorno #{n}',
   'daily.sub': 'Oggi lo stesso tabellone per tutti',
   'daily.done': '{pegs} oggi · serie {streak}',
+  'daily.weekend': 'Weekend: il tabellone grande per tutti',
+  'daily.doneBest': '{pegs} oggi · serie {streak} · record {best}',
+  'daily.inARow.one': '{n} giorno di fila!',
+  'daily.inARow.other': '{n} giorni di fila!',
 
   'pause.title': 'In pausa',
   'pause.body': 'Il tabellone è fermo: niente sbirciatine.',
