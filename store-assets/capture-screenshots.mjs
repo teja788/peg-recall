@@ -68,6 +68,7 @@ const i18n = tsxRequire('../src/i18n/index.ts', import.meta.url);
 if (!i18n.LANGS.includes(LOCALE)) throw new Error(`unknown locale "${LOCALE}" (${i18n.LANGS.join(', ')})`);
 i18n.setLang(LOCALE);
 const T = i18n.tr;
+const { dailyNumber } = tsxRequire('../src/store/statsModel.ts', import.meta.url);
 /** A string template as an anchored regex: "Find {color}" -> /^Find (?<color>.+?)$/. */
 const tpl = (key) =>
   new RegExp(
@@ -484,7 +485,21 @@ const CAPTURE = {
 
   /** 4 - Home: the Bunny / Fox / Owl opponent row, Owl picked. */
   async 4(page, dev, dir) {
-    await seed(page, { boardSize: dev.board, difficulty: 'owl', names: NAMES });
+    // Home's daily card already played today, so it shows a result, a streak
+    // and Share rather than the weekday/weekend subtitle
+    const n = dailyNumber(Date.now());
+    const best = {
+      daily: n,
+      board: 'classic',
+      players: [
+        { name: NAMES[0], avatar: 'fox', ai: false, score: 15, won: true },
+        { avatar: 'fox', ai: true, score: 10, won: false },
+      ],
+      suddenDeath: false,
+      rolls: 31,
+    };
+    const daily = { n, best, streak: 4, bestStreak: 9 };
+    await seed(page, { boardSize: dev.board, difficulty: 'owl', names: NAMES }, { version: 2, players: {}, vsAi: Object.fromEntries(['bunny', 'fox', 'owl'].map((d) => [d, { played: 3, wins: 2, streak: 1, bestStreak: 2 }])), gamesFinished: 9, finishedDays: [], reviewAskedVersion: null, daily });
     if (!dev.rivalsInGame) {
       await goto(page, '/');
       await sleep(900);
