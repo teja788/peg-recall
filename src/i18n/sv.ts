@@ -269,4 +269,8 @@ export const sv: Strings = {
   'daily.title': 'Dagens spelplan #{n}',
   'daily.sub': 'Samma spelplan för alla i dag',
   'daily.done': '{pegs} i dag · {streak} i rad',
+  'daily.weekend': 'Helg: den stora spelplanen för alla',
+  'daily.doneBest': '{pegs} i dag · {streak} i rad · bäst {best}',
+  'daily.inARow.one': '{n} dag i rad!',
+  'daily.inARow.other': '{n} dagar i rad!',
 };

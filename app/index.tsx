@@ -14,7 +14,7 @@ import {
   useSettings,
   type GameMode,
 } from '../src/store/settings';
-import { dailyNumber, useStats } from '../src/store/stats';
+import { dailyBoard, dailyNumber, useStats } from '../src/store/stats';
 import { useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
 import { BoardGlyph, BoardMini } from '../src/ui/BoardMini';
@@ -219,8 +219,12 @@ export default function Home() {
           title={tr('daily.title', { n: today })}
           subtitle={
             daily
-              ? tr('daily.done', { pegs: trn('pegs', dailyScore), streak: daily.streak })
-              : tr('daily.sub')
+              ? daily.bestStreak > daily.streak
+                ? tr('daily.doneBest', { pegs: trn('pegs', dailyScore), streak: daily.streak, best: daily.bestStreak })
+                : tr('daily.done', { pegs: trn('pegs', dailyScore), streak: daily.streak })
+              : dailyBoard(today) === 'big'
+                ? tr('daily.weekend')
+                : tr('daily.sub')
           }
           art={<BoardMini width={cardArt} colors={DAILY_PREVIEW} theme={t.scheme} />}
           action={daily ? tr('share.short') : undefined}

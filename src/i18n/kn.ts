@@ -269,4 +269,8 @@ export const kn: Strings = {
   'daily.title': 'ಇಂದಿನ ಬೋರ್ಡ್ #{n}',
   'daily.sub': 'ಇಂದು ಎಲ್ಲರಿಗೂ ಒಂದೇ ಬೋರ್ಡ್',
   'daily.done': 'ಇಂದು {pegs} · ಸತತ {streak} ದಿನ',
+  'daily.weekend': 'ವಾರಾಂತ್ಯ: ಎಲ್ಲರಿಗೂ ದೊಡ್ಡ ಬೋರ್ಡ್',
+  'daily.doneBest': 'ಇಂದು {pegs} · ಸತತ {streak} ದಿನ · ಉತ್ತಮ {best}',
+  'daily.inARow.one': 'ಸತತ {n} ದಿನ!',
+  'daily.inARow.other': 'ಸತತ {n} ದಿನಗಳು!',
 };

@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 
 import { DEFAULT_RULES, createGame, reduce, type GameState, type PlayerSpec } from '../../engine';
 import { setLang } from '../../i18n';
+import { configFor } from '../game';
+import { DEFAULT_SETTINGS, deal, isLocked } from '../settingsModel';
 import { createStatsStore } from '../stats';
 import {
   EMPTY_STATS,
@@ -10,6 +12,8 @@ import {
   STATS_KEY,
   applyDailyResult,
   applyGameResult,
+  dailyBoard,
+  dailyMilestone,
   dailyNumber,
   emptyStats,
   localDay,
@@ -403,6 +407,24 @@ test('dailyNumber: one board per local day, a new one the next day', () => {
   assert.notEqual(colours(tomorrow), colours(morning), 'next day, another board');
 });
 
+test('dailyBoard: Big on Saturday and Sunday, Classic on weekdays', () => {
+  const board = (y: number, m: number, d: number) => dailyBoard(dailyNumber(new Date(y, m, d, 12).getTime()));
+  assert.equal(board(2026, 9, 23), 'classic', 'Friday Oct 23');
+  assert.equal(board(2026, 9, 24), 'big', 'Saturday Oct 24');
+  assert.equal(board(2026, 9, 25), 'big', 'Sunday Oct 25');
+  assert.equal(board(2026, 9, 26), 'classic', 'Monday Oct 26');
+  assert.equal(board(2026, 8, 24), 'classic', 'launch day, a Thursday');
+  assert.equal(board(2027, 0, 2), 'big', 'a Saturday next year');
+});
+
+test('a weekend daily on Big plays without the unlock; the normal Big board stays locked', () => {
+  const locked = { ...DEFAULT_SETTINGS, unlocked: false, triesUsed: ['big' as const] };
+  const sat = dailyNumber(new Date(2026, 9, 24, 9).getTime());
+  assert.equal(configFor('ai', { ...locked, boardSize: dailyBoard(sat), difficulty: 'fox' }, sat).boardSize, 'big');
+  assert.ok(isLocked(false, 'big'));
+  assert.notEqual(deal('ai', { ...locked, boardSize: 'big' }).settings.boardSize, 'big', 'Big, try used: not dealt');
+});
+
 const daily = (score: number, won: boolean) => ({
   board: 'classic' as const,
   players: [
@@ -424,6 +446,41 @@ test('applyDailyResult: the best game of the day, and a streak of days in a row'
   s = applyDailyResult(s, 13, daily(8, false));
   assert.deepEqual([s.daily?.streak, s.daily?.bestStreak], [1, 2], 'a missed day starts again');
   assert.equal(applyDailyResult(s, 12, daily(20, true)), s, 'the clock went back');
+});
+
+test('daily best streak: kept across a break; an old save without it reads as the streak', () => {
+  let s = EMPTY_STATS;
+  for (const n of [1, 2, 3, 4]) s = applyDailyResult(s, n, daily(9, false));
+  s = applyDailyResult(s, 6, daily(9, false));
+  assert.deepEqual([s.daily?.streak, s.daily?.bestStreak], [1, 4]);
+  const saved = JSON.parse(JSON.stringify(s));
+  delete saved.daily.bestStreak;
+  saved.daily.streak = 5;
+  assert.equal(sanitizeStats(saved).daily?.bestStreak, 5);
+});
+
+test('dailyMilestone: 3, 7, 14 or 30 days, only on the day it was reached', () => {
+  let s = EMPTY_STATS;
+  const seen: (number | null)[] = [];
+  for (let n = 1; n <= 31; n++) {
+    s = applyDailyResult(s, n, daily(9, false));
+    seen.push(dailyMilestone(s.daily, n));
+  }
+  assert.deepEqual(
+    seen.flatMap((m, i) => (m == null ? [] : [[i + 1, m]])),
+    [
+      [3, 3],
+      [7, 7],
+      [14, 14],
+      [30, 30],
+    ],
+  );
+  s = EMPTY_STATS;
+  for (const n of [1, 2, 3]) s = applyDailyResult(s, n, daily(9, false));
+  assert.equal(dailyMilestone(s.daily, 3), 3);
+  assert.equal(dailyMilestone(applyDailyResult(s, 3, daily(20, true)).daily, 3), 3, 'a better game that day: still day 3');
+  assert.equal(dailyMilestone(s.daily, 4), null, 'not on another day');
+  assert.equal(dailyMilestone(null, 3), null);
 });
 
 test('stats v2: a v1 blob hydrates with no daily board; a v2 one keeps it', async () => {

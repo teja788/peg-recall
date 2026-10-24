@@ -15,12 +15,15 @@ import Animated, {
   Easing,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { GameState, PlayerSpec } from '../engine/types';
 import { tr, trn } from '../i18n';
+import { dailyMilestone, useStats } from '../store/stats';
 import { useTheme } from '../theme';
 import { useReduceMotion } from './feedback';
 import { isolate, playerLabel } from './names';
@@ -152,6 +155,31 @@ function UpsellCard({ title, line, action, onAction, onDismiss }: UpsellCardProp
   );
 }
 
+/** "🔥 7 days in a row!" under the headline, on the day a daily streak reaches 3, 7, 14 or 30. */
+function StreakMoment({ daily }: { daily: number }) {
+  const t = useTheme();
+  const reduced = useReduceMotion();
+  const n = useStats((s) => dailyMilestone(s.daily, daily));
+  const pop = useSharedValue(0);
+  useEffect(() => {
+    if (n == null) return;
+    pop.value = withDelay(320, reduced ? withTiming(1, { duration: 200 }) : withSpring(1, { damping: 9, stiffness: 140 }));
+  }, [n, pop, reduced]);
+  const style = useAnimatedStyle(() => ({
+    opacity: Math.min(1, pop.value),
+    transform: [{ scale: reduced ? 1 : 0.6 + 0.4 * pop.value }],
+  }));
+  if (n == null) return null;
+  return (
+    <Animated.Text
+      accessibilityLiveRegion="polite"
+      style={[{ ...t.type.body, color: t.c.accent, fontWeight: '700', textAlign: 'center' }, style]}
+    >
+      {`🔥 ${trn('daily.inARow', n)}`}
+    </Animated.Text>
+  );
+}
+
 export function GameOverSheet({ state, daily, onRematch, onHome, upsell }: GameOverSheetProps) {
   const t = useTheme();
   const reduced = useReduceMotion();
@@ -255,6 +283,7 @@ export function GameOverSheet({ state, daily, onRematch, onHome, upsell }: GameO
                 {tieLine}
               </Text>
             ) : null}
+            {daily != null ? <StreakMoment daily={daily} /> : null}
           </View>
 
           <View style={{ gap: t.spacing.sm }}>

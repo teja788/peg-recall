@@ -138,6 +138,10 @@ export const es: Strings = {
   'daily.title': 'Tablero del día #{n}',
   'daily.sub': 'Hoy, el mismo tablero para todos',
   'daily.done': '{pegs} hoy · racha {streak}',
+  'daily.weekend': 'Fin de semana: el tablero grande para todos',
+  'daily.doneBest': '{pegs} hoy · racha {streak} · mejor {best}',
+  'daily.inARow.one': '¡{n} día seguido!',
+  'daily.inARow.other': '¡{n} días seguidos!',
 
   'pause.title': 'En pausa',
   'pause.body': 'El tablero está congelado: nadie puede espiar.',
