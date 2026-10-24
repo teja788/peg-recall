@@ -270,4 +270,13 @@ export const cs: Strings = {
   'upsell.moreBoth': 'Zahraj si proti Sově na Velkém plánu: jedna hra zdarma.',
   'upsell.moreButton': 'Jdeme na to!',
   'upsell.notNow': 'Teď ne',
+  'share.button': 'Sdílet výsledek',
+  'share.title': 'Color Catch · {board} hrací plán',
+  'share.rolls': '{pegs}, hodů: {n}',
+  'share.cta': 'Dokážeš to překonat?',
+  'share.titleDaily': 'Color Catch #{n} · plán dne',
+  'share.short': 'Sdílet',
+  'daily.title': 'Plán dne #{n}',
+  'daily.sub': 'Dnes mají všichni stejný plán',
+  'daily.done': 'Dnes {pegs} · série {streak}',
 };

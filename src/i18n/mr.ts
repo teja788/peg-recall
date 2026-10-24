@@ -261,4 +261,13 @@ export const mr: Strings = {
   'upsell.moreBoth': 'मोठ्या बोर्डवर घुबडाशी खेळून बघा: एक खेळ मोफत.',
   'upsell.moreButton': 'चला खेळूया',
   'upsell.notNow': 'आत्ता नको',
+  'share.button': 'निकाल शेअर करा',
+  'share.title': 'Color Catch · {board} बोर्ड',
+  'share.rolls': '{n} वेळा फासा टाकून {pegs}',
+  'share.cta': 'तुम्ही यावर मात करू शकता का?',
+  'share.titleDaily': 'Color Catch #{n} · आजचा बोर्ड',
+  'share.short': 'शेअर',
+  'daily.title': 'आजचा बोर्ड #{n}',
+  'daily.sub': 'आज सगळ्यांसाठी एकच बोर्ड',
+  'daily.done': 'आज {pegs} · सलग {streak} दिवस',
 };

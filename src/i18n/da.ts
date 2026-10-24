@@ -261,4 +261,13 @@ export const da: Strings = {
   'upsell.moreBoth': 'Spil mod Ugle på det store bræt: ét spil gratis.',
   'upsell.moreButton': 'Kom så',
   'upsell.notNow': 'Ikke nu',
+  'share.button': 'Del resultatet',
+  'share.title': 'Color Catch · {board} bræt',
+  'share.rolls': '{pegs} på {n} slag',
+  'share.cta': 'Kan du slå det?',
+  'share.titleDaily': 'Color Catch #{n} · dagens bræt',
+  'share.short': 'Del',
+  'daily.title': 'Dagens bræt #{n}',
+  'daily.sub': 'Det samme bræt for alle i dag',
+  'daily.done': '{pegs} i dag · {streak} i træk',
 };

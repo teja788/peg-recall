@@ -259,4 +259,13 @@ export const bn: Strings = {
   'upsell.moreBoth': 'বড় বোর্ডে পেঁচার সাথে খেলে দেখো: একটা খেলা ফ্রি।',
   'upsell.moreButton': 'চলো খেলি',
   'upsell.notNow': 'এখন না',
+  'share.button': 'ফলাফল শেয়ার করো',
+  'share.title': 'Color Catch · {board} বোর্ড',
+  'share.rolls': '{n} বার পাশা চেলে {pegs}',
+  'share.cta': 'তুমি কি এটা হারাতে পারবে?',
+  'share.titleDaily': 'Color Catch #{n} · আজকের বোর্ড',
+  'share.short': 'শেয়ার',
+  'daily.title': 'আজকের বোর্ড #{n}',
+  'daily.sub': 'আজ সবার জন্য একই বোর্ড',
+  'daily.done': 'আজ {pegs} · টানা {streak} দিন',
 };

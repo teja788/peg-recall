@@ -277,4 +277,13 @@ export const uk: Strings = {
   'upsell.moreBoth': 'Зіграй із Совою на полі «Велике»: одна гра безкоштовно.',
   'upsell.moreButton': 'Граймо!',
   'upsell.notNow': 'Не зараз',
+  'share.button': 'Поділитися результатом',
+  'share.title': 'Color Catch · {board} поле',
+  'share.rolls': '{pegs}, кидків: {n}',
+  'share.cta': 'Зможеш краще?',
+  'share.titleDaily': 'Color Catch #{n} · поле дня',
+  'share.short': 'Поділитися',
+  'daily.title': 'Поле дня #{n}',
+  'daily.sub': 'Сьогодні в усіх однакове поле',
+  'daily.done': 'Сьогодні {pegs} · серія {streak}',
 };

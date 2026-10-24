@@ -259,4 +259,13 @@ export const te: Strings = {
   'upsell.moreBoth': 'పెద్ద బోర్డుపై గుడ్లగూబతో ఆడి చూడండి: ఒక ఆట ఉచితం.',
   'upsell.moreButton': 'ఆడదాం!',
   'upsell.notNow': 'ఇప్పుడు వద్దు',
+  'share.button': 'ఫలితం షేర్ చేయండి',
+  'share.title': 'Color Catch · {board} బోర్డు',
+  'share.rolls': '{n} సార్లు పాచిక వేసి {pegs}',
+  'share.cta': 'మీరు దీన్ని దాటగలరా?',
+  'share.titleDaily': 'Color Catch #{n} · ఈరోజు బోర్డు',
+  'share.short': 'షేర్',
+  'daily.title': 'ఈరోజు బోర్డు #{n}',
+  'daily.sub': 'ఈరోజు అందరికీ ఒకే బోర్డు',
+  'daily.done': 'ఈరోజు {pegs} · వరుసగా {streak} రోజులు',
 };

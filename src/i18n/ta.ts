@@ -260,4 +260,13 @@ export const ta: Strings = {
   'upsell.moreBoth': 'பெரிய பலகையில் ஆந்தையுடன் ஆடிப் பாருங்கள்: ஒரு ஆட்டம் இலவசம்.',
   'upsell.moreButton': 'விளையாடுவோம்!',
   'upsell.notNow': 'இப்போது வேண்டாம்',
+  'share.button': 'முடிவைப் பகிருங்கள்',
+  'share.title': 'Color Catch · {board} பலகை',
+  'share.rolls': '{n} முறை பகடை உருட்டி {pegs}',
+  'share.cta': 'முறியடிக்க முடியுமா?',
+  'share.titleDaily': 'Color Catch #{n} · இன்றைய பலகை',
+  'share.short': 'பகிர்',
+  'daily.title': 'இன்றைய பலகை #{n}',
+  'daily.sub': 'இன்று எல்லோருக்கும் ஒரே பலகை',
+  'daily.done': 'இன்று {pegs} · தொடர்ந்து {streak} நாள்',
 };

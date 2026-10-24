@@ -260,4 +260,13 @@ export const sv: Strings = {
   'upsell.moreBoth': 'Spela mot Uggla på den stora spelplanen: ett spel gratis.',
   'upsell.moreButton': 'Nu kör vi',
   'upsell.notNow': 'Inte nu',
+  'share.button': 'Dela resultatet',
+  'share.title': 'Color Catch · {board} spelplan',
+  'share.rolls': '{pegs} på {n} slag',
+  'share.cta': 'Kan du slå det?',
+  'share.titleDaily': 'Color Catch #{n} · dagens spelplan',
+  'share.short': 'Dela',
+  'daily.title': 'Dagens spelplan #{n}',
+  'daily.sub': 'Samma spelplan för alla i dag',
+  'daily.done': '{pegs} i dag · {streak} i rad',
 };

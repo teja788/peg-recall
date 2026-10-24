@@ -260,4 +260,13 @@ export const kn: Strings = {
   'upsell.moreBoth': 'ದೊಡ್ಡ ಬೋರ್ಡ್‌ನಲ್ಲಿ ಗೂಬೆ ಜೊತೆ ಆಡಿ ನೋಡಿ: ಒಂದು ಆಟ ಉಚಿತ.',
   'upsell.moreButton': 'ಆಡೋಣ!',
   'upsell.notNow': 'ಈಗ ಬೇಡ',
+  'share.button': 'ಫಲಿತಾಂಶ ಹಂಚಿಕೊಳ್ಳಿ',
+  'share.title': 'Color Catch · {board} ಬೋರ್ಡ್',
+  'share.rolls': '{n} ಬಾರಿ ದಾಳ ಹಾಕಿ {pegs}',
+  'share.cta': 'ಇದನ್ನು ಮೀರಿಸಬಲ್ಲಿರಾ?',
+  'share.titleDaily': 'Color Catch #{n} · ಇಂದಿನ ಬೋರ್ಡ್',
+  'share.short': 'ಹಂಚಿ',
+  'daily.title': 'ಇಂದಿನ ಬೋರ್ಡ್ #{n}',
+  'daily.sub': 'ಇಂದು ಎಲ್ಲರಿಗೂ ಒಂದೇ ಬೋರ್ಡ್',
+  'daily.done': 'ಇಂದು {pegs} · ಸತತ {streak} ದಿನ',
 };
