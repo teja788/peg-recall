@@ -1,6 +1,6 @@
 /**
  * The message "Share result" hands to the share sheet: four short lines that
- * read as one WhatsApp bubble (no "Read more"), with the link to our /play page.
+ * read as one WhatsApp bubble (no "Read more"), with the App Store link (no /play page: D3 = no).
  *
  * Pure TypeScript (no React Native), so the tests can run it in every language.
  * The computer is never named in a share: it shows as 🤖 (PLAN-v1.3 D2).
@@ -10,7 +10,7 @@ import { BOARD_SPECS, PEG_COLORS, type AvatarId, type BoardSize, type GameState,
 import { tr } from '../i18n';
 import { isolate, joinNames, playerLabel } from './names';
 
-export const PLAY_URL = 'https://teja788.github.io/peg-recall/play';
+export const PLAY_URL = 'https://apps.apple.com/app/id6813625311';
 
 /** One per peg colour; there is no pink square, so the pinkish "purple" is a heart. */
 const EMOJI: Record<PegColor, string> = {
