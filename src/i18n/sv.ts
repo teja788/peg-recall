@@ -9,6 +9,13 @@ import type { Strings } from './index';
  */
 export const sv: Strings = {
   'common.close': 'Stäng',
+  'reminder.ask': 'Påminn mig i morgon?',
+  'reminder.yes': 'Ja',
+  'reminder.on': 'Påminnelse på. Vi ses i morgon!',
+  'reminder.blocked': 'Notiser för Color Catch är avstängda. Du kan tillåta dem i iOS-inställningar.',
+  'reminder.title': 'Daglig påminnelse',
+  'reminder.hint': 'En notis när dagens nya spelplan är klar',
+  'reminder.body': 'Dagens spelplan #{n} är klar',
   'common.cancel': 'Avbryt',
   'common.continue': 'Fortsätt',
   'common.done': 'Klar',

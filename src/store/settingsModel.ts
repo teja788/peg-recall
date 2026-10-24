@@ -35,6 +35,13 @@ export interface Settings {
   triesUsed: Lockable[];
   /** The "Ready for more?" card after a Classic win has been shown (once ever). */
   moreOffered: boolean;
+  /** Daily reminder (local notifications, iOS): on only after iOS said yes. */
+  reminder: boolean;
+  /** The "Remind me tomorrow?" row has been shown (once ever). */
+  reminderAsked: boolean;
+  /** When the last daily board was finished (ms; 0 = never): reminders come
+   *  at that time of day on the next two days (see `reminderPlan`). */
+  lastDailyAt: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -51,6 +58,9 @@ export const DEFAULT_SETTINGS: Settings = {
   unlocked: false,
   triesUsed: [],
   moreOffered: false,
+  reminder: false,
+  reminderAsked: false,
+  lastDailyAt: 0,
 };
 
 /** Seats stored in `avatars` / `names` (the 4-player mode's count). */
@@ -66,8 +76,9 @@ export const BOARD_CYCLE: BoardSize[] = ['small', 'classic', 'big', 'huge'];
 export const SETTINGS_KEY = 'pegrecall.settings.v1';
 /** Schema version written into the stored blob (1.0 wrote none = version 1;
  *  2 added `names`, 3 added `recentNames`, 4 added `unlocked`, 5 added
- *  `triesUsed` and `moreOffered`). */
-export const SETTINGS_VERSION = 5;
+ *  `triesUsed` and `moreOffered`, 6 added `reminder`, `reminderAsked` and
+ *  `lastDailyAt`). */
+export const SETTINGS_VERSION = 6;
 
 /* ------------------------------------------------------------ player names */
 
@@ -258,6 +269,11 @@ export function sanitize(raw: unknown): Partial<Settings> {
   if (typeof r.kidMode === 'boolean') out.kidMode = r.kidMode;
   if (typeof r.unlocked === 'boolean') out.unlocked = r.unlocked;
   if (typeof r.moreOffered === 'boolean') out.moreOffered = r.moreOffered;
+  if (typeof r.reminder === 'boolean') out.reminder = r.reminder;
+  if (typeof r.reminderAsked === 'boolean') out.reminderAsked = r.reminderAsked;
+  if (typeof r.lastDailyAt === 'number' && Number.isFinite(r.lastDailyAt) && r.lastDailyAt >= 0) {
+    out.lastDailyAt = r.lastDailyAt;
+  }
   if (Array.isArray(r.triesUsed)) {
     // unknown entries drop out; a used try is never forgotten for a bad neighbour
     out.triesUsed = LOCKABLES.filter((v) => (r.triesUsed as unknown[]).includes(v));
@@ -306,6 +322,9 @@ export function persistable(s: Settings): PersistedSettings {
     unlocked: s.unlocked,
     triesUsed: s.triesUsed,
     moreOffered: s.moreOffered,
+    reminder: s.reminder,
+    reminderAsked: s.reminderAsked,
+    lastDailyAt: s.lastDailyAt,
   };
 }
 

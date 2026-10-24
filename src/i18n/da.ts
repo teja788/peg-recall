@@ -10,6 +10,13 @@ import type { Strings } from './index';
  */
 export const da: Strings = {
   'common.close': 'Luk',
+  'reminder.ask': 'Påmind mig i morgen?',
+  'reminder.yes': 'Ja',
+  'reminder.on': 'Påmindelse slået til. Vi ses i morgen!',
+  'reminder.blocked': 'Notifikationer for Color Catch er slået fra. Du kan tillade dem i iOS-indstillinger.',
+  'reminder.title': 'Daglig påmindelse',
+  'reminder.hint': 'En besked, når dagens nye bræt er klar',
+  'reminder.body': 'Dagens bræt #{n} er klar',
   'common.cancel': 'Annuller',
   'common.continue': 'Fortsæt',
   'common.done': 'Færdig',

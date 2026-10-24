@@ -7,6 +7,13 @@ import type { Strings } from './index';
  */
 export const pl: Strings = {
   'common.close': 'Zamknij',
+  'reminder.ask': 'Przypomnieć jutro?',
+  'reminder.yes': 'Tak',
+  'reminder.on': 'Przypomnienie włączone. Do jutra!',
+  'reminder.blocked': 'Powiadomienia Color Catch są wyłączone. Możesz je włączyć w Ustawieniach iOS.',
+  'reminder.title': 'Codzienne przypomnienie',
+  'reminder.hint': 'Powiadomienie, gdy czeka nowa plansza dnia',
+  'reminder.body': 'Plansza dnia #{n} jest gotowa',
   'common.cancel': 'Anuluj',
   'common.continue': 'Dalej',
   'common.done': 'Gotowe',

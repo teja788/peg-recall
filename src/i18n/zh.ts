@@ -5,6 +5,13 @@ import type { Strings } from './index';
  *  mainland China, and Traditional is readable there). */
 export const zh: Strings = {
   'common.close': '關閉',
+  'reminder.ask': '明天提醒你嗎？',
+  'reminder.yes': '好',
+  'reminder.on': '已開啟提醒，明天見！',
+  'reminder.blocked': 'Color Catch 的通知已關閉，可以在 iOS 設定中開啟。',
+  'reminder.title': '每日提醒',
+  'reminder.hint': '新的今日棋盤準備好時通知你',
+  'reminder.body': '今日棋盤 #{n} 準備好了',
   'common.cancel': '取消',
   'common.continue': '繼續',
   'common.done': '完成',

@@ -5,6 +5,13 @@ import type { Strings } from './index';
 // lines about a player use "की बारी" / "की जीत" and stay neutral.
 export const hi: Strings = {
   'common.close': 'बंद करो',
+  'reminder.ask': 'कल याद दिलाएँ?',
+  'reminder.yes': 'हाँ',
+  'reminder.on': 'रिमाइंडर चालू। कल मिलते हैं!',
+  'reminder.blocked': 'Color Catch की सूचनाएँ बंद हैं। तुम iOS सेटिंग्स में इन्हें चालू कर सकते हो।',
+  'reminder.title': 'रोज़ का रिमाइंडर',
+  'reminder.hint': 'नया आज का बोर्ड तैयार होने पर सूचना',
+  'reminder.body': 'आज का बोर्ड #{n} तैयार है',
   'common.cancel': 'रद्द करो',
   'common.continue': 'आगे बढ़ो',
   'common.done': 'हो गया',

@@ -4,6 +4,13 @@ import type { Strings } from './index';
 // "dadu". No plural forms: .one and .other match.
 export const id: Strings = {
   'common.close': 'Tutup',
+  'reminder.ask': 'Ingatkan besok?',
+  'reminder.yes': 'Ya',
+  'reminder.on': 'Pengingat aktif. Sampai besok!',
+  'reminder.blocked': 'Notifikasi Color Catch mati. Kamu bisa mengizinkannya di Pengaturan iOS.',
+  'reminder.title': 'Pengingat harian',
+  'reminder.hint': 'Notifikasi saat papan harian baru siap',
+  'reminder.body': 'Papan hari ini #{n} sudah siap',
   'common.cancel': 'Batal',
   'common.continue': 'Lanjut',
   'common.done': 'Selesai',

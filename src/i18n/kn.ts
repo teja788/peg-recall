@@ -9,6 +9,13 @@ import type { Strings } from './index';
 // 0 with "one" (0 ಕಾಯಿ), like Hindi.
 export const kn: Strings = {
   'common.close': 'ಮುಚ್ಚಿ',
+  'reminder.ask': 'ನಾಳೆ ನೆನಪಿಸಬೇಕೆ?',
+  'reminder.yes': 'ಹೌದು',
+  'reminder.on': 'ಜ್ಞಾಪನೆ ಆನ್ ಆಗಿದೆ. ನಾಳೆ ಸಿಗೋಣ!',
+  'reminder.blocked': 'Color Catch ಅಧಿಸೂಚನೆಗಳು ಆಫ್ ಆಗಿವೆ. iOS ಸೆಟ್ಟಿಂಗ್ಸ್‌ನಲ್ಲಿ ನೀವು ಅವನ್ನು ಅನುಮತಿಸಬಹುದು.',
+  'reminder.title': 'ದೈನಂದಿನ ಜ್ಞಾಪನೆ',
+  'reminder.hint': 'ಹೊಸ ಇಂದಿನ ಬೋರ್ಡ್ ಸಿದ್ಧವಾದಾಗ ಒಂದು ಅಧಿಸೂಚನೆ',
+  'reminder.body': 'ಇಂದಿನ ಬೋರ್ಡ್ #{n} ಸಿದ್ಧವಾಗಿದೆ',
   'common.cancel': 'ರದ್ದು',
   'common.continue': 'ಮುಂದುವರಿಸಿ',
   'common.done': 'ಆಯಿತು',

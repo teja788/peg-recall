@@ -6,6 +6,13 @@ import type { Strings } from './index';
  */
 export const es: Strings = {
   'common.close': 'Cerrar',
+  'reminder.ask': '¿Te lo recuerdo mañana?',
+  'reminder.yes': 'Sí',
+  'reminder.on': 'Recordatorio activado. ¡Hasta mañana!',
+  'reminder.blocked': 'Las notificaciones de Color Catch están desactivadas. Puedes permitirlas en Ajustes de iOS.',
+  'reminder.title': 'Recordatorio diario',
+  'reminder.hint': 'Un aviso cuando haya un nuevo tablero del día',
+  'reminder.body': 'El tablero del día #{n} ya está listo',
   'common.cancel': 'Cancelar',
   'common.continue': 'Continuar',
   'common.done': 'Listo',

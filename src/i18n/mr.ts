@@ -9,6 +9,13 @@ import type { Strings } from './index';
 // ("{color} रंग शोधा") so निळा / हिरवा / पिवळा always agree.
 export const mr: Strings = {
   'common.close': 'बंद करा',
+  'reminder.ask': 'उद्या आठवण करून देऊ?',
+  'reminder.yes': 'हो',
+  'reminder.on': 'आठवण चालू. उद्या भेटू!',
+  'reminder.blocked': 'Color Catch च्या सूचना बंद आहेत. तुम्ही iOS सेटिंग्जमध्ये त्या चालू करू शकता.',
+  'reminder.title': 'रोजची आठवण',
+  'reminder.hint': 'नवा आजचा बोर्ड तयार झाला की सूचना',
+  'reminder.body': 'आजचा बोर्ड #{n} तयार आहे',
   'common.cancel': 'रद्द करा',
   'common.continue': 'पुढे चला',
   'common.done': 'झाले',

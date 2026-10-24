@@ -4,6 +4,13 @@ import type { Strings } from './index';
  *  and parental-gate lines are for grown-ups and use ordinary kanji. */
 export const ja: Strings = {
   'common.close': 'とじる',
+  'reminder.ask': 'あしたおしらせする？',
+  'reminder.yes': 'おねがい',
+  'reminder.on': 'おしらせオン。またあした！',
+  'reminder.blocked': 'Color Catchのつうちがオフです。iOSの「せってい」でオンにできます。',
+  'reminder.title': 'まいにちのおしらせ',
+  'reminder.hint': 'あたらしいきょうのボードができたらおしらせ',
+  'reminder.body': 'きょうのボード #{n} ができたよ',
   'common.cancel': 'キャンセル',
   'common.continue': 'つづける',
   'common.done': 'OK',

@@ -14,6 +14,7 @@ import {
   useSettings,
 } from '../src/store/settings';
 import { buy } from '../src/store/purchases';
+import { remindersSupported, turnOnReminders } from '../src/store/reminders';
 import { TIP_IDS, type ProductId } from '../src/store/purchasesModel';
 import { useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
@@ -106,6 +107,7 @@ export default function SettingsScreen() {
           value={kidMode}
           onToggle={() => toggle('kidMode')}
         />
+        {remindersSupported ? <ReminderRow /> : null}
 
         <Text style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}>
           {tr('board.size')}
@@ -167,6 +169,23 @@ export default function SettingsScreen() {
         <UnlockSheet restoring={sheet === 'restore'} onClose={() => setSheet(null)} />
       ) : null}
     </Backdrop>
+  );
+}
+
+/** The daily reminder: turning it on asks iOS first; off cancels what is scheduled. */
+function ReminderRow() {
+  const reminder = useSettings((s) => s.reminder);
+  const setSetting = useSettings((s) => s.set);
+  const [blocked, setBlocked] = useState(false);
+  return (
+    <ToggleRow
+      title={tr('reminder.title')}
+      subtitle={tr(blocked ? 'reminder.blocked' : 'reminder.hint')}
+      value={reminder}
+      onToggle={() =>
+        reminder ? setSetting('reminder', false) : void turnOnReminders().then((ok) => setBlocked(!ok))
+      }
+    />
   );
 }
 

@@ -9,6 +9,13 @@ import type { Strings } from './index';
 // "பேர்" (2 பேர்). Names never get a case ending glued on: "{name}: …" instead.
 export const ta: Strings = {
   'common.close': 'மூடுங்கள்',
+  'reminder.ask': 'நாளை நினைவூட்டவா?',
+  'reminder.yes': 'ஆம்',
+  'reminder.on': 'நினைவூட்டல் இயக்கப்பட்டது. நாளை சந்திப்போம்!',
+  'reminder.blocked': 'Color Catch அறிவிப்புகள் முடக்கப்பட்டுள்ளன. iOS அமைப்புகளில் நீங்கள் அவற்றை அனுமதிக்கலாம்.',
+  'reminder.title': 'தினசரி நினைவூட்டல்',
+  'reminder.hint': 'புதிய இன்றைய பலகை தயாரானதும் ஓர் அறிவிப்பு',
+  'reminder.body': 'இன்றைய பலகை #{n} தயார்',
   'common.cancel': 'ரத்து',
   'common.continue': 'தொடருங்கள்',
   'common.done': 'முடிந்தது',

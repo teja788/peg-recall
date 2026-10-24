@@ -8,6 +8,13 @@ import type { Strings } from './index';
 // A single seat is "ప్లేయర్" (ఆటగాడు is male only); several are ఆటగాళ్ళు.
 export const te: Strings = {
   'common.close': 'మూసేయండి',
+  'reminder.ask': 'రేపు గుర్తు చేయమంటారా?',
+  'reminder.yes': 'అవును',
+  'reminder.on': 'రిమైండర్ ఆన్ అయింది. రేపు కలుద్దాం!',
+  'reminder.blocked': 'Color Catch నోటిఫికేషన్లు ఆఫ్‌లో ఉన్నాయి. iOS సెట్టింగ్స్‌లో మీరు వాటిని అనుమతించవచ్చు.',
+  'reminder.title': 'రోజువారీ రిమైండర్',
+  'reminder.hint': 'కొత్త ఈరోజు బోర్డు సిద్ధమైనప్పుడు ఒక నోటిఫికేషన్',
+  'reminder.body': 'ఈరోజు బోర్డు #{n} సిద్ధంగా ఉంది',
   'common.cancel': 'రద్దు',
   'common.continue': 'కొనసాగించండి',
   'common.done': 'అయింది',

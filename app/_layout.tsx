@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { startPurchases } from '../src/store/purchases';
+import { syncReminders } from '../src/store/reminders';
 import { useSettings } from '../src/store/settings';
 import { useStats } from '../src/store/stats';
 import { DARK, LIGHT, ThemeProvider } from '../src/theme';
@@ -21,6 +22,15 @@ export default function RootLayout() {
     // replayed App Store transactions, and "already owns the unlock?" (quietly)
     startPurchases();
   }, [hydrate]);
+
+  // the daily reminder: rescheduled at launch (so its board numbers stay
+  // right), when it is turned on or off, and after each daily board
+  const settingsReady = useSettings((s) => s.hydrated);
+  const reminder = useSettings((s) => s.reminder);
+  const lastDailyAt = useSettings((s) => s.lastDailyAt);
+  useEffect(() => {
+    if (settingsReady) void syncReminders(reminder, lastDailyAt);
+  }, [settingsReady, reminder, lastDailyAt]);
 
   // the colour behind the screens during a transition — matching the table
   // backdrop keeps a cream flash from showing between Home and Game

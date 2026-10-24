@@ -139,6 +139,9 @@ test('a round trip through persistable + sanitize is lossless', () => {
     names: ['Maya', 'Zoë 🦊', '', 'Ana'],
     triesUsed: ['big', '4p'],
     moreOffered: true,
+    reminder: true,
+    reminderAsked: true,
+    lastDailyAt: 1_790_000_000_000,
   };
   assert.deepEqual(hydrated(JSON.stringify(persistable(tweaked))), tweaked);
 });
@@ -150,7 +153,7 @@ test('persistable writes only the stored fields, plus the schema version', () =>
     [...Object.keys(DEFAULT_SETTINGS), 'version'].sort(),
   );
   assert.equal(persistable(DEFAULT_SETTINGS).version, SETTINGS_VERSION);
-  assert.equal(SETTINGS_VERSION, 5);
+  assert.equal(SETTINGS_VERSION, 6);
 });
 
 /* ----------------------------------------------------------------- A18 */
@@ -197,6 +200,9 @@ test('A18: a v1 blob (no version, no names) hydrates with every field intact', (
     unlocked: false,
     triesUsed: [],
     moreOffered: false,
+    reminder: false,
+    reminderAsked: false,
+    lastDailyAt: 0,
   });
   assert.equal(SETTINGS_KEY, 'pegrecall.settings.v1', 'no key migration');
 });
@@ -213,7 +219,7 @@ test('A18: a current blob round-trips and the version field is ignored on read',
   const blob = {
     ...persistable({ ...DEFAULT_SETTINGS, names: ['Ann', 'Bo', 'Cy', 'Dee'], recentNames: ['Ann', 'Dee'] }),
   };
-  assert.equal(blob.version, 5);
+  assert.equal(blob.version, 6);
   assert.deepEqual(hydrated(JSON.stringify(blob)).recentNames, ['Ann', 'Dee']);
   assert.equal('version' in sanitize(blob), false, 'version never leaks into Settings');
   assert.deepEqual(hydrated(JSON.stringify(blob)).names, ['Ann', 'Bo', 'Cy', 'Dee']);
@@ -502,6 +508,15 @@ test('old saves load with no tries used and the "more" card not yet shown', () =
     assert.deepEqual(s.triesUsed, []);
     assert.equal(s.moreOffered, false);
   }
+});
+
+test('reminder fields: off, never asked, no daily yet on old saves; junk is dropped', () => {
+  const s = hydrated(JSON.stringify({ version: 5, moreOffered: true }));
+  assert.equal(s.reminder, false);
+  assert.equal(s.reminderAsked, false);
+  assert.equal(s.lastDailyAt, 0);
+  assert.deepEqual(sanitize({ reminder: 'yes', reminderAsked: 1, lastDailyAt: -5 }), {});
+  assert.deepEqual(sanitize({ lastDailyAt: Number.NaN }), {});
 });
 
 test('sanitize: triesUsed keeps known items in a fixed order, drops junk', () => {

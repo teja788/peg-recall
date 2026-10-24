@@ -1,5 +1,5 @@
 import { Avatar } from '@art';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
   Linking,
@@ -21,10 +21,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { GameState, PlayerSpec } from '../engine/types';
 import { tr, trn } from '../i18n';
+import { remindersSupported, turnOnReminders } from '../store/reminders';
+import { useSettings } from '../store/settings';
 import { useTheme } from '../theme';
 import { useReduceMotion } from './feedback';
 import { isolate, playerLabel } from './names';
 import { headlineFor, resultOf, shareText } from './shareText';
+import { PillButton } from './StatsCard';
 
 export interface UpsellCardProps {
   title: string;
@@ -152,6 +155,30 @@ function UpsellCard({ title, line, action, onAction, onDismiss }: UpsellCardProp
   );
 }
 
+/** "Remind me tomorrow?": asks iOS only on the tap. Shown once ever. */
+function ReminderOffer() {
+  const t = useTheme();
+  const [answer, setAnswer] = useState<boolean | null>(null);
+  const text = answer == null ? tr('reminder.ask') : tr(answer ? 'reminder.on' : 'reminder.blocked');
+  return (
+    <View
+      accessibilityLiveRegion="polite"
+      style={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: t.spacing.md,
+      }}
+    >
+      <Text style={{ ...t.type.body, color: t.c.text, flexShrink: 1 }}>{text}</Text>
+      {answer == null ? (
+        <PillButton text={tr('reminder.yes')} filled onPress={() => void turnOnReminders().then(setAnswer)} />
+      ) : null}
+    </View>
+  );
+}
+
 export function GameOverSheet({ state, daily, onRematch, onHome, upsell }: GameOverSheetProps) {
   const t = useTheme();
   const reduced = useReduceMotion();
@@ -160,6 +187,20 @@ export function GameOverSheet({ state, daily, onRematch, onHome, upsell }: GameO
   // reliably on every target, and a sheet that never appears is a dead end
   const enter = useSharedValue(0);
   const playAgain = useRef<View>(null);
+  // decided as the sheet opens, so marking the offer as shown keeps it up
+  const [offerReminder] = useState(
+    () => daily != null && remindersSupported && !useSettings.getState().reminderAsked,
+  );
+
+  useEffect(() => {
+    if (daily == null) return;
+    // the next reminders come at this time of day (see `reminderPlan`)
+    const s = useSettings.getState();
+    s.set('lastDailyAt', Date.now());
+    if (offerReminder) s.set('reminderAsked', true);
+    // once per finished board: the sheet mounts at game over
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /** "Not now": the card goes, and VoiceOver lands on Play again rather than
    *  wherever iOS puts it when the focused button disappears */
@@ -372,6 +413,8 @@ export function GameOverSheet({ state, daily, onRematch, onHome, upsell }: GameO
               <Text style={{ ...t.type.heading, color: t.c.text }}>{tr('common.home')}</Text>
             </Pressable>
           </View>
+
+          {offerReminder ? <ReminderOffer /> : null}
 
           {/* under the buttons: with four players on a small phone, a card
               above them pushed Play again and Home off the screen */}

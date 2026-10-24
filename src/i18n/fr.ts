@@ -3,6 +3,13 @@ import type { Strings } from './index';
 // French puts a no-break space before ? ! : (written here as  ).
 export const fr: Strings = {
   'common.close': 'Fermer',
+  'reminder.ask': 'Un rappel demain ?',
+  'reminder.yes': 'Oui',
+  'reminder.on': 'Rappel activé. À demain !',
+  'reminder.blocked': 'Les notifications de Color Catch sont désactivées. Tu peux les autoriser dans les Réglages d’iOS.',
+  'reminder.title': 'Rappel quotidien',
+  'reminder.hint': 'Une notification quand un nouveau plateau du jour est prêt',
+  'reminder.body': 'Le plateau du jour #{n} est prêt',
   'common.cancel': 'Annuler',
   'common.continue': 'Continuer',
   'common.done': 'OK',
