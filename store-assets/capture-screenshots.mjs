@@ -971,6 +971,8 @@ if (!process.exitCode && LOCALE === 'en' && !args.includes('--no-compose')) {
     const from = path.join(RAW_ROOT, lang, 'iphone-6.5');
     if (existsSync(from)) await cp(from, path.join(RAW_ROOT, lang, 'iphone-6.9'), { recursive: true });
   }
+  // the Norwegian store locale is "no", its UI language "nb": no/ is a copy, kept fresh here
+  if (existsSync(path.join(RAW_ROOT, 'nb'))) await cp(path.join(RAW_ROOT, 'nb'), path.join(RAW_ROOT, 'no'), { recursive: true });
   if (SET) {
     // the control's translated captions under the treatment's file names
     const spec = JSON.parse(readFileSync(captions, 'utf8'));
