@@ -112,3 +112,4 @@ Rough total: **~2½ days of build work** (3 with analytics) + 1 TestFlight round
 - `src/i18n/nb.ts` `board.huge` 'Kjempestort' is cut off on the iPhone board tile: use 'Kjempe' and update the `no` description to match.
 - cs caption 03-family: no-break space after the one-letter "s" ("s celou").
 - Recompose `hi` screenshots: Indic captions now get line-height 1.32 (two lines collided at 1.08).
+- Search-result images: 6 locales have none (hi, ru, vi, id, th, ar-SA). After the reshoot, re-render all 34 with `compose-creative.mjs` and check each one by eye (submission checklist §5). The header has no text and serves every locale.

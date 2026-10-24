@@ -67,6 +67,8 @@ Legend: **[you]** = must be done by the user (Apple ID, 2FA, payments, Finder di
 
 ## 5. Screenshots
 
+- [ ] **Header and search-result images, every release (Oct 24 2026):** every locale in `listing.json` has `creative/search-<locale>.png`; sizes 3840×1646 (header) and 3840×2560 (search) with no alpha; open each one by eye (headline not clipped, no price/kids words, no "Kid mode"/"Free" UI, frames in that language and current UI); re-render with `compose-creative.mjs` when frames change; after upload, check every locale has one header and one search placement. Skill: `ship-ios-app` → Metadata rejections.
+
 - [x] Both sets captured 2026-09-23 with `node store-assets/capture-screenshots.mjs` (headless
       Chromium against the web build on :8089): `store-assets/screenshots/iphone-6.5/01..06.png`
       at **1284 x 2778** and `store-assets/screenshots/ipad-12.9/01..06.png` at **2048 x 2732**,
