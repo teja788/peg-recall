@@ -57,6 +57,12 @@ Can you beat me? 👉 https://teja788.github.io/peg-recall/play
 - Best result and a streak are stored on the device. No server.
 - Already played today: the button shows the result and "Share".
 
+### S6–S8. Added Oct 24 (owner: yes)
+
+- **S6 Daily reminder:** optional, asked after the first daily game and in Settings; local notifications only, at most 2 after the last daily game, no push token, no data collected.
+- **S7 Weekend daily board on Big:** Saturday and Sunday use the Big board (normally paid) for that one game. No "free" wording.
+- **S8 Streak moments:** best streak on the daily card; a celebration at 3, 7, 14 and 30 days.
+
 ### S3. `/play` link page (~2 h)
 
 - `docs/play.html` on GitHub Pages, with Open Graph tags (the 1.2 header image at 1200×630), so WhatsApp shows a big colorful card.

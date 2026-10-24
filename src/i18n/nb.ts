@@ -4,7 +4,7 @@ import type { Strings } from './index';
  * Norwegian Bokmål, "du" (iOS reports nb-NO; the store locale is "no"). No
  * "memory" (a trademark in Europe): the game is a "huskespill". Pegs are
  * "brikker", the board a "brett" (neuter, so the board names are Lite,
- * Klassisk, Stort, Kjempestort), the die a "terning", the computer
+ * Klassisk, Stort, Kjempe), the die a "terning", the computer
  * "datamaskinen". Colors are lower case, as Norwegian writes them mid-sentence.
  * Sudden death is "avgjørende runde"; Kid mode is "Barnemodus" (iOS says
  * "modus"). "{name} sin tur" avoids the -s genitive on names ending in s.
@@ -48,7 +48,7 @@ export const nb: Strings = {
   'board.small': 'Lite',
   'board.classic': 'Klassisk',
   'board.big': 'Stort',
-  'board.huge': 'Kjempestort',
+  'board.huge': 'Kjempe',
   'board.withPegs': '{name} · {n} brikker',
   'board.pegsShort': '{n} brikker',
   'board.size': 'Brettstørrelse',
@@ -235,10 +235,10 @@ export const nb: Strings = {
 
   'unlock.title': 'Lås opp alt',
   'unlock.titleDone': 'Lås opp alt: låst opp',
-  'unlock.what': 'Brettene Stort og Kjempestort, Ugle, 3 og 4 spillere',
+  'unlock.what': 'Brettene Stort og Kjempe, Ugle, 3 og 4 spillere',
   'unlock.doneRow': 'Låst opp. Takk!',
   'unlock.restore': 'Gjenopprett kjøp',
-  'unlock.perkBoards': 'Brettene Stort (36 brikker) og Kjempestort (40 brikker)',
+  'unlock.perkBoards': 'Brettene Stort (36 brikker) og Kjempe (40 brikker)',
   'unlock.perkOwl': 'Ugle, datamaskinen som husker nesten alt',
   'unlock.perk3p': '3 eller 4 spillere, etter tur på én enhet',
   'unlock.keep': 'Ett kjøp, ditt for alltid. Aldri reklame.',
