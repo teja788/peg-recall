@@ -1,6 +1,6 @@
 # Color Catch v1.3: share, daily board, and real numbers
 
-Date: 2026-10-23 (replaces the Oct 7 draft). Status: **plan, waiting on the owner's decisions (section 2)**. Hindi, the old 1.3.1, already shipped in 1.2.1. Other ideas: `GROWTH-IDEAS.md`.
+Date: 2026-10-23 (replaces the Oct 7 draft). Status: **plan; D1 and D2 decided Oct 24, D3–D5 still open (section 2)**. Hindi, the old 1.3.1, already shipped in 1.2.1. Other ideas: `GROWTH-IDEAS.md`.
 
 ## 1. Why these four things
 
@@ -25,8 +25,8 @@ Success 4 weeks after 1.3 is live: day-7 retention above 10%, new downloads per 
 
 | # | Decision | Recommendation |
 |---|---|---|
-| D1 | Ship the **daily board** (same board for everyone each day, Wordle-style)? | **Yes.** It is the only item aimed at the 4% retention. |
-| D2 | Do shared messages include **player names**? | **Yes**, except the computer's. Kids can be "Player 2". The user starts every share. |
+| D1 ✅ yes (Oct 24) | Ship the **daily board** (same board for everyone each day, Wordle-style)? | **Yes.** It is the only item aimed at the 4% retention. |
+| D2 ✅ yes (Oct 24) | Do shared messages include **player names**? | **Yes**, except the computer's. Kids can be "Player 2". The user starts every share. |
 | D3 | Where does the shared link go? | **Our `/play` page** with a preview card. iPhone/iPad goes on to the Family custom product page; Android shows "coming soon". |
 | D4 | Add **anonymous analytics** (PostHog)? | **Yes, anonymous only:** no person profiles, no session replay, no advertising ID, 6 events. The App Privacy label changes from "Data Not Collected" to "Usage Data, not linked to you". |
 | D5 | New names for **"Kid mode"** and the **"Try free"** badge? | **"Gentle mode"** and **"Try once"**. |
