@@ -1,0 +1,10 @@
+# Only what server/Dockerfile needs: the shared app code and the server.
+# (Keeps assets, store-assets and node_modules out of the build context.)
+*
+!src/
+!server/package.json
+!server/package-lock.json
+!server/tsconfig.json
+!server/src/
+src/**/__tests__/
+server/src/__tests__/

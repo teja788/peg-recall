@@ -87,7 +87,8 @@ export type ClientMessage =
 export type ErrorCode =
   /** the app is too old for this server: update it */
   | 'update'
-  /** this room's game rules differ from the app's: someone must update */
+  /** the app is newer than this server (protocol or game rules): try again
+   *  once the server is updated */
   | 'rules'
   | 'notFound'
   | 'full'
@@ -108,8 +109,18 @@ export type ServerMessage =
   /** a new board: seq 0 is `createGame(config)`, applied at server time `at` */
   | { type: 'started'; config: GameConfig; seq: 0; at: number }
   /** the action numbered `seq`, applied at server time `at`; `by` is the seat
-   *  that asked, null for the server's own steps; `hash` is `stateHash` after it */
-  | { type: 'action'; seq: number; action: GameAction; by: string | null; at: number; hash: string }
+   *  whose move it is, null for the server's own steps (reveal end, result
+   *  end); `standIn` when the server played it for a person who was away or
+   *  out of time; `hash` is `stateHash` after it */
+  | {
+      type: 'action';
+      seq: number;
+      action: GameAction;
+      by: string | null;
+      standIn?: true;
+      at: number;
+      hash: string;
+    }
   /** the whole game as of `seq` (on joining late, coming back, or a mismatch) */
   | { type: 'snapshot'; state: GameState; seq: number; at: number }
   | { type: 'error'; code: ErrorCode }

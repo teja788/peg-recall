@@ -9,7 +9,8 @@
     "web": "expo start --web",
     "test": "tsx --test \"src/**/__tests__/*.test.ts\"",
     "build:web": "expo export -p web && node scripts/web-finish.mjs",
-    "smoke:web": "node scripts/web-smoke.mjs"
+    "smoke:web": "node scripts/web-smoke.mjs",
+    "test:server": "npm --prefix server test"
   },
   "dependencies": {
     "@react-navigation/native": "^7.4.1",

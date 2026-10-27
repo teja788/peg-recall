@@ -1,0 +1,13 @@
+# Caddy in front of the room server on a droplet / VPS: automatic HTTPS
+# (Let's Encrypt), and WebSockets are proxied as they are.
+# Replace the address with the real one, point its DNS at the server, then:
+#   sudo cp Caddyfile /etc/caddy/Caddyfile && sudo systemctl reload caddy
+
+rooms.example.com {
+	reverse_proxy 127.0.0.1:8787
+	encode gzip
+	log {
+		# no access log: the server keeps no addresses (PLAN-web-online.md §B9)
+		output discard
+	}
+}

@@ -2,6 +2,8 @@
 
 Date: 2026-10-27. Status: **plan, nothing built yet.** Google Play is **paused** (owner, Oct 27).
 
+**R1 (room server) built Oct 27, not deployed (D3 open):** `server/` — host-neutral `room.ts` + `hub.ts`, a Node adapter, Dockerfile, Caddy and systemd files (`server/README.md`). Already in, ahead of R3: away players get 15 s, then the computer plays for them (`standIn`), and the Relaxed/Quick turn clock; reconnect with a seat token and a snapshot; version check; rate limits; expiry. Host limits are one switch, off (D4 open). Next: R2, the app and web screens.
+
 **R0 (shared code) done Oct 27:** `src/engine/timing.ts`, `src/engine/driver.ts` (`autoStep`, `computerPick`, `freshBrains`, `observePick`), `src/online/protocol.ts`, `src/online/hash.ts`. The local game runs on the driver with no change in behaviour.
 
 **W1 (web version) built Oct 27, merged to `main`.** It goes live once the owner creates the Cloudflare Pages project (`WEB.md`). Differences from §A2: locked items keep the padlock (no new "In the app" badge to fit into 28 languages), the sheet says the unlock is in the app; no QR code yet; web shares link to the web game.

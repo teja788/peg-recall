@@ -1,0 +1,32 @@
+# systemd unit for the room server on a droplet / VPS (server/README.md).
+#   sudo cp color-catch-rooms.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now color-catch-rooms
+# Settings go in /etc/color-catch-rooms.env (PUBLIC_ORIGINS, STATS_TOKEN, ...).
+
+[Unit]
+Description=Color Catch room server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Environment=NODE_ENV=production
+Environment=PORT=8787
+Environment=HOST=127.0.0.1
+Environment=TRUST_PROXY=1
+EnvironmentFile=-/etc/color-catch-rooms.env
+ExecStart=/usr/bin/node /opt/color-catch-rooms/server.mjs
+Restart=always
+RestartSec=2
+# rooms are told "server restarting" on stop; give it a moment
+TimeoutStopSec=8
+
+DynamicUser=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target

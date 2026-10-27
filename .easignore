@@ -28,3 +28,6 @@ reports/
 # web game only (npm run build:web), not needed by the iOS build
 public/
 web-smoke/
+
+# the room server is deployed on its own (server/README.md)
+server/

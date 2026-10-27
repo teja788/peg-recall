@@ -35,12 +35,19 @@ export function aiSeedFor(gameSeed: number): number {
  * difficulty's rate. Every new board gets new brains — memory is indexed by
  * peg index, so a sudden-death mini board would otherwise be played with
  * confident, entirely wrong memories of the board it replaced.
+ *
+ * `standIns`: people's seats that also get a brain (Fox's), so the room
+ * server can play a turn for someone who has gone away. The app passes none.
  */
-export function freshBrains(state: GameState, rng: RngState): { ais: Brains; rng: RngState } {
+export function freshBrains(
+  state: GameState,
+  rng: RngState,
+  standIns: readonly string[] = [],
+): { ais: Brains; rng: RngState } {
   const ais: Brains = {};
   let r = rng;
   for (const p of state.config.players) {
-    if (p.kind !== 'ai') continue;
+    if (p.kind !== 'ai' && !standIns.includes(p.id)) continue;
     // `state.turn` keeps counting across a sudden-death board, so the reveal
     // must be stamped with it — stamping turn 0 would leave the AI's fresh
     // memories looking decades old and every tier near-blind.
@@ -70,16 +77,17 @@ export function observePick(ais: Brains, state: GameState): Brains {
 }
 
 /**
- * The computer's pick for the seat to move, or null when it is not a computer
- * seat's pick (or that seat has no brain). `pegIndex` is -1 when there is
- * nothing to pick; the rng has still moved on.
+ * The pick the seat to move makes with its brain: a computer seat's own, or a
+ * stand-in for an away player (`freshBrains`). Null when it is not a pick or
+ * that seat has no brain — in the app, every person's seat. `pegIndex` is -1
+ * when there is nothing to pick; the rng has still moved on.
  */
 export function computerPick(
   state: GameState,
   ais: Brains,
   rng: RngState,
 ): { pegIndex: number; ais: Brains; rng: RngState } | null {
-  if (state.phase !== 'pick' || isHumanTurn(state)) return null;
+  if (state.phase !== 'pick') return null;
   const id = activePlayerSpec(state).id;
   const ai = ais[id];
   if (!ai) return null;
