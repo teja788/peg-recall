@@ -53,3 +53,6 @@ store-assets/screenshot-frames-ppo/
 store-assets/cpp/*/*/
 store-assets/screenshot-frames-cpp/
 store-assets/promo/codes*.txt
+
+# web smoke test screenshots (npm run smoke:web)
+web-smoke/

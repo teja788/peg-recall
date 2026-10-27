@@ -249,6 +249,8 @@ export const bn: Strings = {
   'unlock.for': '{price}-এ আনলক করো',
   'unlock.button': 'আনলক করো',
   'unlock.nothing': 'এই Apple অ্যাকাউন্টে ফিরিয়ে আনার মতো কিছু নেই।',
+  'web.appOnly': 'সব আনলক করতে iPhone বা iPad-এ Color Catch নামাও।',
+  'web.getApp': 'App Store থেকে নামাও',
   'buy.cancelled': 'কেনাকাটা বাতিল হয়েছে। কোনো টাকা কাটা হয়নি।',
   'buy.pending': 'অনুমতির অপেক্ষায়। অনুমতি পেলেই চলে আসবে।',
   'buy.failed': 'হলো না। একটু পরে আবার চেষ্টা করো।',

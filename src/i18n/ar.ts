@@ -289,6 +289,8 @@ export const ar: Strings = {
   'unlock.for': 'افتح مقابل {price}',
   'unlock.button': 'افتح',
   'unlock.nothing': 'لا شيء لاستعادته في حساب Apple هذا.',
+  'web.appOnly': 'لفتح الكل، نزّل Color Catch على iPhone أو iPad.',
+  'web.getApp': 'حمّله من App Store',
   'buy.cancelled': 'أُلغي الشراء. لم يُخصم أي مبلغ.',
   'buy.pending': 'بانتظار الموافقة. سيكتمل الشراء بعد الموافقة.',
   'buy.failed': 'لم تنجح العملية. حاول مجددًا لاحقًا.',

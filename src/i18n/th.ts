@@ -258,6 +258,8 @@ export const th: Strings = {
   'unlock.for': 'ปลดล็อกในราคา {price}',
   'unlock.button': 'ปลดล็อก',
   'unlock.nothing': 'ไม่มีอะไรให้กู้คืนสำหรับบัญชี Apple นี้',
+  'web.appOnly': 'ดาวน์โหลด Color Catch สำหรับ iPhone หรือ iPad เพื่อปลดล็อกทั้งหมด',
+  'web.getApp': 'ดาวน์โหลดจาก App Store',
   'buy.cancelled': 'ยกเลิกการซื้อแล้ว ไม่มีการเรียกเก็บเงิน',
   'buy.pending': 'รอการอนุมัติ จะได้รับทันทีเมื่ออนุมัติแล้ว',
   'buy.failed': 'ไม่สำเร็จ ลองใหม่อีกครั้งภายหลังนะ',

@@ -256,6 +256,8 @@ export const de: Strings = {
   'unlock.for': 'Freischalten für {price}',
   'unlock.button': 'Freischalten',
   'unlock.nothing': 'Für diesen Apple Account gibt es nichts wiederherzustellen.',
+  'web.appOnly': 'Um alles freizuschalten, lade Color Catch für iPhone oder iPad.',
+  'web.getApp': 'Im App Store laden',
   'buy.cancelled': 'Kauf abgebrochen. Es wurde nichts berechnet.',
   'buy.pending': 'Wartet auf Zustimmung. Kommt, sobald sie da ist.',
   'buy.failed': 'Das hat nicht geklappt. Bitte versuch es später noch einmal.',

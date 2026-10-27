@@ -29,7 +29,7 @@ import { useSettings } from '../store/settings';
 import { useTheme } from '../theme';
 import { useReduceMotion } from './feedback';
 import { isolate, playerLabel } from './names';
-import { headlineFor, resultOf, shareText } from './shareText';
+import { PLAY_URL, headlineFor, resultOf, shareText } from './shareText';
 import { PillButton } from './StatsCard';
 
 export interface UpsellCardProps {
@@ -62,6 +62,17 @@ export interface GameOverSheetProps {
 export function gameOverHeadline(state: GameState): string {
   const winners = state.config.players.filter((p) => state.winnerIds.includes(p.id));
   return headlineFor(winners.map(playerLabel), state.suddenDeath);
+}
+
+/**
+ * Where a shared result sends friends. From the app: the App Store. From the
+ * web game: the web game itself, which opens on any phone (most friends in
+ * India are on Android). A local dev server (http) still shares the App Store.
+ */
+export function shareUrl(): string {
+  if (Platform.OS !== 'web') return PLAY_URL;
+  const origin = (globalThis as { location?: { origin?: string } }).location?.origin;
+  return origin?.startsWith('https://') ? `${origin}/` : PLAY_URL;
 }
 
 /**
@@ -412,7 +423,7 @@ export function GameOverSheet({ state, daily, onRematch, onHome, upsell }: GameO
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={tr('share.button')}
-              onPress={() => void shareMessage(shareText({ ...resultOf(state), daily }))}
+              onPress={() => void shareMessage(shareText({ ...resultOf(state), daily }, shareUrl()))}
               style={({ pressed }) => [
                 styles.btn,
                 {

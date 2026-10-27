@@ -261,6 +261,8 @@ export const ko: Strings = {
   'unlock.for': '{price}에 잠금 해제',
   'unlock.button': '잠금 해제',
   'unlock.nothing': '이 Apple 계정으로 복원할 구입 항목이 없어요.',
+  'web.appOnly': '모두 잠금 해제하려면 iPhone 또는 iPad용 Color Catch를 받으세요.',
+  'web.getApp': 'App Store에서 받기',
   'buy.cancelled': '구입이 취소됐어요. 결제되지 않았어요.',
   'buy.pending': '승인을 기다리고 있어요. 승인되면 자동으로 적용돼요.',
   'buy.failed': '처리되지 않았어요. 나중에 다시 시도해 주세요.',

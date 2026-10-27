@@ -260,6 +260,8 @@ export const cs: Strings = {
   'unlock.for': 'Odemknout za {price}',
   'unlock.button': 'Odemknout',
   'unlock.nothing': 'Pro tento účet Apple není co obnovit.',
+  'web.appOnly': 'Pro odemknutí všeho si stáhni Color Catch pro iPhone nebo iPad.',
+  'web.getApp': 'Stáhnout v App Storu',
   'buy.cancelled': 'Nákup zrušen. Nic se neúčtovalo.',
   'buy.pending': 'Čeká se na schválení. Jakmile ho dostaneš, nákup dorazí.',
   'buy.failed': 'To nevyšlo. Zkus to prosím později.',

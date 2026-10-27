@@ -279,6 +279,8 @@ export const ru: Strings = {
   'unlock.for': 'Открыть за {price}',
   'unlock.button': 'Открыть',
   'unlock.nothing': 'Для этого аккаунта Apple нечего восстанавливать.',
+  'web.appOnly': 'Чтобы открыть всё, скачай Color Catch для iPhone или iPad.',
+  'web.getApp': 'Скачать в App Store',
   'buy.cancelled': 'Покупка отменена. Деньги не списаны.',
   'buy.pending': 'Ждём одобрения. Покупка придёт, как только её одобрят.',
   'buy.failed': 'Не получилось. Попробуй позже.',

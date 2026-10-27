@@ -256,6 +256,8 @@ export const it: Strings = {
   'unlock.for': 'Sblocca per {price}',
   'unlock.button': 'Sblocca',
   'unlock.nothing': 'Niente da ripristinare per questo Account Apple.',
+  'web.appOnly': 'Per sbloccare tutto, scarica Color Catch per iPhone o iPad.',
+  'web.getApp': 'Scarica dall’App Store',
   'buy.cancelled': 'Acquisto annullato. Nessun addebito.',
   'buy.pending': 'In attesa di approvazione. Arriverà appena approvato.',
   'buy.failed': 'Non è andato a buon fine. Riprova più tardi.',

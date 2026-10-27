@@ -251,6 +251,8 @@ export const mr: Strings = {
   'unlock.for': '{price} मध्ये अनलॉक करा',
   'unlock.button': 'अनलॉक करा',
   'unlock.nothing': 'या Apple खात्यासाठी परत मिळवण्यासारखे काही नाही.',
+  'web.appOnly': 'सगळे अनलॉक करण्यासाठी iPhone किंवा iPad वर Color Catch डाउनलोड करा.',
+  'web.getApp': 'App Store वरून डाउनलोड करा',
   'buy.cancelled': 'खरेदी रद्द झाली. कोणतेही पैसे कापले गेले नाहीत.',
   'buy.pending': 'मंजुरीची वाट पाहत आहे. मंजुरी मिळताच ते येईल.',
   'buy.failed': 'हे झाले नाही. थोड्या वेळाने पुन्हा प्रयत्न करा.',

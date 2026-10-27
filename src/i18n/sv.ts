@@ -250,6 +250,8 @@ export const sv: Strings = {
   'unlock.for': 'Lås upp för {price}',
   'unlock.button': 'Lås upp',
   'unlock.nothing': 'Inget att återställa för det här Apple-kontot.',
+  'web.appOnly': 'Hämta Color Catch för iPhone eller iPad för att låsa upp allt.',
+  'web.getApp': 'Hämta i App Store',
   'buy.cancelled': 'Köpet avbröts. Inget har dragits.',
   'buy.pending': 'Väntar på godkännande. Det kommer så fort det har godkänts.',
   'buy.failed': 'Det gick inte. Försök igen senare.',

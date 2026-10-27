@@ -616,3 +616,12 @@ test('"Ready for more?": a win vs the computer on Classic, once, while Big or Ow
   assert.equal(upsellCard({ ...s, triesUsed: ['big'] }, win), 'more');
   assert.equal(upsellCard({ ...s, triesUsed: ['big', 'owl'] }, win), null, 'nothing left to offer');
 });
+
+test('web game (noTries): "Liked it?" after any win, once ever, never for an unlocked player', () => {
+  const s = { unlocked: false, triesUsed: LOCKABLE_ALL, moreOffered: false };
+  const win = { tries: 0, humanWon: true, vsComputer: false, boardSize: 'small' as const, reviewDue: true, noTries: true };
+  assert.equal(upsellCard(s, win), 'unlock', 'pass and play on Small counts too; no rating prompt on the web');
+  assert.equal(upsellCard(s, { ...win, humanWon: false }), null, 'not after a loss');
+  assert.equal(upsellCard({ ...s, moreOffered: true }, win), null, 'once ever');
+  assert.equal(upsellCard({ ...s, unlocked: true }, win), null);
+});

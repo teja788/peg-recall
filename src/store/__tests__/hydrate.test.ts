@@ -5,7 +5,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { DEFAULT_SETTINGS, SETTINGS_KEY } from '../settingsModel';
+import { DEFAULT_SETTINGS, LOCKABLES, SETTINGS_KEY, canTry } from '../settingsModel';
 import { createSettingsStore } from '../settingsStore';
 import type { KeyValueStorage } from '../storage';
 import { createStorageGate } from '../storageGate';
@@ -272,4 +272,16 @@ test('a free try used while the read is still out adds to the stored ones', asyn
   await tick(10);
   assert.deepEqual(useS.getState().triesUsed, ['big', 'owl'], 'neither try comes back');
   assert.deepEqual(JSON.parse(storage.writes[0][1]).triesUsed, ['big', 'owl']);
+});
+
+test('noTries (the web game): every locked item reads as tried, before and after the read', async () => {
+  const storage = new SlowStorage();
+  storage.data.set(SETTINGS_KEY, JSON.stringify({ version: 6, unlocked: false, triesUsed: [] }));
+  const useS = createSettingsStore(storage, { timeoutMs: 5, debounceMs: 1, noTries: true });
+  assert.deepEqual(useS.getState().triesUsed, LOCKABLES, 'no try on the first frame either');
+  const p = useS.getState().hydrate();
+  storage.release();
+  await p;
+  assert.deepEqual(useS.getState().triesUsed, LOCKABLES, 'cleared site data cannot bring the tries back');
+  for (const v of LOCKABLES) assert.equal(canTry(useS.getState(), v), false, v);
 });

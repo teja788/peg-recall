@@ -256,6 +256,8 @@ export const zh: Strings = {
   'unlock.for': '以 {price} 解鎖',
   'unlock.button': '解鎖',
   'unlock.nothing': '這個 Apple 帳號沒有可回復的購買項目。',
+  'web.appOnly': '要全部解鎖，請下載 iPhone 或 iPad 版 Color Catch。',
+  'web.getApp': '在 App Store 下載',
   'buy.cancelled': '已取消購買，沒有收費。',
   'buy.pending': '正在等待核准，核准後就會自動完成購買。',
   'buy.failed': '沒有成功，請稍後再試。',

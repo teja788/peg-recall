@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="%LANG_ISO_CODE%">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
+    <title>Color Catch – the peg memory game, in your browser</title>
+    <meta name="description" content="Roll the color die, find the matching peg. Play the computer or pass the phone around the family. Free in your browser: no ads, no sign-up." />
+
+    <!-- WhatsApp / social previews. scripts/web-finish.mjs fills in the site
+         address after `expo export` (absolute URLs only), or drops these two
+         lines when it is not known. -->
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:image" content="%SITE_URL%/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Color Catch" />
+    <meta property="og:title" content="Color Catch – play in your browser" />
+    <meta property="og:description" content="Roll the color die, find the matching peg. Free, no ads, no sign-up." />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Safari on iPhone/iPad shows a "Get" banner for the App Store app -->
+    <meta name="apple-itunes-app" content="app-id=6813625311" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#2A7399" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#16324A" media="(prefers-color-scheme: dark)" />
+
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      /* These styles make the body full-height */
+      html,
+      body {
+        height: 100%;
+      }
+      /* These styles disable body scrolling if you are using <ScrollView> */
+      body {
+        overflow: hidden;
+      }
+      /* These styles make the root element full-height */
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+    <!-- The table backdrop (src/theme/tokens.ts) from the first frame, and a
+         loading card while the game downloads: never a white page. React
+         replaces everything inside #root when it starts. -->
+    <style>
+      body {
+        margin: 0;
+        background: linear-gradient(#2A7399, #1B5478);
+        color: #fff;
+        font: 600 17px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+      }
+      @media (prefers-color-scheme: dark) {
+        body { background: linear-gradient(#16324A, #0E2233); }
+      }
+      .boot {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+      }
+      .boot h1 { margin: 0; font-size: 34px; letter-spacing: 0.3px; }
+      .boot .pegs { display: flex; gap: 10px; }
+      .boot .pegs span {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        animation: bob 1.2s ease-in-out infinite;
+      }
+      .boot .pegs span:nth-child(2) { animation-delay: 0.1s; }
+      .boot .pegs span:nth-child(3) { animation-delay: 0.2s; }
+      .boot .pegs span:nth-child(4) { animation-delay: 0.3s; }
+      .boot .pegs span:nth-child(5) { animation-delay: 0.4s; }
+      .boot .pegs span:nth-child(6) { animation-delay: 0.5s; }
+      @keyframes bob {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot .pegs span { animation: none; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>
+      Color Catch needs JavaScript to run in the browser.
+    </noscript>
+    <div id="root">
+      <div class="boot" role="status" aria-label="Loading Color Catch">
+        <div class="pegs" aria-hidden="true">
+          <span style="background:#CE1202"></span>
+          <span style="background:#6201DA"></span>
+          <span style="background:#0072B2"></span>
+          <span style="background:#009E73"></span>
+          <span style="background:#F0E442"></span>
+          <span style="background:#CC79A7"></span>
+        </div>
+        <h1>Color Catch</h1>
+      </div>
+    </div>
+  </body>
+</html>

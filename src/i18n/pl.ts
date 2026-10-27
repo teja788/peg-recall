@@ -279,6 +279,8 @@ export const pl: Strings = {
   'unlock.for': 'Odblokuj za {price}',
   'unlock.button': 'Odblokuj',
   'unlock.nothing': 'Brak zakupów do przywrócenia dla tego Konta Apple.',
+  'web.appOnly': 'Aby odblokować wszystko, pobierz Color Catch na iPhone’a lub iPada.',
+  'web.getApp': 'Pobierz z App Store',
   'buy.cancelled': 'Zakup anulowany. Nie pobrano opłaty.',
   'buy.pending': 'Zakup czeka na zgodę. Po zatwierdzeniu zostanie zrealizowany.',
   'buy.failed': 'Nie udało się. Spróbuj ponownie później.',

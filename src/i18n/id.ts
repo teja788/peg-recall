@@ -257,6 +257,8 @@ export const id: Strings = {
   'unlock.for': 'Buka seharga {price}',
   'unlock.button': 'Buka',
   'unlock.nothing': 'Tidak ada yang bisa dipulihkan untuk Akun Apple ini.',
+  'web.appOnly': 'Untuk membuka semua, unduh Color Catch untuk iPhone atau iPad.',
+  'web.getApp': 'Unduh di App Store',
   'buy.cancelled': 'Pembelian dibatalkan. Tidak ada biaya.',
   'buy.pending': 'Menunggu persetujuan. Akan masuk setelah disetujui.',
   'buy.failed': 'Belum berhasil. Coba lagi nanti, ya.',

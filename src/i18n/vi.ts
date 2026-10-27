@@ -258,6 +258,8 @@ export const vi: Strings = {
   'unlock.for': 'Mở khóa với giá {price}',
   'unlock.button': 'Mở khóa',
   'unlock.nothing': 'Không có gì để khôi phục cho Tài khoản Apple này.',
+  'web.appOnly': 'Để mở khóa tất cả, hãy tải Color Catch cho iPhone hoặc iPad.',
+  'web.getApp': 'Tải về trên App Store',
   'buy.cancelled': 'Đã hủy giao dịch. Bạn không bị trừ tiền.',
   'buy.pending': 'Đang chờ duyệt. Giao dịch sẽ hoàn tất khi được duyệt.',
   'buy.failed': 'Chưa thành công. Vui lòng thử lại sau.',

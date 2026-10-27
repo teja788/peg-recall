@@ -24,3 +24,7 @@ PLAN.md
 .env*
 research_notes/
 reports/
+
+# web game only (npm run build:web), not needed by the iOS build
+public/
+web-smoke/

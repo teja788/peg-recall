@@ -1,6 +1,7 @@
 /**
  * The message "Share result" hands to the share sheet: four short lines that
- * read as one WhatsApp bubble (no "Read more"), with the App Store link (no /play page: D3 = no).
+ * read as one WhatsApp bubble (no "Read more"), with the App Store link (no /play page: D3 = no),
+ * or from the web game, the web game's own address (PLAN-web-online.md).
  *
  * Pure TypeScript (no React Native), so the tests can run it in every language.
  * The computer is never named in a share: it shows as 🤖 (PLAN-v1.3 D2).
@@ -59,7 +60,9 @@ export function headlineFor(winners: string[], suddenDeath: boolean): string {
   return tr(suddenDeath ? 'over.winsSudden' : 'over.wins', { name: isolate(winners[0]) });
 }
 
-export function shareText(r: ShareResult): string {
+/** `url`: where the message sends friends (the App Store unless told otherwise;
+ *  the web game passes its own address, see `shareUrl`). */
+export function shareText(r: ShareResult, url: string = PLAY_URL): string {
   const label = (p: ShareResult['players'][number]) => (p.ai ? COMPUTER : playerLabel(p));
   const headline = headlineFor(r.players.filter((p) => p.won).map(label), r.suddenDeath);
   const scores = [...r.players]
@@ -71,6 +74,6 @@ export function shareText(r: ShareResult): string {
     `🎯 ${r.daily != null ? tr('share.titleDaily', { n: r.daily }) : tr('share.title', { board: tr(`board.${r.board}`) })}`,
     `🏆 ${headline} ${scores}`,
     `${COLOR_ROW} ${tr('share.rolls', { pegs, n: r.rolls })}`,
-    `${tr('share.cta')} 👉 ${PLAY_URL}`,
+    `${tr('share.cta')} 👉 ${url}`,
   ].join('\n');
 }

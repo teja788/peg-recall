@@ -258,6 +258,8 @@ export const ja: Strings = {
   'unlock.for': '{price}でアンロック',
   'unlock.button': 'アンロック',
   'unlock.nothing': 'このApple Accountで復元できる購入はありません。',
+  'web.appOnly': 'すべてアンロックするには、iPhone または iPad 版の Color Catch をダウンロードしてください。',
+  'web.getApp': 'App Store で入手',
   'buy.cancelled': '購入をキャンセルしました。請求はありません。',
   'buy.pending': '承認待ちです。承認されると届きます。',
   'buy.failed': 'うまくいきませんでした。あとでもう一度お試しください。',

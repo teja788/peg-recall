@@ -106,6 +106,24 @@ test('every language: ≤ 6 lines, ≤ 300 characters, colour row, link, no {pla
   }
 });
 
+test('the web game shares its own address, still one bubble in every language', () => {
+  // longer than the App Store link, so the 300-character budget is the real test
+  const web = 'https://color-catch-web-game.pages.dev/';
+  try {
+    for (const lang of LANGS) {
+      setLang(lang);
+      for (const [name, r] of cases) {
+        const s = shareText(r, web);
+        assert.ok(s.endsWith(web), `${lang} ${name}`);
+        assert.ok(!s.includes(PLAY_URL), `${lang} ${name}`);
+        assert.ok(s.length <= 300, `${lang} ${name}: ${s.length} chars`);
+      }
+    }
+  } finally {
+    setLang('en');
+  }
+});
+
 test('Arabic: a Latin name is fenced off, numbers stay Western', () => {
   try {
     setLang('ar');

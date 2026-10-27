@@ -257,6 +257,8 @@ export const nl: Strings = {
   'unlock.for': 'Ontgrendel voor {price}',
   'unlock.button': 'Ontgrendel',
   'unlock.nothing': 'Niets te herstellen voor deze Apple-account.',
+  'web.appOnly': 'Download Color Catch voor iPhone of iPad om alles te ontgrendelen.',
+  'web.getApp': 'Download in de App Store',
   'buy.cancelled': 'Aankoop geannuleerd. Er is niets betaald.',
   'buy.pending': 'Wacht op goedkeuring. De aankoop wordt voltooid zodra die is goedgekeurd.',
   'buy.failed': 'Dat lukte niet. Probeer het later opnieuw.',

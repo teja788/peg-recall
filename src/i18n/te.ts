@@ -249,6 +249,8 @@ export const te: Strings = {
   'unlock.for': '{price}కి అన్‌లాక్ చేయండి',
   'unlock.button': 'అన్‌లాక్',
   'unlock.nothing': 'ఈ Apple ఖాతాకు పునరుద్ధరించడానికి ఏమీ లేదు.',
+  'web.appOnly': 'అన్నీ అన్‌లాక్ చేయడానికి, iPhone లేదా iPadలో Color Catch డౌన్‌లోడ్ చేయండి.',
+  'web.getApp': 'App Storeలో పొందండి',
   'buy.cancelled': 'కొనుగోలు రద్దయింది. డబ్బులేమీ కట్ కాలేదు.',
   'buy.pending': 'అనుమతి కోసం ఎదురుచూస్తోంది. అనుమతి రాగానే వస్తుంది.',
   'buy.failed': 'అది జరగలేదు. కాసేపాగి మళ్ళీ ప్రయత్నించండి.',

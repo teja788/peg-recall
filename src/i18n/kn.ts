@@ -250,6 +250,8 @@ export const kn: Strings = {
   'unlock.for': '{price}ಗೆ ಅನ್‌ಲಾಕ್ ಮಾಡಿ',
   'unlock.button': 'ಅನ್‌ಲಾಕ್',
   'unlock.nothing': 'ಈ Apple ಖಾತೆಗೆ ಮರುಸ್ಥಾಪಿಸಲು ಏನೂ ಇಲ್ಲ.',
+  'web.appOnly': 'ಎಲ್ಲವನ್ನೂ ಅನ್‌ಲಾಕ್ ಮಾಡಲು, iPhone ಅಥವಾ iPad ನಲ್ಲಿ Color Catch ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ.',
+  'web.getApp': 'App Store ನಲ್ಲಿ ಪಡೆಯಿರಿ',
   'buy.cancelled': 'ಖರೀದಿ ರದ್ದಾಯಿತು. ಯಾವ ಹಣವೂ ಕಡಿತವಾಗಿಲ್ಲ.',
   'buy.pending': 'ಅನುಮತಿಗಾಗಿ ಕಾಯುತ್ತಿದೆ. ಅನುಮತಿ ಸಿಕ್ಕ ತಕ್ಷಣ ಬರುತ್ತದೆ.',
   'buy.failed': 'ಅದು ಆಗಲಿಲ್ಲ. ಸ್ವಲ್ಪ ಹೊತ್ತಿನ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',

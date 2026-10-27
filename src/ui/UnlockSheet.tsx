@@ -5,10 +5,14 @@
  * Same scrim + slide-up as the pause and "Who's playing?" sheets. Buying and
  * restoring both go through the math question first (ParentalGate), shown in
  * place of the buttons, so the sheet never stacks a second sheet.
+ *
+ * The published web game has no store (storefront.ts): the same perks, then a
+ * button to the App Store instead of buying and restoring.
  */
 import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -28,9 +32,11 @@ import { tr } from '../i18n';
 import { buy, loadPrices, restore } from '../store/purchases';
 import { UNLOCK_ID, type BuyResult, type ProductId } from '../store/purchasesModel';
 import { useSettings } from '../store/settings';
+import { hasStore } from '../store/storefront';
 import { useTheme } from '../theme';
 import { useReduceMotion } from './feedback';
 import { ParentalGate } from './ParentalGate';
+import { PLAY_URL } from './shareText';
 
 /** Store prices by product, once they arrive. Missing = show no price. */
 export function usePrices(): Partial<Record<ProductId, string>> {
@@ -104,16 +110,21 @@ export function UnlockSheet({
     </>
   ) : gate ? (
     <ParentalGate onPass={() => void run(gate)} onCancel={() => setGate(null)} />
+  ) : !hasStore ? (
+    <>
+      <Perks />
+      <Text style={{ ...t.type.body, color: t.c.text }}>{tr('web.appOnly')}</Text>
+      <SheetButton
+        text={tr('web.getApp')}
+        filled
+        onPress={() => {
+          Linking.openURL(PLAY_URL).catch(() => {});
+        }}
+      />
+    </>
   ) : (
     <>
-      <View style={{ gap: t.spacing.sm }}>
-        {PERKS.map((p) => (
-          <View key={p} accessible style={{ flexDirection: 'row', gap: t.spacing.sm }}>
-            <Text style={{ ...t.type.body, color: t.c.accent }}>✓</Text>
-            <Text style={{ ...t.type.body, color: t.c.text, flex: 1 }}>{tr(p)}</Text>
-          </View>
-        ))}
-      </View>
+      <Perks />
       <Text style={{ ...t.type.caption, color: t.c.textDim }}>
         {tr('unlock.keep')}
       </Text>
@@ -208,6 +219,21 @@ export function UnlockSheet({
         </Animated.View>
       </KeyboardAvoidingView>
     </Animated.View>
+  );
+}
+
+/** What the unlock opens, one ticked line each. */
+function Perks() {
+  const t = useTheme();
+  return (
+    <View style={{ gap: t.spacing.sm }}>
+      {PERKS.map((p) => (
+        <View key={p} accessible style={{ flexDirection: 'row', gap: t.spacing.sm }}>
+          <Text style={{ ...t.type.body, color: t.c.accent }}>✓</Text>
+          <Text style={{ ...t.type.body, color: t.c.text, flex: 1 }}>{tr(p)}</Text>
+        </View>
+      ))}
+    </View>
   );
 }
 

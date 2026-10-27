@@ -272,6 +272,8 @@ export const en = {
   'unlock.for': 'Unlock for {price}',
   'unlock.button': 'Unlock',
   'unlock.nothing': 'Nothing to restore for this Apple Account.',
+  'web.appOnly': 'To unlock everything, get Color Catch for iPhone or iPad.',
+  'web.getApp': 'Get it on the App Store',
   'buy.cancelled': 'Purchase cancelled. Nothing was charged.',
   'buy.pending': 'Waiting for approval. It will arrive once approved.',
   'buy.failed': 'That did not go through. Please try again later.',

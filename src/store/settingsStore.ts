@@ -11,6 +11,7 @@ import { create } from 'zustand';
 
 import {
   DEFAULT_SETTINGS,
+  LOCKABLES,
   SETTINGS_KEY,
   addRecentNames,
   cleanName,
@@ -47,6 +48,9 @@ export interface SettingsStoreOptions {
   timers?: GateTimers;
   /** Runs alongside `hydrate` (the app uses it to start the stats read too). */
   onHydrate?: () => void;
+  /** No free tries (the published web game, see storefront.ts): every locked
+   *  item reads as already tried, whatever storage says. */
+  noTries?: boolean;
 }
 
 export function createSettingsStore(storage: KeyValueStorage, opts: SettingsStoreOptions = {}) {
@@ -76,6 +80,7 @@ export function createSettingsStore(storage: KeyValueStorage, opts: SettingsStor
 
     return {
       ...DEFAULT_SETTINGS,
+      ...(opts.noTries ? { triesUsed: [...LOCKABLES] } : {}),
       hydrated: false,
 
       hydrate: () => {
@@ -99,6 +104,7 @@ export function createSettingsStore(storage: KeyValueStorage, opts: SettingsStor
             if (stored.triesUsed && touched.has('triesUsed')) {
               apply.triesUsed = withTries(stored.triesUsed, getState().triesUsed);
             }
+            if (opts.noTries) apply.triesUsed = [...LOCKABLES];
             touched.clear();
             setState({ ...apply, hydrated: true });
           })

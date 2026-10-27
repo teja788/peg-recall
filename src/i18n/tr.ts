@@ -261,6 +261,8 @@ export const tr: Strings = {
   'unlock.for': '{price} ile kilidi aç',
   'unlock.button': 'Kilidi aç',
   'unlock.nothing': 'Bu Apple Hesabı için geri yüklenecek bir şey yok.',
+  'web.appOnly': 'Her şeyin kilidini açmak için iPhone veya iPad’e Color Catch’i indir.',
+  'web.getApp': 'App Store’dan indir',
   'buy.cancelled': 'Satın alma iptal edildi. Ücret alınmadı.',
   'buy.pending': 'Onay bekleniyor. Onaylanınca satın alım tamamlanacak.',
   'buy.failed': 'Olmadı. Lütfen daha sonra tekrar dene.',

@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useGame } from '../src/store/game';
 import { maybeRequestReview, reviewDue } from '../src/store/reviewPrompt';
+import { hasStore } from '../src/store/storefront';
 import { dailyBoard, dailyNumber } from '../src/store/stats';
 import {
   deal,
@@ -411,9 +412,11 @@ export default function GameScreen() {
         humanWon: won,
         passAndPlay: g.config.players.filter((p) => p.kind === 'human').length > 1,
       }),
+      noTries: !hasStore,
     });
     setUpsell(card ? { key: overKey, card, more: moreToTry(s) } : null);
-    if (card === 'more') s.set('moreOffered', true);
+    // both once-ever cards: "Ready for more?", and the web game's "Liked it?"
+    if (card === 'more' || (card && !hasStore)) s.set('moreOffered', true);
   }, [overKey]);
 
   /** "Ready for more?" → straight into a game on the Big board and/or vs Owl.

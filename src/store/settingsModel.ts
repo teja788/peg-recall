@@ -33,7 +33,8 @@ export interface Settings {
   unlocked: boolean;
   /** Locked items whose one free game has been played (see `canTry`). */
   triesUsed: Lockable[];
-  /** The "Ready for more?" card after a Classic win has been shown (once ever). */
+  /** The "Ready for more?" card after a Classic win has been shown (once
+   *  ever). In the web game: its "Liked it?" card (see `upsellCard`). */
   moreOffered: boolean;
   /** Daily reminder (local notifications, iOS): on only after iOS said yes. */
   reminder: boolean;
@@ -332,7 +333,7 @@ export function persistable(s: Settings): PersistedSettings {
 
 /** What the unlock opens. Board sizes, opponents and modes share no names. */
 export type Lockable = 'big' | 'huge' | 'owl' | '3p' | '4p';
-const LOCKABLES: Lockable[] = ['big', 'huge', 'owl', '3p', '4p'];
+export const LOCKABLES: readonly Lockable[] = ['big', 'huge', 'owl', '3p', '4p'];
 const LOCKED = new Set<string>(LOCKABLES);
 
 /** What decides whether a locked item can be played. */
@@ -421,13 +422,24 @@ export function moreToTry(s: Access): ('big' | 'owl')[] {
  *  - 'more': a person beat the computer on the Classic board, not on a try,
  *    and Big or Owl still has its try; once ever (`moreOffered`). Not on the
  *    game-over where the rating prompt is asked for: that one wins.
+ *  - `noTries` (the web game, which has no tries and no rating prompt):
+ *    'unlock' after any game a person won, once ever (`moreOffered`). Its
+ *    sheet points to the App Store.
  */
 export function upsellCard(
   s: Access & Pick<Settings, 'moreOffered'>,
-  game: { tries: number; humanWon: boolean; vsComputer: boolean; boardSize: BoardSize; reviewDue: boolean },
+  game: {
+    tries: number;
+    humanWon: boolean;
+    vsComputer: boolean;
+    boardSize: BoardSize;
+    reviewDue: boolean;
+    noTries?: boolean;
+  },
 ): 'unlock' | 'more' | null {
   if (s.unlocked) return null;
   if (game.tries > 0) return 'unlock';
+  if (game.noTries) return game.humanWon && !s.moreOffered ? 'unlock' : null;
   if (
     !game.reviewDue &&
     game.humanWon &&

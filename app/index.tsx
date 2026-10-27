@@ -19,7 +19,7 @@ import { useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
 import { BoardGlyph, BoardMini } from '../src/ui/BoardMini';
 import { IconButton, ModeCard, OptionPill, QuestionGlyph } from '../src/ui/controls';
-import { shareMessage } from '../src/ui/GameOverSheet';
+import { shareMessage, shareUrl } from '../src/ui/GameOverSheet';
 import { shareText } from '../src/ui/shareText';
 import { joinNames, playerLabel } from '../src/ui/names';
 import { PlayersSheet } from '../src/ui/PlayersSheet';
@@ -230,7 +230,7 @@ export default function Home() {
           action={daily ? tr('share.short') : undefined}
           onPress={() =>
             daily
-              ? void shareMessage(shareText(daily.best))
+              ? void shareMessage(shareText(daily.best, shareUrl()))
               : go({ pathname: '/game', params: { mode: 'ai', daily: '1' } })
           }
           style={cardStyle}

@@ -15,6 +15,7 @@ import {
 } from '../src/store/settings';
 import { buy } from '../src/store/purchases';
 import { remindersSupported, turnOnReminders } from '../src/store/reminders';
+import { hasStore } from '../src/store/storefront';
 import { TIP_IDS, type ProductId } from '../src/store/purchasesModel';
 import { useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
@@ -156,14 +157,19 @@ export default function SettingsScreen() {
         <ForgetNamesRow />
 
         <UnlockRow unlocked={unlocked} onOpen={setSheet} />
-        <Text
-          accessibilityRole="header"
-          style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}
-        >
-          {tr('settings.support')}
-        </Text>
-        <TipJar />
-        <RateRow />
+        {/* the published web game sells nothing, so no tips (and no rating) */}
+        {hasStore ? (
+          <>
+            <Text
+              accessibilityRole="header"
+              style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}
+            >
+              {tr('settings.support')}
+            </Text>
+            <TipJar />
+            <RateRow />
+          </>
+        ) : null}
       </ScrollView>
       {sheet ? (
         <UnlockSheet restoring={sheet === 'restore'} onClose={() => setSheet(null)} />
@@ -310,7 +316,9 @@ function UnlockRow({
           {chevron('›')}
         </Text>
       </Pressable>
-      {unlocked ? null : <PillButton text={tr('unlock.restore')} onPress={() => onOpen('restore')} />}
+      {unlocked || !hasStore ? null : (
+        <PillButton text={tr('unlock.restore')} onPress={() => onOpen('restore')} />
+      )}
     </View>
   );
 }

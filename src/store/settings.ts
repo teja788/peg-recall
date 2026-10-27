@@ -1,6 +1,7 @@
 import { createSettingsStore } from './settingsStore';
 import { bindStatsStorage, useStats } from './stats';
 import { storage } from './storage';
+import { hasStore } from './storefront';
 
 // The data and the pure helpers live in settingsModel.ts (which imports no
 // native module); re-exported here so every screen keeps one import path.
@@ -41,4 +42,6 @@ export const useSettings = createSettingsStore(storage, {
   onHydrate: () => {
     void useStats.getState().hydrate();
   },
+  // the published web game: nothing to buy, so no free tries to count either
+  noTries: !hasStore,
 });

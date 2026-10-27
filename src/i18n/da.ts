@@ -251,6 +251,8 @@ export const da: Strings = {
   'unlock.for': 'Lås op for {price}',
   'unlock.button': 'Lås op',
   'unlock.nothing': 'Intet at gendanne for denne Apple-konto.',
+  'web.appOnly': 'Hent Color Catch til iPhone eller iPad for at låse alt op.',
+  'web.getApp': 'Hent i App Store',
   'buy.cancelled': 'Købet blev annulleret. Der er ikke trukket noget.',
   'buy.pending': 'Venter på godkendelse. Det kommer, så snart det er godkendt.',
   'buy.failed': 'Det gik ikke igennem. Prøv igen senere.',

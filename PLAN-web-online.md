@@ -2,6 +2,8 @@
 
 Date: 2026-10-27. Status: **plan, nothing built yet.** Google Play is **paused** (owner, Oct 27).
 
+**W1 (web version) built Oct 27.** It goes live once the owner creates the Cloudflare Pages project (`WEB.md`). Differences from §A2: locked items keep the padlock (no new "In the app" badge to fit into 28 languages), the sheet says the unlock is in the app; no QR code yet; web shares link to the web game.
+
 Owner, Oct 27: the website and the web game go on **Cloudflare Pages** (D2 ✅). The domain will be bought later (D1). The server host (D3) and the money model (D4) are still open, so the plan keeps both open and says in §3 when each one is needed.
 
 Related: `GROWTH-IDEAS.md` §4 (first sketch of web + online), `PLAN-v1.3.md` (daily board, share).

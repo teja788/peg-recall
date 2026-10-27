@@ -253,6 +253,8 @@ export const nb: Strings = {
   'unlock.for': 'Lås opp for {price}',
   'unlock.button': 'Lås opp',
   'unlock.nothing': 'Ingenting å gjenopprette for denne Apple-kontoen.',
+  'web.appOnly': 'Last ned Color Catch for iPhone eller iPad for å låse opp alt.',
+  'web.getApp': 'Last ned i App Store',
   'buy.cancelled': 'Kjøpet ble avbrutt. Ingenting ble belastet.',
   'buy.pending': 'Venter på godkjenning. Det kommer så snart det er godkjent.',
   'buy.failed': 'Det gikk ikke. Prøv igjen senere.',
