@@ -6,6 +6,7 @@ import {
   AppState,
   BackHandler,
   I18nManager,
+  Linking,
   Platform,
   StyleSheet,
   Text,
@@ -16,6 +17,7 @@ import {
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { reportUrl } from '../src/online/config';
 import { useGame } from '../src/store/game';
 import { useRoom } from '../src/store/room';
 import { maybeRequestReview, reviewDue } from '../src/store/reviewPrompt';
@@ -250,6 +252,9 @@ export default function GameScreen() {
   const [frozen, setFrozen] = useState<GameState | null>(null);
   /** `leaving`, but set at once: a second tap in the same frame sees it */
   const leavingNow = useRef(false);
+  /** online, this board is no longer the room's (it ended, or a reload lost
+   *  it): off to the room page, past the leave guard */
+  const terminal = online && !leaving && (roomEnded != null || remote == null);
   const started = useRef(false);
   /** the locked items the game on the table plays on their free try */
   const trial = useRef<Lockable[]>([]);
@@ -302,15 +307,6 @@ export default function GameScreen() {
     started.current = true;
     dealNew(undefined, isDaily);
   }, [hydrated, hasState, dealNew, leaving, isDaily, online]);
-
-  // online with no board from the room (a reload), or the room ended: the
-  // room page rejoins, or says what happened
-  useEffect(() => {
-    if (!online || leaving) return;
-    if (roomEnded || !useGame.getState().remote) {
-      router.replace({ pathname: '/room/[code]', params: { code: roomCode } });
-    }
-  }, [online, roomEnded, leaving, roomCode, router]);
 
   useEffect(
     () => () => {
@@ -506,9 +502,16 @@ export default function GameScreen() {
   // browser's Back owns the history entry (see the Esc handler below), and a
   // guard there fights `popstate` instead of trapping it.
   usePreventRemove(
-    Platform.OS !== 'web' && !leaving && state != null && state.phase !== 'gameOver',
+    Platform.OS !== 'web' && !leaving && !terminal && state != null && state.phase !== 'gameOver',
     openPause,
   );
+
+  // online with no board from the room (a reload), or the room ended: the
+  // room page rejoins, or says what happened. Declared after the guard above,
+  // which `terminal` has already released by the time this runs (audit F03).
+  useEffect(() => {
+    if (terminal) router.replace({ pathname: '/room/[code]', params: { code: roomCode } });
+  }, [terminal, roomCode, router]);
 
   /* -------------------------------------------------- web: Esc key */
 
@@ -829,6 +832,10 @@ export default function GameScreen() {
         body={tr('online.menuBody')}
         homeLabel={tr('online.leave')}
         homeHint={tr('online.leaveHint')}
+        extra={{
+          label: tr('online.report'),
+          onPress: () => void Linking.openURL(reportUrl(roomCode, remote?.seat ?? null)).catch(() => {}),
+        }}
       />
     ) : null}
 

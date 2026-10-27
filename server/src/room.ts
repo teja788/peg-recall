@@ -64,6 +64,8 @@ export interface Seat {
   awaySince: number | null;
   /** a person who left (or was removed) mid-game: the computer finishes for them */
   left?: boolean;
+  /** the address fingerprint they joined from (hub.ts), so a removal sticks */
+  addr?: string;
 }
 
 export interface RoomDeps {
@@ -99,6 +101,13 @@ export class Room {
   private pending: Pending | null = null;
   /** away people whose turns the computer is playing, at computer pace */
   private standingIn = new Set<string>();
+  /** a stand-in's thinking time for the pick numbered `seq`, drawn once so a
+   *  re-armed clock keeps the same deadline (audit F05) */
+  private think: { seq: number; ms: number } | null = null;
+  /** addresses of people the host removed: they cannot come back to this room */
+  private readonly banned = new Set<string>();
+  /** the clock on a dropped-out host handing over (`checkHost`) */
+  private handover: unknown = null;
 
   constructor(
     readonly code: string,
@@ -140,8 +149,10 @@ export class Room {
 
   /* --------------------------------------------------------------- seats */
 
-  /** A person takes a free seat (create or join). */
-  addPerson(conn: Conn, name: string | undefined, avatar: AvatarId): Seat | ErrorCode {
+  /** A person takes a free seat (create or join). `addr`: where they came
+   *  from (hub.ts fingerprint), so a removal by the host sticks. */
+  addPerson(conn: Conn, name: string | undefined, avatar: AvatarId, addr?: string): Seat | ErrorCode {
+    if (addr && this.barred(addr)) return 'removed';
     if (this.status === 'playing') return 'started';
     if (this.seats.length >= this.settings.maxSeats) return 'full';
     const seat: Seat = {
@@ -152,6 +163,7 @@ export class Room {
       token: (this.deps.token ?? randomToken)(),
       conn,
       awaySince: null,
+      ...(addr ? { addr } : {}),
     };
     this.seats.push(seat);
     this.touch();
@@ -166,7 +178,9 @@ export class Room {
     if (!seat) return null;
     const old = seat.conn;
     if (old && old !== conn) {
-      // the same person on a newer connection (a second tab, a network switch)
+      // the same person on a newer connection (a network switch, a second
+      // tab): the older one is told why, so it stops coming back (audit F04)
+      this.send(old, { type: 'ended', reason: 'replaced' });
       this.deps.release(old);
       old.close();
     }
@@ -178,6 +192,7 @@ export class Room {
     if (this.state) this.send(conn, { type: 'snapshot', state: this.state, seq: this.seq, at: this.at });
     this.broadcastRoom();
     this.presenceChanged();
+    this.checkHost();
     return seat;
   }
 
@@ -189,6 +204,7 @@ export class Room {
     seat.awaySince = this.deps.clock.now();
     this.broadcastRoom();
     this.presenceChanged();
+    this.checkHost();
   }
 
   /** A person leaves on purpose. Before a game their seat goes; during one the
@@ -226,6 +242,8 @@ export class Room {
       this.broadcastRoom();
       return null;
     }
+    // removed for good: not back in this room from the same address (F09)
+    if (seat.addr) this.banned.add(seat.addr);
     if (seat.conn) {
       this.send(seat.conn, { type: 'ended', reason: 'removed' });
       this.deps.release(seat.conn);
@@ -296,6 +314,7 @@ export class Room {
     if (this.closed) return;
     this.closed = true;
     this.cancelPending();
+    this.cancelHandover();
     for (const seat of this.seats) {
       if (!seat.conn) continue;
       this.send(seat.conn, { type: 'ended', reason });
@@ -347,6 +366,7 @@ export class Room {
       this.overAt = this.at;
       this.deps.stats.gamesFinished++;
       this.broadcastRoom();
+      this.checkHost();
     }
     this.schedule();
     return true;
@@ -389,12 +409,9 @@ export class Room {
       delay = this.at + config.turnMs[this.settings.timer] - now;
     } else if (seat.left || this.standingIn.has(seat.id)) {
       // already standing in: computer pacing, as for a computer seat
-      if (s.phase === 'roll') delay = FLOW.aiRollDelay;
-      else {
-        const [think, next] = aiThinkMs(this.rng);
-        this.rng = next;
-        delay = this.at + tumbleMs(s.dieRerolls ?? 0) + think - now;
-      }
+      // deadlines from when the phase began, so re-arming never pushes them back
+      if (s.phase === 'roll') delay = this.at + FLOW.aiRollDelay - now;
+      else delay = this.at + tumbleMs(s.dieRerolls ?? 0) + this.thinkFor(this.seq) - now;
     } else {
       const since = Math.max(this.at, seat.awaySince ?? this.at);
       delay = Math.min(this.at + config.turnMs[this.settings.timer], since + config.awayGraceMs) - now;
@@ -419,6 +436,55 @@ export class Room {
     this.rng = res.rng;
     this.ais = res.ais;
     if (res.pegIndex >= 0) this.apply({ type: 'PICK', pegIndex: res.pegIndex }, id, standIn);
+  }
+
+  /**
+   * A removed person's address, unless someone still in the room is
+   * connected from it too: then it is a household (one home Wi-Fi), and the
+   * address cannot tell the removed device from the rest of the family, so
+   * their relative joining is not refused for it.
+   */
+  private barred(addr: string): boolean {
+    return this.banned.has(addr) && !this.seats.some((s) => s.addr === addr && s.conn && !s.left);
+  }
+
+  /** A stand-in's thinking time for this pick: drawn once, kept on re-arm. */
+  private thinkFor(seq: number): number {
+    if (this.think?.seq !== seq) {
+      const [ms, next] = aiThinkMs(this.rng);
+      this.rng = next;
+      this.think = { seq, ms };
+    }
+    return this.think.ms;
+  }
+
+  /**
+   * A host who has dropped out hands over after `hostHandoverMs`, so a room
+   * never waits forever on someone who is gone. Only outside a game: during
+   * one nothing needs the host until it ends (then this runs again).
+   */
+  private checkHost(): void {
+    const next = () => this.sorted().find((s) => s.kind === 'human' && !s.left && s.conn);
+    const host = this.seats.find((s) => s.id === this.host);
+    if (this.closed || this.status === 'playing' || host?.conn || !next()) {
+      this.cancelHandover();
+      return;
+    }
+    if (this.handover) return;
+    this.handover = this.deps.clock.setTimeout(() => {
+      this.handover = null;
+      const still = this.seats.find((s) => s.id === this.host);
+      const heir = next();
+      if (this.closed || this.status === 'playing' || still?.conn || !heir) return;
+      this.host = heir.id;
+      this.touch();
+      this.broadcastRoom();
+    }, this.deps.config.hostHandoverMs);
+  }
+
+  private cancelHandover(): void {
+    if (this.handover) this.deps.clock.clearTimeout(this.handover);
+    this.handover = null;
   }
 
   /** Brains for the computer seats, and stand-ins for every person's seat. */

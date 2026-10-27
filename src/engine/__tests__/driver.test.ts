@@ -168,3 +168,40 @@ test('stateHash: survives JSON, changes with any move', () => {
   seen.add(stateHash(cur));
   assert.equal(seen.size, 5, 'every step has its own hash');
 });
+
+test('stateHash: every field that changes play changes the hash (audit F07)', () => {
+  let s = createGame(allComputer(2, 'classic', 77));
+  s = reduce(s, { type: 'REVEAL_DONE' });
+  s = reduce(s, { type: 'ROLL' });
+  s = reduce(s, { type: 'PICK', pegIndex: s.pegs.findIndex((p) => p.state === 'hidden') });
+  const base = stateHash(s);
+  const lm = s.lastMove!;
+  const variants: [string, GameState][] = [
+    ['bonusTurnOnMatch', { ...s, config: { ...s.config, rules: { ...s.config.rules, bonusTurnOnMatch: false } } }],
+    ['tieBreak', { ...s, config: { ...s.config, rules: { ...s.config.rules, tieBreak: 'shared' } } }],
+    ['kidMode', { ...s, config: { ...s.config, rules: { ...s.config.rules, kidMode: true } } }],
+    ['boardSize', { ...s, config: { ...s.config, boardSize: 'big' } }],
+    ['seed', { ...s, config: { ...s.config, seed: s.config.seed + 1 } }],
+    ['player kind', { ...s, config: { ...s.config, players: [{ ...s.config.players[0], kind: 'human' }, s.config.players[1]] } }],
+    ['spec', { ...s, spec: { ...s.spec, revealMs: s.spec.revealMs + 1 } }],
+    ['lastMove.matched', { ...s, lastMove: { ...lm, matched: !lm.matched } }],
+    ['lastMove.pegIndex', { ...s, lastMove: { ...lm, pegIndex: lm.pegIndex + 1 } }],
+    ['lastMove gone', { ...s, lastMove: null }],
+    ['dieRerolls', { ...s, dieRerolls: (s.dieRerolls ?? 0) + 1 }],
+    ['peg colour', { ...s, pegs: s.pegs.map((p, i) => (i === 3 ? { ...p, color: p.color === 'red' ? 'blue' : 'red' } : p)) }],
+    ['capturedBy', { ...s, pegs: s.pegs.map((p, i) => (i === 3 ? { ...p, state: 'captured', capturedBy: 'p2' } : p)) }],
+    ['scores', { ...s, scores: { ...s.scores, p2: (s.scores.p2 ?? 0) + 1 } }],
+    ['suddenDeathScores', { ...s, suddenDeathScores: { ...s.suddenDeathScores, p1: 1 } }],
+    ['activeSeats', { ...s, activeSeats: [1] }],
+    ['winnerIds', { ...s, winnerIds: ['p1'] }],
+    ['rng', { ...s, rng: { ...s.rng, counter: s.rng.counter + 1 } }],
+    ['turn', { ...s, turn: s.turn + 1 }],
+    ['activePlayer', { ...s, activePlayer: 1 - s.activePlayer }],
+    ['dieColor', { ...s, dieColor: s.dieColor === 'red' ? 'blue' : 'red' }],
+    ['suddenDeath', { ...s, suddenDeath: true }],
+  ];
+  for (const [what, v] of variants) assert.notEqual(stateHash(v), base, what);
+  // the audit's example: a different bonus rule plays out differently, and now hashes differently
+  const noBonus = variants[0][1];
+  assert.notEqual(stateHash(reduce(noBonus, { type: 'RESULT_DONE' })), stateHash(reduce(s, { type: 'RESULT_DONE' })));
+});

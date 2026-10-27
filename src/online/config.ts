@@ -12,7 +12,10 @@
  *   EXPO_PUBLIC_ROOMS_URL=ws://localhost:8787/ws npx expo start --web
  */
 
+import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+
+import { formatCode } from './protocol';
 
 export const ROOMS_URL = process.env.EXPO_PUBLIC_ROOMS_URL ?? '';
 const WEB_URL = (process.env.EXPO_PUBLIC_WEB_URL ?? '').replace(/\/+$/, '');
@@ -33,4 +36,25 @@ export function inviteUrl(code: string): string | null {
     if (origin?.startsWith('https://')) base = origin;
   }
   return base ? `${base}/join/${code}` : null;
+}
+
+/** Where "Report a problem" writes to: the contact address on the website. */
+export const SUPPORT_EMAIL = 'ravibitspilani@gmail.com';
+
+/** An email about a room, ready to write: the room code in the subject, so a
+ *  report can be matched to the room (and the host told, or the name dealt
+ *  with). Grown-ups write it; nothing is sent until they press Send. */
+export function reportUrl(code: string, seat: string | null): string {
+  const room = formatCode(code);
+  const subject = `Color Catch online: room ${room}`;
+  const body = [
+    `Room: ${room}`,
+    `My seat: ${seat ?? '-'}`,
+    `App: ${Platform.OS} ${Constants.expoConfig?.version ?? ''}`.trim(),
+    `Time: ${new Date().toISOString()}`,
+    '',
+    'What happened:',
+    '',
+  ].join('\n');
+  return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }

@@ -119,3 +119,24 @@ test('shutting down tells every room why', async () => {
   const m = await ended;
   assert.equal(m.type === 'ended' && m.reason, 'serverRestart');
 });
+
+test('F01: a binary frame or an oversized text frame ends the connection', async () => {
+  const srv = await startServer({ port: 0, host: '127.0.0.1', log: () => {} });
+  const url = `ws://127.0.0.1:${srv.port}/ws`;
+  const closedAfter = async (send: (ws: WebSocket) => void) => {
+    const c = await client(url);
+    const closed = new Promise<boolean>((resolve) => {
+      c.ws.addEventListener('close', () => resolve(true));
+      setTimeout(() => resolve(false), 2000).unref();
+    });
+    send(c.ws);
+    return closed;
+  };
+  try {
+    assert.equal(await closedAfter((ws) => ws.send(new Uint8Array(16))), true, 'binary');
+    assert.equal(await closedAfter((ws) => ws.send('x'.repeat(5000))), true, 'over 4 KB');
+    assert.equal(await closedAfter((ws) => ws.send(JSON.stringify(hello))), false, 'a normal hello stays');
+  } finally {
+    await srv.close();
+  }
+});

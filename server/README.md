@@ -74,11 +74,27 @@ One-time, on your computer (about 10 minutes):
 Updating: `npm run cf:deploy` again. Rooms open at that moment end ("This
 room has closed"), as after any server restart, so deploy at a quiet hour.
 
-Why it stays free: every room lives in **one** Durable Object, and Cloudflare
-bills each object for the time it is awake. One object can be awake at most
-24 h a day, which is 10,800 GB-s at Cloudflare's 128 MB, under the free
-13,000 GB-s a day. The other free limit, 100,000 requests a day, counts 20
-game messages as one request: thousands of games a day. Nothing is stored.
+Why it should stay free (Cloudflare's free limits as of Oct 2026; check
+their current pricing page before relying on it): every room lives in
+**one** Durable Object, and Cloudflare bills each object for the time it is
+awake. One object can be awake at most 24 h a day, which is 10,800 GB-s at
+Cloudflare's 128 MB, under the free 13,000 GB-s a day. The other free limit,
+100,000 requests a day, counts 20 game messages as one request: thousands of
+games a day. Nothing is stored.
+
+What the free plan does not promise:
+
+- **Restarts.** Cloudflare restarts Durable Objects now and then (its own
+  updates, moving the object, or our deploys). Rooms open at that moment end
+  ("This room has closed"); players start a new room. There is no uptime
+  guarantee on the free plan.
+- **Running out.** If a day's free allowance is used up, online play stops
+  until it resets (00:00 UTC). Games on one device are not affected. `/stats`
+  shows how busy it is.
+- **One machine.** One object runs on one machine, so every room shares it.
+  That is plenty for family games (a move is a few small messages), but it
+  is a ceiling: if `/stats` ever shows thousands of rooms at once, move to
+  Workers Paid and split the rooms across several objects.
 
 Try it locally in Cloudflare's own runtime (no account needed):
 `npm run cf:dev` (port 8787), then the app tests in "Run and test" with

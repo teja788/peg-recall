@@ -26,8 +26,11 @@ npm run smoke:web     # serves dist/ like Cloudflare does, checks it in Chromium
 ```
 
 The smoke test needs the shared Playwright Chromium
-(`npx playwright@1.47.0 install chromium`), or any Chrome binary in
-`PW_CHROMIUM`. Screenshots land in `web-smoke/` (not committed).
+(`npx playwright@1.47.0 install chromium`), any Chrome binary in
+`PW_CHROMIUM`, or an installed browser by name in `PW_CHANNEL` (`chrome`,
+`msedge`). Playwright's own Chromium cannot play AAC, so the game's sounds
+fail there (harmless); a branded browser plays them. Screenshots land in
+`web-smoke/` (not committed).
 
 ## Cloudflare Pages: one-time setup (owner, ~10 minutes)
 
@@ -101,6 +104,10 @@ EXPO_PUBLIC_ROOMS_URL=ws://127.0.0.1:8787/ws npm run build:web
 npm run e2e:online                         # room server on Node
 E2E_ROOMS=cloudflare npm run e2e:online    # room server in Cloudflare's runtime
 ```
+
+It runs on macOS, Linux and Windows (on Windows set the variables with
+`set NAME=value` first, or use Git Bash). `E2E_PLAY_MINUTES` (default 10)
+is how long the game may take on a slow machine.
 
 **Try it by hand:** `npm --prefix server run dev` in one terminal, then
 `EXPO_PUBLIC_ROOMS_URL=ws://localhost:8787/ws npx expo start --web` and open

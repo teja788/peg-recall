@@ -12,7 +12,10 @@
  * Screenshots (phone, tablet, desktop) go to web-smoke/ for a look by eye.
  *
  * Browser: the shared Playwright Chromium (`npx playwright@1.47.0 install
- * chromium`), or any Chrome/Chromium binary in PW_CHROMIUM.
+ * chromium`), any Chrome/Chromium binary in PW_CHROMIUM, or an installed
+ * browser by name in PW_CHANNEL (chrome, msedge). Playwright's own Chromium
+ * cannot play AAC, so its console may show the game's sounds failing; a
+ * branded browser plays them.
  */
 import fs from 'node:fs';
 import http from 'node:http';
@@ -66,6 +69,7 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({
   headless: true,
   ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}),
+  ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}),
 });
 
 try {

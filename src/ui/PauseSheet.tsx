@@ -29,9 +29,20 @@ export interface PauseSheetProps {
   body?: string;
   homeLabel?: string;
   homeHint?: string;
+  /** one more quiet button above Home (the online game's "Report a problem") */
+  extra?: { label: string; onPress: () => void };
 }
 
-export function PauseSheet({ onResume, onRestart, onHome, title, body, homeLabel, homeHint }: PauseSheetProps) {
+export function PauseSheet({
+  onResume,
+  onRestart,
+  onHome,
+  title,
+  body,
+  homeLabel,
+  homeHint,
+  extra,
+}: PauseSheetProps) {
   const t = useTheme();
   const reduced = useReduceMotion();
   const insets = useSafeAreaInsets();
@@ -148,6 +159,24 @@ export function PauseSheet({ onResume, onRestart, onHome, title, body, homeLabel
                 ]}
               >
                 <Text style={{ ...t.type.heading, color: t.c.text }}>{tr('pause.restart')}</Text>
+              </Pressable>
+            ) : null}
+            {extra ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={extra.label}
+                onPress={extra.onPress}
+                style={({ pressed }) => [
+                  styles.btn,
+                  {
+                    borderRadius: t.radii.lg,
+                    borderWidth: 2,
+                    borderColor: t.c.line,
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}
+              >
+                <Text style={{ ...t.type.heading, color: t.c.text }}>{extra.label}</Text>
               </Pressable>
             ) : null}
             <Pressable

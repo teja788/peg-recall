@@ -13,9 +13,12 @@
  *
  * E2E_ROOMS=cloudflare runs the room server in Cloudflare's own runtime
  * instead (`wrangler dev`, server/src/cloudflare.ts; no account needed).
- * Browser: as for web-smoke.mjs (PW_CHROMIUM for another binary).
+ * Browser: as for web-smoke.mjs (PW_CHROMIUM for another binary,
+ * PW_CHANNEL=chrome or msedge for an installed browser that plays the
+ * game's AAC sounds). E2E_PLAY_MINUTES: how long the game may take (10).
+ * Runs on macOS, Linux and Windows.
  */
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
@@ -52,14 +55,34 @@ for (const [file, hint] of [
 fs.mkdirSync(SHOTS, { recursive: true });
 
 const onCloudflare = process.env.E2E_ROOMS === 'cloudflare';
+const windows = process.platform === 'win32';
 const rooms = onCloudflare
   ? spawn('npx', ['wrangler', 'dev', '--port', String(PORT), '--ip', '127.0.0.1'], {
       cwd: path.resolve('server'),
       env: { ...process.env, WRANGLER_SEND_METRICS: 'false', CI: '1' },
       stdio: 'ignore',
-      detached: true,
+      // npx is a .cmd file on Windows; elsewhere its own process group, so
+      // workerd (wrangler's child) stops with it
+      shell: windows,
+      detached: !windows,
     })
   : spawn(process.execPath, [SERVER], { env: { ...process.env, PORT: String(PORT), HOST: '127.0.0.1' }, stdio: 'ignore' });
+rooms.on('error', (e) => {
+  console.error(`the room server could not start: ${e.message}`);
+  process.exit(1);
+});
+
+/** Stop the room server and everything it started. */
+function stopRooms() {
+  if (rooms.exitCode != null || rooms.pid == null) return;
+  try {
+    if (windows) spawnSync('taskkill', ['/pid', String(rooms.pid), '/T', '/F'], { stdio: 'ignore' });
+    else if (onCloudflare) process.kill(-rooms.pid, 'SIGTERM');
+    else rooms.kill('SIGTERM');
+  } catch {
+    /* already gone */
+  }
+}
 /** the room server is up when /health answers */
 async function serverUp() {
   for (let i = 0; i < 120; i++) {
@@ -74,12 +97,17 @@ async function serverUp() {
 }
 if (!(await serverUp())) {
   console.error('the room server did not start');
+  stopRooms();
   process.exit(1);
 }
 console.log(`room server: ${onCloudflare ? 'Cloudflare (wrangler dev)' : 'Node'}`);
 const web = await serveDist();
 const base = `http://127.0.0.1:${web.address().port}`;
-const browser = await chromium.launch({ headless: true, ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}) });
+const browser = await chromium.launch({
+  headless: true,
+  ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}),
+  ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}),
+});
 
 const failures = [];
 const check = (ok, what) => {
@@ -138,6 +166,7 @@ try {
   await maya.getByText('Dadi', { exact: true }).waitFor({ timeout: 5000 });
   check(true, 'Maya sees Dadi arrive');
   check(await dadi.getByText('Waiting for Maya to start').isVisible(), 'Dadi waits for the host');
+  check(await dadi.getByRole('button', { name: 'Report a problem' }).isVisible(), 'the waiting room has Report a problem');
   await shot(dadi, '2-lobby-guest');
 
   // Maya starts: both go to the table
@@ -147,8 +176,17 @@ try {
   check(true, 'both screens show the same reveal');
   await shot(dadi, '3-reveal');
 
+  // the browser's Back leaves the table but keeps the seat; Forward comes
+  // back through the waiting room, which asks for the board again
+  await maya.goBack();
+  await maya.waitForURL((u) => !u.search.includes('room='), { timeout: 5000 });
+  await maya.goForward();
+  await maya.waitForURL(/\/game\?room=/, { timeout: 10000 });
+  await maya.getByLabel(/^Round board, \d+ pegs/).first().waitFor({ timeout: 10000 });
+  check(maya.url().includes(`room=${code}`), "after the browser's Back and Forward, Maya is back at the table");
+
   // play it out
-  const deadline = Date.now() + 4 * 60_000;
+  const deadline = Date.now() + Number(process.env.E2E_PLAY_MINUTES || 10) * 60_000;
   let moves = 0;
   while (Date.now() < deadline) {
     if ((await over(maya)) && (await over(dadi))) break;
@@ -172,9 +210,7 @@ try {
 } finally {
   await browser.close();
   web.close();
-  // wrangler starts workerd as a child: stop the whole group
-  if (onCloudflare) process.kill(-rooms.pid, 'SIGTERM');
-  else rooms.kill('SIGTERM');
+  stopRooms();
 }
 
 console.log(failures.length ? `\n${failures.length} failed` : '\nall passed');

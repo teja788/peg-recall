@@ -43,14 +43,13 @@ export interface HubDeps {
 }
 
 interface ConnState {
-  /** the address the connection came from: only for the create limit, never logged */
-  ip: string;
+  /** a salted fingerprint of the address the connection came from (see
+   *  `fingerprint`): only for the limits below, in memory, never logged */
+  addr: string;
   app: AppPlatform | null;
   room: Room | null;
   /** when recent messages arrived (the per-second limit) */
   recent: number[];
-  /** when recent wrong codes were tried */
-  badJoins: number[];
   /** the last message from this connection (devices ping every 20 s) */
   lastSeen: number;
 }
@@ -62,9 +61,16 @@ export class Hub {
   private readonly conns = new Map<Conn, ConnState>();
   /** room creations per address in the last hour, in memory only */
   private readonly creates = new Map<string, number[]>();
+  /** wrong codes per address in the last minute: across all its connections */
+  private readonly badJoins = new Map<string, number[]>();
+  /** open connections per address */
+  private readonly perAddr = new Map<string, number>();
+  /** makes the address fingerprints useless outside this process */
+  private readonly salt: string;
 
   constructor(private readonly deps: HubDeps) {
     this.config = { ...DEFAULT_CONFIG, ...deps.config };
+    this.salt = ((deps.random ?? randomUint32)() >>> 0).toString(16);
   }
 
   get roomCount(): number {
@@ -75,9 +81,18 @@ export class Hub {
     return this.conns.size;
   }
 
-  /** A new connection. Nothing is said until its `hello`. */
+  /** A new connection. Nothing is said until its `hello`. Too many open at
+   *  once, from one address or in all, and it is turned away at the door. */
   connect(conn: Conn, ip: string): void {
-    this.conns.set(conn, { ip, app: null, room: null, recent: [], badJoins: [], lastSeen: this.deps.clock.now() });
+    const addr = this.fingerprint(ip);
+    const open = this.perAddr.get(addr) ?? 0;
+    if (open >= this.config.connsPerAddress || this.conns.size >= this.config.maxConnections) {
+      this.send(conn, { type: 'error', code: 'rate' });
+      conn.close();
+      return;
+    }
+    this.perAddr.set(addr, open + 1);
+    this.conns.set(conn, { addr, app: null, room: null, recent: [], lastSeen: this.deps.clock.now() });
   }
 
   /** The connection went away (closed, dropped, timed out). */
@@ -86,6 +101,16 @@ export class Hub {
     if (!st) return;
     st.room?.disconnect(conn);
     this.conns.delete(conn);
+    const open = (this.perAddr.get(st.addr) ?? 1) - 1;
+    if (open > 0) this.perAddr.set(st.addr, open);
+    else this.perAddr.delete(st.addr);
+  }
+
+  /** A frame the protocol never sends (binary, or larger than any message):
+   *  the connection is closed at once. Adapters call this before `message`. */
+  violation(conn: Conn): void {
+    this.closed(conn);
+    conn.close();
   }
 
   /** One text message from a connection. */
@@ -120,10 +145,15 @@ export class Hub {
       this.rooms.delete(room.code);
       this.stats.roomsExpired++;
     }
-    for (const [ip, times] of this.creates) {
-      const kept = times.filter((t) => now - t < 3_600_000);
-      if (kept.length) this.creates.set(ip, kept);
-      else this.creates.delete(ip);
+    for (const [map, window] of [
+      [this.creates, 3_600_000],
+      [this.badJoins, 60_000],
+    ] as const) {
+      for (const [addr, times] of map) {
+        const kept = times.filter((t) => now - t < window);
+        if (kept.length) map.set(addr, kept);
+        else map.delete(addr);
+      }
     }
   }
 
@@ -153,11 +183,11 @@ export class Hub {
           this.stats.needsUnlock++;
           return this.error(conn, 'needsUnlock');
         }
-        const recent = (this.creates.get(st.ip) ?? []).filter((t) => now - t < 3_600_000);
+        const recent = (this.creates.get(st.addr) ?? []).filter((t) => now - t < 3_600_000);
         if (recent.length >= this.config.createsPerHour || this.rooms.size >= this.config.maxRooms) {
           return this.error(conn, 'rate');
         }
-        this.creates.set(st.ip, [...recent, now]);
+        this.creates.set(st.addr, [...recent, now]);
         this.leaveRoom(conn, st);
         const room = new Room(this.newCode(), settings, m.unlocked, {
           clock: this.deps.clock,
@@ -169,7 +199,7 @@ export class Hub {
           token: this.deps.token ?? randomToken,
         });
         this.rooms.set(room.code, room);
-        const seat = room.addPerson(conn, m.name, m.avatar);
+        const seat = room.addPerson(conn, m.name, m.avatar, st.addr);
         if (typeof seat === 'string') return this.error(conn, seat);
         st.room = room;
         this.stats.roomsCreated[st.app!]++;
@@ -181,7 +211,7 @@ export class Hub {
         if (!room) return this.wrongCode(conn, st, now);
         if (st.room === room) return;
         // guests are never limited: no needsUnlock check here
-        const seat = room.addPerson(conn, m.name, m.avatar);
+        const seat = room.addPerson(conn, m.name, m.avatar, st.addr);
         if (typeof seat === 'string') return this.error(conn, seat);
         if (st.room) this.leaveRoom(conn, st);
         st.room = room;
@@ -244,10 +274,22 @@ export class Hub {
   }
 
   private wrongCode(conn: Conn, st: ConnState, now: number): void {
-    st.badJoins = st.badJoins.filter((t) => now - t < 60_000);
-    st.badJoins.push(now);
-    if (st.badJoins.length > this.config.badJoinsPerMinute) return this.refuse(conn, 'rate', true);
+    const recent = [...(this.badJoins.get(st.addr) ?? []).filter((t) => now - t < 60_000), now];
+    this.badJoins.set(st.addr, recent);
+    if (recent.length > this.config.badJoinsPerMinute) return this.refuse(conn, 'rate', true);
     this.error(conn, 'notFound');
+  }
+
+  /** The address as a salted 32-bit fingerprint (FNV-1a): enough to count
+   *  per address, and nothing that is the address itself is kept. */
+  private fingerprint(ip: string): string {
+    const text = `${this.salt}|${ip}`;
+    let h = 0x811c9dc5;
+    for (let i = 0; i < text.length; i++) {
+      h ^= text.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h.toString(16);
   }
 
   /** A fresh 6-digit code no open room is using. */

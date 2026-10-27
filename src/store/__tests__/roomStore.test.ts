@@ -124,20 +124,52 @@ test('rejoin: from the saved seat after a reload; a stale or other room is not t
   }
 });
 
-test('a saved room that is gone: forgotten; an ended room: told and forgotten', async () => {
+test('a saved room that is gone: ended for this device and forgotten; an ended room: told and forgotten', async () => {
   const saved = JSON.stringify({ code: '111222', token: 'e'.repeat(32), at: 999_000 });
   const { useRoom, lines, data } = setup({ [ROOM_KEY]: saved });
   await useRoom.getState().rejoin();
   lines[0].ready();
+  assert.equal(lines[0].sent[0].type, 'resume');
   lines[0].receive({ type: 'error', code: 'notFound' });
-  assert.deepEqual([useRoom.getState().code, useRoom.getState().error], [null, 'notFound']);
+  // every screen leaves the room, a game included (audit F02)
+  const st = useRoom.getState();
+  assert.deepEqual([st.code, st.seat, st.room, st.error, st.ended], [null, null, null, null, 'expired']);
   await Promise.resolve();
   assert.equal(data.get(ROOM_KEY), '');
+
+  // a code typed wrong is only a refusal: nothing ends
+  useRoom.getState().join('999999', undefined, 'cat');
+  lines[0].receive({ type: 'error', code: 'notFound' });
+  assert.deepEqual([useRoom.getState().error, useRoom.getState().ended], ['notFound', null]);
 
   useRoom.getState().join('333444', undefined, 'cat');
   lines[0].receive({ type: 'joined', code: '333444', seat: 'p3', token: 'f'.repeat(32) });
   lines[0].receive({ type: 'ended', reason: 'removed' });
   assert.deepEqual([useRoom.getState().ended, useRoom.getState().seat], ['removed', null]);
+  await Promise.resolve();
+  assert.equal(data.get(ROOM_KEY), '');
+});
+
+test('"replaced": this window stops, the seat stays saved for the other one (audit F04)', async () => {
+  const { useRoom, lines, data } = setup();
+  useRoom.getState().join('482913', 'Leo', 'owl');
+  lines[0].ready();
+  lines[0].receive({ type: 'joined', code: '482913', seat: 'p2', token: 'b'.repeat(32) });
+  await Promise.resolve();
+  const kept = data.get(ROOM_KEY);
+  lines[0].receive({ type: 'ended', reason: 'replaced' });
+  assert.deepEqual([useRoom.getState().ended, useRoom.getState().code], ['replaced', null]);
+  await Promise.resolve();
+  assert.equal(data.get(ROOM_KEY), kept, 'the other window still needs it');
+});
+
+test('resync asks for the seat (and so the board) again', () => {
+  const { useRoom, lines } = setup();
+  useRoom.getState().join('482913', 'Leo', 'owl');
+  lines[0].ready();
+  lines[0].receive({ type: 'joined', code: '482913', seat: 'p2', token: 'b'.repeat(32) });
+  useRoom.getState().resync();
+  assert.deepEqual(lines[0].sent.at(-1), { type: 'resume', code: '482913', token: 'b'.repeat(32) });
 });
 
 test('leave tells the server, hangs up and forgets the seat', async () => {

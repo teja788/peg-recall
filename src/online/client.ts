@@ -6,7 +6,12 @@
  * clock, and reconnects after a drop with growing pauses (0.5, 1, 2, 4, 8,
  * then every 15 s). After every (re)connect `onReady` runs, so the room store
  * can resume its seat. An answer of "update" or "rules" ends it for good:
- * reconnecting would only be refused again.
+ * reconnecting would only be refused again; so does "replaced" (the seat is
+ * open in another window), or the two would take it from each other forever.
+ *
+ * A line can also die without closing (a phone asleep, a tunnel): no welcome
+ * within 10 s, or nothing heard for 45 s, and it is dropped and dialled again;
+ * coming back to the foreground checks it with a ping first.
  *
  * Pure TypeScript: the socket and the clock can be swapped for tests.
  */
@@ -56,6 +61,12 @@ const BACKOFF_MS = [500, 1000, 2000, 4000, 8000, 15000];
 const PING_MS = 20_000;
 /** pings sent right after connecting, to read the server's clock */
 const CLOCK_SAMPLES = 3;
+/** no welcome within this long after dialling: dial again */
+const HANDSHAKE_MS = 10_000;
+/** nothing heard for this long (pings are answered): the line is dead */
+const SILENT_MS = 45_000;
+/** back in the foreground: a ping must be answered within this long */
+const WAKE_CHECK_MS = 5_000;
 
 const REAL_CLOCK: ClientClock = {
   now: () => Date.now(),
@@ -72,6 +83,9 @@ export class RoomClient {
   private attempt = 0;
   private retry: unknown = null;
   private pinger: unknown = null;
+  private watch: unknown = null;
+  /** when anything last arrived on the line */
+  private lastHeard = 0;
   private stopped = false;
   private readonly clock: ClientClock;
 
@@ -95,6 +109,10 @@ export class RoomClient {
       return;
     }
     this.ws = ws;
+    this.lastHeard = this.clock.now();
+    this.arm(HANDSHAKE_MS, () => {
+      if (this.ws === ws && this.status !== 'open') this.abandon(false);
+    });
     ws.onopen = () => {
       this.raw({
         type: 'hello',
@@ -104,7 +122,11 @@ export class RoomClient {
         appVersion: this.opts.appVersion,
       });
     };
-    ws.onmessage = (ev) => this.receive(ev.data);
+    ws.onmessage = (ev) => {
+      if (this.ws !== ws) return;
+      this.lastHeard = this.clock.now();
+      this.receive(ev.data);
+    };
     ws.onerror = () => {
       /* onclose follows */
     };
@@ -112,6 +134,7 @@ export class RoomClient {
       if (this.ws !== ws) return;
       this.ws = null;
       this.stopPinging();
+      this.disarm();
       if (this.stopped) this.setStatus('closed');
       else this.scheduleRetry();
     };
@@ -129,18 +152,32 @@ export class RoomClient {
     if (this.retry) this.clock.clearTimeout(this.retry);
     this.retry = null;
     this.stopPinging();
+    this.disarm();
     const ws = this.ws;
     this.ws = null;
     ws?.close();
     this.setStatus('closed');
   }
 
-  /** Try again at once (the app came back to the foreground). */
+  /**
+   * Back in the foreground: with no line, dial at once; with one that looks
+   * open, ping it, and if nothing answers within WAKE_CHECK_MS, it was dead
+   * all along (a phone asleep keeps a socket that never closes): dial again.
+   */
   wake(): void {
-    if (this.stopped || this.ws) return;
-    if (this.retry) this.clock.clearTimeout(this.retry);
-    this.retry = null;
-    this.connect();
+    if (this.stopped) return;
+    if (!this.ws) {
+      if (this.retry) this.clock.clearTimeout(this.retry);
+      this.retry = null;
+      this.connect();
+      return;
+    }
+    if (this.status !== 'open') return;
+    const asked = this.clock.now();
+    this.raw({ type: 'ping', t: asked });
+    this.arm(WAKE_CHECK_MS, () => {
+      if (this.ws && this.lastHeard < asked) this.abandon(true);
+    });
   }
 
   private receive(data: unknown): void {
@@ -169,6 +206,10 @@ export class RoomClient {
       // this app and this server cannot play together: stop trying
       this.stopped = true;
     }
+    if (m.type === 'ended' && m.reason === 'replaced') {
+      // the seat is open on another connection: coming back would take it away
+      this.stopped = true;
+    }
     this.opts.onMessage(m);
   }
 
@@ -194,9 +235,48 @@ export class RoomClient {
     }, wait);
   }
 
+  /** Drop a line that went silent, quietly, and dial again: at once (`now`,
+   *  the player is looking) or after the usual pause. */
+  private abandon(now: boolean): void {
+    const ws = this.ws;
+    if (!ws) return;
+    ws.onopen = ws.onmessage = ws.onclose = ws.onerror = null;
+    this.ws = null;
+    this.stopPinging();
+    this.disarm();
+    try {
+      ws.close();
+    } catch {
+      /* already gone */
+    }
+    if (now) {
+      this.setStatus('reconnecting');
+      this.connect();
+    } else {
+      this.scheduleRetry();
+    }
+  }
+
+  private arm(ms: number, fn: () => void): void {
+    this.disarm();
+    this.watch = this.clock.setTimeout(() => {
+      this.watch = null;
+      fn();
+    }, ms);
+  }
+
+  private disarm(): void {
+    if (this.watch) this.clock.clearTimeout(this.watch);
+    this.watch = null;
+  }
+
   private startPinging(): void {
     this.stopPinging();
     const tick = () => {
+      if (this.clock.now() - this.lastHeard > SILENT_MS) {
+        this.abandon(false);
+        return;
+      }
       this.raw({ type: 'ping', t: this.clock.now() });
       this.pinger = this.clock.setTimeout(tick, PING_MS);
     };

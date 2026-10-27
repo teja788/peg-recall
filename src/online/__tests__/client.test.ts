@@ -168,6 +168,73 @@ test('pings keep the line warm every 20 s', () => {
   client.connect();
   sockets[0].open();
   sockets[0].receive({ type: 'welcome', serverTime: 1 });
-  clock.advance(60_000);
+  for (let i = 0; i < 3; i++) {
+    clock.advance(20_000);
+    sockets[0].receive({ type: 'pong', t: clock.now(), serverTime: 1 });
+  }
   assert.equal(sockets[0].sent.filter((m) => m.type === 'ping').length, 3 + 3);
+  assert.equal(sockets.length, 1, 'an answered line stays up');
+});
+
+test('a line that goes silent without closing is dropped and dialled again (audit F02)', () => {
+  const { client, sockets, clock, statuses, ready } = setup();
+  client.connect();
+  sockets[0].open();
+  sockets[0].receive({ type: 'welcome', serverTime: 1 });
+  clock.advance(40_000);
+  assert.equal(sockets.length, 1, '40 s of quiet is still a line');
+  clock.advance(20_000);
+  assert.equal(sockets[0].readyState, 3, 'nothing for 60 s: hung up');
+  assert.equal(statuses.at(-1), 'reconnecting');
+  clock.advance(500);
+  assert.equal(sockets.length, 2);
+  sockets[1].open();
+  sockets[1].receive({ type: 'welcome', serverTime: 1 });
+  assert.equal(ready(), 2);
+});
+
+test('no welcome within 10 s: dial again', () => {
+  const { client, sockets, clock } = setup();
+  client.connect();
+  sockets[0].open();
+  clock.advance(9_999);
+  assert.equal(sockets.length, 1);
+  clock.advance(1);
+  assert.equal(sockets[0].readyState, 3);
+  clock.advance(500);
+  assert.equal(sockets.length, 2, 'a socket that never opens is dropped the same way');
+  clock.advance(10_000 + 1_000);
+  assert.equal(sockets.length, 3);
+});
+
+test('wake() on a line that looks open: a ping must come back within 5 s', () => {
+  const { client, sockets, clock } = setup();
+  client.connect();
+  sockets[0].open();
+  sockets[0].receive({ type: 'welcome', serverTime: 1 });
+  clock.advance(1_000);
+  client.wake();
+  assert.equal(sockets[0].sent.at(-1)?.type, 'ping');
+  clock.advance(2_000);
+  sockets[0].receive({ type: 'pong', t: clock.now(), serverTime: 1 });
+  clock.advance(5_000);
+  assert.equal(sockets.length, 1, 'answered: the line was fine');
+
+  client.wake();
+  clock.advance(5_000);
+  assert.equal(sockets[0].readyState, 3, 'no answer: it was dead all along');
+  assert.equal(sockets.length, 2, 'and the new line is dialled at once');
+});
+
+test('"replaced" ends it: the other window keeps the seat', () => {
+  const { client, sockets, clock, messages, statuses } = setup();
+  client.connect();
+  sockets[0].open();
+  sockets[0].receive({ type: 'welcome', serverTime: 1 });
+  sockets[0].receive({ type: 'ended', reason: 'replaced' });
+  sockets[0].drop();
+  clock.advance(60_000);
+  assert.equal(sockets.length, 1, 'no coming back to take it again');
+  assert.equal(statuses.at(-1), 'closed');
+  assert.deepEqual(messages.at(-1), { type: 'ended', reason: 'replaced' });
 });

@@ -69,8 +69,11 @@ export async function startServer(opts: NodeOptions) {
       };
       alive.set(ws, true);
       hub.connect(conn, ip);
+      // the protocol is small JSON text: a binary frame ends the connection
+      // (`maxPayload` already closes on anything over MAX_FRAME_BYTES)
       ws.on('message', (data, isBinary) => {
-        if (!isBinary) hub.message(conn, data.toString());
+        if (isBinary) hub.violation(conn);
+        else hub.message(conn, data.toString());
       });
       ws.on('pong', () => alive.set(ws, true));
       ws.on('close', () => hub.closed(conn));

@@ -1,6 +1,8 @@
 # Color Catch: web version and online rooms
 
-Date: 2026-10-27. Status: **plan, nothing built yet.** Google Play is **paused** (owner, Oct 27).
+Date: 2026-10-27. Status: **W1, R0, R1, R2 and the Cloudflare adapter built** (below); nothing deployed yet. Google Play is **paused** (owner, Oct 27).
+
+**Audit fixes (Oct 27), after an outside review:** binary and oversized frames close the connection, and the server caps connections per network address and in total; a seat opened in a second window ends the first one ("replaced") instead of the two taking it from each other; computer stand-ins and turn deadlines run from when the action was due, not from when the server got round to it; the app drops a line that stays silent (no welcome in 10 s, nothing for 45 s, no answer to a ping on returning to the foreground); a room that is gone when the app comes back ends visibly on every screen, a game included; the state hash covers every field; a game that finished while a device was away still counts in its stats, once; the host role passes to the next person after 30 s away outside a game; a removed player cannot rejoin that room from the same network (a household sharing it with someone still in the room is let in); "Report a problem" in the waiting room and the online game menu; the privacy policy describes online play.
 
 **Room server on Cloudflare (D3 ✅, Oct 27):** `server/src/cloudflare.ts` runs the same hub in one Durable Object on the Workers Free plan. Tested in Cloudflare's own runtime (`wrangler dev`): the app's client, and the two-browser game. Deploying needs the owner's Cloudflare login (`server/README.md`, "Deploy on Cloudflare").
 
@@ -377,7 +379,7 @@ All JSON, at most 2 KB each, at most 20 per second per connection.
 
 **Other work**
 - **Text:** about 45 new strings (lobby, errors, away, timer, web "Get the app") in all 28 UI languages, checked twice as before.
-- **Privacy policy** (`docs/privacy.html`): what the room server receives (name, animal, moves, and the IP address that every connection has), that it is kept in memory only during the game, never logged, and never shared.
+- **Privacy policy** (`docs/privacy.html`, ✅ updated Oct 27): what the room server receives (name, animal, moves, a seat code, and the IP address that every connection has), that it is kept in memory only while the room is open and never logged, who sees it (the room only), the scrambled address fingerprint used against misuse, and Cloudflare as the host.
 
 ### B8. Edge cases
 
@@ -388,7 +390,7 @@ All JSON, at most 2 KB each, at most 20 per second per connection.
 | Wi-Fi switches to 4G | Reconnect + `resume` with the seat token; snapshot if any actions were missed |
 | App killed mid-game | Token kept on the device. Home shows "Back to your game with Maya?" while the room is alive. |
 | The same person in two tabs | Same token, so the newer connection replaces the older one |
-| Host drops in the lobby | After 30 s hosting passes to the next seat. Empty rooms close (§B6). |
+| Host drops in the lobby | After 30 s hosting passes to the next person (✅ built). Empty rooms close (§B6). |
 | Server restarts mid-game | "Reconnecting…", then the game continues (R5 restore) or "This game ended. Start a new room." |
 | A tie leads to sudden death | The server runs the mini board's reveal and turns; already in the engine |
 | Phone clocks differ | The countdown follows the server's clock, and the reveal end comes from the server |
@@ -400,8 +402,8 @@ All JSON, at most 2 KB each, at most 20 per second per connection.
 
 ### B9. Safety, privacy and App Review
 
-- **Safety:** no chat, no strangers, no public lobby, no profiles, no photos. Only players' own names and six fixed emoji. Names go through `cleanName` plus a short blocklist per language. **The host can remove a player** (the seat goes to the computer). The room menu has a "Report a problem" link to the support email. Together this covers App Review guideline 1.2 for the only user-written text (names).
-- **App Privacy label:** Apple counts data as "collected" when it is kept longer than needed to answer the request in real time. Rooms keep names in memory only for the game, and nothing is logged. **Recommendation: keep "Data Not Collected"** and describe the server in the privacy policy (D6). If the owner prefers to be cautious: "Other User Content – Not Linked to You – App Functionality".
+- **Safety:** no chat, no strangers, no public lobby, no profiles, no photos. Only players' own names and six fixed emoji. **The host can remove a player** (the seat goes to the computer), and the removal holds for that room: the same network address cannot come back in, unless someone still in the room is on that network too (one home Wi-Fi, where the address cannot tell family apart) (✅ built). The waiting room and the online game menu have "Report a problem", an email to the support address with the room number filled in (✅ built). **Still open (D11):** names go through `cleanName` (length and characters) only, with no word filter yet; and removal is only possible in the waiting room, not during a game. App Review guideline 1.2 asks for a way to filter objectionable text, so decide D11 before R4.
+- **App Privacy label:** Apple counts data as "collected" when it is kept longer than needed to answer the request in real time. Rooms keep names in memory for the life of the room (up to four hours), not only for one request, so the safer reading is that they are collected. **Recommendation (revised after the audit): declare "Other User Content – Not Linked to You – App Functionality – not used for tracking"** (D6). "Data Not Collected" is defensible, since nothing is stored or logged, but the cautious label costs nothing and cannot be wrong.
 - **Age rating:** answer Apple's age-rating questions again, including the newer ones about user-generated content and messaging. With no chat, 4+ is expected, but check the result before submitting.
 - **App Review needs a second player.** Review notes: *"Tap Play online → Create room. To join as a second player, open https://play.colorcatch.app/join/<code shown in the lobby> in any browser, or tap Add computer to play alone."* The web version makes this easy. The server must be up during review.
 - **"Plays offline" stays true:** every offline mode is unchanged. The listing adds "Online rooms need an internet connection."
@@ -456,11 +458,12 @@ The server counts per day and shows them at `/stats` (behind a token): rooms cre
 | D3 ✅ Cloudflare, Workers Free plan (Oct 27) | Where the room server runs | Done: `server/src/cloudflare.ts`, one Durable Object for every room, which keeps room time under the free daily allowance (`server/README.md`). The Node adapter stays as the fallback. |
 | D4 ⏳ open (Oct 27) | Money model online | **Needed before R4.** Until then the host limits are one switch (server setting + app constant), so the beta can run with no limits and either answer is a one-line change. Lean: host pays, guests free (§B2). |
 | D5 | What's free on the web | Small + Classic, Bunny + Fox, 2 players, the daily board. **No free tries on the web.** |
-| D6 | App Privacy label | **Keep "Data Not Collected"**: rooms in memory only, no logs. Update the privacy policy. |
+| D6 ⏳ open | App Privacy label | **"Other User Content – Not Linked to You – App Functionality"** (revised Oct 27, §B9). The privacy policy is updated. |
 | D7 | Counts on the server (no IDs) | **Yes.** It's the only way to see whether rooms work. |
 | D8 | Default turn timer | **Relaxed**: nudge at 30 s, computer plays at 60 s. "Quick" (20 s) as a host option. |
 | D9 | Emoji reactions | **Yes, after launch** (R5). Never text chat. |
 | D10 | Order against the Expo SDK 58 upgrade | **Separate releases.** The web and the web beta don't depend on it. Pick the iOS order by Apple's iOS 27 SDK deadline. |
+| D11 ⏳ open (Oct 27) | Online names: free text or a list | **Needed before R4** (§B9). Either a word filter per language on typed names, or online players pick from a fixed list of friendly names and their animal. The list is simpler and safer for a 4+ app; typed names feel more like family. Lean: typed names with a filter, plus removal during a game. |
 
 ---
 

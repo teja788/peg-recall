@@ -23,12 +23,19 @@ export interface ServerConfig {
   maxRooms: number;
   /** rooms one address may create per hour */
   createsPerHour: number;
-  /** wrong codes one connection may try per minute before it is closed */
+  /** wrong codes one address may try per minute (all its connections together) */
   badJoinsPerMinute: number;
+  /** connections open at once from one address (a family's devices, a
+   *  mobile carrier sharing one address across many people) */
+  connsPerAddress: number;
+  /** connections open at once in all */
+  maxConnections: number;
   /** messages one connection may send per second before it is closed */
   messagesPerSecond: number;
   /** a person who dropped out gets this long before the computer plays for them */
   awayGraceMs: number;
+  /** a host who dropped out hands the room over after this long (outside a game) */
+  hostHandoverMs: number;
   /** a connection that sends nothing for this long is closed (devices ping every 20 s) */
   idleMs: number;
   /** a person who is here but does not move: per roll or pick */
@@ -45,8 +52,11 @@ export const DEFAULT_CONFIG: ServerConfig = {
   maxRooms: 2000,
   createsPerHour: 10,
   badJoinsPerMinute: 10,
+  connsPerAddress: 50,
+  maxConnections: 5000,
   messagesPerSecond: 20,
   awayGraceMs: 15_000,
+  hostHandoverMs: 30_000,
   idleMs: 90_000,
   turnMs: { relaxed: 60_000, quick: 20_000 },
   lobbyIdleMs: 30 * 60_000,

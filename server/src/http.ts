@@ -9,6 +9,14 @@ import type { Hub } from './hub';
 /** Largest frame accepted from a device (messages are well under 2 KB). */
 export const MAX_FRAME_BYTES = 4096;
 
+const encoder = new TextEncoder();
+
+/** A text frame over MAX_FRAME_BYTES, counted in bytes (a character can take 3). */
+export function frameTooBig(text: string): boolean {
+  if (text.length * 3 <= MAX_FRAME_BYTES) return false;
+  return text.length > MAX_FRAME_BYTES || encoder.encode(text).length > MAX_FRAME_BYTES;
+}
+
 /**
  * Browsers always send Origin: only the web game's own address(es) may open
  * a socket, or a page on this server's own host. The iOS app sends none (or

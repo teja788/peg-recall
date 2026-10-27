@@ -21,7 +21,7 @@
  */
 
 import { Hub } from './hub';
-import { MAX_FRAME_BYTES, healthBody, originAllowed, statsAllowed, statsBody } from './http';
+import { frameTooBig, healthBody, originAllowed, statsAllowed, statsBody } from './http';
 import type { Clock, Conn } from './types';
 
 export interface Env {
@@ -106,12 +106,9 @@ export class RoomsObject implements DurableObject {
     this.startSweeping();
 
     server.addEventListener('message', (ev) => {
-      if (typeof ev.data !== 'string') return;
-      if (ev.data.length > MAX_FRAME_BYTES) {
-        this.hub.closed(conn);
-        conn.close();
-        return;
-      }
+      // the protocol is small JSON text: anything else ends the connection
+      // before it can cost the shared object anything (audit F01)
+      if (typeof ev.data !== 'string' || frameTooBig(ev.data)) return this.hub.violation(conn);
       this.hub.message(conn, ev.data);
     });
     const gone = () => {

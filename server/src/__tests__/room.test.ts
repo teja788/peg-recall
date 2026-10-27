@@ -305,3 +305,149 @@ test('a connection that goes silent (no pings) is let go; a pinging one stays', 
   host.read();
   assert.equal(host.room?.seats[1].online, false, 'and shown as away');
 });
+
+/* ------------------------------------------------ audit fixes (Oct 28) */
+
+test('F05: resume spam from another seat cannot stall an away player’s stand-in', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1);
+  host.say({ type: 'start' });
+  guests[0].read();
+  guests[0].drop();
+  // Maya plays her own turns and, every 100 ms, sends a (valid) resume
+  for (let t = 0; t < 60_000; t += 100) {
+    host.read();
+    if (host.myMove()) host.move();
+    host.say({ type: 'resume', code: host.code!, token: host.token! });
+    clock.advance(100);
+  }
+  host.read();
+  const standIns = host.actions.filter((a) => a.by === 'p2' && a.standIn);
+  assert.ok(standIns.filter((a) => a.action.type === 'ROLL').length >= 3, `stand-in rolls: ${standIns.length}`);
+  assert.ok(standIns.some((a) => a.action.type === 'PICK'));
+});
+
+test('F05: a stand-in roll keeps its deadline when the clock is re-armed', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1);
+  host.say({ type: 'start' });
+  guests[0].read();
+  guests[0].drop();
+  // play until a stand-in has rolled once (so p2 is played at computer pace)
+  for (let i = 0; i < 4000 && !host.actions.some((a) => a.standIn); i++) {
+    if (host.myMove()) host.move();
+    clock.advance(50);
+    host.read();
+  }
+  // next time it is p2's roll, spam resumes: the roll still comes 400 ms after the phase began
+  for (let i = 0; i < 4000; i++) {
+    host.read();
+    const s = host.state!;
+    if (s.phase === 'roll' && s.activePlayer === 1) break;
+    if (host.myMove()) host.move();
+    clock.advance(50);
+  }
+  const began = host.actions.at(-1)!.at;
+  for (let t = 0; t < 1000; t += 100) {
+    host.say({ type: 'resume', code: host.code!, token: host.token! });
+    clock.advance(100);
+  }
+  host.read();
+  const roll = host.actions.find((a) => a.at >= began && a.by === 'p2' && a.action.type === 'ROLL')!;
+  assert.ok(roll, 'the stand-in rolled');
+  assert.equal(roll.at - began, 400);
+});
+
+test('host handover: a dropped-out host passes the room on after 30 s (lobby)', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1);
+  host.drop();
+  clock.advance(29_000);
+  guests[0].say({ type: 'start' });
+  assert.deepEqual(guests[0].errors, ['notHost']);
+  clock.advance(2_000);
+  guests[0].read();
+  assert.equal(guests[0].room?.host, 'p2');
+  guests[0].say({ type: 'addBot', difficulty: 'fox' });
+  guests[0].say({ type: 'start' });
+  assert.equal(guests[0].state?.phase, 'reveal', 'the new host can start');
+});
+
+test('host handover: none if the host comes back in time, none during a game', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1);
+  const old = host.reconnect();
+  void old;
+  clock.advance(10_000);
+  host.hello().say({ type: 'resume', code: host.code!, token: host.token! });
+  clock.advance(40_000);
+  host.read();
+  assert.equal(host.room?.host, 'p1');
+  host.say({ type: 'start' });
+  host.drop();
+  clock.advance(40_000);
+  guests[0].read();
+  assert.equal(guests[0].room?.host, 'p1', 'mid-game the host stays (nothing needs a host then)');
+});
+
+test('F09: a removed player cannot rejoin from the same address; others still can', () => {
+  const { hub } = makeHub();
+  const { host, guests } = room(hub, 1);
+  host.say({ type: 'removeSeat', seat: 'p2' });
+  const again = new Device(hub, 'web', guests[0].ip).hello().say({ type: 'join', code: host.code!, name: 'Other', avatar: 'cat' });
+  assert.deepEqual(again.errors, ['removed']);
+  const someoneElse = new Device(hub, 'web', '10.9.0.1').hello().say({ type: 'join', code: host.code!, avatar: 'cat' });
+  assert.deepEqual(someoneElse.errors, []);
+});
+
+test('F09: a removal on one home Wi-Fi does not lock out the rest of the family there', () => {
+  const { hub } = makeHub();
+  const { host } = room(hub, 0);
+  // two more devices at the host's home; the host removes one (a double join)
+  const twice = new Device(hub, 'web', host.ip).hello().say({ type: 'join', code: host.code!, avatar: 'cat' });
+  host.read();
+  host.say({ type: 'removeSeat', seat: twice.seat! });
+  const mum = new Device(hub, 'web', host.ip).hello().say({ type: 'join', code: host.code!, name: 'Mum', avatar: 'owl' });
+  assert.deepEqual(mum.errors, [], 'the host is still here from that address');
+});
+
+test('F04: the same seat in a second window: the first is told "replaced" and let go', () => {
+  const { hub } = makeHub();
+  const { host } = room(hub, 1);
+  const tab = new Device(hub, 'web', host.ip).hello();
+  tab.say({ type: 'resume', code: host.code!, token: host.token! });
+  host.read();
+  assert.equal(host.ended, 'replaced');
+  assert.equal(host.conn.closed, true);
+  assert.equal(tab.seat, 'p1');
+});
+
+test('abuse: connections per address are capped; wrong codes count across connections', () => {
+  const { hub } = makeHub({ connsPerAddress: 3 });
+  const devices = Array.from({ length: 4 }, () => new Device(hub, 'web', '10.7.7.7'));
+  assert.deepEqual(devices.map((d) => d.conn.closed), [false, false, false, true]);
+  assert.deepEqual(devices[3].conn.inbox, [{ type: 'error', code: 'rate' }]);
+  devices[0].drop();
+  assert.equal(new Device(hub, 'web', '10.7.7.7').conn.closed, false, 'a slot frees up when one closes');
+
+  const { hub: hub2 } = makeHub();
+  const guessers = Array.from({ length: 3 }, () => new Device(hub2, 'web', '10.8.8.8').hello());
+  for (let i = 0; i < 11; i++) guessers[i % 3].say({ type: 'join', code: String(100000 + i), avatar: 'cat' });
+  assert.ok(guessers.some((g) => g.errors.includes('rate')), 'the 11th wrong code from one address is refused');
+});
+
+test('a finished game’s room closes 15 min after the end', () => {
+  const { hub, clock } = makeHub({ idleMs: 24 * 60 * 60_000 });
+  const { host, all } = room(hub, 1);
+  host.say({ type: 'start' });
+  playOut(clock, all);
+  assert.equal(hub.roomCount, 1);
+  clock.advance(14 * 60_000);
+  hub.sweep();
+  assert.equal(hub.roomCount, 1);
+  clock.advance(2 * 60_000);
+  hub.sweep();
+  assert.equal(hub.roomCount, 0);
+  host.read();
+  assert.equal(host.ended, 'expired');
+});

@@ -95,11 +95,15 @@ export type ErrorCode =
   | 'started'
   /** the free host limits (PLAN-web-online.md §B2) */
   | 'needsUnlock'
+  /** the host removed this person from the room: no coming back */
+  | 'removed'
   | 'notHost'
   | 'rate'
   | 'bad';
 
-export type EndReason = 'expired' | 'hostClosed' | 'removed' | 'serverRestart';
+/** `replaced`: the same seat was taken up on another connection (a second
+ *  window, a newer network): this one stops and does not come back. */
+export type EndReason = 'expired' | 'hostClosed' | 'removed' | 'serverRestart' | 'replaced';
 
 export type ServerMessage =
   | { type: 'welcome'; serverTime: number }

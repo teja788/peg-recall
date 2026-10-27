@@ -199,6 +199,8 @@ export function errorText(code: ErrorCode): string {
     case 'rate':
     case 'needsUnlock':
       return tr(`online.err.${code}`);
+    case 'removed':
+      return tr('online.ended.removed');
     default:
       return tr('online.err.unknown');
   }
@@ -208,6 +210,7 @@ export function errorText(code: ErrorCode): string {
 export function endedText(reason: EndReason): string {
   if (reason === 'removed') return tr('online.ended.removed');
   if (reason === 'serverRestart') return tr('online.ended.restart');
+  if (reason === 'replaced') return tr('online.ended.replaced');
   return tr('online.ended.closed');
 }
 

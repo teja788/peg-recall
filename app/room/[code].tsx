@@ -8,12 +8,12 @@
  */
 import { Avatar } from '@art';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
-import { Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Linking, Text, View } from 'react-native';
 
 import type { Difficulty } from '../../src/engine/types';
 import { tr } from '../../src/i18n';
-import { HOST_LIMITS, inviteUrl } from '../../src/online/config';
+import { HOST_LIMITS, inviteUrl, reportUrl } from '../../src/online/config';
 import { needsUnlock } from '../../src/online/limits';
 import { formatCode, normalizeCode, type SeatInfo } from '../../src/online/protocol';
 import { useGame } from '../../src/store/game';
@@ -40,6 +40,11 @@ export default function RoomScreen() {
   const ended = useRoom((s) => s.ended);
   const unlocked = useSettings((s) => s.unlocked);
   const playing = useGame((s) => s.remote != null && s.state != null);
+  /** the game is on, but this device has no board for it (the browser's Back
+   *  left the game screen): asking for the seat again brings the board, and
+   *  the effect below goes back to the table */
+  const away = !!room && room.status === 'playing' && !playing && myCode === code && !!mySeat;
+  const askedBoard = useRef(false);
 
   // opened straight: back into the seat saved on this device, or to the join page
   useEffect(() => {
@@ -61,6 +66,13 @@ export default function RoomScreen() {
       router.replace({ pathname: '/game', params: { room: code } });
     }
   }, [playing, room?.status, code, router]);
+
+  // once on arrival; the "Back to the game" button is there if it fails
+  useEffect(() => {
+    if (!away || askedBoard.current) return;
+    askedBoard.current = true;
+    useRoom.getState().resync();
+  }, [away]);
 
   const home = () => {
     useRoom.getState().leave();
@@ -141,7 +153,9 @@ export default function RoomScreen() {
         </>
       ) : null}
 
-      {room ? (
+      {away ? (
+        <WideButton text={tr('online.backToGame')} filled onPress={() => useRoom.getState().resync()} />
+      ) : room ? (
         isHost ? (
           <>
             <WideButton
@@ -167,6 +181,14 @@ export default function RoomScreen() {
       ) : null}
 
       <WideButton text={tr('online.leave')} onPress={home} />
+      {code ? (
+        <View style={{ alignItems: 'center' }}>
+          <PillButton
+            text={tr('online.report')}
+            onPress={() => void Linking.openURL(reportUrl(code, mySeat)).catch(() => {})}
+          />
+        </View>
+      ) : null}
     </OnlineFrame>
   );
 }

@@ -77,6 +77,8 @@ export interface RoomStore {
   /** Back into the room saved on this device (after a reload or a restart).
    *  Resolves false when there is none for `code`. */
   rejoin: (code?: string) => Promise<boolean>;
+  /** Ask for the board again (this screen lost it, e.g. after the browser's Back). */
+  resync: () => void;
   start: () => void;
   rematch: () => void;
   addBot: (difficulty: Difficulty) => void;
@@ -101,6 +103,8 @@ export function createRoomStore(deps: RoomDeps) {
     let token: string | null = null;
     /** sent as soon as the line is up (create / join) */
     let pending: ClientMessage | null = null;
+    /** a resume is out: a "notFound" now means the room itself is gone */
+    let resuming = false;
 
     function save(code: string | null, tok: string | null) {
       token = tok;
@@ -118,7 +122,7 @@ export function createRoomStore(deps: RoomDeps) {
 
     function resume() {
       const { code } = getState();
-      if (code && token) conn?.send({ type: 'resume', code, token });
+      if (code && token && conn?.send({ type: 'resume', code, token })) resuming = true;
     }
 
     function line(): RoomConnection {
@@ -147,6 +151,7 @@ export function createRoomStore(deps: RoomDeps) {
     function receive(m: ServerMessage) {
       switch (m.type) {
         case 'joined':
+          resuming = false;
           setState({ code: m.code, seat: m.seat, error: null, ended: null });
           save(m.code, m.token);
           return;
@@ -163,15 +168,23 @@ export function createRoomStore(deps: RoomDeps) {
           deps.game.remoteAction(m.seq, m.action, m.hash);
           return;
         case 'error':
-          // a saved seat that is gone (the room closed meanwhile)
-          if (m.code === 'notFound' && token && !pending) {
+          // our seat's room is gone (the server restarted, or it expired
+          // while we were away): that ends the room for this device, so every
+          // screen leaves it, a game included (audit F02)
+          if (m.code === 'notFound' && resuming) {
+            resuming = false;
             save(null, null);
-            setState({ code: null, seat: null, room: null });
+            setState({ code: null, seat: null, room: null, error: null, ended: 'expired' });
+            return;
           }
           setState({ error: m.code });
           return;
         case 'ended':
-          save(null, null);
+          resuming = false;
+          // "replaced": the seat lives on in another window, which shares this
+          // storage: keep it saved for that one (audit F04)
+          if (m.reason !== 'replaced') save(null, null);
+          else token = null;
           setState({ ended: m.reason, code: null, seat: null });
           return;
         default:
@@ -214,10 +227,12 @@ export function createRoomStore(deps: RoomDeps) {
         token = saved.token;
         setState({ code: saved.code, error: null, ended: null });
         // now if the line is up; else onReady resumes once it is
-        line().send({ type: 'resume', code: saved.code, token: saved.token });
+        line();
+        resume();
         return true;
       },
 
+      resync: () => resume(),
       start: () => request({ type: 'start' }),
       rematch: () => request({ type: 'rematch' }),
       addBot: (difficulty) => request({ type: 'addBot', difficulty }),

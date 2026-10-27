@@ -246,6 +246,23 @@ function recordFinished(state: GameState, daily: number | null) {
   }
 }
 
+/** Online games already in the stats, by the server's seed for that board
+ *  (each game gets a fresh one): a finished game counts once, whether it
+ *  arrives as actions or, after a reconnect, as a finished snapshot (F08). */
+const recordedOnline: number[] = [];
+
+function recordOnline(state: GameState) {
+  const id = state.config.seed;
+  if (recordedOnline.includes(id)) return;
+  recordedOnline.push(id);
+  if (recordedOnline.length > 32) recordedOnline.shift();
+  try {
+    useStats.getState().recordGame(state);
+  } catch {
+    /* stats must never break the end of a game */
+  }
+}
+
 export const useGame = create<GameStore>((setState, getState) => {
   /** Decide what the machine should do next, once nothing is animating. */
   function schedule() {
@@ -332,7 +349,7 @@ export const useGame = create<GameStore>((setState, getState) => {
         return;
       }
       setState({ state: next, seq, waiting: false });
-      if (next.phase === 'gameOver' && prev.phase !== 'gameOver') recordFinished(next, null);
+      if (next.phase === 'gameOver' && prev.phase !== 'gameOver') recordOnline(next);
       if (hurry || inbox.length > CATCH_UP) continue;
       if (action.type === 'ROLL') {
         busyFor(tumbleMs(next.dieRerolls ?? 0), drain);
@@ -401,7 +418,11 @@ export const useGame = create<GameStore>((setState, getState) => {
 
     remoteStart: (config, seat) => remoteBoard(createGame(config), 0, seat),
 
-    remoteSnapshot: (state, seq, seat) => remoteBoard(state, seq, seat),
+    remoteSnapshot: (state, seq, seat) => {
+      remoteBoard(state, seq, seat);
+      // a game that ended while this device was away still counts
+      if (state.phase === 'gameOver') recordOnline(state);
+    },
 
     remoteAction: (seq, action, hash) => {
       const { remote, seq: at } = getState();

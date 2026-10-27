@@ -24,6 +24,7 @@ import {
 import { stateHash } from '../../online/hash';
 import type { Intent } from '../../online/protocol';
 import { setGameScheduler, useGame, type GameScheduler, type RemoteSeat } from '../game';
+import { useStats } from '../stats';
 
 class FakeClock implements GameScheduler {
   t = 0;
@@ -72,16 +73,18 @@ const config = (kinds: ('human' | 'ai')[], seed = 11): GameConfig => ({
   seed,
 });
 
-/** What a server sends for an all-computer game: the numbered log with hashes. */
+/** What a server sends for a game: the numbered log with hashes. People's
+ *  turns are played by stand-ins, as if everyone had gone away. */
 function serverLog(cfg: GameConfig) {
+  const people = cfg.players.filter((p) => p.kind === 'human').map((p) => p.id);
   let state = createGame(cfg);
   let rng = { seed: aiSeedFor(cfg.seed), counter: 0 };
-  let b = freshBrains(state, rng);
+  let b = freshBrains(state, rng, people);
   let ais = b.ais;
   rng = b.rng;
   const log: { seq: number; action: GameAction; hash: string }[] = [];
   while (state.phase !== 'gameOver') {
-    const step = autoStep(state, rng)!;
+    const step = autoStep(state, rng) ?? { kind: state.phase === 'roll' ? 'ROLL' : 'PICK', rng };
     rng = step.rng;
     let action: GameAction = { type: step.kind } as GameAction;
     if (step.kind === 'PICK') {
@@ -93,7 +96,7 @@ function serverLog(cfg: GameConfig) {
     const next = reduce(state, action);
     if (action.type === 'PICK') ais = observePick(ais, next);
     if (next.phase === 'reveal' && state.phase !== 'reveal') {
-      b = freshBrains(next, rng);
+      b = freshBrains(next, rng, people);
       ais = b.ais;
       rng = b.rng;
     }
@@ -205,4 +208,29 @@ test('online, nobody can pause the table or deal a rematch locally', () => {
   assert.equal(useGame.getState().state, before, 'no local computer turns or timers');
   useGame.getState().teardown();
   assert.equal(useGame.getState().remote, null);
+});
+
+test('a finished game counts once, as actions or as a finished snapshot after a reconnect (audit F08)', () => {
+  const games = () => useStats.getState().gamesFinished;
+  // each message arrives as a new object, as off the network
+  const wire = (s: GameState): GameState => JSON.parse(JSON.stringify(s));
+  // finished while this device was away: it only ever sees the final board
+  const away = serverLog(config(['human', 'ai'], 31));
+  const before = games();
+  useGame.getState().remoteSnapshot(wire(away.final), away.log.length, seat().link);
+  assert.equal(games(), before + 1);
+  useGame.getState().remoteSnapshot(wire(away.final), away.log.length, seat().link);
+  assert.equal(games(), before + 1, 'the same game again (another resync) is not a new one');
+
+  // played to the end here, then a resync sends the finished board too
+  const cfg = config(['human', 'ai'], 32);
+  const here = serverLog(cfg);
+  const { link } = seat();
+  useGame.getState().remoteStart(cfg, link);
+  for (const m of here.log) useGame.getState().remoteAction(m.seq, m.action, m.hash);
+  clock.advance(10_000);
+  assert.equal(useGame.getState().state!.phase, 'gameOver');
+  assert.equal(games(), before + 2);
+  useGame.getState().remoteSnapshot(wire(here.final), here.log.length, link);
+  assert.equal(games(), before + 2);
 });
