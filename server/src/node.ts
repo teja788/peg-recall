@@ -12,6 +12,7 @@ import type { Duplex } from 'node:stream';
 import { WebSocketServer, type WebSocket } from 'ws';
 
 import { Hub } from './hub';
+import { MAX_FRAME_BYTES, healthBody, originAllowed, statsAllowed, statsBody } from './http';
 import type { Clock, Conn, ServerConfig } from './types';
 
 export interface NodeOptions {
@@ -33,8 +34,6 @@ const REAL_CLOCK: Clock = {
   clearTimeout: (h) => clearTimeout(h as ReturnType<typeof setTimeout>),
 };
 
-/** Largest frame accepted from a device (messages are well under 2 KB). */
-const MAX_FRAME_BYTES = 4096;
 const HEARTBEAT_MS = 30_000;
 const SWEEP_MS = 60_000;
 
@@ -47,13 +46,10 @@ export async function startServer(opts: NodeOptions) {
 
   const server = http.createServer((req, res) => {
     const url = new URL(req.url ?? '/', 'http://x');
-    if (req.method === 'GET' && url.pathname === '/health') {
-      return json(res, 200, { ok: true, rooms: hub.roomCount, connections: hub.connCount });
-    }
+    if (req.method === 'GET' && url.pathname === '/health') return json(res, 200, healthBody(hub));
     if (req.method === 'GET' && url.pathname === '/stats') {
-      const auth = req.headers.authorization ?? '';
-      if (!opts.statsToken || auth !== `Bearer ${opts.statsToken}`) return json(res, 404, { error: 'not found' });
-      return json(res, 200, { rooms: hub.roomCount, connections: hub.connCount, ...hub.stats });
+      if (!statsAllowed(req.headers.authorization, opts.statsToken)) return json(res, 404, { error: 'not found' });
+      return json(res, 200, statsBody(hub));
     }
     json(res, 404, { error: 'not found' });
   });
@@ -61,12 +57,7 @@ export async function startServer(opts: NodeOptions) {
   server.on('upgrade', (req, socket: Duplex, head) => {
     const url = new URL(req.url ?? '/', 'http://x');
     if (url.pathname !== '/ws') return reject(socket, 404);
-    // Browsers always send Origin: only the web game's own address may connect.
-    // The iOS app sends none, or its own server's address.
-    const origin = req.headers.origin;
-    if (origin && origins.length && !origins.includes(origin) && !sameHost(origin, req.headers.host)) {
-      return reject(socket, 403);
-    }
+    if (!originAllowed(req.headers.origin, req.headers.host, origins)) return reject(socket, 403);
     wss.handleUpgrade(req, socket, head, (ws) => {
       const forwarded = String(req.headers['x-forwarded-for'] ?? '').split(',')[0].trim();
       const ip = (opts.trustProxy && forwarded) || req.socket.remoteAddress || '?';
@@ -128,10 +119,3 @@ function reject(socket: Duplex, status: 403 | 404) {
   socket.destroy();
 }
 
-function sameHost(origin: string, host: string | undefined): boolean {
-  try {
-    return !!host && new URL(origin).host === host;
-  } catch {
-    return false;
-  }
-}

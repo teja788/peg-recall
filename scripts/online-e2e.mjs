@@ -10,6 +10,9 @@
  *
  * Starts the room server (server/dist/server.mjs) on :8787 and serves dist/
  * like Cloudflare Pages does. Screenshots go to web-smoke/online-*.png.
+ *
+ * E2E_ROOMS=cloudflare runs the room server in Cloudflare's own runtime
+ * instead (`wrangler dev`, server/src/cloudflare.ts; no account needed).
  * Browser: as for web-smoke.mjs (PW_CHROMIUM for another binary).
  */
 import { spawn } from 'node:child_process';
@@ -48,8 +51,32 @@ for (const [file, hint] of [
 }
 fs.mkdirSync(SHOTS, { recursive: true });
 
-const rooms = spawn(process.execPath, [SERVER], { env: { ...process.env, PORT: String(PORT), HOST: '127.0.0.1' }, stdio: 'ignore' });
-await new Promise((r) => setTimeout(r, 800));
+const onCloudflare = process.env.E2E_ROOMS === 'cloudflare';
+const rooms = onCloudflare
+  ? spawn('npx', ['wrangler', 'dev', '--port', String(PORT), '--ip', '127.0.0.1'], {
+      cwd: path.resolve('server'),
+      env: { ...process.env, WRANGLER_SEND_METRICS: 'false', CI: '1' },
+      stdio: 'ignore',
+      detached: true,
+    })
+  : spawn(process.execPath, [SERVER], { env: { ...process.env, PORT: String(PORT), HOST: '127.0.0.1' }, stdio: 'ignore' });
+/** the room server is up when /health answers */
+async function serverUp() {
+  for (let i = 0; i < 120; i++) {
+    try {
+      if ((await fetch(`http://127.0.0.1:${PORT}/health`)).ok) return true;
+    } catch {
+      /* not yet */
+    }
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  return false;
+}
+if (!(await serverUp())) {
+  console.error('the room server did not start');
+  process.exit(1);
+}
+console.log(`room server: ${onCloudflare ? 'Cloudflare (wrangler dev)' : 'Node'}`);
 const web = await serveDist();
 const base = `http://127.0.0.1:${web.address().port}`;
 const browser = await chromium.launch({ headless: true, ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}) });
@@ -145,7 +172,9 @@ try {
 } finally {
   await browser.close();
   web.close();
-  rooms.kill('SIGTERM');
+  // wrangler starts workerd as a child: stop the whole group
+  if (onCloudflare) process.kill(-rooms.pid, 'SIGTERM');
+  else rooms.kill('SIGTERM');
 }
 
 console.log(failures.length ? `\n${failures.length} failed` : '\nall passed');

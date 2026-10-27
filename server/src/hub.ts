@@ -51,6 +51,8 @@ interface ConnState {
   recent: number[];
   /** when recent wrong codes were tried */
   badJoins: number[];
+  /** the last message from this connection (devices ping every 20 s) */
+  lastSeen: number;
 }
 
 export class Hub {
@@ -75,7 +77,7 @@ export class Hub {
 
   /** A new connection. Nothing is said until its `hello`. */
   connect(conn: Conn, ip: string): void {
-    this.conns.set(conn, { ip, app: null, room: null, recent: [], badJoins: [] });
+    this.conns.set(conn, { ip, app: null, room: null, recent: [], badJoins: [], lastSeen: this.deps.clock.now() });
   }
 
   /** The connection went away (closed, dropped, timed out). */
@@ -91,6 +93,7 @@ export class Hub {
     const st = this.conns.get(conn);
     if (!st) return;
     const now = this.deps.clock.now();
+    st.lastSeen = now;
 
     st.recent = st.recent.filter((t) => now - t < 1000);
     st.recent.push(now);
@@ -102,9 +105,15 @@ export class Hub {
     this.handle(conn, st, m, now);
   }
 
-  /** Close rooms that have outlived their welcome. Call about once a minute. */
+  /** Close rooms that have outlived their welcome, and connections that went
+   *  silent (a phone gone without a goodbye). Call about once a minute. */
   sweep(): void {
     const now = this.deps.clock.now();
+    for (const [conn, st] of this.conns) {
+      if (now - st.lastSeen <= this.config.idleMs) continue;
+      this.closed(conn);
+      conn.close();
+    }
     for (const room of this.rooms.values()) {
       if (!room.expired(now)) continue;
       room.close('expired');

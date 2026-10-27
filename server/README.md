@@ -15,13 +15,15 @@ and nothing about people is logged.
 | `src/room.ts` | One room: seats, lobby, the referee (via `src/engine/driver.ts`), stand-ins, turn clocks |
 | `src/hub.ts` | The front door: version check, limits, room codes, expiry, counters |
 | `src/types.ts` | Clock, connection and settings types; defaults |
-| `src/node.ts` | Node adapter: HTTP `/health` and `/stats`, WebSockets at `/ws` |
+| `src/cloudflare.ts` | **Cloudflare adapter (in use):** a Worker plus one Durable Object that runs the hub for every room |
+| `src/node.ts` | Node adapter: HTTP `/health` and `/stats`, WebSockets at `/ws` (a droplet or any VPS) |
+| `src/http.ts` | What both adapters answer alike: origin check, `/health`, `/stats` |
 | `src/main.ts` | Starts it from environment settings |
 | `deploy/` | Caddy and systemd files for a droplet / VPS |
 | `Dockerfile` | One small image for any Docker host |
 
-`room.ts` and `hub.ts` never touch Node: a Cloudflare Durable Object adapter
-could sit beside `node.ts` and reuse them unchanged (decision D3 is open).
+`room.ts` and `hub.ts` never touch Node or Cloudflare; the two adapters reuse
+them unchanged. Decision D3 (Oct 27): **Cloudflare, Workers Free plan.**
 
 ## Run and test
 
@@ -49,7 +51,42 @@ npm run build       # dist/server.mjs, one file, needs only Node 22
 `GET /health` answers `{"ok":true,"rooms":N,"connections":N}`. Point a free
 uptime check at it.
 
-## Deploy
+## Deploy on Cloudflare (Workers Free plan)
+
+One-time, on your computer (about 10 minutes):
+
+1. `cd server && npm ci`
+2. `npx wrangler login`. A browser window opens; use the same Cloudflare
+   account as the Pages site.
+3. In `wrangler.toml`, set `PUBLIC_ORIGINS` to the web game's address, e.g.
+   `"https://colorcatch.pages.dev"` (several: comma-separated). Leaving it
+   empty lets any website connect; fine for a first test.
+4. `npm run cf:deploy`. It prints the server's address, like
+   `https://color-catch-rooms.<your-subdomain>.workers.dev`.
+5. Check it: open `https://color-catch-rooms.<your-subdomain>.workers.dev/health`
+   in a browser. It shows `{"ok":true,"rooms":0,"connections":0}`.
+6. Optional, to read the counts at `/stats`: `npx wrangler secret put STATS_TOKEN`.
+7. In the Cloudflare Pages project, add the build settings from `WEB.md`
+   ("Online play"), with `EXPO_PUBLIC_ROOMS_URL` =
+   `wss://color-catch-rooms.<your-subdomain>.workers.dev/ws`, then redeploy
+   the site. The "Play online" card appears.
+
+Updating: `npm run cf:deploy` again. Rooms open at that moment end ("This
+room has closed"), as after any server restart, so deploy at a quiet hour.
+
+Why it stays free: every room lives in **one** Durable Object, and Cloudflare
+bills each object for the time it is awake. One object can be awake at most
+24 h a day, which is 10,800 GB-s at Cloudflare's 128 MB, under the free
+13,000 GB-s a day. The other free limit, 100,000 requests a day, counts 20
+game messages as one request: thousands of games a day. Nothing is stored.
+
+Try it locally in Cloudflare's own runtime (no account needed):
+`npm run cf:dev` (port 8787), then the app tests in "Run and test" with
+`ROOMS_URL=ws://127.0.0.1:8787/ws npx tsx --test src/__tests__/client.test.ts`,
+or the two-browser game from the repository root with
+`E2E_ROOMS=cloudflare npm run e2e:online` (see `WEB.md`).
+
+## Deploy on a droplet or any VPS (the other adapter)
 
 **A droplet or any VPS (Ubuntu):**
 

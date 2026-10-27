@@ -29,6 +29,8 @@ export interface ServerConfig {
   messagesPerSecond: number;
   /** a person who dropped out gets this long before the computer plays for them */
   awayGraceMs: number;
+  /** a connection that sends nothing for this long is closed (devices ping every 20 s) */
+  idleMs: number;
   /** a person who is here but does not move: per roll or pick */
   turnMs: { relaxed: number; quick: number };
   /** how long rooms live (§B6) */
@@ -45,6 +47,7 @@ export const DEFAULT_CONFIG: ServerConfig = {
   badJoinsPerMinute: 10,
   messagesPerSecond: 20,
   awayGraceMs: 15_000,
+  idleMs: 90_000,
   turnMs: { relaxed: 60_000, quick: 20_000 },
   lobbyIdleMs: 30 * 60_000,
   emptyGameMs: 10 * 60_000,
@@ -79,11 +82,11 @@ export function newStats(): Stats {
 
 /** Random numbers from the platform (Node 22 and Workers both have Web Crypto). */
 export function randomUint32(): number {
-  return globalThis.crypto.getRandomValues(new Uint32Array(1))[0];
+  return crypto.getRandomValues(new Uint32Array(1))[0];
 }
 
 /** 128 random bits as 32 hex characters: a seat token. */
 export function randomToken(): string {
-  const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
   return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }

@@ -2,6 +2,8 @@
 
 Date: 2026-10-27. Status: **plan, nothing built yet.** Google Play is **paused** (owner, Oct 27).
 
+**Room server on Cloudflare (D3 ✅, Oct 27):** `server/src/cloudflare.ts` runs the same hub in one Durable Object on the Workers Free plan. Tested in Cloudflare's own runtime (`wrangler dev`): the app's client, and the two-browser game. Deploying needs the owner's Cloudflare login (`server/README.md`, "Deploy on Cloudflare").
+
 **R2 (app and web screens) built Oct 27:** Home "Play online" card, `app/online.tsx` (start a room or join by code), `app/join/[code].tsx` (invite links), `app/room/[code].tsx` (waiting room), the game screen's online mode (room menu, host deals the rematch, away/reconnecting line, confetti only for the winner), 52 strings × 28 languages. Shown only when `EXPO_PUBLIC_ROOMS_URL` is set (`WEB.md`). Checked end to end in two browsers (`npm run e2e:online`). Not yet: universal links (needs the domain), the "Back to your game" banner on Home, a countdown that follows the server's clock for late joiners, emoji reactions (R5).
 
 **R1 (room server) built Oct 27, not deployed (D3 open):** `server/` — host-neutral `room.ts` + `hub.ts`, a Node adapter, Dockerfile, Caddy and systemd files (`server/README.md`). Already in, ahead of R3: away players get 15 s, then the computer plays for them (`standIn`), and the Relaxed/Quick turn clock; reconnect with a seat token and a snapshot; version check; rate limits; expiry. Host limits are one switch, off (D4 open). Next: R2, the app and web screens.
@@ -331,13 +333,13 @@ All JSON, at most 2 KB each, at most 20 per second per connection.
 
 **Restarting for an update:** on shutdown the server tells everyone `ended: serverRestart` and the apps show "Reconnecting…". In R5 the server also writes all rooms to a temporary file on shutdown and reads them back on start (they are plain JSON), so a deploy no longer ends games.
 
-**Keeping the host open:** the room logic (`room.ts`, `rooms.ts`, the driver, the protocol) never touches Node or Cloudflare directly. A thin adapter connects it to the host: `server/node/` (Node + `ws`, for a droplet or VPS) or `server/cloudflare/` (a Worker + one Durable Object per room). Only the adapter changes if D3 changes.
+**Keeping the host open:** the room logic (`room.ts`, `rooms.ts`, the driver, the protocol) never touches Node or Cloudflare directly. A thin adapter connects it to the host: `server/src/node.ts` (Node + `ws`, for a droplet or VPS) or `server/src/cloudflare.ts` (a Worker + one Durable Object holding every room, chosen Oct 27). Only the adapter changes if D3 changes.
 
 **Where it can run**
 
 | Host | Cost | Notes |
 |---|---|---|
-| **Cloudflare Workers + Durable Objects** | check current pricing (the free plan has included Durable Objects with daily limits since 2025; Workers Paid is $5 a month) | Same account as Pages. One Durable Object per room fits this design: it holds the room in memory and keeps its WebSockets open. Nothing to patch or restart, and it's fast in India. Timers use the object's alarms. Fits the "no server to look after" wish. |
+| **Cloudflare Workers + Durable Objects** ✅ chosen | $0 on the Workers Free plan (13,000 GB-s and 100,000 requests a day); Workers Paid is $5 a month | Same account as Pages, nothing to patch or restart, fast in India. Built as **one** Durable Object holding every room: an object is billed for the time it is awake, so one object never passes the free daily allowance (24 h × 128 MB = 10,800 GB-s). It holds the rooms in memory and keeps their WebSockets open. |
 | **Owner's droplet** / any VPS | $0 extra / $4–6 a month | `server/deploy/` will have both a systemd unit and a Docker setup, plus a Caddy config (automatic HTTPS; WebSockets work as is). Check the droplet's free RAM and load first. |
 | Fly.io, Railway, Render (paid, always-on) | ~$5 a month | The Dockerfile works as is. Run **one instance**, because rooms are in memory. Several instances would need routing by room code, which isn't needed below about 10,000 players at once. |
 | ✗ Serverless (Vercel/Netlify functions, Lambda) | — | No long-lived WebSockets |
@@ -451,7 +453,7 @@ The server counts per day and shows them at `/stats` (behind a token): rooms cre
 |---|---|---|
 | D1 ⏳ later (Oct 27) | Buy a domain (~$10–15 a year) | Use `*.pages.dev` until then (§A3). **Needed before R4**, because the iOS app has the invite domain built in. Buy it through Cloudflare Registrar to keep everything in one account. |
 | D2 ✅ Cloudflare Pages (Oct 27) | Where the website and the web game live | Done. |
-| D3 ⏳ open (Oct 27) | Where the room server runs | **Needed before R2's web beta.** R0 and R1 are built and tested locally either way (§B6 adapters). Lean: **Cloudflare Workers + Durable Objects**, the same account as Pages with nothing to maintain. The droplet is the fallback. Not ordinary serverless functions, not free plans that sleep. |
+| D3 ✅ Cloudflare, Workers Free plan (Oct 27) | Where the room server runs | Done: `server/src/cloudflare.ts`, one Durable Object for every room, which keeps room time under the free daily allowance (`server/README.md`). The Node adapter stays as the fallback. |
 | D4 ⏳ open (Oct 27) | Money model online | **Needed before R4.** Until then the host limits are one switch (server setting + app constant), so the beta can run with no limits and either answer is a one-line change. Lean: host pays, guests free (§B2). |
 | D5 | What's free on the web | Small + Classic, Bunny + Fox, 2 players, the daily board. **No free tries on the web.** |
 | D6 | App Privacy label | **Keep "Data Not Collected"**: rooms in memory only, no logs. Update the privacy policy. |

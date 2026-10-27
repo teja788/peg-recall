@@ -2,6 +2,9 @@
  * The app's own connection code (src/online/client.ts + src/store/roomStore.ts)
  * against the real server over real sockets: create, join, start, and a
  * dropped line that comes back by itself to the same seat with the board.
+ *
+ * ROOMS_URL=ws://127.0.0.1:8788/ws runs it against another server instead of
+ * the Node one it starts, e.g. the Cloudflare adapter under `npm run cf:dev`.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -49,8 +52,9 @@ async function until(what: string, ok: () => boolean, ms = 3000) {
 }
 
 test('the app’s client and room store: a game, a dropped line, the same seat again', async () => {
-  const srv = await startServer({ port: 0, host: '127.0.0.1', log: () => {} });
-  const url = `ws://127.0.0.1:${srv.port}/ws`;
+  const external = process.env.ROOMS_URL;
+  const srv = external ? null : await startServer({ port: 0, host: '127.0.0.1', log: () => {} });
+  const url = external ?? `ws://127.0.0.1:${srv!.port}/ws`;
   const host = device(url);
   const guest = device(url);
   try {
@@ -81,6 +85,6 @@ test('the app’s client and room store: a game, a dropped line, the same seat a
     await until('the host sees the guest gone', () => host.store.getState().room?.seats[1]?.online === false);
   } finally {
     host.store.getState().leave();
-    await srv.close();
+    await srv?.close();
   }
 });

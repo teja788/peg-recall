@@ -84,7 +84,7 @@ hidden, so nothing half-working reaches players.
 
 | Setting (build time) | Example | What |
 |---|---|---|
-| `EXPO_PUBLIC_ROOMS_URL` | `wss://rooms.colorcatch.app/ws` | the room server (`server/README.md`) |
+| `EXPO_PUBLIC_ROOMS_URL` | `wss://color-catch-rooms.<your-subdomain>.workers.dev/ws` | the room server on Cloudflare (`server/README.md`, "Deploy on Cloudflare") |
 | `EXPO_PUBLIC_WEB_URL` | `https://colorcatch.pages.dev` | invite links point here (`/join/482913`); the web game uses its own address if this is unset |
 | `EXPO_PUBLIC_HOST_LIMITS` | `on` | the free host limits; keep it the same as the server's `HOST_LIMITS` (decision D4) |
 
@@ -98,7 +98,8 @@ refuses a build that still carries a local test server's address.
 ```bash
 npm --prefix server ci && npm --prefix server run build
 EXPO_PUBLIC_ROOMS_URL=ws://127.0.0.1:8787/ws npm run build:web
-npm run e2e:online
+npm run e2e:online                         # room server on Node
+E2E_ROOMS=cloudflare npm run e2e:online    # room server in Cloudflare's runtime
 ```
 
 **Try it by hand:** `npm --prefix server run dev` in one terminal, then

@@ -243,7 +243,8 @@ test('limits: off by default; on, a free host is held to 2 seats, Small/Classic,
 });
 
 test('rooms expire: an idle lobby, an empty game, a finished game', () => {
-  const { hub, clock } = makeHub();
+  // these devices stay connected without pinging, so the idle sweep is off here
+  const { hub, clock } = makeHub({ idleMs: 24 * 60 * 60_000 });
   const lobby = room(hub, 1);
   const empty = room(hub, 1);
   empty.host.say({ type: 'start' });
@@ -289,4 +290,18 @@ test('a second connection with the same token takes the seat over', () => {
   assert.equal(host.seat, 'p1');
   const stranger = new Device(hub).hello().say({ type: 'resume', code: host.code!, token: 'f'.repeat(32) });
   assert.deepEqual(stranger.errors, ['notFound']);
+});
+
+test('a connection that goes silent (no pings) is let go; a pinging one stays', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1);
+  for (let t = 0; t < 4; t++) {
+    clock.advance(30_000);
+    host.say({ type: 'ping', t });
+    hub.sweep();
+  }
+  assert.equal(host.conn.closed, false, 'pinging every 30 s keeps the line');
+  assert.equal(guests[0].conn.closed, true, 'two minutes of silence: closed');
+  host.read();
+  assert.equal(host.room?.seats[1].online, false, 'and shown as away');
 });
