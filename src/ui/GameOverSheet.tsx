@@ -50,6 +50,8 @@ export interface GameOverSheetProps {
   onHome: () => void;
   /** at most one gentle card under the buttons (see `upsellCard`) */
   upsell?: UpsellCardProps;
+  /** online, for everyone but the host: who deals the next game, in place of Play again */
+  waitNote?: string;
 }
 
 /**
@@ -218,7 +220,7 @@ function ReminderOffer() {
   );
 }
 
-export function GameOverSheet({ state, daily, onRematch, onHome, upsell }: GameOverSheetProps) {
+export function GameOverSheet({ state, daily, onRematch, onHome, upsell, waitNote }: GameOverSheetProps) {
   const t = useTheme();
   const reduced = useReduceMotion();
   const insets = useSafeAreaInsets();
@@ -404,22 +406,31 @@ export function GameOverSheet({ state, daily, onRematch, onHome, upsell }: GameO
           </View>
 
           <View style={{ gap: t.spacing.md }}>
-            <Pressable
-              ref={playAgain}
-              accessibilityRole="button"
-              accessibilityLabel={tr('over.playAgain')}
-              onPress={onRematch}
-              style={({ pressed }) => [
-                styles.btn,
-                {
-                  backgroundColor: t.c.accent,
-                  borderRadius: t.radii.lg,
-                  opacity: pressed ? 0.85 : 1,
-                },
-              ]}
-            >
-              <Text style={{ ...t.type.heading, color: t.c.accentInk }}>{tr('over.playAgain')}</Text>
-            </Pressable>
+            {waitNote ? (
+              <Text
+                accessibilityLiveRegion="polite"
+                style={{ ...t.type.body, color: t.c.textDim, textAlign: 'center' }}
+              >
+                {waitNote}
+              </Text>
+            ) : (
+              <Pressable
+                ref={playAgain}
+                accessibilityRole="button"
+                accessibilityLabel={tr('over.playAgain')}
+                onPress={onRematch}
+                style={({ pressed }) => [
+                  styles.btn,
+                  {
+                    backgroundColor: t.c.accent,
+                    borderRadius: t.radii.lg,
+                    opacity: pressed ? 0.85 : 1,
+                  },
+                ]}
+              >
+                <Text style={{ ...t.type.heading, color: t.c.accentInk }}>{tr('over.playAgain')}</Text>
+              </Pressable>
+            )}
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={tr('share.button')}

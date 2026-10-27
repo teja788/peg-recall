@@ -19,6 +19,10 @@ const WEB_URL = (process.env.EXPO_PUBLIC_WEB_URL ?? '').replace(/\/+$/, '');
 
 export const onlineEnabled = ROOMS_URL !== '';
 
+/** The free host limits (src/online/limits.ts), matching the server's
+ *  HOST_LIMITS: EXPO_PUBLIC_HOST_LIMITS=on. Off until decision D4. */
+export const HOST_LIMITS = process.env.EXPO_PUBLIC_HOST_LIMITS === 'on';
+
 /** The address an invite sends people to: the web game's join page, which
  *  opens the app instead where it can (later: universal links). Null when no
  *  web address is known: the invite then carries only the code. */

@@ -17,6 +17,7 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useGame } from '../src/store/game';
+import { useRoom } from '../src/store/room';
 import { maybeRequestReview, reviewDue } from '../src/store/reviewPrompt';
 import { hasStore } from '../src/store/storefront';
 import { dailyBoard, dailyNumber } from '../src/store/stats';
@@ -52,6 +53,7 @@ import {
 } from '../src/ui/feedback';
 import { TRAY_GAP, tableLayout } from '../src/ui/gameLayout';
 import { isolate, playerLabel } from '../src/ui/names';
+import { seatName } from '../src/ui/online';
 import { tr, trn } from '../src/i18n';
 
 import type { GameState, Peg, PegColor } from '../src/engine/types';
@@ -202,11 +204,21 @@ export default function GameScreen() {
   const padR = swap ? insets.left : insets.right;
   const win = useWindowDimensions();
   const reduced = useReduceMotion();
-  const params = useLocalSearchParams<{ mode?: string; daily?: string }>();
+  const params = useLocalSearchParams<{ mode?: string; daily?: string; room?: string }>();
   /** the mode asked for; `deal` decides what is actually played */
   const requested: GameMode = isMode(params.mode) ? params.mode : 'ai';
   /** Home's "Today's board": the first game here is the daily board */
   const isDaily = params.daily === '1';
+  /** an online game (?room=482913): the room server deals and referees it */
+  const roomCode = typeof params.room === 'string' && params.room ? params.room : null;
+  const online = roomCode != null;
+  const remote = useGame((s) => s.remote);
+  const waiting = useGame((s) => s.waiting);
+  const roomInfo = useRoom((s) => s.room);
+  const roomStatus = useRoom((s) => s.status);
+  const roomEnded = useRoom((s) => s.ended);
+  /** online: the room menu is up (the board does not stop for it) */
+  const [menu, setMenu] = useState(false);
   const unlocked = useSettings((s) => s.unlocked);
 
   const hydrated = useSettings((s) => s.hydrated);
@@ -281,13 +293,24 @@ export default function GameScreen() {
   );
 
   useEffect(() => {
+    // online, the room deals (src/store/room.ts)
+    if (online) return;
     // a teardown on the way out empties the store too; that is not a cue to deal
     if (!hydrated || leaving) return;
     if (!hasState) started.current = false;
     if (started.current) return;
     started.current = true;
     dealNew(undefined, isDaily);
-  }, [hydrated, hasState, dealNew, leaving, isDaily]);
+  }, [hydrated, hasState, dealNew, leaving, isDaily, online]);
+
+  // online with no board from the room (a reload), or the room ended: the
+  // room page rejoins, or says what happened
+  useEffect(() => {
+    if (!online || leaving) return;
+    if (roomEnded || !useGame.getState().remote) {
+      router.replace({ pathname: '/room/[code]', params: { code: roomCode } });
+    }
+  }, [online, roomEnded, leaving, roomCode, router]);
 
   useEffect(
     () => () => {
@@ -313,7 +336,10 @@ export default function GameScreen() {
 
   // The chime, like the confetti, is for a person winning — not for the
   // computer beating one.
-  const celebrate = state != null && humanWon(state);
+  // online, only the winner's own screen celebrates
+  const celebrate =
+    state != null &&
+    (online ? state.phase === 'gameOver' && !!remote && state.winnerIds.includes(remote.seat) : humanWon(state));
   useEffect(() => {
     if (celebrate) play('win');
   }, [celebrate, play]);
@@ -366,8 +392,10 @@ export default function GameScreen() {
     if (chime.current) clearTimeout(chime.current);
     setFrozen((cur) => cur ?? useGame.getState().state);
     setLeaving(true);
+    // online: out of the room too (the computer finishes this game for us)
+    if (online) useRoom.getState().leave();
     teardown();
-  }, [teardown]);
+  }, [teardown, online]);
 
   useEffect(() => {
     if (!leaving) return;
@@ -377,8 +405,12 @@ export default function GameScreen() {
 
   const openPause = useCallback(() => {
     if (useGame.getState().state?.phase === 'gameOver') return;
-    pause();
-  }, [pause]);
+    if (online) setMenu(true);
+    else pause();
+  }, [pause, online]);
+
+  /** online: the host deals the next game for everyone */
+  const onlineRematch = useCallback(() => useRoom.getState().rematch(), []);
 
   /** Play again / Restart: a new seed, and the board running again. A game
    *  played on a free try is not replayed: it deals again from the settings,
@@ -398,7 +430,8 @@ export default function GameScreen() {
   // Picked once per game-over, when it begins: what the card offers must not
   // change under the player (nor vanish when the rating prompt marks itself).
   useEffect(() => {
-    if (!overKey) return;
+    // no offers on an online game: it is the room's, not this device's
+    if (!overKey || online) return;
     const g = useGame.getState().state;
     if (!g || g.phase !== 'gameOver') return;
     const s = useSettings.getState();
@@ -417,7 +450,7 @@ export default function GameScreen() {
     setUpsell(card ? { key: overKey, card, more: moreToTry(s) } : null);
     // both once-ever cards: "Ready for more?", and the web game's "Liked it?"
     if (card === 'more' || (card && !hasStore)) s.set('moreOffered', true);
-  }, [overKey]);
+  }, [overKey, online]);
 
   /** "Ready for more?" → straight into a game on the Big board and/or vs Owl.
    *  Only this game: the stored choices stay, so Play again after the try goes
@@ -572,11 +605,24 @@ export default function GameScreen() {
   }
   // everything below draws `view`; while leaving it is a still frame
   const human = isHumanTurn(view);
-  const canRoll = !leaving && view.phase === 'roll' && human && !busy && !paused;
-  const canPick = !leaving && view.phase === 'pick' && human && !busy && !paused;
-  const won = humanWon(view);
+  // online, only this device's seat moves, and each tap goes to the server once
+  const mine = online ? remote != null && activePlayerSpec(view).id === remote.seat : human;
+  const canRoll = !leaving && view.phase === 'roll' && mine && !busy && !paused && !waiting;
+  const canPick = !leaving && view.phase === 'pick' && mine && !busy && !paused && !waiting;
+  const won = online
+    ? view.phase === 'gameOver' && !!remote && view.winnerIds.includes(remote.seat)
+    : humanWon(view);
   // never for an unlocked player (a purchase from the card hides it at once)
-  const card = !unlocked && upsell && upsell.key === overKey ? upsell.card : null;
+  const card = !online && !unlocked && upsell && upsell.key === overKey ? upsell.card : null;
+  const hostSeat = roomInfo?.seats.find((x) => x.id === roomInfo.host);
+  const awaySeat = roomInfo?.seats.find((x) => x.kind === 'human' && !x.online && x.id !== remote?.seat);
+  const onlineNote = !online
+    ? ''
+    : roomStatus === 'connecting' || roomStatus === 'reconnecting'
+      ? tr('online.reconnecting')
+      : awaySeat
+        ? tr('online.awayLine', { name: seatName(awaySeat) })
+        : '';
 
   const trayCount = view.config.players.length;
   const stacked = L.mode === 'stacked';
@@ -689,7 +735,7 @@ export default function GameScreen() {
           />
         )}
       </View>
-      {view.phase === 'roll' && human ? (
+      {view.phase === 'roll' && mine ? (
         <Text
           numberOfLines={1}
           style={{
@@ -730,8 +776,13 @@ export default function GameScreen() {
       <GameOverSheet
         state={view}
         daily={daily ?? undefined}
-        onRematch={restart}
+        onRematch={online ? onlineRematch : restart}
         onHome={goHome}
+        waitNote={
+          online && remote && roomInfo && roomInfo.host !== remote.seat
+            ? tr('online.waitNext', { name: hostSeat ? seatName(hostSeat) : '' })
+            : undefined
+        }
         upsell={
           card === 'unlock'
             ? {
@@ -766,8 +817,47 @@ export default function GameScreen() {
 
     {/* while leaving, the menu stays up over the still frame it was
         closed from (the teardown has already lifted `paused`) */}
-    {(paused || leaving) && view.phase !== 'gameOver' ? (
+    {!online && (paused || leaving) && view.phase !== 'gameOver' ? (
       <PauseSheet onResume={resume} onRestart={restart} onHome={goHome} />
+    ) : null}
+
+    {online && menu && view.phase !== 'gameOver' ? (
+      <PauseSheet
+        onResume={() => setMenu(false)}
+        onHome={goHome}
+        title={tr('online.menu')}
+        body={tr('online.menuBody')}
+        homeLabel={tr('online.leave')}
+        homeHint={tr('online.leaveHint')}
+      />
+    ) : null}
+
+    {onlineNote ? (
+      <View
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: insets.bottom + t.spacing.sm,
+          alignItems: 'center',
+          pointerEvents: 'none',
+        }}
+      >
+        <Text
+          accessibilityLiveRegion="polite"
+          style={{
+            ...t.type.caption,
+            color: '#fff',
+            backgroundColor: 'rgba(0,0,0,0.45)',
+            paddingHorizontal: t.spacing.md,
+            paddingVertical: 4,
+            borderRadius: 999,
+            overflow: 'hidden',
+          }}
+        >
+          {onlineNote}
+        </Text>
+      </View>
     ) : null}
     </>
   );

@@ -5,6 +5,7 @@ import { ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { tr, trn } from '../src/i18n';
+import { onlineEnabled } from '../src/online/config';
 import {
   BOARD_CYCLE,
   animalName,
@@ -33,6 +34,7 @@ import { BOARD_SPECS, type AvatarId, type Difficulty, type PegColor } from '../s
  * purple.
  */
 const DAILY_PREVIEW: (PegColor | null)[] = ['purple', 'yellow', 'green', null, 'blue', 'yellow', null];
+const ONLINE_PREVIEW: (PegColor | null)[] = ['yellow', 'green', null, 'purple', 'blue', null, 'green'];
 const PREVIEWS: Record<GameMode, (PegColor | null)[]> = {
   ai: ['yellow', null, 'violet', null, 'violet', null, 'red'],
   '2p': ['green', 'blue', null, 'green', null, 'purple', null],
@@ -235,6 +237,15 @@ export default function Home() {
           }
           style={cardStyle}
         />
+        {onlineEnabled ? (
+          <ModeCard
+            title={tr('online.card')}
+            subtitle={tr('online.cardSub')}
+            art={<BoardMini width={cardArt} colors={ONLINE_PREVIEW} theme={t.scheme} />}
+            onPress={() => go('/online')}
+            style={cardStyle}
+          />
+        ) : null}
         <ModeCard
           title={tr('home.vsComputer')}
           subtitle={subtitles.ai}

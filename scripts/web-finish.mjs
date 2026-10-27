@@ -37,6 +37,17 @@ const problems = [];
 const left = html.match(/%[A-Z_]+%/g);
 if (left) problems.push(`placeholders left in index.html: ${[...new Set(left)].join(', ')}`);
 if (fs.existsSync(path.join(dist, '404.html'))) problems.push('dist/404.html exists: it turns off the single-page fallback');
+// EXPO_PUBLIC_ values are baked in at build time, and a stale Metro cache can
+// carry an old one over (build:web clears it): never ship a local test server
+const rooms = process.env.EXPO_PUBLIC_ROOMS_URL ?? '';
+if (!/localhost|127\.0\.0\.1/.test(rooms)) {
+  const bundles = path.join(dist, '_expo', 'static', 'js', 'web');
+  for (const f of fs.existsSync(bundles) ? fs.readdirSync(bundles) : []) {
+    if (/wss?:\/\/(localhost|127\.0\.0\.1)/.test(fs.readFileSync(path.join(bundles, f), 'utf8'))) {
+      problems.push(`${f} contains a local rooms address that EXPO_PUBLIC_ROOMS_URL did not ask for (stale cache?)`);
+    }
+  }
+}
 for (const f of ['_headers', 'manifest.json', 'og.jpg', 'icon-192.png', 'icon-512.png']) {
   if (!fs.existsSync(path.join(dist, f))) problems.push(`missing dist/${f} (is public/ being copied?)`);
 }

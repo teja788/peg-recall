@@ -21,11 +21,17 @@ import { useReduceMotion } from './feedback';
 
 export interface PauseSheetProps {
   onResume: () => void;
-  onRestart: () => void;
+  /** no Restart button without it (an online game is dealt by the host) */
+  onRestart?: () => void;
   onHome: () => void;
+  /** the online game's menu: its own words, since that board does not stop */
+  title?: string;
+  body?: string;
+  homeLabel?: string;
+  homeHint?: string;
 }
 
-export function PauseSheet({ onResume, onRestart, onHome }: PauseSheetProps) {
+export function PauseSheet({ onResume, onRestart, onHome, title, body, homeLabel, homeHint }: PauseSheetProps) {
   const t = useTheme();
   const reduced = useReduceMotion();
   const insets = useSafeAreaInsets();
@@ -102,10 +108,10 @@ export function PauseSheet({ onResume, onRestart, onHome }: PauseSheetProps) {
               accessibilityRole="header"
               style={{ ...t.type.title, color: t.c.text, textAlign: 'center' }}
             >
-              {tr('pause.title')}
+              {title ?? tr('pause.title')}
             </Text>
             <Text style={{ ...t.type.caption, color: t.c.textDim, textAlign: 'center' }}>
-              {tr('pause.body')}
+              {body ?? tr('pause.body')}
             </Text>
           </View>
 
@@ -125,27 +131,29 @@ export function PauseSheet({ onResume, onRestart, onHome }: PauseSheetProps) {
             >
               <Text style={{ ...t.type.heading, color: t.c.accentInk }}>{tr('pause.resume')}</Text>
             </Pressable>
+            {onRestart ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={tr('pause.restart')}
+                accessibilityHint={tr('pause.restartHint')}
+                onPress={onRestart}
+                style={({ pressed }) => [
+                  styles.btn,
+                  {
+                    borderRadius: t.radii.lg,
+                    borderWidth: 2,
+                    borderColor: t.c.line,
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}
+              >
+                <Text style={{ ...t.type.heading, color: t.c.text }}>{tr('pause.restart')}</Text>
+              </Pressable>
+            ) : null}
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={tr('pause.restart')}
-              accessibilityHint={tr('pause.restartHint')}
-              onPress={onRestart}
-              style={({ pressed }) => [
-                styles.btn,
-                {
-                  borderRadius: t.radii.lg,
-                  borderWidth: 2,
-                  borderColor: t.c.line,
-                  opacity: pressed ? 0.7 : 1,
-                },
-              ]}
-            >
-              <Text style={{ ...t.type.heading, color: t.c.text }}>{tr('pause.restart')}</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={tr('common.home')}
-              accessibilityHint={tr('pause.homeHint')}
+              accessibilityLabel={homeLabel ?? tr('common.home')}
+              accessibilityHint={homeHint ?? tr('pause.homeHint')}
               onPress={onHome}
               style={({ pressed }) => [
                 styles.btn,
@@ -157,7 +165,7 @@ export function PauseSheet({ onResume, onRestart, onHome }: PauseSheetProps) {
                 },
               ]}
             >
-              <Text style={{ ...t.type.heading, color: t.c.text }}>{tr('common.home')}</Text>
+              <Text style={{ ...t.type.heading, color: t.c.text }}>{homeLabel ?? tr('common.home')}</Text>
             </Pressable>
           </View>
         </ScrollView>

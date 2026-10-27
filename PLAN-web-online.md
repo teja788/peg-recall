@@ -2,6 +2,8 @@
 
 Date: 2026-10-27. Status: **plan, nothing built yet.** Google Play is **paused** (owner, Oct 27).
 
+**R2 (app and web screens) built Oct 27:** Home "Play online" card, `app/online.tsx` (start a room or join by code), `app/join/[code].tsx` (invite links), `app/room/[code].tsx` (waiting room), the game screen's online mode (room menu, host deals the rematch, away/reconnecting line, confetti only for the winner), 52 strings × 28 languages. Shown only when `EXPO_PUBLIC_ROOMS_URL` is set (`WEB.md`). Checked end to end in two browsers (`npm run e2e:online`). Not yet: universal links (needs the domain), the "Back to your game" banner on Home, a countdown that follows the server's clock for late joiners, emoji reactions (R5).
+
 **R1 (room server) built Oct 27, not deployed (D3 open):** `server/` — host-neutral `room.ts` + `hub.ts`, a Node adapter, Dockerfile, Caddy and systemd files (`server/README.md`). Already in, ahead of R3: away players get 15 s, then the computer plays for them (`standIn`), and the Relaxed/Quick turn clock; reconnect with a seat token and a snapshot; version check; rate limits; expiry. Host limits are one switch, off (D4 open). Next: R2, the app and web screens.
 
 **R0 (shared code) done Oct 27:** `src/engine/timing.ts`, `src/engine/driver.ts` (`autoStep`, `computerPick`, `freshBrains`, `observePick`), `src/online/protocol.ts`, `src/online/hash.ts`. The local game runs on the driver with no change in behaviour.

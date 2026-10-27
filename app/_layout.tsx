@@ -54,6 +54,9 @@ export default function RootLayout() {
             <Stack.Screen name="game" />
             <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
             <Stack.Screen name="how-to-play" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="online" />
+            <Stack.Screen name="join/[code]" />
+            <Stack.Screen name="room/[code]" />
           </Stack>
         </ThemeProvider>
       </SafeAreaProvider>

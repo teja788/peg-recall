@@ -76,6 +76,35 @@ Keep **no `404.html`** at the top of the export: without one, Cloudflare
 sends every unknown path (`/settings`, later `/join/482913`) to the game.
 `scripts/web-finish.mjs` fails the build if one appears.
 
+## Online play (rooms)
+
+Online play shows up only in builds that know where the room server is
+(`src/online/config.ts`). Without these settings the "Play online" card is
+hidden, so nothing half-working reaches players.
+
+| Setting (build time) | Example | What |
+|---|---|---|
+| `EXPO_PUBLIC_ROOMS_URL` | `wss://rooms.colorcatch.app/ws` | the room server (`server/README.md`) |
+| `EXPO_PUBLIC_WEB_URL` | `https://colorcatch.pages.dev` | invite links point here (`/join/482913`); the web game uses its own address if this is unset |
+| `EXPO_PUBLIC_HOST_LIMITS` | `on` | the free host limits; keep it the same as the server's `HOST_LIMITS` (decision D4) |
+
+Set them in the Cloudflare Pages project (web) and for EAS builds (iOS) once
+the server is deployed. `npm run build:web` clears Metro's cache, because
+these values are baked in when the code is bundled, and `web-finish.mjs`
+refuses a build that still carries a local test server's address.
+
+**Check it end to end** (two browsers, a whole game against each other):
+
+```bash
+npm --prefix server ci && npm --prefix server run build
+EXPO_PUBLIC_ROOMS_URL=ws://127.0.0.1:8787/ws npm run build:web
+npm run e2e:online
+```
+
+**Try it by hand:** `npm --prefix server run dev` in one terminal, then
+`EXPO_PUBLIC_ROOMS_URL=ws://localhost:8787/ws npx expo start --web` and open
+two browser windows.
+
 ## Later
 
 - **Domain:** add it under the Pages project → Custom domains, then change
