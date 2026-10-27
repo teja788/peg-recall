@@ -317,6 +317,7 @@ export const cs: Strings = {
   'online.ended.replaced': 'Tahle hra je otevřená v jiném okně.',
   'online.report': 'Nahlásit problém',
   'online.backToGame': 'Zpět do hry',
+  'online.nameBlocked': 'Tohle jméno se online použít nedá. Vyber jiné, nebo nech pole prázdné a hraj jako své zvíře.',
   'buy.cancelled': 'Nákup zrušen. Nic se neúčtovalo.',
   'buy.pending': 'Čeká se na schválení. Jakmile ho dostaneš, nákup dorazí.',
   'buy.failed': 'To nevyšlo. Zkus to prosím později.',

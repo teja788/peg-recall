@@ -9,6 +9,7 @@ import { Text } from 'react-native';
 
 import { tr } from '../../src/i18n';
 import { onlineEnabled } from '../../src/online/config';
+import { onlineName } from '../../src/online/nameFilter';
 import { formatCode, normalizeCode } from '../../src/online/protocol';
 import { useRoom } from '../../src/store/room';
 import { useSettings } from '../../src/store/settings';
@@ -48,7 +49,7 @@ export default function JoinScreen() {
     const s = useSettings.getState();
     useRoom.getState().clear();
     setAsked(true);
-    useRoom.getState().join(code, s.names[0] || undefined, s.avatars[0]);
+    useRoom.getState().join(code, onlineName(s.names[0]), s.avatars[0]);
   };
 
   const home = () => router.replace('/');

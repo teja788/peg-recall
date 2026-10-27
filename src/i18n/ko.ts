@@ -318,6 +318,7 @@ export const ko: Strings = {
   'online.ended.replaced': '이 게임은 다른 창에서 열려 있어요.',
   'online.report': '문제 신고하기',
   'online.backToGame': '게임으로 돌아가기',
+  'online.nameBlocked': '이 이름은 온라인에서 쓸 수 없어요. 다른 이름을 고르거나, 비워 두면 내 동물로 플레이해요.',
   'buy.cancelled': '구입이 취소됐어요. 결제되지 않았어요.',
   'buy.pending': '승인을 기다리고 있어요. 승인되면 자동으로 적용돼요.',
   'buy.failed': '처리되지 않았어요. 나중에 다시 시도해 주세요.',

@@ -313,6 +313,7 @@ export const it: Strings = {
   'online.ended.replaced': 'Questa partita è aperta in un’altra finestra.',
   'online.report': 'Segnala un problema',
   'online.backToGame': 'Torna alla partita',
+  'online.nameBlocked': 'Questo nome non si può usare online. Scegline un altro, o lascia vuoto per giocare come il tuo animale.',
   'buy.cancelled': 'Acquisto annullato. Nessun addebito.',
   'buy.pending': 'In attesa di approvazione. Arriverà appena approvato.',
   'buy.failed': 'Non è andato a buon fine. Riprova più tardi.',

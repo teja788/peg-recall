@@ -315,6 +315,7 @@ export const ja: Strings = {
   'online.ended.replaced': 'このゲームはべつのウィンドウでひらいています。',
   'online.report': 'もんだいをしらせる',
   'online.backToGame': 'ゲームにもどる',
+  'online.nameBlocked': 'このなまえはオンラインではつかえません。べつのなまえにするか、からにしてどうぶつのなまえであそんでね。',
   'buy.cancelled': '購入をキャンセルしました。請求はありません。',
   'buy.pending': '承認待ちです。承認されると届きます。',
   'buy.failed': 'うまくいきませんでした。あとでもう一度お試しください。',

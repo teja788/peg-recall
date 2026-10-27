@@ -313,6 +313,7 @@ export const zh: Strings = {
   'online.ended.replaced': '這場遊戲已在另一個視窗開啟。',
   'online.report': '回報問題',
   'online.backToGame': '回到遊戲',
+  'online.nameBlocked': '這個名字不能在線上使用。請換一個，或留空，用你的動物名字來玩。',
   'buy.cancelled': '已取消購買，沒有收費。',
   'buy.pending': '正在等待核准，核准後就會自動完成購買。',
   'buy.failed': '沒有成功，請稍後再試。',

@@ -314,6 +314,7 @@ export const fr: Strings = {
   'online.ended.replaced': 'Cette partie est ouverte dans une autre fenêtre.',
   'online.report': 'Signaler un problème',
   'online.backToGame': 'Retour à la partie',
+  'online.nameBlocked': 'Ce nom ne peut pas être utilisé en ligne. Choisis-en un autre, ou laisse le champ vide pour jouer sous le nom de ton animal.',
   'buy.cancelled': 'Achat annulé. Rien n’a été facturé.',
   'buy.pending': 'En attente d’autorisation. L’achat sera finalisé dès qu’elle sera accordée.',
   'buy.failed': 'Ça n’a pas marché. Réessaie plus tard.',

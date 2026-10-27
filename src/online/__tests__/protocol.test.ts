@@ -75,6 +75,17 @@ test('names are cleaned like the app cleans them; an empty one means "no name"',
   assert.equal(send({ type: 'join', code: '482913', avatar: 'fox', name: 42 }), null);
 });
 
+test('a name with a rude word is dropped, not refused: that player shows as their animal', () => {
+  assert.deepEqual(send({ type: 'join', code: '482913', avatar: 'fox', name: 'B1g D!ck' }), {
+    type: 'join',
+    code: '482913',
+    avatar: 'fox',
+  });
+  const create = send({ type: 'create', settings: SETTINGS, name: 'sh1t', avatar: 'owl', unlocked: false });
+  assert.ok(create && create.type === 'create' && create.name === undefined);
+  assert.equal(send({ type: 'join', code: '482913', avatar: 'fox', name: 'Cassandra' })?.type, 'join');
+});
+
 test('anything else is refused', () => {
   const bad: unknown[] = [
     { type: 'hello', protocol: 1, rules: 1, app: 'android', appVersion: '1' },

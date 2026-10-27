@@ -317,6 +317,7 @@ export const es: Strings = {
   'online.ended.replaced': 'Esta partida está abierta en otra ventana.',
   'online.report': 'Informar de un problema',
   'online.backToGame': 'Volver a la partida',
+  'online.nameBlocked': 'Ese nombre no se puede usar en línea. Elige otro o déjalo vacío para jugar como tu animal.',
   'buy.cancelled': 'Compra cancelada. No se cobró nada.',
   'buy.pending': 'Esperando aprobación. Llegará en cuanto se apruebe.',
   'buy.failed': 'No se pudo completar. Inténtalo más tarde.',

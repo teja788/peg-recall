@@ -314,6 +314,7 @@ export const id: Strings = {
   'online.ended.replaced': 'Permainan ini terbuka di jendela lain.',
   'online.report': 'Laporkan masalah',
   'online.backToGame': 'Kembali ke permainan',
+  'online.nameBlocked': 'Nama itu tidak bisa dipakai untuk bermain online. Pilih nama lain, atau kosongkan agar bermain sebagai hewanmu.',
   'buy.cancelled': 'Pembelian dibatalkan. Tidak ada biaya.',
   'buy.pending': 'Menunggu persetujuan. Akan masuk setelah disetujui.',
   'buy.failed': 'Belum berhasil. Coba lagi nanti, ya.',

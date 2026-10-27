@@ -307,6 +307,7 @@ export const sv: Strings = {
   'online.ended.replaced': 'Spelet är öppet i ett annat fönster.',
   'online.report': 'Rapportera ett problem',
   'online.backToGame': 'Tillbaka till spelet',
+  'online.nameBlocked': 'Det namnet går inte att använda online. Välj ett annat, eller lämna fältet tomt och spela som ditt djur.',
   'buy.cancelled': 'Köpet avbröts. Inget har dragits.',
   'buy.pending': 'Väntar på godkännande. Det kommer så fort det har godkänts.',
   'buy.failed': 'Det gick inte. Försök igen senare.',

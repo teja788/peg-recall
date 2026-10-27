@@ -2,7 +2,7 @@
  * Online play, end to end, in two browsers (PLAN-web-online.md §B11):
  * Maya starts a room, Dadi opens the invite link and joins, Maya starts,
  * both play a whole Small-board game against each other through the room
- * server, then Maya deals a rematch.
+ * server, then Maya deals a rematch and removes Dadi from it.
  *
  *   npm --prefix server run build
  *   EXPO_PUBLIC_ROOMS_URL=ws://127.0.0.1:8787/ws npm run build:web
@@ -160,7 +160,10 @@ try {
   // Dadi opens the invite link
   await dadi.goto(`${base}/join/${code}`, { waitUntil: 'networkidle' });
   check(await dadi.getByText('You’re invited to play Color Catch').isVisible(), 'the invite page greets Dadi');
+  await dadi.getByLabel('Your name').fill('sh1t');
+  check(await dadi.getByText('That name can’t be used online', { exact: false }).isVisible(), 'a rude name is caught as it is typed');
   await dadi.getByLabel('Your name').fill('Dadi');
+  check(!(await dadi.getByText('That name can’t be used online', { exact: false }).isVisible()), 'and the note goes once it is changed');
   await dadi.getByRole('button', { name: 'Join', exact: true }).click();
   await dadi.waitForURL(new RegExp(`/room/${code}$`), { timeout: 10000 });
   await maya.getByText('Dadi', { exact: true }).waitFor({ timeout: 5000 });
@@ -203,6 +206,20 @@ try {
   await maya.getByRole('button', { name: 'Play again' }).click();
   await Promise.all([maya, dadi].map((p) => p.getByText('Look and remember!').waitFor({ timeout: 5000 })));
   check(true, 'Play again deals a new board for both');
+
+  // the host removes a player mid-game, from the game's menu
+  await maya.getByRole('button', { name: 'Pause', exact: true }).click();
+  await maya.getByRole('button', { name: 'Remove Dadi' }).waitFor({ timeout: 5000 });
+  await maya.waitForTimeout(500); // the sheet's fade-in
+  await shot(maya, '6-menu-host');
+  await maya.getByRole('button', { name: 'Remove Dadi' }).click();
+  await dadi.getByText('The host took you out of this room.').waitFor({ timeout: 10000 });
+  check(true, 'Maya removes Dadi during the game, and Dadi is told');
+  await shot(dadi, '7-removed');
+  check(
+    !(await maya.getByRole('button', { name: 'Remove Dadi' }).isVisible().catch(() => false)),
+    "Dadi is off Maya's list; the computer plays for them",
+  );
 
   for (const p of [maya, dadi]) check(p.errors.length === 0, `${p.label}: no page errors ${p.errors.join(' | ')}`);
 } catch (e) {

@@ -11,6 +11,7 @@ import { BOARD_SPECS, type BoardSize } from '../src/engine/types';
 import { tr } from '../src/i18n';
 import { HOST_LIMITS, onlineEnabled } from '../src/online/config';
 import { needsUnlock } from '../src/online/limits';
+import { onlineName } from '../src/online/nameFilter';
 import { normalizeCode, type TimerMode } from '../src/online/protocol';
 import { useRoom } from '../src/store/room';
 import { BOARD_CYCLE, useSettings } from '../src/store/settings';
@@ -55,7 +56,7 @@ export default function OnlineScreen() {
   };
   const me = () => {
     const s = useSettings.getState();
-    return { name: s.names[0] || undefined, avatar: s.avatars[0] };
+    return { name: onlineName(s.names[0]), avatar: s.avatars[0] };
   };
 
   const create = () => {

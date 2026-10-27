@@ -134,6 +134,7 @@ export class Room {
         ...(s.name ? { name: s.name } : {}),
         ...(s.difficulty ? { difficulty: s.difficulty } : {}),
         online: s.kind === 'ai' || s.conn !== null,
+        ...(s.left ? { left: true as const } : {}),
       })),
     };
   }

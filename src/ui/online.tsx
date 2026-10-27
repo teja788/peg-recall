@@ -11,12 +11,14 @@ import { Pressable, ScrollView, Text, TextInput, View, type ViewStyle } from 're
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { ConnStatus } from '../online/client';
-import type { EndReason, ErrorCode } from '../online/protocol';
+import { isBlockedName } from '../online/nameFilter';
+import type { EndReason, ErrorCode, RoomInfo } from '../online/protocol';
 import { chevron, tr } from '../i18n';
 import { NAME_INPUT_MAX, animalName, useSettings } from '../store/settings';
 import { useTheme } from '../theme';
 import { Backdrop } from './Backdrop';
 import { IconButton } from './controls';
+import { PillButton } from './StatsCard';
 
 /** The column the online screens share: a back button, a title, then content. */
 export function OnlineFrame({
@@ -147,43 +149,51 @@ export function YouRow() {
   const setName = useSettings((s) => s.setName);
   const cycleAvatar = useSettings((s) => s.cycleAvatar);
   const [text, setText] = React.useState(name);
+  const refused = isBlockedName(name);
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.md }}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={animalName(avatar)}
-        accessibilityHint={tr('players.seatHint')}
-        onPress={() => cycleAvatar(0, { seats: 1 })}
-        hitSlop={6}
-      >
-        <Avatar id={avatar} size={48} />
-      </Pressable>
-      <TextInput
-        value={text}
-        onChangeText={(v) => {
-          // kept as typed here, stored cleaned at once: a tap on Create or
-          // Join right after typing must not lose the name
-          setText(v);
-          setName(0, v);
-        }}
-        placeholder={animalName(avatar)}
-        placeholderTextColor={t.c.textDim}
-        accessibilityLabel={tr('online.yourName')}
-        maxLength={NAME_INPUT_MAX}
-        autoCorrect={false}
-        returnKeyType="done"
-        style={{
-          flex: 1,
-          minWidth: 0,
-          minHeight: 48,
-          paddingHorizontal: t.spacing.md,
-          borderRadius: t.radii.md,
-          borderWidth: 2,
-          borderColor: t.c.line,
-          color: t.c.text,
-          ...t.type.body,
-        }}
-      />
+    <View style={{ gap: t.spacing.sm }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.md }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={animalName(avatar)}
+          accessibilityHint={tr('players.seatHint')}
+          onPress={() => cycleAvatar(0, { seats: 1 })}
+          hitSlop={6}
+        >
+          <Avatar id={avatar} size={48} />
+        </Pressable>
+        <TextInput
+          value={text}
+          onChangeText={(v) => {
+            // kept as typed here, stored cleaned at once: a tap on Create or
+            // Join right after typing must not lose the name
+            setText(v);
+            setName(0, v);
+          }}
+          placeholder={animalName(avatar)}
+          placeholderTextColor={t.c.textDim}
+          accessibilityLabel={tr('online.yourName')}
+          maxLength={NAME_INPUT_MAX}
+          autoCorrect={false}
+          returnKeyType="done"
+          style={{
+            flex: 1,
+            minWidth: 0,
+            minHeight: 48,
+            paddingHorizontal: t.spacing.md,
+            borderRadius: t.radii.md,
+            borderWidth: 2,
+            borderColor: t.c.line,
+            color: t.c.text,
+            ...t.type.body,
+          }}
+        />
+      </View>
+      {refused ? (
+        <Text accessibilityLiveRegion="polite" style={{ ...t.type.caption, color: t.c.textDim }}>
+          {tr('online.nameBlocked')}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -242,5 +252,45 @@ export function Note({ text }: { text: string }) {
 /** The name a seat shows: its typed name, else its animal's. */
 export function seatName(seat: { name?: string; avatar: Parameters<typeof animalName>[0] }): string {
   return seat.name || animalName(seat.avatar);
+}
+
+/**
+ * The host's list in the online game's menu: everyone else still playing,
+ * each with Remove. The computer finishes their game, and they cannot come
+ * back to this room. Nothing for anyone but the host.
+ */
+export function RemovePlayers({
+  room,
+  me,
+  onRemove,
+}: {
+  room: RoomInfo;
+  me: string;
+  onRemove: (seat: string) => void;
+}) {
+  const t = useTheme();
+  const people = room.seats.filter((s) => s.kind === 'human' && s.id !== me && !s.left);
+  if (room.host !== me || people.length === 0) return null;
+  return (
+    <View style={{ gap: t.spacing.sm }}>
+      <Text style={{ ...t.type.label, color: t.c.textDim }}>{tr('online.players')}</Text>
+      {people.map((s) => {
+        const name = seatName(s);
+        return (
+          <View key={s.id} style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.md }}>
+            <Avatar id={s.avatar} size={32} />
+            <Text numberOfLines={1} style={{ ...t.type.body, color: t.c.text, flex: 1 }}>
+              {name}
+            </Text>
+            <PillButton
+              text={tr('online.remove')}
+              label={tr('online.removeLabel', { name })}
+              onPress={() => onRemove(s.id)}
+            />
+          </View>
+        );
+      })}
+    </View>
+  );
 }
 

@@ -179,6 +179,33 @@ test('the host removes a player: they are told, and their moves no longer count'
   assert.deepEqual(guests[0].errors, ['bad'], 'no longer in a room');
 });
 
+test('the host removes a player mid-game: told, marked as left, and the computer finishes for them', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 2);
+  host.say({ type: 'start' });
+  host.read();
+  host.say({ type: 'removeSeat', seat: 'p2' });
+  guests[0].read();
+  host.read();
+  assert.equal(guests[0].ended, 'removed');
+  assert.deepEqual(
+    host.room?.seats.map((s) => [s.id, s.left ?? false]),
+    [['p1', false], ['p2', true], ['p3', false]],
+  );
+  playOut(clock, [host, guests[1]]);
+  assert.equal(host.state?.phase, 'gameOver');
+});
+
+test('a rude name never reaches the room: the player shows as their animal (D11)', () => {
+  const { hub } = makeHub();
+  const { host } = room(hub, 0);
+  const rude = new Device(hub, 'web', '10.3.3.3').hello().say({ type: 'join', code: host.code!, name: 'fuuuck', avatar: 'cat' });
+  host.read();
+  assert.deepEqual(rude.errors, []);
+  const seat = host.room?.seats.find((s) => s.id === rude.seat);
+  assert.ok(seat && seat.name === undefined && seat.avatar === 'cat');
+});
+
 test('joining: full, already playing, wrong code (and too many wrong codes)', () => {
   const { hub } = makeHub();
   const { host } = room(hub, 1, { maxSeats: 2 });

@@ -329,6 +329,7 @@ export const en = {
   'online.ended.replaced': 'This game is open in another window.',
   'online.report': 'Report a problem',
   'online.backToGame': 'Back to the game',
+  'online.nameBlocked': 'That name can’t be used online. Pick another one, or leave it empty to play as your animal.',
   'buy.cancelled': 'Purchase cancelled. Nothing was charged.',
   'buy.pending': 'Waiting for approval. It will arrive once approved.',
   'buy.failed': 'That did not go through. Please try again later.',

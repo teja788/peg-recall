@@ -318,6 +318,7 @@ export const tr: Strings = {
   'online.ended.replaced': 'Bu oyun başka bir pencerede açık.',
   'online.report': 'Sorun bildir',
   'online.backToGame': 'Oyuna dön',
+  'online.nameBlocked': 'Bu ad çevrimiçi kullanılamaz. Başka bir ad seç ya da boş bırakıp hayvanınla oyna.',
   'buy.cancelled': 'Satın alma iptal edildi. Ücret alınmadı.',
   'buy.pending': 'Onay bekleniyor. Onaylanınca satın alım tamamlanacak.',
   'buy.failed': 'Olmadı. Lütfen daha sonra tekrar dene.',

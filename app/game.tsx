@@ -55,7 +55,7 @@ import {
 } from '../src/ui/feedback';
 import { TRAY_GAP, tableLayout } from '../src/ui/gameLayout';
 import { isolate, playerLabel } from '../src/ui/names';
-import { seatName } from '../src/ui/online';
+import { RemovePlayers, seatName } from '../src/ui/online';
 import { tr, trn } from '../src/i18n';
 
 import type { GameState, Peg, PegColor } from '../src/engine/types';
@@ -836,7 +836,15 @@ export default function GameScreen() {
           label: tr('online.report'),
           onPress: () => void Linking.openURL(reportUrl(roomCode, remote?.seat ?? null)).catch(() => {}),
         }}
-      />
+      >
+        {roomInfo && remote ? (
+          <RemovePlayers
+            room={roomInfo}
+            me={remote.seat}
+            onRemove={(seat) => useRoom.getState().removeSeat(seat)}
+          />
+        ) : null}
+      </PauseSheet>
     ) : null}
 
     {onlineNote ? (

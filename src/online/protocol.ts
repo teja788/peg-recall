@@ -23,6 +23,7 @@ import type {
 } from '../engine/types';
 import { BOARD_SPECS } from '../engine/types';
 import { cleanName } from '../store/settingsModel';
+import { isBlockedName } from './nameFilter';
 
 /** Bumped when a message changes shape. The server accepts this one and the one before. */
 export const PROTOCOL = 1;
@@ -56,6 +57,8 @@ export interface SeatInfo {
   difficulty?: Difficulty;
   /** a person with a live connection (computer seats are always online) */
   online: boolean;
+  /** a person who left or was removed mid-game: the computer finishes for them */
+  left?: true;
 }
 
 export interface RoomInfo {
@@ -166,11 +169,14 @@ function parseJson(raw: unknown): Obj | null {
   }
 }
 
-/** A typed name, cleaned like the app's own (`cleanName`); '' → no name. */
+/** A typed name, cleaned like the app's own (`cleanName`); '' → no name,
+ *  and so is a name with a word the room should not see (nameFilter.ts):
+ *  that player shows as their animal. */
 function nameOf(v: unknown): string | undefined | null {
   if (v === undefined) return undefined;
   if (typeof v !== 'string') return null;
-  return cleanName(v) || undefined;
+  const name = cleanName(v);
+  return name && !isBlockedName(name) ? name : undefined;
 }
 
 function settingsOf(v: unknown): RoomSettings | null {

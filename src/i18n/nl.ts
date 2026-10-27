@@ -314,6 +314,7 @@ export const nl: Strings = {
   'online.ended.replaced': 'Dit spel is open in een ander venster.',
   'online.report': 'Probleem melden',
   'online.backToGame': 'Terug naar het spel',
+  'online.nameBlocked': 'Deze naam kan online niet worden gebruikt. Kies een andere, of laat het leeg om als je dier te spelen.',
   'buy.cancelled': 'Aankoop geannuleerd. Er is niets betaald.',
   'buy.pending': 'Wacht op goedkeuring. De aankoop wordt voltooid zodra die is goedgekeurd.',
   'buy.failed': 'Dat lukte niet. Probeer het later opnieuw.',

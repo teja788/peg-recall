@@ -315,6 +315,7 @@ export const vi: Strings = {
   'online.ended.replaced': 'Ván này đang mở ở một cửa sổ khác.',
   'online.report': 'Báo lỗi',
   'online.backToGame': 'Quay lại ván chơi',
+  'online.nameBlocked': 'Không thể dùng tên này khi chơi trực tuyến. Hãy chọn tên khác, hoặc để trống để chơi bằng con vật của bạn.',
   'buy.cancelled': 'Đã hủy giao dịch. Bạn không bị trừ tiền.',
   'buy.pending': 'Đang chờ duyệt. Giao dịch sẽ hoàn tất khi được duyệt.',
   'buy.failed': 'Chưa thành công. Vui lòng thử lại sau.',

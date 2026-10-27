@@ -308,6 +308,7 @@ export const da: Strings = {
   'online.ended.replaced': 'Spillet er åbent i et andet vindue.',
   'online.report': 'Rapportér et problem',
   'online.backToGame': 'Tilbage til spillet',
+  'online.nameBlocked': 'Det navn kan ikke bruges online. Vælg et andet, eller lad feltet være tomt og spil som dit dyr.',
   'buy.cancelled': 'Købet blev annulleret. Der er ikke trukket noget.',
   'buy.pending': 'Venter på godkendelse. Det kommer, så snart det er godkendt.',
   'buy.failed': 'Det gik ikke igennem. Prøv igen senere.',

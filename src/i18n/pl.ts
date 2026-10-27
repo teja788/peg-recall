@@ -336,6 +336,7 @@ export const pl: Strings = {
   'online.ended.replaced': 'Ta gra jest otwarta w innym oknie.',
   'online.report': 'Zgłoś problem',
   'online.backToGame': 'Wróć do gry',
+  'online.nameBlocked': 'Tego imienia nie można używać online. Wybierz inne albo zostaw puste i graj jako swoje zwierzątko.',
   'buy.cancelled': 'Zakup anulowany. Nie pobrano opłaty.',
   'buy.pending': 'Zakup czeka na zgodę. Po zatwierdzeniu zostanie zrealizowany.',
   'buy.failed': 'Nie udało się. Spróbuj ponownie później.',

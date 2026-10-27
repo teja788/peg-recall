@@ -31,6 +31,8 @@ export interface PauseSheetProps {
   homeHint?: string;
   /** one more quiet button above Home (the online game's "Report a problem") */
   extra?: { label: string; onPress: () => void };
+  /** shown between the words and the buttons (the host's player list online) */
+  children?: React.ReactNode;
 }
 
 export function PauseSheet({
@@ -42,6 +44,7 @@ export function PauseSheet({
   homeLabel,
   homeHint,
   extra,
+  children,
 }: PauseSheetProps) {
   const t = useTheme();
   const reduced = useReduceMotion();
@@ -125,6 +128,8 @@ export function PauseSheet({
               {body ?? tr('pause.body')}
             </Text>
           </View>
+
+          {children}
 
           <View style={{ gap: t.spacing.md }}>
             <Pressable
