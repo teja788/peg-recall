@@ -19,3 +19,5 @@ export {
   observe,
   observeInitialReveal,
 } from './ai';
+export * from './timing';
+export * from './driver';

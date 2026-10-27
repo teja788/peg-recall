@@ -1,15 +1,16 @@
 import { create } from 'zustand';
 
 import {
-  activePlayerSpec,
+  aiSeedFor,
   aiThinkMs,
-  chooseMove,
-  createAi,
+  computerPick,
   createGame,
+  freshBrains as brainsFor,
   isHumanTurn,
-  observe,
-  observeInitialReveal,
+  observePick,
   reduce,
+  resultMs,
+  tumbleMs,
 } from '../engine';
 import type {
   AiState,
@@ -161,22 +162,9 @@ export function configFor(mode: GameMode, s: Settings, seed = Date.now()): GameC
   };
 }
 
-/**
- * The AI's rng is a separate stream from the board's, so that a game replayed
- * from an explicit seed does not have the opponent's dice riding on the very
- * numbers that laid the board out. Mixed, not equal.
- */
-function aiSeedFor(gameSeed: number): number {
-  return (((gameSeed ^ 0x9e3779b9) >>> 0) & 0x7fffffff) || 1;
-}
-
-/** How long the die is allowed to tumble, dead-colour rerolls included. */
-export function tumbleMs(rerolls: number): number {
-  // The roll rerolls internally until it finds a live colour — up to 64 times
-  // near the end of a board. Showing all of them would freeze the screen for
-  // twenty seconds, so the animation only ever acts out the first three.
-  return timing.dieTumble + 300 * Math.min(Math.max(0, rerolls), 3);
-}
+// The die reads the tumble length from here (src/ui/Die.tsx); it is the
+// engine's, which the room server shares.
+export { tumbleMs };
 
 /* ------------------------------------------------------------------ store */
 
@@ -240,14 +228,12 @@ export const useGame = create<GameStore>((setState, getState) => {
       rng = afterThink;
       later(() => {
         const cur = getState().state;
-        if (!cur || cur.phase !== 'pick' || isHumanTurn(cur)) return;
-        const spec = activePlayerSpec(cur);
-        const ai = getState().ais[spec.id];
-        if (!ai) return;
-        const res = chooseMove(ai, cur, rng);
+        if (!cur) return;
+        const res = computerPick(cur, getState().ais, rng);
+        if (!res) return;
         rng = res.rng;
         if (res.pegIndex < 0) return;
-        setState({ ais: { ...getState().ais, [spec.id]: res.ai } });
+        setState({ ais: res.ais });
         getState().dispatch({ type: 'PICK', pegIndex: res.pegIndex });
       }, think);
     }
@@ -265,39 +251,18 @@ export const useGame = create<GameStore>((setState, getState) => {
     }, ms);
   }
 
-  /** Every AI sees the peg that was just turned face up — everyone was looking. */
-  function observeReveal(state: GameState, pegIndex: number, captured: boolean) {
+  /** Every AI sees the peg the last pick turned face up (src/engine/driver.ts). */
+  function observeLastPick(state: GameState) {
     const ais = getState().ais;
-    if (Object.keys(ais).length === 0) return;
-    const peg = state.pegs[pegIndex];
-    if (!peg) return;
-    const next: Record<string, AiState> = {};
-    for (const [id, ai] of Object.entries(ais)) {
-      // A captured peg leaves the board: the AI must DROP it, not file it away
-      // as somewhere worth tapping again.
-      next[id] = observe(ai, { turn: state.turn, pegIndex, color: peg.color, captured });
-    }
-    setState({ ais: next });
+    const next = observePick(ais, state);
+    if (next !== ais) setState({ ais: next });
   }
 
-  /**
-   * Fresh brains for a board, each memorising the opening reveal at its own
-   * difficulty's rate. Every new board gets new brains — memory is indexed by
-   * peg index, so a sudden-death mini board would otherwise be played with
-   * confident, entirely wrong memories of the board it replaced.
-   */
+  /** Fresh brains for a board, drawn from the store's AI rng (src/engine/driver.ts). */
   function freshBrains(state: GameState): Record<string, AiState> {
-    const ais: Record<string, AiState> = {};
-    for (const p of state.config.players) {
-      if (p.kind !== 'ai') continue;
-      // `state.turn` keeps counting across a sudden-death board, so the reveal
-      // must be stamped with it — stamping turn 0 would leave the AI's fresh
-      // memories looking decades old and every tier near-blind.
-      const res = observeInitialReveal(createAi(p.difficulty ?? 'fox'), state.pegs, rng, state.turn);
-      rng = res.rng;
-      ais[p.id] = res.ai;
-    }
-    return ais;
+    const res = brainsFor(state, rng);
+    rng = res.rng;
+    return res.ais;
   }
 
   return {
@@ -355,10 +320,10 @@ export const useGame = create<GameStore>((setState, getState) => {
 
       if (action.type === 'PICK' && next.lastMove) {
         const move = next.lastMove;
-        observeReveal(next, move.pegIndex, move.matched);
+        observeLastPick(next);
         nonce += 1;
         setState({ feedback: { kind: move.matched ? 'match' : 'miss', pegIndex: move.pegIndex, nonce } });
-        busyFor(move.matched ? timing.matchTotal : timing.missTotal, () => {
+        busyFor(resultMs(move.matched), () => {
           setState({ feedback: null });
           getState().dispatch({ type: 'RESULT_DONE' });
         });

@@ -5,6 +5,7 @@
  */
 import { PEG_HEX, PEG_RIM } from '../ui/art/palette';
 
+import { FLOW } from '../engine/timing';
 import type { PegColor } from '../engine/types';
 
 /** A peg colour as the UI frames it: fill and rim (its name is in src/i18n). */
@@ -131,14 +132,13 @@ export const type = {
   caption: { fontSize: 13, lineHeight: 18, fontWeight: '600' },
 } as const;
 
-/** Animation durations (PLAN.md section 2). */
+/** Animation durations (PLAN.md section 2). The ones that pace the game
+ *  itself (tumble, match, miss, the computer's roll) come from the engine,
+ *  which the room server shares (src/engine/timing.ts). */
 export const timing = {
   flip: 250,
   flipStagger: 12,
-  dieTumble: 600,
-  matchTotal: 850,
-  missTotal: 1400,
-  aiRollDelay: 400,
+  ...FLOW,
   aiThinkMin: 700,
   aiThinkMax: 1300,
   bannerSlide: 260,
