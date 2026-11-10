@@ -26,7 +26,9 @@
         "image": "macos-sequoia-15.6-xcode-26.2"
       },
       "env": {
-        "EXPO_PUBLIC_COUNTS_URL": "https://app-counts.vivekananda-archive.workers.dev/c"
+        "EXPO_PUBLIC_COUNTS_URL": "https://app-counts.vivekananda-archive.workers.dev/c",
+        "EXPO_PUBLIC_ROOMS_URL": "wss://color-catch-rooms.vivekananda-archive.workers.dev/ws",
+        "EXPO_PUBLIC_WEB_URL": "https://colorcatch.pages.dev"
       }
     }
   },
