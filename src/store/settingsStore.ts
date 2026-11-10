@@ -30,7 +30,7 @@ export interface SettingsStore extends Settings {
   hydrated: boolean;
   hydrate: () => Promise<void>;
   set: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
-  toggle: (key: 'soundOn' | 'showShapes' | 'bonusTurnOnMatch' | 'kidMode') => void;
+  toggle: (key: 'soundOn' | 'showShapes' | 'bonusTurnOnMatch' | 'kidMode' | 'reactionsOn') => void;
   /** Next free animal for `seat` (see `nextAvatars`; default: all seats in play). */
   cycleAvatar: (seat: number, opts?: CycleOptions) => void;
   /** Store a seat's typed name, cleaned (see `cleanName`). '' = the animal. */

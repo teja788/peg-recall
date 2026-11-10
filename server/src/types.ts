@@ -75,6 +75,8 @@ export interface Stats {
   gamesFinished: number;
   rematches: number;
   standInMoves: number;
+  /** reactions passed on (preset only; which ones is not counted) */
+  reactions: number;
   needsUnlock: number;
   roomsExpired: number;
 }
@@ -87,6 +89,7 @@ export function newStats(): Stats {
     gamesFinished: 0,
     rematches: 0,
     standInMoves: 0,
+    reactions: 0,
     needsUnlock: 0,
     roomsExpired: 0,
   };

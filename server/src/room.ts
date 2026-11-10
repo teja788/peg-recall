@@ -45,7 +45,7 @@ import type {
   RoomStatus,
   ServerMessage,
 } from '../../src/online/protocol';
-import { BREAK_MS, MISSED_LIMIT, RESUME_MS } from '../../src/online/protocol';
+import { BREAK_MS, MISSED_LIMIT, REACT_COOLDOWN_MS, RESUME_MS, type ReactionId } from '../../src/online/protocol';
 import { AVATAR_CYCLE } from '../../src/store/settingsModel';
 import { randomToken, randomUint32, type Clock, type Conn, type ServerConfig, type Stats } from './types';
 
@@ -74,6 +74,8 @@ export interface Seat {
   stepped?: boolean;
   /** has had their break this game */
   breakUsed?: boolean;
+  /** when their last reaction went out (REACT_COOLDOWN_MS between them) */
+  reactedAt?: number;
 }
 
 export interface RoomDeps {
@@ -375,6 +377,17 @@ export class Room {
     this.schedule();
     this.broadcastRoom();
     return null;
+  }
+
+  /** A preset reaction, passed on to everyone else in the room; nothing is
+   *  kept. Faster than one per REACT_COOLDOWN_MS is dropped without a word. */
+  react(by: Conn, id: ReactionId): void {
+    const seat = this.seatOf(by);
+    const now = this.deps.clock.now();
+    if (!seat || now - (seat.reactedAt ?? -Infinity) < REACT_COOLDOWN_MS) return;
+    seat.reactedAt = now;
+    this.deps.stats.reactions++;
+    for (const s of this.seats) if (s.conn && s !== seat) this.send(s.conn, { type: 'react', seat: seat.id, id });
   }
 
   /** Close the room: everyone still here is told why. */

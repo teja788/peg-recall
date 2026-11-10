@@ -10,6 +10,7 @@ import { Avatar } from '@art';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
 import { Linking, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { Difficulty } from '../../src/engine/types';
 import { tr } from '../../src/i18n';
@@ -23,6 +24,7 @@ import { useTheme } from '../../src/theme';
 import { Chip } from '../../src/ui/controls';
 import { shareMessage } from '../../src/ui/GameOverSheet';
 import { Card, Note, OnlineFrame, StatusLine, WideButton, endedText, errorText, seatName } from '../../src/ui/online';
+import { ReactButton, ReactionBubbles } from '../../src/ui/reactions';
 import { PillButton } from '../../src/ui/StatsCard';
 
 const BOTS: Difficulty[] = ['bunny', 'fox', 'owl'];
@@ -32,6 +34,7 @@ export default function RoomScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ code?: string }>();
   const code = normalizeCode(params.code);
+  const insets = useSafeAreaInsets();
   const status = useRoom((s) => s.status);
   const room = useRoom((s) => s.room);
   const mySeat = useRoom((s) => s.seat);
@@ -100,7 +103,12 @@ export default function RoomScreen() {
   };
 
   return (
-    <OnlineFrame title={tr('online.waiting')} onBack={home}>
+    <OnlineFrame
+      title={tr('online.waiting')}
+      onBack={home}
+      action={mySeat ? <ReactButton /> : null}
+      overlay={<ReactionBubbles side="right" inset={16 + insets.right} top={insets.top + 68} />}
+    >
       <StatusLine status={status} />
       {error ? <Note text={errorText(error)} /> : null}
 

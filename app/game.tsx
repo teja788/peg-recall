@@ -56,6 +56,7 @@ import {
 import { TRAY_GAP, tableLayout } from '../src/ui/gameLayout';
 import { isolate, playerLabel } from '../src/ui/names';
 import { AwayBar, BreakOverlay, seatName, useTurnCountdown } from '../src/ui/online';
+import { ReactButton, ReactionBubbles } from '../src/ui/reactions';
 import { MISSED_WARN, NUDGE_MS, TURN_MS } from '../src/online/protocol';
 import { tr, trn } from '../src/i18n';
 
@@ -267,6 +268,9 @@ export default function GameScreen() {
   /** measured height of the box the banner + board + die share (stacked
    *  layout), tagged with the window size it was measured at */
   const [tableBox, setTableBox] = useState({ key: '', h: 0 });
+  /** stacked layout: the height of the top row (pause + trays), so the 💬 button
+   *  and the reaction bubbles can sit just under it without moving the board */
+  const [topRowH, setTopRowH] = useState(0);
 
   /* ------------------------------------------------- lifecycle */
 
@@ -924,6 +928,21 @@ export default function GameScreen() {
         </Text>
       </View>
     ) : null}
+    {/* online: reactions. Stacked, the 💬 sits under the pause button (above
+        the game-over sheet too); split, it is in the button row */}
+    {online && remote ? (
+      // beside the 💬 button: in the gap above the turn banner
+      <ReactionBubbles
+        side="left"
+        inset={padL + (stacked ? t.spacing.md + L.px(48) + t.spacing.sm : L.edge)}
+        top={insets.top + (stacked ? topRowH + t.spacing.sm : L.edge + L.px(48) + t.spacing.sm) + L.px(4)}
+      />
+    ) : null}
+    {online && remote && stacked && topRowH > 0 && !menu && !breakInfo ? (
+      <View style={{ position: 'absolute', top: insets.top + topRowH + t.spacing.sm, left: padL + t.spacing.md }}>
+        <ReactButton size={L.px(48)} />
+      </View>
+    ) : null}
     </>
   );
 
@@ -936,6 +955,7 @@ export default function GameScreen() {
     const buttons = (
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         {pauseButton}
+        {online && remote ? <ReactButton size={L.px(48)} /> : null}
         {soundButton}
       </View>
     );
@@ -993,6 +1013,7 @@ export default function GameScreen() {
     <View style={{ flex: 1, paddingTop: insets.top, zIndex: 0 }}>
       {/* trays */}
       <View
+        onLayout={(e) => setTopRowH(e.nativeEvent.layout.height)}
         style={{
           flexDirection: 'row',
           alignItems: 'center',

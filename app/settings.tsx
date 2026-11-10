@@ -13,6 +13,7 @@ import {
   playable,
   useSettings,
 } from '../src/store/settings';
+import { onlineEnabled } from '../src/online/config';
 import { buy } from '../src/store/purchases';
 import { remindersSupported, turnOnReminders } from '../src/store/reminders';
 import { hasStore } from '../src/store/storefront';
@@ -39,6 +40,7 @@ export default function SettingsScreen() {
   const showShapes = useSettings((s) => s.showShapes);
   const bonusTurnOnMatch = useSettings((s) => s.bonusTurnOnMatch);
   const kidMode = useSettings((s) => s.kidMode);
+  const reactionsOn = useSettings((s) => s.reactionsOn);
   const boardSize = useSettings((s) => playable(s).boardSize);
   const difficulty = useSettings((s) => playable(s).difficulty);
   const unlocked = useSettings((s) => s.unlocked);
@@ -108,6 +110,14 @@ export default function SettingsScreen() {
           value={kidMode}
           onToggle={() => toggle('kidMode')}
         />
+        {onlineEnabled ? (
+          <ToggleRow
+            title={tr('settings.reactions')}
+            subtitle={tr('settings.reactionsHint')}
+            value={reactionsOn}
+            onToggle={() => toggle('reactionsOn')}
+          />
+        ) : null}
         {remindersSupported ? <ReminderRow /> : null}
 
         <Text style={{ ...t.type.label, color: t.c.onBackdropMuted, marginTop: t.spacing.md }}>

@@ -19,10 +19,12 @@ import type {
   EndReason,
   ErrorCode,
   Intent,
+  ReactionId,
   RoomInfo,
   RoomSettings,
   ServerMessage,
 } from '../online/protocol';
+import { REACT_COOLDOWN_MS } from '../online/protocol';
 import type { KeyValueStorage } from './storage';
 
 export const ROOM_KEY = 'pegrecall.room.v1';
@@ -73,6 +75,10 @@ export interface RoomStore {
   ended: EndReason | null;
   /** server time of the board's last step: a person's turn clock runs from here */
   lastAt: number | null;
+  /** the latest reaction in this room, this device's own included; `n` counts up */
+  lastReaction: { n: number; seat: string; id: ReactionId } | null;
+  /** seats whose reactions this device does not show (for this room) */
+  muted: string[];
 
   create: (settings: RoomSettings, name: string | undefined, avatar: AvatarId, unlocked: boolean) => void;
   join: (code: string, name: string | undefined, avatar: AvatarId) => void;
@@ -90,6 +96,9 @@ export interface RoomStore {
   endBreak: () => void;
   /** "Step away" (true) and "I'm back" (false) */
   stepAway: (away: boolean) => void;
+  /** Send a preset reaction; false while the last one is still cooling down. */
+  react: (id: ReactionId) => boolean;
+  toggleMute: (seat: string) => void;
   /** Leave the room for good and hang up. */
   leave: () => void;
   /** Forget an ended room or a refusal the screen has shown. */
@@ -110,6 +119,8 @@ export function createRoomStore(deps: RoomDeps) {
     let token: string | null = null;
     /** sent as soon as the line is up (create / join) */
     let pending: ClientMessage | null = null;
+    /** when this device last sent a reaction (REACT_COOLDOWN_MS) */
+    let reactedAt = -Infinity;
     /** a resume is out: a "notFound" now means the room itself is gone */
     let resuming = false;
 
@@ -173,6 +184,11 @@ export function createRoomStore(deps: RoomDeps) {
           setState({ lastAt: m.at });
           deps.game.remoteSnapshot(m.state, m.seq, link());
           return;
+        case 'react': {
+          const n = (getState().lastReaction?.n ?? 0) + 1;
+          setState({ lastReaction: { n, seat: m.seat, id: m.id } });
+          return;
+        }
         case 'action':
           setState({ lastAt: m.at });
           deps.game.remoteAction(m.seq, m.action, m.hash);
@@ -210,6 +226,8 @@ export function createRoomStore(deps: RoomDeps) {
       error: null,
       ended: null,
       lastAt: null,
+      lastReaction: null,
+      muted: [],
 
       create: (settings, name, avatar, unlocked) =>
         request({ type: 'create', settings, ...(name ? { name } : {}), avatar, unlocked }),
@@ -251,6 +269,19 @@ export function createRoomStore(deps: RoomDeps) {
       takeBreak: () => request({ type: 'break' }),
       endBreak: () => request({ type: 'endBreak' }),
       stepAway: (away) => request({ type: 'away', away }),
+      react: (id) => {
+        const { seat, lastReaction } = getState();
+        const t = (deps.now ?? Date.now)();
+        if (!seat || !conn || t - reactedAt < REACT_COOLDOWN_MS) return false;
+        reactedAt = t;
+        conn.send({ type: 'react', id });
+        setState({ lastReaction: { n: (lastReaction?.n ?? 0) + 1, seat, id } });
+        return true;
+      },
+      toggleMute: (seat) => {
+        const muted = getState().muted;
+        setState({ muted: muted.includes(seat) ? muted.filter((s) => s !== seat) : [...muted, seat] });
+      },
 
       leave: () => {
         conn?.send({ type: 'leave' });
@@ -258,7 +289,7 @@ export function createRoomStore(deps: RoomDeps) {
         conn = null;
         pending = null;
         save(null, null);
-        setState({ status: 'idle', code: null, seat: null, room: null, error: null });
+        setState({ status: 'idle', code: null, seat: null, room: null, error: null, muted: [], lastReaction: null });
       },
 
       clear: () => setState({ error: null, ended: null }),

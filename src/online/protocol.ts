@@ -40,6 +40,25 @@ export const MISSED_LIMIT = 3;
 export const BREAK_MS = 2 * 60_000;
 /** then a 3-2-1 before play goes on */
 export const RESUME_MS = 3_000;
+
+/** Reactions: preset only, sent as ids, so each device shows them in its own
+ *  language and nobody can type anything (no text to filter). */
+export const REACTION_EMOJI = {
+  thumbs: '👍',
+  smile: '😄',
+  wow: '😮',
+  party: '🎉',
+  heart: '❤️',
+  think: '🤔',
+} as const;
+export const REACTION_PHRASES = ['hi', 'luck', 'nice', 'close', 'yourTurn', 'gg', 'again', 'thanks'] as const;
+export type ReactionId = keyof typeof REACTION_EMOJI | (typeof REACTION_PHRASES)[number];
+export const REACTION_IDS: readonly ReactionId[] = [
+  ...(Object.keys(REACTION_EMOJI) as (keyof typeof REACTION_EMOJI)[]),
+  ...REACTION_PHRASES,
+];
+/** one reaction per person per this long; faster ones are dropped */
+export const REACT_COOLDOWN_MS = 2_000;
 /** Largest message either side accepts, in UTF-16 code units of the raw JSON. */
 export const MAX_MESSAGE_CHARS = 2048;
 export const MAX_SEATS = 4;
@@ -110,6 +129,7 @@ export type ClientMessage =
   | { type: 'endBreak' }
   /** "Step away" (away: true) and "I'm back" (away: false) */
   | { type: 'away'; away: boolean }
+  | { type: 'react'; id: ReactionId }
   | { type: 'leave' }
   | { type: 'ping'; t: number };
 
@@ -159,7 +179,9 @@ export type ServerMessage =
   | { type: 'snapshot'; state: GameState; seq: number; at: number }
   | { type: 'error'; code: ErrorCode }
   | { type: 'ended'; reason: EndReason }
-  | { type: 'pong'; t: number; serverTime: number };
+  | { type: 'pong'; t: number; serverTime: number }
+  /** someone else's reaction (never echoed to its sender) */
+  | { type: 'react'; seat: string; id: ReactionId };
 
 /* ------------------------------------------------------------- helpers */
 
@@ -264,6 +286,8 @@ export function parseClientMessage(raw: unknown): ClientMessage | null {
       return { type: m.type };
     case 'away':
       return typeof m.away === 'boolean' ? { type: 'away', away: m.away } : null;
+    case 'react':
+      return oneOf(REACTION_IDS, m.id) ? { type: 'react', id: m.id } : null;
     case 'intent': {
       const action = intentOf(m.action);
       return action ? { type: 'intent', action } : null;
@@ -310,6 +334,8 @@ export function parseServerMessage(raw: unknown): ServerMessage | null {
       return typeof m.reason === 'string' ? (m as ServerMessage) : null;
     case 'pong':
       return typeof m.t === 'number' && typeof m.serverTime === 'number' ? (m as ServerMessage) : null;
+    case 'react':
+      return typeof m.seat === 'string' && oneOf(REACTION_IDS, m.id) ? (m as ServerMessage) : null;
     default:
       return null;
   }

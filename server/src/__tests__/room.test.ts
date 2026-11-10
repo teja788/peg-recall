@@ -577,3 +577,23 @@ test('step away: the computer plays their turns at its pace, never counted as mi
   assert.equal(host.actions.at(-1)?.by, 'p2');
   assert.equal(host.actions.at(-1)?.standIn, undefined);
 });
+
+test('reactions: passed on to the others only, preset ids only, one per 2 s per person', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 2);
+  const [dadi, ravi] = guests;
+  const reacts = (d: Device) => d.messages.filter((m) => m.type === 'react');
+  dadi.say({ type: 'react', id: 'party' });
+  dadi.say({ type: 'react', id: 'gg' }); // too soon: dropped
+  for (const d of [host, dadi, ravi]) d.read();
+  assert.deepEqual(reacts(host), [{ type: 'react', seat: 'p2', id: 'party' }]);
+  assert.deepEqual(reacts(ravi), [{ type: 'react', seat: 'p2', id: 'party' }]);
+  assert.equal(reacts(dadi).length, 0, 'never echoed to its sender');
+  clock.advance(2_000);
+  dadi.say({ type: 'react', id: 'gg' });
+  host.read();
+  assert.equal(reacts(host).length, 2);
+  dadi.say({ type: 'react', id: 'you are bad' } as never); // not a preset: refused by the parser
+  host.read();
+  assert.equal(reacts(host).length, 2, 'only preset ids get through');
+});

@@ -203,6 +203,7 @@ test('A18: a v1 blob (no version, no names) hydrates with every field intact', (
     reminder: false,
     reminderAsked: false,
     lastDailyAt: 0,
+    reactionsOn: true,
   });
   assert.equal(SETTINGS_KEY, 'pegrecall.settings.v1', 'no key migration');
 });

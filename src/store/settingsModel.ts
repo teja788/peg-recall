@@ -18,6 +18,8 @@ export interface Settings {
   difficulty: Difficulty;
   bonusTurnOnMatch: boolean;
   kidMode: boolean;
+  /** other players' reactions in online games (shown, or quietly dropped) */
+  reactionsOn: boolean;
   lastMode: GameMode;
   /** Seat avatars, index 0..3. Seat 1 is the computer in `ai` mode. */
   avatars: AvatarId[];
@@ -46,6 +48,7 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
+  reactionsOn: true,
   soundOn: true,
   showShapes: false,
   boardSize: 'classic',
@@ -268,6 +271,7 @@ export function sanitize(raw: unknown): Partial<Settings> {
   if (typeof r.showShapes === 'boolean') out.showShapes = r.showShapes;
   if (typeof r.bonusTurnOnMatch === 'boolean') out.bonusTurnOnMatch = r.bonusTurnOnMatch;
   if (typeof r.kidMode === 'boolean') out.kidMode = r.kidMode;
+  if (typeof r.reactionsOn === 'boolean') out.reactionsOn = r.reactionsOn;
   if (typeof r.unlocked === 'boolean') out.unlocked = r.unlocked;
   if (typeof r.moreOffered === 'boolean') out.moreOffered = r.moreOffered;
   if (typeof r.reminder === 'boolean') out.reminder = r.reminder;
@@ -316,6 +320,7 @@ export function persistable(s: Settings): PersistedSettings {
     difficulty: s.difficulty,
     bonusTurnOnMatch: s.bonusTurnOnMatch,
     kidMode: s.kidMode,
+    reactionsOn: s.reactionsOn,
     lastMode: s.lastMode,
     avatars: s.avatars,
     names: s.names,

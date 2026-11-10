@@ -258,6 +258,10 @@ export class Hub {
       case 'away':
         return st.room ? this.maybeError(conn, st.room.stepAway(conn, m.away)) : this.error(conn, 'bad');
 
+      case 'react':
+        st.room?.react(conn, m.id);
+        return;
+
       case 'leave':
         this.leaveRoom(conn, st);
         return;

@@ -25,8 +25,11 @@ export function OnlineFrame({
   onBack,
   children,
   overlay,
+  action,
 }: {
   title: string;
+  /** a button at the end of the title row (the waiting room's 💬) */
+  action?: React.ReactNode;
   /** default: back, or Home when there is nowhere to go back to */
   onBack?: () => void;
   children: React.ReactNode;
@@ -51,9 +54,10 @@ export function OnlineFrame({
         }}
       >
         <IconButton glyph={chevron('‹')} label={tr('settings.close')} onPress={back} tone="filled" />
-        <Text accessibilityRole="header" style={{ ...t.type.title, color: t.c.onBackdrop, flexShrink: 1 }}>
+        <Text accessibilityRole="header" style={{ ...t.type.title, color: t.c.onBackdrop, flexShrink: 1, flexGrow: 1 }}>
           {title}
         </Text>
+        {action}
       </View>
       <ScrollView
         keyboardShouldPersistTaps="handled"

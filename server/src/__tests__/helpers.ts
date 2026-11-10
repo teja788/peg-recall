@@ -122,6 +122,11 @@ export class Device {
     return this;
   }
 
+  /** everything the server sent this connection */
+  get messages(): ServerMessage[] {
+    return this.conn.inbox;
+  }
+
   /** The connection drops (no leave message). */
   drop() {
     this.hub.closed(this.conn);
