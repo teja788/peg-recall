@@ -451,3 +451,47 @@ test('a finished game’s room closes 15 min after the end', () => {
   host.read();
   assert.equal(host.ended, 'expired');
 });
+
+test('missed turns in a row: a warning at 2, the computer takes the seat at 3; a move resets the count', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1, { timer: 'quick' });
+  const dadi = guests[0];
+  host.say({ type: 'start' });
+  clock.advance(4_100); // Small board reveal: 4 s
+  /** let time pass in steps, with the host playing their own turns at once */
+  const runUntil = (done: () => boolean, limitMs = 10 * 60_000) => {
+    for (let t = 0; t < limitMs && !done(); t += 250) {
+      clock.advance(250);
+      host.read();
+      dadi.read();
+      if (host.state && activePlayerSpec(host.state).id === 'p1') {
+        if (host.state.phase === 'roll') host.say({ type: 'intent', action: { type: 'ROLL' } });
+        else if (host.state.phase === 'pick') {
+          const peg = host.state.pegs.find((p) => p.state === 'hidden');
+          if (peg) host.say({ type: 'intent', action: { type: 'PICK', pegIndex: peg.index } });
+        }
+      }
+    }
+  };
+  const missed = () => host.room?.seats.find((s) => s.id === 'p2')?.missed ?? 0;
+
+  runUntil(() => missed() === 1);
+  assert.equal(missed(), 1, 'one turn ran out (its roll and pick count once)');
+  // Dadi plays her next turn herself: the count starts again
+  runUntil(() => !!dadi.state && activePlayerSpec(dadi.state).id === 'p2' && dadi.state.phase === 'roll');
+  dadi.say({ type: 'intent', action: { type: 'ROLL' } });
+  host.read();
+  dadi.read();
+  assert.equal(missed(), 0, 'a move of her own resets it');
+
+  runUntil(() => missed() === 2);
+  assert.equal(dadi.room?.seats.find((s) => s.id === 'p2')?.missed, 2, 'Dadi sees the warning count');
+  assert.equal(dadi.ended, null, 'still in the game at 2');
+  runUntil(() => dadi.ended !== null);
+  assert.equal(dadi.ended, 'idle', 'the third missed turn takes her seat');
+  const p2 = host.room?.seats.find((s) => s.id === 'p2');
+  assert.equal(p2?.online, false);
+  // the computer finishes her seat: the game still ends
+  runUntil(() => host.state?.phase === 'gameOver', 30 * 60_000);
+  assert.equal(host.state?.phase, 'gameOver');
+});

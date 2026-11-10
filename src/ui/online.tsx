@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { ConnStatus } from '../online/client';
 import type { EndReason, ErrorCode } from '../online/protocol';
 import { chevron, tr } from '../i18n';
+import { serverNow } from '../store/room';
 import { NAME_INPUT_MAX, animalName, useSettings } from '../store/settings';
 import { useTheme } from '../theme';
 import { Backdrop } from './Backdrop';
@@ -211,6 +212,7 @@ export function endedText(reason: EndReason): string {
   if (reason === 'removed') return tr('online.ended.removed');
   if (reason === 'serverRestart') return tr('online.ended.restart');
   if (reason === 'replaced') return tr('online.ended.replaced');
+  if (reason === 'idle') return tr('online.ended.idle');
   return tr('online.ended.closed');
 }
 
@@ -244,3 +246,18 @@ export function seatName(seat: { name?: string; avatar: Parameters<typeof animal
   return seat.name || animalName(seat.avatar);
 }
 
+
+/** Whole seconds left before `deadline` (server time), counting down while
+ *  inside the last `windowMs`; null outside it. Re-renders only then. */
+export function useTurnCountdown(deadline: number | null, windowMs: number): number | null {
+  const [, tick] = React.useState(0);
+  const left = deadline == null ? null : deadline - serverNow();
+  const showing = left != null && left > 0 && left <= windowMs;
+  React.useEffect(() => {
+    if (deadline == null || (left != null && left <= 0)) return;
+    // wake when the window opens, then every half second inside it
+    const id = setTimeout(() => tick((n) => n + 1), showing ? 500 : Math.max(50, left! - windowMs));
+    return () => clearTimeout(id);
+  });
+  return showing ? Math.ceil(left / 1000) : null;
+}

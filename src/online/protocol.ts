@@ -28,6 +28,14 @@ import { cleanName } from '../store/settingsModel';
 export const PROTOCOL = 1;
 /** Bumped when the engine's rules change what a game does: a room never mixes rules. */
 export const RULES_VERSION = 1;
+/** How long a person who is here has for a roll or a pick before the computer plays it. */
+export const TURN_MS = { relaxed: 60_000, quick: 20_000 } as const;
+/** The countdown shows on the mover's screen for this last part of the turn. */
+export const NUDGE_MS = { relaxed: 30_000, quick: 10_000 } as const;
+/** Turns in a row a person who is here lets run out: a warning at the first
+ *  number, and at the second the computer takes their seat for the game. */
+export const MISSED_WARN = 2;
+export const MISSED_LIMIT = 3;
 /** Largest message either side accepts, in UTF-16 code units of the raw JSON. */
 export const MAX_MESSAGE_CHARS = 2048;
 export const MAX_SEATS = 4;
@@ -56,6 +64,8 @@ export interface SeatInfo {
   difficulty?: Difficulty;
   /** a person with a live connection (computer seats are always online) */
   online: boolean;
+  /** turns in a row this person let run out while here (shown at MISSED_WARN) */
+  missed?: number;
 }
 
 export interface RoomInfo {
@@ -102,8 +112,9 @@ export type ErrorCode =
   | 'bad';
 
 /** `replaced`: the same seat was taken up on another connection (a second
- *  window, a newer network): this one stops and does not come back. */
-export type EndReason = 'expired' | 'hostClosed' | 'removed' | 'serverRestart' | 'replaced';
+ *  window, a newer network): this one stops and does not come back.
+ *  `idle`: MISSED_LIMIT turns in a row ran out; the computer has the seat. */
+export type EndReason = 'expired' | 'hostClosed' | 'removed' | 'serverRestart' | 'replaced' | 'idle';
 
 export type ServerMessage =
   | { type: 'welcome'; serverTime: number }

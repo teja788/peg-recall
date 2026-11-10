@@ -71,6 +71,8 @@ export interface RoomStore {
   error: ErrorCode | null;
   /** why this device is no longer in the room */
   ended: EndReason | null;
+  /** server time of the board's last step: a person's turn clock runs from here */
+  lastAt: number | null;
 
   create: (settings: RoomSettings, name: string | undefined, avatar: AvatarId, unlocked: boolean) => void;
   join: (code: string, name: string | undefined, avatar: AvatarId) => void;
@@ -159,12 +161,15 @@ export function createRoomStore(deps: RoomDeps) {
           setState({ room: m.room });
           return;
         case 'started':
+          setState({ lastAt: m.at });
           deps.game.remoteStart(m.config, link());
           return;
         case 'snapshot':
+          setState({ lastAt: m.at });
           deps.game.remoteSnapshot(m.state, m.seq, link());
           return;
         case 'action':
+          setState({ lastAt: m.at });
           deps.game.remoteAction(m.seq, m.action, m.hash);
           return;
         case 'error':
@@ -199,6 +204,7 @@ export function createRoomStore(deps: RoomDeps) {
       room: null,
       error: null,
       ended: null,
+      lastAt: null,
 
       create: (settings, name, avatar, unlocked) =>
         request({ type: 'create', settings, ...(name ? { name } : {}), avatar, unlocked }),

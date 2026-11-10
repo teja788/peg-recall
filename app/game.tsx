@@ -55,7 +55,8 @@ import {
 } from '../src/ui/feedback';
 import { TRAY_GAP, tableLayout } from '../src/ui/gameLayout';
 import { isolate, playerLabel } from '../src/ui/names';
-import { seatName } from '../src/ui/online';
+import { seatName, useTurnCountdown } from '../src/ui/online';
+import { MISSED_WARN, NUDGE_MS, TURN_MS } from '../src/online/protocol';
 import { tr, trn } from '../src/i18n';
 
 import type { GameState, Peg, PegColor } from '../src/engine/types';
@@ -219,6 +220,7 @@ export default function GameScreen() {
   const roomInfo = useRoom((s) => s.room);
   const roomStatus = useRoom((s) => s.status);
   const roomEnded = useRoom((s) => s.ended);
+  const lastAt = useRoom((s) => s.lastAt);
   /** online: the room menu is up (the board does not stop for it) */
   const [menu, setMenu] = useState(false);
   const unlocked = useSettings((s) => s.unlocked);
@@ -599,6 +601,12 @@ export default function GameScreen() {
   // what the die landed on, the result. Silent while paused or leaving.
   useAnnouncement(paused || leaving ? '' : say);
 
+  // online, my roll or pick: the server's clock on it, shown near its end
+  const timer = roomInfo?.settings.timer ?? 'relaxed';
+  const myMove =
+    online && !!view && !!remote && (view.phase === 'roll' || view.phase === 'pick') && activePlayerSpec(view).id === remote.seat;
+  const secondsLeft = useTurnCountdown(myMove && lastAt != null ? lastAt + TURN_MS[timer] : null, NUDGE_MS[timer]);
+
   if (!view) {
     return (
       <Backdrop>
@@ -619,13 +627,18 @@ export default function GameScreen() {
   const card = !online && !unlocked && upsell && upsell.key === overKey ? upsell.card : null;
   const hostSeat = roomInfo?.seats.find((x) => x.id === roomInfo.host);
   const awaySeat = roomInfo?.seats.find((x) => x.kind === 'human' && !x.online && x.id !== remote?.seat);
+  const missed = roomInfo?.seats.find((x) => x.id === remote?.seat)?.missed ?? 0;
   const onlineNote = !online
     ? ''
     : roomStatus === 'connecting' || roomStatus === 'reconnecting'
       ? tr('online.reconnecting')
-      : awaySeat
-        ? tr('online.awayLine', { name: seatName(awaySeat) })
-        : '';
+      : [
+          secondsLeft != null ? tr('online.hurry', { time: trn('seconds', secondsLeft) }) : '',
+          missed >= MISSED_WARN ? tr('online.missedWarn') : '',
+          !secondsLeft && awaySeat ? tr('online.awayLine', { name: seatName(awaySeat) }) : '',
+        ]
+          .filter(Boolean)
+          .join('\n');
 
   const trayCount = view.config.players.length;
   const stacked = L.mode === 'stacked';
@@ -843,8 +856,9 @@ export default function GameScreen() {
       <View
         style={{
           position: 'absolute',
-          left: 0,
-          right: 0,
+          // clear of the sound button in the bottom corner
+          left: insets.left + 64,
+          right: insets.right + 64,
           bottom: insets.bottom + t.spacing.sm,
           alignItems: 'center',
           pointerEvents: 'none',
@@ -858,8 +872,9 @@ export default function GameScreen() {
             backgroundColor: 'rgba(0,0,0,0.45)',
             paddingHorizontal: t.spacing.md,
             paddingVertical: 4,
-            borderRadius: 999,
+            borderRadius: 16,
             overflow: 'hidden',
+            textAlign: 'center',
           }}
         >
           {onlineNote}

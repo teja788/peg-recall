@@ -4,6 +4,8 @@
  * Durable Object later, if D3 goes that way) supplies these.
  */
 
+import { TURN_MS } from '../../src/online/protocol';
+
 /** Time and timers. Real in production; a fake one in the tests. */
 export interface Clock {
   now(): number;
@@ -58,7 +60,7 @@ export const DEFAULT_CONFIG: ServerConfig = {
   awayGraceMs: 15_000,
   hostHandoverMs: 30_000,
   idleMs: 90_000,
-  turnMs: { relaxed: 60_000, quick: 20_000 },
+  turnMs: TURN_MS,
   lobbyIdleMs: 30 * 60_000,
   emptyGameMs: 10 * 60_000,
   finishedMs: 15 * 60_000,

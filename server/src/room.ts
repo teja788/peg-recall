@@ -45,6 +45,7 @@ import type {
   RoomStatus,
   ServerMessage,
 } from '../../src/online/protocol';
+import { MISSED_LIMIT } from '../../src/online/protocol';
 import { AVATAR_CYCLE } from '../../src/store/settingsModel';
 import { randomToken, randomUint32, type Clock, type Conn, type ServerConfig, type Stats } from './types';
 
@@ -66,6 +67,9 @@ export interface Seat {
   left?: boolean;
   /** the address fingerprint they joined from (hub.ts), so a removal sticks */
   addr?: string;
+  /** turns in a row they let run out while here, and the last such turn */
+  missed?: number;
+  missedTurn?: number;
 }
 
 export interface RoomDeps {
@@ -134,6 +138,7 @@ export class Room {
         ...(s.name ? { name: s.name } : {}),
         ...(s.difficulty ? { difficulty: s.difficulty } : {}),
         online: s.kind === 'ai' || s.conn !== null,
+        ...(s.missed ? { missed: s.missed } : {}),
       })),
     };
   }
@@ -259,6 +264,7 @@ export class Room {
     if (err) return err;
     // people who left during the last game are gone for this one
     for (const s of this.seats.filter((x) => x.left)) this.seats.splice(this.seats.indexOf(s), 1);
+    for (const s of this.seats) s.missed = s.missedTurn = undefined;
     if (this.seats.length < 2) {
       this.broadcastRoom();
       return 'bad';
@@ -306,7 +312,9 @@ export class Room {
     if (!seat || !s || this.status !== 'playing') return;
     if (activePlayerSpec(s).id !== seat.id) return;
     this.standingIn.delete(seat.id);
-    this.apply(action, seat.id, false);
+    const warned = !!seat.missed;
+    seat.missed = 0;
+    if (this.apply(action, seat.id, false) && warned) this.broadcastRoom();
   }
 
   /** Close the room: everyone still here is told why. */
@@ -424,8 +432,23 @@ export class Room {
     const s = this.state;
     if (!s || activePlayerSpec(s).id !== seat.id) return;
     if (!seat.conn) this.standingIn.add(seat.id);
+    // here, but the turn ran out: counted once per turn (a roll and its pick)
+    const idle = !!seat.conn && seat.missedTurn !== s.turn;
+    if (idle) {
+      seat.missed = (seat.missed ?? 0) + 1;
+      seat.missedTurn = s.turn;
+    }
     if (s.phase === 'roll') this.apply({ type: 'ROLL' }, seat.id, true);
     else if (s.phase === 'pick') this.pickFor(seat.id, true);
+    if (!idle || this.closed) return;
+    if (seat.missed! >= MISSED_LIMIT && seat.conn) {
+      // the computer keeps the seat for the rest of this game
+      this.send(seat.conn, { type: 'ended', reason: 'idle' });
+      this.deps.release(seat.conn);
+      this.dropPerson(seat);
+    } else {
+      this.broadcastRoom();
+    }
   }
 
   private pickFor(id: string, standIn: boolean): void {

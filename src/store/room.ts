@@ -40,6 +40,11 @@ export const useRoom = createRoomStore({
   },
 });
 
+/** Server time now (this device's clock corrected by the measured offset). */
+export function serverNow(): number {
+  return client?.serverNow() ?? Date.now();
+}
+
 AppState.addEventListener('change', (next) => {
   if (next === 'active') client?.wake();
 });
