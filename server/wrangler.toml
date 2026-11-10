@@ -17,7 +17,7 @@ new_sqlite_classes = ["RoomsObject"]
 
 [vars]
 # the web game's address(es), comma-separated, e.g. "https://colorcatch.pages.dev"
-PUBLIC_ORIGINS = ""
+PUBLIC_ORIGINS = "https://colorcatch.pages.dev"
 # "on" holds free hosts to the free limits (decision D4); keep it equal to the
 # web/app build's EXPO_PUBLIC_HOST_LIMITS
 HOST_LIMITS = "off"

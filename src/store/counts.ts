@@ -135,6 +135,8 @@ export function createCounts(o: CountsOptions): Counts {
         method: 'POST',
         headers: { 'content-type': 'text/plain' },
         body: JSON.stringify({ app: o.app, days: sent }),
+        // a browser posts as the page closes; keepalive lets it finish
+        keepalive: true,
       });
       // 400: the server will never take these (too old, say), so let them go
       if (!res.ok && res.status !== 400) return;

@@ -118,6 +118,8 @@ const shot = (page, name) => page.screenshot({ path: path.join(SHOTS, `online-${
 
 async function device(name) {
   const context = await browser.newContext({ locale: 'en-US', viewport: { width: 390, height: 844 } });
+  // play counts never reach the live Worker from a test run (they would count as players)
+  await context.route(/app-counts/, (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }));
   const page = await context.newPage();
   page.errors = [];
   page.on('pageerror', (e) => page.errors.push(e.message));
