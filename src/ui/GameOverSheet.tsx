@@ -23,6 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { GameState, PlayerSpec } from '../engine/types';
 import { tr, trn } from '../i18n';
+import { count } from '../store/analytics';
 import { dailyMilestone, useStats } from '../store/stats';
 import { remindersSupported, turnOnReminders } from '../store/reminders';
 import { useSettings } from '../store/settings';
@@ -82,6 +83,7 @@ export function shareUrl(): string {
  * navigator.share; a browser without it gets WhatsApp's own link instead.
  */
 export async function shareMessage(message: string): Promise<void> {
+  count({ share: 1 });
   try {
     await Share.share({ message });
   } catch (e) {

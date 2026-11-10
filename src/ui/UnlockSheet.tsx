@@ -29,6 +29,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { tr } from '../i18n';
+import { count } from '../store/analytics';
 import { buy, loadPrices, restore } from '../store/purchases';
 import { UNLOCK_ID, type BuyResult, type ProductId } from '../store/purchasesModel';
 import { useSettings } from '../store/settings';
@@ -74,6 +75,12 @@ export function UnlockSheet({
   const [gate, setGate] = useState<'buy' | 'restore' | null>(restoring ? 'restore' : null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+
+  // opened from a locked item or "Get the full game" (not for a restore)
+  useEffect(() => {
+    if (!restoring) count({ 'unlock.open': 1 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const enter = useSharedValue(0);
   useEffect(() => {

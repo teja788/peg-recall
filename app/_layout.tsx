@@ -5,6 +5,7 @@ import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { startAnalytics } from '../src/store/analyticsStart';
 import { startPurchases } from '../src/store/purchases';
 import { syncReminders } from '../src/store/reminders';
 import { useSettings } from '../src/store/settings';
@@ -22,6 +23,9 @@ export default function RootLayout() {
     // replayed App Store transactions, and "already owns the unlock?" (quietly)
     startPurchases();
   }, [hydrate]);
+
+  // anonymous play counts: time in the app, and a post when it opens or closes
+  useEffect(() => startAnalytics(), []);
 
   // the daily reminder: rescheduled at launch (so its board numbers stay
   // right), when it is turned on or off, and after each daily board

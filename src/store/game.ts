@@ -27,6 +27,7 @@ import { stateHash } from '../online/hash';
 import type { Intent } from '../online/protocol';
 import { timing } from '../theme/tokens';
 import { AVATAR_CYCLE, humanAvatarVsAi, type GameMode, type Settings } from './settingsModel';
+import { count, gameKeys } from './analytics';
 import { useStats } from './stats';
 
 /* ---------------------------------------------------------------- timers */
@@ -241,6 +242,7 @@ function recordFinished(state: GameState, daily: number | null) {
   try {
     useStats.getState().recordGame(state);
     if (daily != null) useStats.getState().recordDaily(daily, state);
+    count(gameKeys(state, { daily: daily != null }));
   } catch {
     /* stats must never break the end of a game */
   }
@@ -258,6 +260,7 @@ function recordOnline(state: GameState) {
   if (recordedOnline.length > 32) recordedOnline.shift();
   try {
     useStats.getState().recordGame(state);
+    count(gameKeys(state, { online: true }));
   } catch {
     /* stats must never break the end of a game */
   }
