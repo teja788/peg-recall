@@ -166,7 +166,7 @@ export function YouRow() {
           setText(v);
           setName(0, v);
         }}
-        placeholder={animalName(avatar)}
+        placeholder={tr('online.typeName')}
         placeholderTextColor={t.c.textDim}
         accessibilityLabel={tr('online.yourName')}
         maxLength={NAME_INPUT_MAX}

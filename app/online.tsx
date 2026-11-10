@@ -30,8 +30,8 @@ export default function OnlineScreen() {
   const seat = useRoom((s) => s.seat);
   const unlocked = useSettings((s) => s.unlocked);
 
-  const [board, setBoard] = useState<BoardSize>('classic');
-  const [seats, setSeats] = useState<2 | 3 | 4>(4);
+  const [board, setBoard] = useState<BoardSize>('small');
+  const [seats, setSeats] = useState<2 | 3 | 4>(2);
   const [timer, setTimer] = useState<TimerMode>('relaxed');
   const [codeText, setCodeText] = useState('');
   /** a create or join is on its way: the next seat we get is that room's */
