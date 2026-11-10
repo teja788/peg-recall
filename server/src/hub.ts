@@ -171,7 +171,7 @@ export class Hub {
     switch (m.type) {
       case 'hello': {
         // an older app must update; a newer one has to wait for this server
-        if (m.protocol < PROTOCOL - 1 || m.rules < RULES_VERSION) return this.refuse(conn, 'update', true);
+        if (m.protocol < PROTOCOL || m.rules < RULES_VERSION) return this.refuse(conn, 'update', true);
         if (m.protocol > PROTOCOL || m.rules > RULES_VERSION) return this.refuse(conn, 'rules', true);
         st.app = m.app;
         return this.send(conn, { type: 'welcome', serverTime: now });
@@ -194,6 +194,7 @@ export class Hub {
           config: this.config,
           stats: this.stats,
           release: (c) => this.release(c),
+          lastHeard: (c) => this.conns.get(c)?.lastSeen ?? 0,
           onClosed: (r) => this.rooms.delete(r.code),
           random: this.deps.random,
           token: this.deps.token ?? randomToken,

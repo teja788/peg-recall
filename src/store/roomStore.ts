@@ -121,6 +121,8 @@ export function createRoomStore(deps: RoomDeps) {
     let pending: ClientMessage | null = null;
     /** when this device last sent a reaction (REACT_COOLDOWN_MS) */
     let reactedAt = -Infinity;
+    /** counts every reaction shown, across rooms, so a screen can tell new from seen */
+    let reactN = 0;
     /** a resume is out: a "notFound" now means the room itself is gone */
     let resuming = false;
 
@@ -170,6 +172,8 @@ export function createRoomStore(deps: RoomDeps) {
       switch (m.type) {
         case 'joined':
           resuming = false;
+          // another room: its seats are other people (mutes and the last reaction go)
+          if (m.code !== getState().code) setState({ muted: [], lastReaction: null });
           setState({ code: m.code, seat: m.seat, error: null, ended: null });
           save(m.code, m.token);
           return;
@@ -184,11 +188,9 @@ export function createRoomStore(deps: RoomDeps) {
           setState({ lastAt: m.at });
           deps.game.remoteSnapshot(m.state, m.seq, link());
           return;
-        case 'react': {
-          const n = (getState().lastReaction?.n ?? 0) + 1;
-          setState({ lastReaction: { n, seat: m.seat, id: m.id } });
+        case 'react':
+          setState({ lastReaction: { n: ++reactN, seat: m.seat, id: m.id } });
           return;
-        }
         case 'action':
           setState({ lastAt: m.at });
           deps.game.remoteAction(m.seq, m.action, m.hash);
@@ -211,7 +213,7 @@ export function createRoomStore(deps: RoomDeps) {
           // storage: keep it saved for that one (audit F04)
           if (m.reason !== 'replaced') save(null, null);
           else token = null;
-          setState({ ended: m.reason, code: null, seat: null });
+          setState({ ended: m.reason, code: null, seat: null, muted: [], lastReaction: null });
           return;
         default:
           return;
@@ -270,12 +272,13 @@ export function createRoomStore(deps: RoomDeps) {
       endBreak: () => request({ type: 'endBreak' }),
       stepAway: (away) => request({ type: 'away', away }),
       react: (id) => {
-        const { seat, lastReaction } = getState();
+        const { seat } = getState();
         const t = (deps.now ?? Date.now)();
         if (!seat || !conn || t - reactedAt < REACT_COOLDOWN_MS) return false;
+        // not on the line right now (reconnecting): nothing went out, nothing shows
+        if (!conn.send({ type: 'react', id })) return false;
         reactedAt = t;
-        conn.send({ type: 'react', id });
-        setState({ lastReaction: { n: (lastReaction?.n ?? 0) + 1, seat, id } });
+        setState({ lastReaction: { n: ++reactN, seat, id } });
         return true;
       },
       toggleMute: (seat) => {

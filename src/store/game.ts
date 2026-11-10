@@ -224,6 +224,8 @@ let rng: RngState = { seed: aiSeedFor(Date.now()), counter: 0 };
 let nonce = 0;
 /** online: server actions waiting for the animation in front of them */
 let inbox: { seq: number; action: GameAction; hash: string }[] = [];
+/** online: a tap with no answer from the server for this long can be tried again */
+const UNSTICK_MS = 4_000;
 /** online: past this many waiting actions the board catches up without animating */
 const CATCH_UP = 2;
 /** The `generation` whose finished game has already gone into the stats. */
@@ -371,17 +373,27 @@ export const useGame = create<GameStore>((setState, getState) => {
     }
   }
 
+  /** A tap the server never answered (dropped as a break began, lost on the
+   *  line): the die and pegs come back rather than staying dead. */
+  function unstickLater(seq: number) {
+    setTimeout(() => {
+      if (getState().waiting && getState().seq === seq) setState({ waiting: false });
+    }, UNSTICK_MS);
+  }
+
   /** Online: a tap becomes an intent, only on this seat's turn and only once. */
   function sendIntent(action: GameAction) {
-    const { state, remote, waiting, busy } = getState();
+    const { state, remote, waiting, busy, seq } = getState();
     if (!state || !remote || waiting || busy) return;
     if (activePlayerSpec(state).id !== remote.seat) return;
     if (action.type === 'ROLL' && state.phase === 'roll') {
       setState({ waiting: true });
       remote.send({ type: 'ROLL' });
+      unstickLater(seq);
     } else if (action.type === 'PICK' && state.phase === 'pick' && state.pegs[action.pegIndex]?.state === 'hidden') {
       setState({ waiting: true });
       remote.send({ type: 'PICK', pegIndex: action.pegIndex });
+      unstickLater(seq);
     }
     // REVEAL_DONE, RESULT_DONE and RESTART are the server's to send
   }

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { RoomClient, type ClientClock, type ConnStatus, type SocketLike } from '../client';
-import type { ServerMessage } from '../protocol';
+import { PROTOCOL, type ServerMessage } from '../protocol';
 
 class FakeClock implements ClientClock {
   t = 10_000;
@@ -84,7 +84,7 @@ test('says hello on open, is ready on welcome, and only then sends', () => {
   assert.equal(client.send({ type: 'start' }), false, 'nothing goes out before the welcome');
   sockets[0].open();
   assert.equal(sockets[0].sent[0].type, 'hello');
-  assert.equal(sockets[0].sent[0].protocol, 1);
+  assert.equal(sockets[0].sent[0].protocol, PROTOCOL);
   sockets[0].receive({ type: 'welcome', serverTime: 50_000 });
   assert.equal(ready(), 1);
   assert.deepEqual(statuses, ['connecting', 'open']);

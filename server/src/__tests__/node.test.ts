@@ -6,7 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import type { ServerMessage } from '../../../src/online/protocol';
+import { PROTOCOL, type ServerMessage } from '../../../src/online/protocol';
 import { startServer } from '../node';
 
 type Client = { ws: WebSocket; next: (type: ServerMessage['type']) => Promise<ServerMessage> };
@@ -35,7 +35,7 @@ function client(url: string, headers?: Record<string, string>): Promise<Client> 
 }
 
 const send = (c: Client, m: unknown) => c.ws.send(JSON.stringify(m));
-const hello = { type: 'hello', protocol: 1, rules: 1, app: 'web', appVersion: 'test' };
+const hello = { type: 'hello', protocol: PROTOCOL, rules: 1, app: 'web', appVersion: 'test' };
 
 test('two devices meet in a room and start a game over real sockets', async () => {
   const srv = await startServer({ port: 0, host: '127.0.0.1', statsToken: 'secret', log: () => {} });

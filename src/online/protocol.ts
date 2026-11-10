@@ -24,8 +24,9 @@ import type {
 import { BOARD_SPECS } from '../engine/types';
 import { cleanName } from '../store/settingsModel';
 
-/** Bumped when a message changes shape. The server accepts this one and the one before. */
-export const PROTOCOL = 1;
+/** Bumped when a message changes shape. The server accepts this one only.
+ *  2: breaks, step away, reactions, missed turns. */
+export const PROTOCOL = 2;
 /** Bumped when the engine's rules change what a game does: a room never mixes rules. */
 export const RULES_VERSION = 1;
 /** How long a person who is here has for a roll or a pick before the computer plays it. */
@@ -59,6 +60,9 @@ export const REACTION_IDS: readonly ReactionId[] = [
 ];
 /** one reaction per person per this long; faster ones are dropped */
 export const REACT_COOLDOWN_MS = 2_000;
+/** the server's own limit, shorter, so network jitter never drops a reaction
+ *  its sender already sees on screen */
+export const REACT_SERVER_COOLDOWN_MS = 1_500;
 /** Largest message either side accepts, in UTF-16 code units of the raw JSON. */
 export const MAX_MESSAGE_CHARS = 2048;
 export const MAX_SEATS = 4;

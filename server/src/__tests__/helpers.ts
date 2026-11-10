@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 
 import { activePlayerSpec, createGame, reduce, type GameState } from '../../../src/engine';
 import { stateHash } from '../../../src/online/hash';
-import type { AppPlatform, ClientMessage, RoomInfo, RoomSettings, ServerMessage } from '../../../src/online/protocol';
+import { PROTOCOL, type AppPlatform, type ClientMessage, type RoomInfo, type RoomSettings, type ServerMessage } from '../../../src/online/protocol';
 import { Hub } from '../hub';
 import type { Clock, Conn, ServerConfig } from '../types';
 
@@ -112,7 +112,7 @@ export class Device {
     hub.connect(this.conn, ip);
   }
 
-  hello(protocol = 1, rules = 1) {
+  hello(protocol = PROTOCOL, rules = 1) {
     return this.say({ type: 'hello', protocol, rules, app: this.app, appVersion: '1.4.0' });
   }
 

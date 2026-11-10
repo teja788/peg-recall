@@ -45,7 +45,7 @@ import type {
   RoomStatus,
   ServerMessage,
 } from '../../src/online/protocol';
-import { BREAK_MS, MISSED_LIMIT, REACT_COOLDOWN_MS, RESUME_MS, type ReactionId } from '../../src/online/protocol';
+import { BREAK_MS, MISSED_LIMIT, REACT_SERVER_COOLDOWN_MS, RESUME_MS, type ReactionId } from '../../src/online/protocol';
 import { AVATAR_CYCLE } from '../../src/store/settingsModel';
 import { randomToken, randomUint32, type Clock, type Conn, type ServerConfig, type Stats } from './types';
 
@@ -67,14 +67,18 @@ export interface Seat {
   left?: boolean;
   /** the address fingerprint they joined from (hub.ts), so a removal sticks */
   addr?: string;
-  /** turns in a row they let run out while here, and the last such turn */
+  /** turns in a row they let run out while here */
   missed?: number;
-  missedTurn?: number;
+  /** the sitting they last came back ("I'm back") in: one fresh clock each */
+  backSitting?: number;
+  /** the sitting their turn clock last ran out in while here: counted once,
+   *  and the rest of that sitting goes at computer pace */
+  timedOut?: number;
   /** "Step away": here, but the computer plays for them until they are back */
   stepped?: boolean;
   /** has had their break this game */
   breakUsed?: boolean;
-  /** when their last reaction went out (REACT_COOLDOWN_MS between them) */
+  /** when their last reaction went out (REACT_SERVER_COOLDOWN_MS between them) */
   reactedAt?: number;
 }
 
@@ -84,6 +88,8 @@ export interface RoomDeps {
   stats: Stats;
   /** this connection is no longer in the room (removed, or the room closed) */
   release: (conn: Conn) => void;
+  /** when this connection last sent anything (devices ping every 20 s) */
+  lastHeard: (conn: Conn) => number;
   /** the room closed itself (nobody left in it) */
   onClosed: (room: Room) => void;
   /** a 32-bit random number, for game seeds */
@@ -123,6 +129,9 @@ export class Room {
   private brkTimer: unknown = null;
   /** turn clocks run from the later of this and the last action (a break, a return) */
   private clockFrom = 0;
+  /** one stretch of the same seat moving on the same board: bonus turns
+   *  included, so a missed turn is counted once however many picks it has */
+  private sitting = 0;
 
   constructor(
     readonly code: string,
@@ -197,6 +206,7 @@ export class Room {
     const seat = this.seats.find((s) => s.kind === 'human' && s.token === token && !s.left);
     if (!seat) return null;
     const old = seat.conn;
+    const empty = this.peopleHere() === 0;
     if (old && old !== conn) {
       // the same person on a newer connection (a network switch, a second
       // tab): the older one is told why, so it stops coming back (audit F04)
@@ -207,6 +217,10 @@ export class Room {
     seat.conn = conn;
     seat.awaySince = null;
     this.standingIn.delete(seat.id);
+    // the board waited for everyone: the mover gets a whole turn. Only after
+    // nobody was here (the clock was not running), so a mover who drops and
+    // comes back while others wait never buys time
+    if (empty && this.status === 'playing') this.clockFrom = this.deps.clock.now();
     this.touch();
     this.send(conn, { type: 'joined', code: this.code, seat: seat.id, token: seat.token! });
     if (this.state) this.send(conn, { type: 'snapshot', state: this.state, seq: this.seq, at: this.at });
@@ -277,9 +291,7 @@ export class Room {
   start(by: Conn): ErrorCode | null {
     const err = this.hostOnly(by) ?? this.notDuringGame();
     if (err) return err;
-    // people who left during the last game are gone for this one
-    for (const s of this.seats.filter((x) => x.left)) this.seats.splice(this.seats.indexOf(s), 1);
-    for (const s of this.seats) s.missed = s.missedTurn = s.breakUsed = undefined;
+    for (const s of this.seats) s.missed = s.timedOut = s.breakUsed = undefined;
     this.clearBreak();
     this.clockFrom = 0;
     if (this.seats.length < 2) {
@@ -311,6 +323,7 @@ export class Room {
     this.rng = { seed: aiSeedFor(seed), counter: 0 };
     this.newBrains(this.state);
     this.standingIn.clear();
+    this.sitting++;
     this.status = 'playing';
     this.overAt = null;
     this.touch();
@@ -327,16 +340,21 @@ export class Room {
     const seat = this.seatOf(by);
     const s = this.state;
     if (!seat || !s || this.status !== 'playing' || this.brk) return;
-    if (activePlayerSpec(s).id !== seat.id) return;
+    // only a move that counts brings them back: a late tap after the
+    // computer rolled for them changes nothing
+    if (activePlayerSpec(s).id !== seat.id || reduce(s, action) === s) return;
     this.standingIn.delete(seat.id);
     const changed = !!seat.missed || !!seat.stepped;
     seat.missed = 0;
     seat.stepped = false;
-    if (this.apply(action, seat.id, false) && changed) this.broadcastRoom();
+    seat.timedOut = undefined;
+    this.apply(action, seat.id, false);
+    if (changed) this.broadcastRoom();
   }
 
   /** "Take a break": once per person per game, everyone waits up to BREAK_MS.
-   *  A reveal or a result already showing still finishes; no move is made. */
+   *  Nothing moves, not even a result finishing (it could open a sudden-death
+   *  reveal while everyone is away). */
   takeBreak(by: Conn): ErrorCode | null {
     const seat = this.seatOf(by);
     if (!seat || this.status !== 'playing' || this.brk || seat.breakUsed) return 'bad';
@@ -368,23 +386,29 @@ export class Room {
     if (!!seat.stepped === away) return null;
     seat.stepped = away;
     seat.missed = 0;
+    seat.timedOut = undefined;
     if (!away) {
       this.standingIn.delete(seat.id);
-      // back on their own turn: a fresh clock
-      if (this.state && activePlayerSpec(this.state).id === seat.id) this.clockFrom = this.deps.clock.now();
+      // back on their own turn: a fresh clock, once per sitting (toggling
+      // again cannot keep restarting it and stall everyone)
+      if (this.state && activePlayerSpec(this.state).id === seat.id && seat.backSitting !== this.sitting) {
+        seat.backSitting = this.sitting;
+        this.clockFrom = this.deps.clock.now();
+      }
     }
     this.touch();
-    this.schedule();
+    // not schedule(): toggling must not restart a reveal or a computer move
+    this.presenceChanged();
     this.broadcastRoom();
     return null;
   }
 
   /** A preset reaction, passed on to everyone else in the room; nothing is
-   *  kept. Faster than one per REACT_COOLDOWN_MS is dropped without a word. */
+   *  kept. Faster than one per REACT_SERVER_COOLDOWN_MS is dropped without a word. */
   react(by: Conn, id: ReactionId): void {
     const seat = this.seatOf(by);
     const now = this.deps.clock.now();
-    if (!seat || now - (seat.reactedAt ?? -Infinity) < REACT_COOLDOWN_MS) return;
+    if (!seat || now - (seat.reactedAt ?? -Infinity) < REACT_SERVER_COOLDOWN_MS) return;
     seat.reactedAt = now;
     this.deps.stats.reactions++;
     for (const s of this.seats) if (s.conn && s !== seat) this.send(s.conn, { type: 'react', seat: seat.id, id });
@@ -431,8 +455,10 @@ export class Room {
     this.at = this.deps.clock.now();
     this.touch();
     if (action.type === 'PICK') this.ais = observePick(this.ais, next);
-    // a sudden-death mini board is a new board: new brains
-    if (next.phase === 'reveal' && prev.phase !== 'reveal') this.newBrains(next);
+    // a sudden-death mini board is a new board: new brains, a new sitting
+    const newBoard = next.phase === 'reveal' && prev.phase !== 'reveal';
+    if (newBoard) this.newBrains(next);
+    if (newBoard || next.activePlayer !== prev.activePlayer) this.sitting++;
     if (standIn) this.deps.stats.standInMoves++;
     this.broadcast({
       type: 'action',
@@ -446,6 +472,8 @@ export class Room {
     if (next.phase === 'gameOver') {
       this.clearBreak();
       this.status = 'over';
+      // seats of people who left are free again before the next game
+      for (const x of this.seats.filter((x) => x.left)) this.seats.splice(this.seats.indexOf(x), 1);
       this.overAt = this.at;
       this.deps.stats.gamesFinished++;
       this.broadcastRoom();
@@ -462,14 +490,14 @@ export class Room {
     if (!s || s.phase === 'gameOver' || this.closed) return;
     // nobody here: the board waits for someone to come back
     if (this.peopleHere() === 0) return;
+    // on a break nothing moves; the 3-2-1's end schedules again
+    if (this.brk) return;
     const step = autoStep(s, this.rng);
-    // on a break, a reveal or result that is showing finishes; nobody moves
-    if (step && (!this.brk || step.kind === 'REVEAL_DONE' || step.kind === 'RESULT_DONE')) {
+    if (step) {
       this.rng = step.rng;
       this.arm('auto', step.afterMs, () => this.fireAuto(step.kind));
       return;
     }
-    if (this.brk) return;
     this.armTurn();
   }
 
@@ -492,9 +520,12 @@ export class Room {
     // the phase began at the last action, or later if a break or a return restarted the clock
     const from = Math.max(this.at, this.clockFrom);
     let delay: number;
-    if (seat.conn && !seat.stepped) {
+    // timed out once this sitting: the rest of it too (an idle device
+    // would otherwise cost a whole clock per roll and per pick)
+    const pace = seat.left || seat.stepped || this.standingIn.has(seat.id) || seat.timedOut === this.sitting;
+    if (seat.conn && !pace) {
       delay = from + config.turnMs[this.settings.timer] - now;
-    } else if (seat.left || seat.stepped || this.standingIn.has(seat.id)) {
+    } else if (pace) {
       // already standing in: computer pacing, as for a computer seat
       // deadlines from when the phase began, so re-arming never pushes them back
       if (s.phase === 'roll') delay = from + FLOW.aiRollDelay - now;
@@ -511,16 +542,24 @@ export class Room {
     const s = this.state;
     if (!s || activePlayerSpec(s).id !== seat.id) return;
     if (!seat.conn) this.standingIn.add(seat.id);
-    // here, but the turn ran out: counted once per turn (a roll and its pick)
-    const idle = !!seat.conn && !seat.stepped && seat.missedTurn !== s.turn;
-    if (idle) {
-      seat.missed = (seat.missed ?? 0) + 1;
-      seat.missedTurn = s.turn;
+    let idle = false;
+    if (seat.conn && !seat.stepped) {
+      // here, but the turn ran out: counted once per sitting, and only if the
+      // device was heard from since the clock started (a tab frozen in the
+      // background or a locked phone is not idle, just not there yet)
+      const from = Math.max(this.at, this.clockFrom);
+      idle = seat.timedOut !== this.sitting && this.deps.lastHeard(seat.conn) > from;
+      seat.timedOut = this.sitting;
+      if (idle) seat.missed = (seat.missed ?? 0) + 1;
     }
     if (s.phase === 'roll') this.apply({ type: 'ROLL' }, seat.id, true);
     else if (s.phase === 'pick') this.pickFor(seat.id, true);
     if (!idle || this.closed) return;
-    if (seat.missed! >= MISSED_LIMIT && seat.conn) {
+    // this pick ends the game: they see the result, not a removal
+    const after = this.state;
+    const decided =
+      this.status !== 'playing' || (after?.phase === 'result' && reduce(after, { type: 'RESULT_DONE' }).phase === 'gameOver');
+    if (seat.missed! >= MISSED_LIMIT && seat.conn && !decided) {
       // the computer keeps the seat for the rest of this game
       this.send(seat.conn, { type: 'ended', reason: 'idle' });
       this.deps.release(seat.conn);

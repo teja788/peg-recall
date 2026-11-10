@@ -7,7 +7,7 @@
 import { Avatar } from '@art';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Pressable, ScrollView, Text, TextInput, View, type ViewStyle } from 'react-native';
+import { AccessibilityInfo, Pressable, ScrollView, Text, TextInput, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { ConnStatus } from '../online/client';
@@ -17,6 +17,7 @@ import { serverNow } from '../store/room';
 import { NAME_INPUT_MAX, animalName, useSettings } from '../store/settings';
 import { useTheme } from '../theme';
 import { Backdrop } from './Backdrop';
+import { PillButton } from './StatsCard';
 import { IconButton } from './controls';
 
 /** The column the online screens share: a back button, a title, then content. */
@@ -290,12 +291,17 @@ export function BreakOverlay({
   mine,
   canEnd,
   onEnd,
+  onLeave,
+  onReport,
 }: {
   pause: { by: string; until: number; resumeAt?: number };
   name: string;
   mine: boolean;
   canEnd: boolean;
   onEnd: () => void;
+  /** the menu is behind this screen: leaving and reporting stay reachable */
+  onLeave: () => void;
+  onReport: () => void;
 }) {
   const t = useTheme();
   useTicking(true);
@@ -303,6 +309,11 @@ export function BreakOverlay({
   const text = pause.resumeAt
     ? tr('online.restarting', { n: Math.max(1, Math.ceil((pause.resumeAt - now) / 1000)) })
     : tr(mine ? 'online.myBreak' : 'online.onBreak', { name, time: clockText(Math.min(BREAK_MS, pause.until - now)) });
+  // read out when the break starts and when the 3-2-1 begins, not every tick
+  React.useEffect(() => {
+    AccessibilityInfo.announceForAccessibility(text);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pause.by, !!pause.resumeAt]);
   return (
     <View
       accessibilityViewIsModal
@@ -321,12 +332,15 @@ export function BreakOverlay({
       <Card style={{ width: '100%', maxWidth: 420, gap: t.spacing.md, alignItems: 'stretch' }}>
         <Text
           accessibilityRole="header"
-          accessibilityLiveRegion="polite"
           style={{ ...t.type.title, color: t.c.text, textAlign: 'center' }}
         >
           {text}
         </Text>
         {canEnd && !pause.resumeAt ? <WideButton text={tr('online.endBreak')} filled onPress={onEnd} /> : null}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: t.spacing.sm }}>
+          <PillButton text={tr('online.leave')} onPress={onLeave} />
+          <PillButton text={tr('online.report')} onPress={onReport} />
+        </View>
       </Card>
     </View>
   );

@@ -186,3 +186,25 @@ test('leave tells the server, hangs up and forgets the seat', async () => {
   useRoom.getState().join('482913', undefined, 'owl');
   assert.equal(lines.length, 2, 'a new line for the next room');
 });
+
+test('reactions: shown only if they went out, one per cooldown; mutes and the last one reset in another room', () => {
+  const { useRoom, lines } = setup();
+  useRoom.getState().create(settings, 'Maya', 'fox', false);
+  lines[0].ready();
+  lines[0].receive({ type: 'joined', code: '482913', seat: 'p1', token: 'a'.repeat(32) });
+  lines[0].open = false; // reconnecting: nothing can go out
+  assert.equal(useRoom.getState().react('party'), false);
+  assert.equal(useRoom.getState().lastReaction, null, 'no bubble for a reaction that never left');
+  lines[0].open = true;
+  assert.equal(useRoom.getState().react('party'), true);
+  assert.equal(useRoom.getState().react('gg'), false, 'cooling down');
+  lines[0].receive({ type: 'react', seat: 'p2', id: 'hi' });
+  const n = useRoom.getState().lastReaction!.n;
+  useRoom.getState().toggleMute('p2');
+  assert.deepEqual(useRoom.getState().muted, ['p2']);
+  // the same seat id in another room is someone else
+  lines[0].receive({ type: 'joined', code: '111111', seat: 'p3', token: 'b'.repeat(32) });
+  assert.deepEqual([useRoom.getState().muted, useRoom.getState().lastReaction], [[], null]);
+  lines[0].receive({ type: 'react', seat: 'p2', id: 'hi' });
+  assert.ok(useRoom.getState().lastReaction!.n > n, 'numbering never goes back, so no screen mistakes it for one it has seen');
+});

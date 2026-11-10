@@ -84,9 +84,9 @@ export default function RoomScreen() {
 
   if (ended) {
     return (
-      <OnlineFrame title={tr('online.title')} onBack={() => (useRoom.getState().clear(), router.replace('/'))}>
+      <OnlineFrame title={tr('online.title')} onBack={() => (useRoom.getState().leave(), useRoom.getState().clear(), router.replace('/'))}>
         <Note text={endedText(ended)} />
-        <WideButton text={tr('common.home')} onPress={() => (useRoom.getState().clear(), router.replace('/'))} />
+        <WideButton text={tr('common.home')} onPress={() => (useRoom.getState().leave(), useRoom.getState().clear(), router.replace('/'))} />
       </OnlineFrame>
     );
   }

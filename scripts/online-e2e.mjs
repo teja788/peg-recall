@@ -167,7 +167,11 @@ try {
 
   // Dadi opens the invite link
   await dadi.goto(`${base}/join/${code}`, { waitUntil: 'networkidle' });
-  check(await dadi.getByText('You’re invited to play Color Catch').isVisible(), 'the invite page greets Dadi');
+  const greeted = await dadi
+    .getByText('You’re invited to play Color Catch')
+    .waitFor({ timeout: 5000 })
+    .then(() => true, () => false);
+  check(greeted, 'the invite page greets Dadi');
   await dadi.getByLabel('Your name').fill('Dadi');
   await dadi.getByRole('button', { name: 'Join', exact: true }).click();
   await dadi.waitForURL(new RegExp(`/room/${code}$`), { timeout: 10000 });

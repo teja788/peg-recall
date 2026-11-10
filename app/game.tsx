@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AppState,
   BackHandler,
+  AccessibilityInfo,
   I18nManager,
   Linking,
   Platform,
@@ -411,8 +412,13 @@ export default function GameScreen() {
     else pause();
   }, [pause, online]);
 
-  /** online: the host deals the next game for everyone */
-  const onlineRematch = useCallback(() => useRoom.getState().rematch(), []);
+  /** online: the host deals the next game for everyone; with nobody left to
+   *  play against, the waiting room instead (invite someone, or the computer) */
+  const onlineRematch = useCallback(() => {
+    const seats = useRoom.getState().room?.seats.length ?? 0;
+    if (seats >= 2) useRoom.getState().rematch();
+    else if (roomCode) router.replace({ pathname: '/room/[code]', params: { code: roomCode } });
+  }, [roomCode, router]);
 
   /** Play again / Restart: a new seed, and the board running again. A game
    *  played on a free try is not replayed: it deals again from the settings,
@@ -619,6 +625,12 @@ export default function GameScreen() {
     activePlayerSpec(view).id === remote.seat;
   const clockFrom = Math.max(lastAt ?? 0, roomInfo?.clockFrom ?? 0);
   const secondsLeft = useTurnCountdown(myMove && lastAt != null ? clockFrom + TURN_MS[timer] : null, NUDGE_MS[timer]);
+  // VoiceOver: the countdown is read when it appears and at 10 s, not every second
+  useEffect(() => {
+    if (secondsLeft != null && (secondsLeft === NUDGE_MS[timer] / 1000 || secondsLeft === 10)) {
+      AccessibilityInfo.announceForAccessibility(tr('online.hurry', { time: trn('seconds', secondsLeft) }));
+    }
+  }, [secondsLeft, timer]);
 
   if (!view) {
     return (
@@ -892,6 +904,8 @@ export default function GameScreen() {
         mine={breakInfo.by === remote?.seat}
         canEnd={breakInfo.by === remote?.seat || roomInfo?.host === remote?.seat}
         onEnd={() => useRoom.getState().endBreak()}
+        onLeave={goHome}
+        onReport={() => void Linking.openURL(reportUrl(roomCode!, remote?.seat ?? null)).catch(() => {})}
       />
     ) : null}
 
@@ -912,7 +926,7 @@ export default function GameScreen() {
         }}
       >
         <Text
-          accessibilityLiveRegion="polite"
+          accessibilityLiveRegion={secondsLeft != null ? 'none' : 'polite'}
           style={{
             ...t.type.caption,
             color: '#fff',

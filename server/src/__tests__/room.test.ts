@@ -2,7 +2,21 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { activePlayerSpec } from '../../../src/engine';
-import { Device, SETTINGS, makeHub, playOut, room } from './helpers';
+import { MISSED_LIMIT, PROTOCOL } from '../../../src/online/protocol';
+import type { Room } from '../room';
+import { Device, SETTINGS, makeHub, playOut, room, type FakeClock } from './helpers';
+
+/** Let time pass in 250 ms steps until `done`: the host plays their own turns
+ *  at once, and `pingers` ping every 5 s as a live device does. */
+function run(clock: FakeClock, host: Device, pingers: Device[], done: () => boolean, limitMs = 10 * 60_000) {
+  for (let t = 0; t < limitMs && !done(); t += 250) {
+    clock.advance(250);
+    if (t % 5_000 === 0) for (const d of pingers) d.say({ type: 'ping', t });
+    host.read();
+    for (const d of pingers) d.read();
+    if (host.myMove()) host.move();
+  }
+}
 
 test('two people play a whole game; both screens rebuild it hash for hash', () => {
   const { hub, clock } = makeHub();
@@ -206,11 +220,11 @@ test('two people wanting the same animal: the second gets the next free one', ()
 
 test('versions: an old app must update, a newer app waits for the server', () => {
   const { hub } = makeHub();
-  const old = new Device(hub).hello(-1, 1); // older than the one before current
+  const old = new Device(hub).hello(PROTOCOL - 1, 1); // #12: protocol 1 had no breaks or reactions
   assert.deepEqual([old.errors, old.conn.closed], [['update'], true]);
-  const oldRules = new Device(hub).hello(1, 0);
+  const oldRules = new Device(hub).hello(PROTOCOL, 0);
   assert.deepEqual(oldRules.errors, ['update']);
-  const newer = new Device(hub).hello(2, 1);
+  const newer = new Device(hub).hello(PROTOCOL + 1, 1);
   assert.deepEqual([newer.errors, newer.conn.closed], [['rules'], true]);
   const rude = new Device(hub).say({ type: 'create', settings: SETTINGS, avatar: 'fox', unlocked: false });
   assert.deepEqual(rude.errors, ['bad'], 'nothing before hello');
@@ -458,21 +472,8 @@ test('missed turns in a row: a warning at 2, the computer takes the seat at 3; a
   const dadi = guests[0];
   host.say({ type: 'start' });
   clock.advance(4_100); // Small board reveal: 4 s
-  /** let time pass in steps, with the host playing their own turns at once */
-  const runUntil = (done: () => boolean, limitMs = 10 * 60_000) => {
-    for (let t = 0; t < limitMs && !done(); t += 250) {
-      clock.advance(250);
-      host.read();
-      dadi.read();
-      if (host.state && activePlayerSpec(host.state).id === 'p1') {
-        if (host.state.phase === 'roll') host.say({ type: 'intent', action: { type: 'ROLL' } });
-        else if (host.state.phase === 'pick') {
-          const peg = host.state.pegs.find((p) => p.state === 'hidden');
-          if (peg) host.say({ type: 'intent', action: { type: 'PICK', pegIndex: peg.index } });
-        }
-      }
-    }
-  };
+  // Dadi's device is awake (it pings): her turns that run out are counted
+  const runUntil = (done: () => boolean, limitMs = 10 * 60_000) => run(clock, host, [dadi], done, limitMs);
   const missed = () => host.room?.seats.find((s) => s.id === 'p2')?.missed ?? 0;
 
   runUntil(() => missed() === 1);
@@ -578,7 +579,7 @@ test('step away: the computer plays their turns at its pace, never counted as mi
   assert.equal(host.actions.at(-1)?.standIn, undefined);
 });
 
-test('reactions: passed on to the others only, preset ids only, one per 2 s per person', () => {
+test('reactions: passed on to the others only, preset ids only, one per 1.5 s per person on the server', () => {
   const { hub, clock } = makeHub();
   const { host, guests } = room(hub, 2);
   const [dadi, ravi] = guests;
@@ -589,11 +590,225 @@ test('reactions: passed on to the others only, preset ids only, one per 2 s per 
   assert.deepEqual(reacts(host), [{ type: 'react', seat: 'p2', id: 'party' }]);
   assert.deepEqual(reacts(ravi), [{ type: 'react', seat: 'p2', id: 'party' }]);
   assert.equal(reacts(dadi).length, 0, 'never echoed to its sender');
-  clock.advance(2_000);
+  clock.advance(1_500); // #15: the app waits 2 s; jitter can bring it in sooner
   dadi.say({ type: 'react', id: 'gg' });
   host.read();
   assert.equal(reacts(host).length, 2);
   dadi.say({ type: 'react', id: 'you are bad' } as never); // not a preset: refused by the parser
   host.read();
   assert.equal(reacts(host).length, 2, 'only preset ids get through');
+});
+
+/* ------------------------------------------------ audit fixes (Nov 10) */
+
+const seatOf = (d: Device, id: string) => d.room?.seats.find((s) => s.id === id);
+
+test('#1: a missed turn counts once per sitting, however many bonus picks the stand-in makes', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1, { timer: 'quick' });
+  const dadi = guests[0];
+  host.say({ type: 'start' });
+  let picks = 0; // stand-in picks for Dadi in this sitting
+  let bonus = false;
+  let seen = 0;
+  run(
+    clock,
+    host,
+    [dadi],
+    () => {
+      for (; seen < host.actions.length; seen++) {
+        const a = host.actions[seen];
+        if (a.by === 'p1') picks = 0;
+        if (a.by === 'p2' && a.standIn && a.action.type === 'PICK' && ++picks >= 2) bonus = true;
+      }
+      assert.ok((seatOf(host, 'p2')?.missed ?? 0) <= 1, `missed ${seatOf(host, 'p2')?.missed} in one sitting`);
+      // a new sitting of hers: she rolls herself (the count starts again), the pick runs out
+      const lastBy = [...host.actions].reverse().find((a) => a.by)?.by;
+      if (dadi.myMove() && dadi.state!.phase === 'roll' && lastBy !== 'p2') dadi.move();
+      return (bonus && picks === 0) || dadi.ended !== null || host.state?.phase === 'gameOver';
+    },
+    30 * 60_000,
+  );
+  assert.ok(bonus, 'the stand-in had a bonus turn (else this test proves nothing)');
+  assert.equal(dadi.ended, null);
+  assert.equal(seatOf(host, 'p2')?.missed, 1);
+});
+
+test('#2: stepping away and back over and over does not hold the reveal face up', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1);
+  host.say({ type: 'start' });
+  for (let i = 0; i < 10; i++) {
+    guests[0].say({ type: 'away', away: i % 2 === 0 });
+    clock.advance(500);
+  }
+  host.read();
+  assert.equal(host.state?.phase, 'roll', 'the 4 s reveal ended on time');
+});
+
+test('#3: a device gone quiet (a locked phone) is played for, but its turns are not counted', () => {
+  const { hub, clock } = makeHub();
+  for (const pings of [false, true]) {
+    const { host } = room(hub, 1, { timer: 'quick' });
+    host.say({ type: 'start' });
+    clock.advance(4_100);
+    if (pings) {
+      clock.advance(10_000);
+      host.say({ type: 'ping', t: 1 });
+    }
+    clock.advance(pings ? 11_000 : 21_000);
+    host.read();
+    assert.deepEqual([host.actions.at(-1)?.by, host.actions.at(-1)?.standIn], ['p1', true]);
+    assert.equal(seatOf(host, 'p1')?.missed, pings ? 1 : undefined, pings ? 'heard from: counted' : 'silent: not counted');
+  }
+});
+
+test('#4: back after everyone dropped: the mover gets a whole turn, and dropping again buys no time', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1, { timer: 'quick' });
+  const dadi = guests[0];
+  host.say({ type: 'start' });
+  clock.advance(4_100);
+  dadi.read();
+  host.drop();
+  dadi.drop();
+  clock.advance(5 * 60_000);
+  host.reconnect();
+  host.hello().say({ type: 'resume', code: host.code!, token: host.token! });
+  const seq = host.seq;
+  clock.advance(19_000);
+  host.read();
+  assert.equal(host.seq, seq, 'a whole Quick turn from coming back');
+  assert.equal(seatOf(host, 'p1')?.missed, undefined);
+  // Dadi is back; Maya drops and comes back at once: her clock runs on
+  dadi.reconnect();
+  dadi.hello().say({ type: 'resume', code: host.code!, token: dadi.token! });
+  host.drop();
+  host.reconnect();
+  host.hello().say({ type: 'resume', code: host.code!, token: host.token! });
+  clock.advance(1_500);
+  host.read();
+  assert.deepEqual([host.actions.at(-1)?.by, host.actions.at(-1)?.standIn], ['p1', true]);
+});
+
+test('#5: a break taken on a result holds it: nothing moves until play goes on', () => {
+  const { hub, clock } = makeHub();
+  const { host } = room(hub, 1, { timer: 'quick' });
+  host.say({ type: 'start' });
+  clock.advance(4_100);
+  host.read();
+  host.move().move();
+  assert.equal(host.state?.phase, 'result');
+  host.say({ type: 'break' });
+  const seq = host.seq;
+  clock.advance(60_000);
+  host.read();
+  assert.equal(host.seq, seq, 'the result stayed showing');
+  host.say({ type: 'endBreak' });
+  clock.advance(3_100);
+  host.read();
+  assert.equal(host.room?.pause, undefined);
+  clock.advance(3_000);
+  host.read();
+  assert.ok(host.seq > seq, 'and then finished');
+});
+
+test('#8: after a roll that ran out, the pick follows at computer pace', () => {
+  const { hub, clock } = makeHub();
+  const { host } = room(hub, 1, { timer: 'quick' });
+  host.say({ type: 'start' });
+  clock.advance(4_100);
+  clock.advance(20_500);
+  host.read();
+  const roll = host.actions.at(-1)!;
+  assert.deepEqual([roll.by, roll.standIn, roll.action.type], ['p1', true, 'ROLL']);
+  clock.advance(3_000);
+  host.read();
+  const pick = host.actions.find((a) => a.seq > roll.seq && a.action.type === 'PICK');
+  assert.ok(pick && pick.standIn && pick.at - roll.at < 3_000, 'not another 20 s');
+});
+
+test('#10: a seat left mid-game is free again once the game is over', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 2, { maxSeats: 3 });
+  host.say({ type: 'start' });
+  guests[1].say({ type: 'leave' });
+  playOut(clock, [host, guests[0]]);
+  host.read();
+  assert.equal(host.room?.status, 'over');
+  assert.deepEqual(host.room?.seats.map((s) => s.id), ['p1', 'p2']);
+  const back = new Device(hub, 'web', guests[1].ip).hello().say({ type: 'join', code: host.code!, avatar: 'cat' });
+  assert.deepEqual(back.errors, [], 'not "room full"');
+  assert.equal(back.seat, 'p3');
+});
+
+test('#13: a stepped-away player’s late tap (the computer just rolled) changes nothing', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1);
+  const dadi = guests[0];
+  host.say({ type: 'start' });
+  dadi.say({ type: 'away', away: true });
+  for (let i = 0; i < 4000 && !(host.state?.phase === 'pick' && activePlayerSpec(host.state).id === 'p2'); i++) {
+    if (host.myMove()) host.move();
+    clock.advance(50);
+    host.read();
+  }
+  assert.equal(host.state?.phase, 'pick');
+  dadi.read();
+  dadi.say({ type: 'intent', action: { type: 'ROLL' } });
+  clock.advance(3_000);
+  host.read();
+  assert.ok(host.actions.some((a) => a.by === 'p2' && a.standIn && a.action.type === 'PICK'), 'the stand-in picked');
+  assert.equal(seatOf(host, 'p2')?.away, true, 'still away');
+  assert.equal(seatOf(host, 'p2')?.missed, undefined, 'never counted');
+});
+
+test('#14: the idle limit reached on the pick that ends the game: they see the result, not a removal', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1, { timer: 'quick', kidMode: true });
+  const dadi = guests[0];
+  const theRoom = (hub as unknown as { rooms: Map<string, Room> }).rooms.get(host.code!)!;
+  const hidden = () => dadi.state!.pegs.filter((p) => p.state === 'hidden').length;
+  let found = false;
+  for (let game = 0; game < 10 && !found; game++) {
+    host.say({ type: game ? 'rematch' : 'start' });
+    // both play, until Dadi is to roll for the last peg (or the host took it)
+    for (let i = 0; i < 40_000 && !found && host.state?.phase !== 'gameOver'; i++) {
+      clock.advance(50);
+      host.read();
+      dadi.read();
+      if (host.myMove()) host.move();
+      if (dadi.myMove()) {
+        if (dadi.state!.phase === 'roll' && hidden() === 1) found = true;
+        else dadi.move();
+      }
+    }
+  }
+  assert.ok(found, 'Dadi had the last peg in one of the games');
+  dadi.move(); // her own roll; the pick then runs out with two misses already
+  theRoom.seats.find((s) => s.id === 'p2')!.missed = MISSED_LIMIT - 1;
+  run(clock, host, [dadi], () => dadi.state?.phase === 'gameOver', 60_000);
+  assert.equal(dadi.state?.phase, 'gameOver');
+  assert.equal(dadi.ended, null, 'not removed');
+});
+
+test("I'm back on your own turn restarts the clock once per turn, not every toggle", () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1, { timer: 'quick' });
+  const dadi = guests[0];
+  host.say({ type: 'start' });
+  clock.advance(4_100);
+  host.read();
+  // whoever moves first toggles away and back, again and again
+  const mover = host.myMove() ? host : dadi;
+  const seq = host.seq;
+  mover.say({ type: 'away', away: true });
+  mover.say({ type: 'away', away: false }); // a fresh 20 s
+  for (let i = 0; i < 6; i++) {
+    clock.advance(5_000);
+    mover.say({ type: 'away', away: true });
+    mover.say({ type: 'away', away: false }); // no more fresh clocks
+  }
+  host.read();
+  assert.ok(host.seq > seq, 'the computer moved within the turn time: toggling cannot stall the game');
 });
