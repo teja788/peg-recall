@@ -6,7 +6,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { startAnalytics } from '../src/store/analyticsStart';
+import { usePromoted } from '../src/store/promoted';
 import { startPurchases } from '../src/store/purchases';
+import { UnlockSheet } from '../src/ui/UnlockSheet';
 import { syncReminders } from '../src/store/reminders';
 import { useSettings } from '../src/store/settings';
 import { useStats } from '../src/store/stats';
@@ -62,8 +64,15 @@ export default function RootLayout() {
             <Stack.Screen name="join/[code]" />
             <Stack.Screen name="room/[code]" />
           </Stack>
+          <PromotedUnlock />
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
+}
+
+/** The App Store's "Buy" on the promoted unlock: the sheet over whatever screen is open. */
+function PromotedUnlock() {
+  const open = usePromoted((s) => s.open);
+  return open ? <UnlockSheet onClose={() => usePromoted.setState({ open: false })} /> : null;
 }

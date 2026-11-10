@@ -13,7 +13,9 @@ import {
   finishTransaction,
   getAppTransactionIOS,
   getAvailablePurchases,
+  getPromotedProductIOS,
   initConnection,
+  promotedProductListenerIOS,
   purchaseUpdatedListener,
   requestPurchase,
   restorePurchases,
@@ -21,6 +23,8 @@ import {
 } from 'expo-iap';
 import { Platform } from 'react-native';
 
+import { count } from './analytics';
+import { usePromoted } from './promoted';
 import { PRODUCT_IDS, UNLOCK_ID, isGrandfathered, type BuyResult, type ProductId } from './purchasesModel';
 import { useSettings } from './settings';
 
@@ -59,10 +63,23 @@ export function startPurchases() {
   if (started || Platform.OS !== 'ios') return;
   started = true;
   purchaseUpdatedListener((p) => void deliver(p));
+  promotedProductListenerIOS(promoted);
   void (async () => {
     if (!(await connect())) return;
+    // the App Store may have opened the app for it before the listener was up
+    promoted(await getPromotedProductIOS().catch(() => null));
     if (!(await checkGrandfathered())) await checkOwned();
   })();
+}
+
+/** "Buy" on the unlock's tile in the App Store: open the unlock sheet, where
+ *  the parent check and then requestPurchase finish it like any other buy. */
+function promoted(p: unknown) {
+  const o = p as { id?: string; productId?: string } | null;
+  const id = typeof p === 'string' ? p : (o?.id ?? o?.productId);
+  if (id !== UNLOCK_ID || usePromoted.getState().open) return;
+  count({ 'unlock.promoted': 1 });
+  usePromoted.setState({ open: true });
 }
 
 /** true (and granted) if this Apple Account first got the app before 1.2. */
