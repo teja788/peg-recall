@@ -11,7 +11,7 @@ import { Pressable, ScrollView, Text, TextInput, View, type ViewStyle } from 're
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { ConnStatus } from '../online/client';
-import type { EndReason, ErrorCode } from '../online/protocol';
+import { BREAK_MS, type EndReason, type ErrorCode } from '../online/protocol';
 import { chevron, tr } from '../i18n';
 import { serverNow } from '../store/room';
 import { NAME_INPUT_MAX, animalName, useSettings } from '../store/settings';
@@ -260,4 +260,93 @@ export function useTurnCountdown(deadline: number | null, windowMs: number): num
     return () => clearTimeout(id);
   });
   return showing ? Math.ceil(left / 1000) : null;
+}
+
+/** Re-render every half second while `on` (a clock on screen). */
+function useTicking(on: boolean): void {
+  const [, tick] = React.useState(0);
+  React.useEffect(() => {
+    if (!on) return;
+    const id = setInterval(() => tick((n) => n + 1), 500);
+    return () => clearInterval(id);
+  }, [on]);
+}
+
+const clockText = (ms: number) => {
+  const s = Math.max(0, Math.ceil(ms / 1000));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+};
+
+/** A break in an online game: who is on it and how long is left, then the
+ *  3-2-1. The board stays dimly in view (its pegs are hidden; breaks never
+ *  start during a reveal) and takes no taps. */
+export function BreakOverlay({
+  pause,
+  name,
+  mine,
+  canEnd,
+  onEnd,
+}: {
+  pause: { by: string; until: number; resumeAt?: number };
+  name: string;
+  mine: boolean;
+  canEnd: boolean;
+  onEnd: () => void;
+}) {
+  const t = useTheme();
+  useTicking(true);
+  const now = serverNow();
+  const text = pause.resumeAt
+    ? tr('online.restarting', { n: Math.max(1, Math.ceil((pause.resumeAt - now) / 1000)) })
+    : tr(mine ? 'online.myBreak' : 'online.onBreak', { name, time: clockText(Math.min(BREAK_MS, pause.until - now)) });
+  return (
+    <View
+      accessibilityViewIsModal
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.55)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: t.spacing.xl,
+      }}
+    >
+      <Card style={{ width: '100%', maxWidth: 420, gap: t.spacing.md, alignItems: 'stretch' }}>
+        <Text
+          accessibilityRole="header"
+          accessibilityLiveRegion="polite"
+          style={{ ...t.type.title, color: t.c.text, textAlign: 'center' }}
+        >
+          {text}
+        </Text>
+        {canEnd && !pause.resumeAt ? <WideButton text={tr('online.endBreak')} filled onPress={onEnd} /> : null}
+      </Card>
+    </View>
+  );
+}
+
+/** This device stepped away: the computer is playing its turns. */
+export function AwayBar({ onBack }: { onBack: () => void }) {
+  const t = useTheme();
+  const insets = useSafeAreaInsets();
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        // clear of the sound button in the bottom corner
+        left: insets.left + 64,
+        right: insets.right + 64,
+        bottom: insets.bottom + t.spacing.sm,
+        alignItems: 'center',
+      }}
+    >
+      <Card style={{ width: '100%', maxWidth: 420, gap: t.spacing.sm }}>
+        <Text style={{ ...t.type.body, color: t.c.text, textAlign: 'center' }}>{tr('online.youAway')}</Text>
+        <WideButton text={tr('online.imBack')} filled onPress={onBack} />
+      </Card>
+    </View>
+  );
 }

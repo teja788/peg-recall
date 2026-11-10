@@ -29,8 +29,8 @@ export interface PauseSheetProps {
   body?: string;
   homeLabel?: string;
   homeHint?: string;
-  /** one more quiet button above Home (the online game's "Report a problem") */
-  extra?: { label: string; onPress: () => void };
+  /** more quiet buttons above Home (the online game's break, step away, report) */
+  extras?: { label: string; onPress: () => void; hint?: string; disabled?: boolean }[];
 }
 
 export function PauseSheet({
@@ -41,7 +41,7 @@ export function PauseSheet({
   body,
   homeLabel,
   homeHint,
-  extra,
+  extras = [],
 }: PauseSheetProps) {
   const t = useTheme();
   const reduced = useReduceMotion();
@@ -161,24 +161,31 @@ export function PauseSheet({
                 <Text style={{ ...t.type.heading, color: t.c.text }}>{tr('pause.restart')}</Text>
               </Pressable>
             ) : null}
-            {extra ? (
+            {extras.map((x) => (
               <Pressable
+                key={x.label}
                 accessibilityRole="button"
-                accessibilityLabel={extra.label}
-                onPress={extra.onPress}
+                accessibilityLabel={x.label}
+                accessibilityHint={x.hint}
+                accessibilityState={{ disabled: !!x.disabled }}
+                disabled={x.disabled}
+                onPress={x.onPress}
                 style={({ pressed }) => [
                   styles.btn,
                   {
                     borderRadius: t.radii.lg,
                     borderWidth: 2,
                     borderColor: t.c.line,
-                    opacity: pressed ? 0.7 : 1,
+                    opacity: x.disabled ? 0.45 : pressed ? 0.7 : 1,
                   },
                 ]}
               >
-                <Text style={{ ...t.type.heading, color: t.c.text }}>{extra.label}</Text>
+                <Text style={{ ...t.type.heading, color: t.c.text }}>{x.label}</Text>
+                {x.hint ? (
+                  <Text style={{ ...t.type.caption, color: t.c.textDim, textAlign: 'center' }}>{x.hint}</Text>
+                ) : null}
               </Pressable>
-            ) : null}
+            ))}
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={homeLabel ?? tr('common.home')}

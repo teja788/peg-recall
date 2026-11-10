@@ -45,7 +45,7 @@ import type {
   RoomStatus,
   ServerMessage,
 } from '../../src/online/protocol';
-import { MISSED_LIMIT } from '../../src/online/protocol';
+import { BREAK_MS, MISSED_LIMIT, RESUME_MS } from '../../src/online/protocol';
 import { AVATAR_CYCLE } from '../../src/store/settingsModel';
 import { randomToken, randomUint32, type Clock, type Conn, type ServerConfig, type Stats } from './types';
 
@@ -70,6 +70,10 @@ export interface Seat {
   /** turns in a row they let run out while here, and the last such turn */
   missed?: number;
   missedTurn?: number;
+  /** "Step away": here, but the computer plays for them until they are back */
+  stepped?: boolean;
+  /** has had their break this game */
+  breakUsed?: boolean;
 }
 
 export interface RoomDeps {
@@ -112,6 +116,11 @@ export class Room {
   private readonly banned = new Set<string>();
   /** the clock on a dropped-out host handing over (`checkHost`) */
   private handover: unknown = null;
+  /** a break in progress (RoomInfo.pause), and its clock */
+  private brk: { by: string; until: number; resumeAt?: number } | null = null;
+  private brkTimer: unknown = null;
+  /** turn clocks run from the later of this and the last action (a break, a return) */
+  private clockFrom = 0;
 
   constructor(
     readonly code: string,
@@ -139,7 +148,11 @@ export class Room {
         ...(s.difficulty ? { difficulty: s.difficulty } : {}),
         online: s.kind === 'ai' || s.conn !== null,
         ...(s.missed ? { missed: s.missed } : {}),
+        ...(s.stepped ? { away: true as const } : {}),
+        ...(s.breakUsed ? { breakUsed: true as const } : {}),
       })),
+      ...(this.brk ? { pause: { ...this.brk } } : {}),
+      ...(this.clockFrom ? { clockFrom: this.clockFrom } : {}),
     };
   }
 
@@ -264,7 +277,9 @@ export class Room {
     if (err) return err;
     // people who left during the last game are gone for this one
     for (const s of this.seats.filter((x) => x.left)) this.seats.splice(this.seats.indexOf(s), 1);
-    for (const s of this.seats) s.missed = s.missedTurn = undefined;
+    for (const s of this.seats) s.missed = s.missedTurn = s.breakUsed = undefined;
+    this.clearBreak();
+    this.clockFrom = 0;
     if (this.seats.length < 2) {
       this.broadcastRoom();
       return 'bad';
@@ -309,12 +324,57 @@ export class Room {
   intent(by: Conn, action: Intent): void {
     const seat = this.seatOf(by);
     const s = this.state;
-    if (!seat || !s || this.status !== 'playing') return;
+    if (!seat || !s || this.status !== 'playing' || this.brk) return;
     if (activePlayerSpec(s).id !== seat.id) return;
     this.standingIn.delete(seat.id);
-    const warned = !!seat.missed;
+    const changed = !!seat.missed || !!seat.stepped;
     seat.missed = 0;
-    if (this.apply(action, seat.id, false) && warned) this.broadcastRoom();
+    seat.stepped = false;
+    if (this.apply(action, seat.id, false) && changed) this.broadcastRoom();
+  }
+
+  /** "Take a break": once per person per game, everyone waits up to BREAK_MS.
+   *  A reveal or a result already showing still finishes; no move is made. */
+  takeBreak(by: Conn): ErrorCode | null {
+    const seat = this.seatOf(by);
+    if (!seat || this.status !== 'playing' || this.brk || seat.breakUsed) return 'bad';
+    // not while the board is face up: everyone would lose their look at it
+    if (this.state?.phase === 'reveal') return 'bad';
+    seat.breakUsed = true;
+    this.brk = { by: seat.id, until: this.deps.clock.now() + BREAK_MS };
+    this.armBreak(BREAK_MS, () => this.countIn());
+    this.touch();
+    this.schedule();
+    this.broadcastRoom();
+    return null;
+  }
+
+  /** End the break early: whoever took it, or the host. */
+  endBreak(by: Conn): ErrorCode | null {
+    const seat = this.seatOf(by);
+    if (!seat || !this.brk || this.brk.resumeAt) return 'bad';
+    if (seat.id !== this.brk.by && seat.id !== this.host) return 'notHost';
+    this.countIn();
+    return null;
+  }
+
+  /** "Step away" / "I'm back": while away the computer plays their turns at
+   *  its own pace, and those turns are never counted as missed. */
+  stepAway(by: Conn, away: boolean): ErrorCode | null {
+    const seat = this.seatOf(by);
+    if (!seat || this.status !== 'playing') return 'bad';
+    if (!!seat.stepped === away) return null;
+    seat.stepped = away;
+    seat.missed = 0;
+    if (!away) {
+      this.standingIn.delete(seat.id);
+      // back on their own turn: a fresh clock
+      if (this.state && activePlayerSpec(this.state).id === seat.id) this.clockFrom = this.deps.clock.now();
+    }
+    this.touch();
+    this.schedule();
+    this.broadcastRoom();
+    return null;
   }
 
   /** Close the room: everyone still here is told why. */
@@ -323,6 +383,7 @@ export class Room {
     this.closed = true;
     this.cancelPending();
     this.cancelHandover();
+    this.clearBreak();
     for (const seat of this.seats) {
       if (!seat.conn) continue;
       this.send(seat.conn, { type: 'ended', reason });
@@ -370,6 +431,7 @@ export class Room {
       hash: stateHash(next),
     });
     if (next.phase === 'gameOver') {
+      this.clearBreak();
       this.status = 'over';
       this.overAt = this.at;
       this.deps.stats.gamesFinished++;
@@ -388,11 +450,13 @@ export class Room {
     // nobody here: the board waits for someone to come back
     if (this.peopleHere() === 0) return;
     const step = autoStep(s, this.rng);
-    if (step) {
+    // on a break, a reveal or result that is showing finishes; nobody moves
+    if (step && (!this.brk || step.kind === 'REVEAL_DONE' || step.kind === 'RESULT_DONE')) {
       this.rng = step.rng;
       this.arm('auto', step.afterMs, () => this.fireAuto(step.kind));
       return;
     }
+    if (this.brk) return;
     this.armTurn();
   }
 
@@ -412,17 +476,19 @@ export class Room {
     if (!seat) return;
     const now = this.deps.clock.now();
     const { config } = this.deps;
+    // the phase began at the last action, or later if a break or a return restarted the clock
+    const from = Math.max(this.at, this.clockFrom);
     let delay: number;
-    if (seat.conn) {
-      delay = this.at + config.turnMs[this.settings.timer] - now;
-    } else if (seat.left || this.standingIn.has(seat.id)) {
+    if (seat.conn && !seat.stepped) {
+      delay = from + config.turnMs[this.settings.timer] - now;
+    } else if (seat.left || seat.stepped || this.standingIn.has(seat.id)) {
       // already standing in: computer pacing, as for a computer seat
       // deadlines from when the phase began, so re-arming never pushes them back
-      if (s.phase === 'roll') delay = this.at + FLOW.aiRollDelay - now;
-      else delay = this.at + tumbleMs(s.dieRerolls ?? 0) + this.thinkFor(this.seq) - now;
+      if (s.phase === 'roll') delay = from + FLOW.aiRollDelay - now;
+      else delay = from + tumbleMs(s.dieRerolls ?? 0) + this.thinkFor(this.seq) - now;
     } else {
-      const since = Math.max(this.at, seat.awaySince ?? this.at);
-      delay = Math.min(this.at + config.turnMs[this.settings.timer], since + config.awayGraceMs) - now;
+      const since = Math.max(from, seat.awaySince ?? from);
+      delay = Math.min(from + config.turnMs[this.settings.timer], since + config.awayGraceMs) - now;
     }
     this.arm('turn', Math.max(0, delay), () => this.standIn(seat));
   }
@@ -433,7 +499,7 @@ export class Room {
     if (!s || activePlayerSpec(s).id !== seat.id) return;
     if (!seat.conn) this.standingIn.add(seat.id);
     // here, but the turn ran out: counted once per turn (a roll and its pick)
-    const idle = !!seat.conn && seat.missedTurn !== s.turn;
+    const idle = !!seat.conn && !seat.stepped && seat.missedTurn !== s.turn;
     if (idle) {
       seat.missed = (seat.missed ?? 0) + 1;
       seat.missedTurn = s.turn;
@@ -535,6 +601,34 @@ export class Room {
       fn();
     }, ms);
     this.pending = { kind, handle };
+  }
+
+  /** The break's last part: a 3-2-1 everyone sees, then play goes on. */
+  private countIn(): void {
+    if (!this.brk || this.brk.resumeAt) return;
+    this.brk.resumeAt = this.deps.clock.now() + RESUME_MS;
+    this.armBreak(RESUME_MS, () => {
+      this.clearBreak();
+      // the mover gets a whole turn again
+      this.clockFrom = this.deps.clock.now();
+      this.schedule();
+      this.broadcastRoom();
+    });
+    this.broadcastRoom();
+  }
+
+  private armBreak(ms: number, fn: () => void): void {
+    if (this.brkTimer) this.deps.clock.clearTimeout(this.brkTimer);
+    this.brkTimer = this.deps.clock.setTimeout(() => {
+      this.brkTimer = null;
+      fn();
+    }, ms);
+  }
+
+  private clearBreak(): void {
+    if (this.brkTimer) this.deps.clock.clearTimeout(this.brkTimer);
+    this.brkTimer = null;
+    this.brk = null;
   }
 
   private cancelPending(): void {

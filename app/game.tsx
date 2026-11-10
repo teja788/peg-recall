@@ -55,7 +55,7 @@ import {
 } from '../src/ui/feedback';
 import { TRAY_GAP, tableLayout } from '../src/ui/gameLayout';
 import { isolate, playerLabel } from '../src/ui/names';
-import { seatName, useTurnCountdown } from '../src/ui/online';
+import { AwayBar, BreakOverlay, seatName, useTurnCountdown } from '../src/ui/online';
 import { MISSED_WARN, NUDGE_MS, TURN_MS } from '../src/online/protocol';
 import { tr, trn } from '../src/i18n';
 
@@ -603,9 +603,18 @@ export default function GameScreen() {
 
   // online, my roll or pick: the server's clock on it, shown near its end
   const timer = roomInfo?.settings.timer ?? 'relaxed';
+  const breakInfo = online ? roomInfo?.pause : undefined;
+  const meSeat = roomInfo?.seats.find((x) => x.id === remote?.seat);
   const myMove =
-    online && !!view && !!remote && (view.phase === 'roll' || view.phase === 'pick') && activePlayerSpec(view).id === remote.seat;
-  const secondsLeft = useTurnCountdown(myMove && lastAt != null ? lastAt + TURN_MS[timer] : null, NUDGE_MS[timer]);
+    online &&
+    !!view &&
+    !!remote &&
+    !breakInfo &&
+    !meSeat?.away &&
+    (view.phase === 'roll' || view.phase === 'pick') &&
+    activePlayerSpec(view).id === remote.seat;
+  const clockFrom = Math.max(lastAt ?? 0, roomInfo?.clockFrom ?? 0);
+  const secondsLeft = useTurnCountdown(myMove && lastAt != null ? clockFrom + TURN_MS[timer] : null, NUDGE_MS[timer]);
 
   if (!view) {
     return (
@@ -618,17 +627,17 @@ export default function GameScreen() {
   const human = isHumanTurn(view);
   // online, only this device's seat moves, and each tap goes to the server once
   const mine = online ? remote != null && activePlayerSpec(view).id === remote.seat : human;
-  const canRoll = !leaving && view.phase === 'roll' && mine && !busy && !paused && !waiting;
-  const canPick = !leaving && view.phase === 'pick' && mine && !busy && !paused && !waiting;
+  const canRoll = !leaving && view.phase === 'roll' && mine && !busy && !paused && !waiting && !breakInfo;
+  const canPick = !leaving && view.phase === 'pick' && mine && !busy && !paused && !waiting && !breakInfo;
   const won = online
     ? view.phase === 'gameOver' && !!remote && view.winnerIds.includes(remote.seat)
     : humanWon(view);
   // never for an unlocked player (a purchase from the card hides it at once)
   const card = !online && !unlocked && upsell && upsell.key === overKey ? upsell.card : null;
   const hostSeat = roomInfo?.seats.find((x) => x.id === roomInfo.host);
-  const awaySeat = roomInfo?.seats.find((x) => x.kind === 'human' && !x.online && x.id !== remote?.seat);
-  const missed = roomInfo?.seats.find((x) => x.id === remote?.seat)?.missed ?? 0;
-  const onlineNote = !online
+  const awaySeat = roomInfo?.seats.find((x) => x.kind === 'human' && (!x.online || x.away) && x.id !== remote?.seat);
+  const missed = meSeat?.missed ?? 0;
+  const onlineNote = !online || meSeat?.away
     ? ''
     : roomStatus === 'connecting' || roomStatus === 'reconnecting'
       ? tr('online.reconnecting')
@@ -845,11 +854,45 @@ export default function GameScreen() {
         body={tr('online.menuBody')}
         homeLabel={tr('online.leave')}
         homeHint={tr('online.leaveHint')}
-        extra={{
-          label: tr('online.report'),
-          onPress: () => void Linking.openURL(reportUrl(roomCode, remote?.seat ?? null)).catch(() => {}),
-        }}
+        extras={[
+          {
+            label: meSeat?.breakUsed ? tr('online.breakUsed') : tr('online.break'),
+            hint: meSeat?.breakUsed ? undefined : tr('online.breakHint'),
+            // not while the board is face up, nor during someone's break
+            disabled: !!meSeat?.breakUsed || !!breakInfo || view.phase === 'reveal',
+            onPress: () => {
+              setMenu(false);
+              useRoom.getState().takeBreak();
+            },
+          },
+          {
+            label: tr(meSeat?.away ? 'online.imBack' : 'online.stepAway'),
+            hint: meSeat?.away ? undefined : tr('online.stepAwayHint'),
+            onPress: () => {
+              setMenu(false);
+              useRoom.getState().stepAway(!meSeat?.away);
+            },
+          },
+          {
+            label: tr('online.report'),
+            onPress: () => void Linking.openURL(reportUrl(roomCode, remote?.seat ?? null)).catch(() => {}),
+          },
+        ]}
       />
+    ) : null}
+
+    {breakInfo && view.phase !== 'gameOver' ? (
+      <BreakOverlay
+        pause={breakInfo}
+        name={seatName(roomInfo?.seats.find((x) => x.id === breakInfo.by) ?? { avatar: 'bunny' })}
+        mine={breakInfo.by === remote?.seat}
+        canEnd={breakInfo.by === remote?.seat || roomInfo?.host === remote?.seat}
+        onEnd={() => useRoom.getState().endBreak()}
+      />
+    ) : null}
+
+    {online && meSeat?.away && !breakInfo && view.phase !== 'gameOver' ? (
+      <AwayBar onBack={() => useRoom.getState().stepAway(false)} />
     ) : null}
 
     {onlineNote ? (

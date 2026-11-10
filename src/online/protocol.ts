@@ -36,6 +36,10 @@ export const NUDGE_MS = { relaxed: 30_000, quick: 10_000 } as const;
  *  number, and at the second the computer takes their seat for the game. */
 export const MISSED_WARN = 2;
 export const MISSED_LIMIT = 3;
+/** "Take a break": once per person per game, everyone waits at most this long */
+export const BREAK_MS = 2 * 60_000;
+/** then a 3-2-1 before play goes on */
+export const RESUME_MS = 3_000;
 /** Largest message either side accepts, in UTF-16 code units of the raw JSON. */
 export const MAX_MESSAGE_CHARS = 2048;
 export const MAX_SEATS = 4;
@@ -66,6 +70,10 @@ export interface SeatInfo {
   online: boolean;
   /** turns in a row this person let run out while here (shown at MISSED_WARN) */
   missed?: number;
+  /** stepped away: the computer plays for them until they are back */
+  away?: true;
+  /** has had their break this game */
+  breakUsed?: true;
 }
 
 export interface RoomInfo {
@@ -76,6 +84,12 @@ export interface RoomInfo {
   settings: RoomSettings;
   /** filled seats, in seat order */
   seats: SeatInfo[];
+  /** a break in progress: whose, until when (server time), and once it is
+   *  ending, when play starts again */
+  pause?: { by: string; until: number; resumeAt?: number };
+  /** server time a person's turn clock last restarted (after a break, or on
+   *  coming back): the clock runs from the later of this and the last action */
+  clockFrom?: number;
 }
 
 /** A move a device may ask for. Everything else the server does by itself. */
@@ -91,6 +105,11 @@ export type ClientMessage =
   | { type: 'start' }
   | { type: 'rematch' }
   | { type: 'intent'; action: Intent }
+  /** "Take a break" (once per game), and ending it early (its taker or the host) */
+  | { type: 'break' }
+  | { type: 'endBreak' }
+  /** "Step away" (away: true) and "I'm back" (away: false) */
+  | { type: 'away'; away: boolean }
   | { type: 'leave' }
   | { type: 'ping'; t: number };
 
@@ -240,7 +259,11 @@ export function parseClientMessage(raw: unknown): ClientMessage | null {
     case 'start':
     case 'rematch':
     case 'leave':
+    case 'break':
+    case 'endBreak':
       return { type: m.type };
+    case 'away':
+      return typeof m.away === 'boolean' ? { type: 'away', away: m.away } : null;
     case 'intent': {
       const action = intentOf(m.action);
       return action ? { type: 'intent', action } : null;

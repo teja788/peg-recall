@@ -249,6 +249,15 @@ export class Hub {
         st.room?.intent(conn, m.action);
         return;
 
+      case 'break':
+        return st.room ? this.maybeError(conn, st.room.takeBreak(conn)) : this.error(conn, 'bad');
+
+      case 'endBreak':
+        return st.room ? this.maybeError(conn, st.room.endBreak(conn)) : this.error(conn, 'bad');
+
+      case 'away':
+        return st.room ? this.maybeError(conn, st.room.stepAway(conn, m.away)) : this.error(conn, 'bad');
+
       case 'leave':
         this.leaveRoom(conn, st);
         return;

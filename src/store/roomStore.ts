@@ -85,6 +85,11 @@ export interface RoomStore {
   rematch: () => void;
   addBot: (difficulty: Difficulty) => void;
   removeSeat: (seat: string) => void;
+  /** "Take a break" (once per game), and ending one early (its taker or the host) */
+  takeBreak: () => void;
+  endBreak: () => void;
+  /** "Step away" (true) and "I'm back" (false) */
+  stepAway: (away: boolean) => void;
   /** Leave the room for good and hang up. */
   leave: () => void;
   /** Forget an ended room or a refusal the screen has shown. */
@@ -243,6 +248,9 @@ export function createRoomStore(deps: RoomDeps) {
       rematch: () => request({ type: 'rematch' }),
       addBot: (difficulty) => request({ type: 'addBot', difficulty }),
       removeSeat: (seat) => request({ type: 'removeSeat', seat }),
+      takeBreak: () => request({ type: 'break' }),
+      endBreak: () => request({ type: 'endBreak' }),
+      stepAway: (away) => request({ type: 'away', away }),
 
       leave: () => {
         conn?.send({ type: 'leave' });

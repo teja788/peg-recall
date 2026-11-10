@@ -495,3 +495,85 @@ test('missed turns in a row: a warning at 2, the computer takes the seat at 3; a
   runUntil(() => host.state?.phase === 'gameOver', 30 * 60_000);
   assert.equal(host.state?.phase, 'gameOver');
 });
+
+test('a break: nobody moves for up to 2 minutes, then 3-2-1 and a fresh turn clock; once per game; taker or host ends it', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1, { timer: 'quick' });
+  const dadi = guests[0];
+  host.say({ type: 'start' });
+  clock.advance(4_100); // the reveal ends
+  host.read();
+  dadi.read();
+  assert.equal(host.state?.phase, 'roll');
+  const seq = host.seq;
+
+  dadi.say({ type: 'break' });
+  host.read();
+  assert.equal(host.room?.pause?.by, 'p2');
+  host.say({ type: 'intent', action: { type: 'ROLL' } }); // dropped while on a break
+  clock.advance(110_000); // far past Quick's 20 s: no stand-in either
+  host.read();
+  assert.equal(host.seq, seq, 'nothing moved during the break');
+
+  clock.advance(10_500); // 2 minutes up: the 3-2-1 starts
+  host.read();
+  assert.ok(host.room?.pause?.resumeAt, 'counting in');
+  clock.advance(3_100);
+  host.read();
+  assert.equal(host.room?.pause, undefined, 'play goes on');
+  clock.advance(19_000); // a whole Quick turn again from the restart
+  host.read();
+  assert.equal(host.seq, seq, 'the mover got a fresh clock');
+  host.say({ type: 'intent', action: { type: 'ROLL' } });
+  host.read();
+  assert.equal(host.seq, seq + 1);
+
+  dadi.say({ type: 'break' });
+  dadi.read();
+  assert.deepEqual(dadi.errors, ['bad'], 'one break each per game');
+
+  host.say({ type: 'break' });
+  dadi.say({ type: 'endBreak' });
+  dadi.read();
+  assert.deepEqual(dadi.errors, ['bad', 'notHost'], 'only its taker or the host ends it');
+  host.say({ type: 'endBreak' });
+  clock.advance(3_100);
+  host.read();
+  assert.equal(host.room?.pause, undefined);
+});
+
+test('step away: the computer plays their turns at its pace, never counted as missed; a move brings them back', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 1, { timer: 'relaxed' });
+  const dadi = guests[0];
+  host.say({ type: 'start' });
+  clock.advance(4_100);
+  dadi.say({ type: 'away', away: true });
+  host.read();
+  assert.equal(host.room?.seats.find((s) => s.id === 'p2')?.away, true);
+  // the host plays; Dadi's turns go by at computer pace, far under Relaxed's minute
+  const t0 = clock.now();
+  for (let i = 0; i < 400 && clock.now() - t0 < 4 * 60_000; i++) {
+    clock.advance(250);
+    host.read();
+    if (host.state && activePlayerSpec(host.state).id === 'p1') {
+      if (host.state.phase === 'roll') host.say({ type: 'intent', action: { type: 'ROLL' } });
+      else if (host.state.phase === 'pick') {
+        const peg = host.state.pegs.find((p) => p.state === 'hidden');
+        if (peg) host.say({ type: 'intent', action: { type: 'PICK', pegIndex: peg.index } });
+      }
+    }
+    const covered = host.actions.filter((x) => x.by === 'p2').length >= 2;
+    if (covered && host.state && activePlayerSpec(host.state).id === 'p2' && host.state.phase === 'roll') break;
+  }
+  const stood = host.actions.filter((a) => a.by === 'p2');
+  assert.ok(stood.length > 0 && stood.every((a) => a.standIn), 'the computer played for Dadi');
+  assert.ok(clock.now() - t0 < 60_000, 'at computer pace, not after the turn clock');
+  assert.equal(host.room?.seats.find((s) => s.id === 'p2')?.missed, undefined, 'never counted as missed');
+  dadi.read();
+  dadi.say({ type: 'intent', action: { type: 'ROLL' } });
+  host.read();
+  assert.equal(host.room?.seats.find((s) => s.id === 'p2')?.away, undefined, 'a move of her own: she is back');
+  assert.equal(host.actions.at(-1)?.by, 'p2');
+  assert.equal(host.actions.at(-1)?.standIn, undefined);
+});
