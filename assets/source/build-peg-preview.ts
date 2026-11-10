@@ -29,47 +29,8 @@ import {
   projectHole,
   woodDieScene,
 } from '../../src/ui/art/perspectiveModel';
-import type { Grad, Prim, Scene } from '../../src/ui/art/perspectiveModel';
-
-/* ------------------------------------------------------- scene -> svg text */
-
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-
-function attrs(o: Record<string, string | number | undefined>): string {
-  return Object.entries(o)
-    .filter(([, v]) => v !== undefined && v !== null)
-    .map(([k, v]) => ` ${k}="${typeof v === 'string' ? esc(v) : v}"`)
-    .join('');
-}
-
-function gradSvg(g: Grad): string {
-  const stops = g.stops
-    .map((s) => `<stop offset="${s.offset}" stop-color="${s.color}" stop-opacity="${s.opacity ?? 1}"/>`)
-    .join('');
-  return g.kind === 'radial'
-    ? `<radialGradient id="${g.id}" cx="${g.cx}" cy="${g.cy}" r="${g.r}">${stops}</radialGradient>`
-    : `<linearGradient id="${g.id}" x1="${g.x1}" y1="${g.y1}" x2="${g.x2}" y2="${g.y2}">${stops}</linearGradient>`;
-}
-
-function primSvg(p: Prim): string {
-  const common = {
-    fill: p.fill ?? 'none',
-    stroke: p.stroke,
-    'stroke-width': p.sw,
-    opacity: p.opacity,
-    transform: p.transform,
-    'stroke-linecap': p.round ? 'round' : undefined,
-    'stroke-linejoin': p.round ? 'round' : undefined,
-  };
-  switch (p.t) {
-    case 'circle':
-      return `<circle${attrs({ cx: p.cx, cy: p.cy, r: p.r, ...common })}/>`;
-    case 'ellipse':
-      return `<ellipse${attrs({ cx: p.cx, cy: p.cy, rx: p.rx, ry: p.ry, ...common })}/>`;
-    case 'path':
-      return `<path${attrs({ d: p.d, ...common })}/>`;
-  }
-}
+import type { Scene } from '../../src/ui/art/perspectiveModel';
+import { gradSvg, primSvg } from '../../src/ui/art/sceneSvg';
 
 /** Inline a scene at (x, y) of a larger canvas. */
 function place(scene: Scene, x: number, y: number): { defs: string; body: string } {
