@@ -16,7 +16,7 @@
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_COUNTS_URL": "https://app-counts.teja788.workers.dev/c"
+        "EXPO_PUBLIC_COUNTS_URL": "https://app-counts.vivekananda-archive.workers.dev/c"
       }
     },
     "production": {
@@ -26,7 +26,7 @@
         "image": "macos-sequoia-15.6-xcode-26.2"
       },
       "env": {
-        "EXPO_PUBLIC_COUNTS_URL": "https://app-counts.teja788.workers.dev/c"
+        "EXPO_PUBLIC_COUNTS_URL": "https://app-counts.vivekananda-archive.workers.dev/c"
       }
     }
   },
