@@ -24,7 +24,7 @@ const out = path.join(root, 'creative');
 mkdirSync(out, { recursive: true });
 
 const b64 = f => `data:image/png;base64,${readFileSync(f).toString('base64')}`;
-const font = `@font-face{font-family:N;src:url(data:font/ttf;base64,${readFileSync(path.join(root, style.font)).toString('base64')})}`;
+const font = `@font-face{font-family:N;font-weight:200 1000;src:url(data:font/ttf;base64,${readFileSync(path.join(root, style.font)).toString("base64")})}`;
 const frames = path.join(root, 'screenshot-frames');
 // caption locale -> translated-UI frames folder (same rule as compose-screenshots.mjs)
 const frame = (locale, shot) => {
@@ -41,7 +41,7 @@ div{position:absolute;left:896px;top:43px;width:2048px;height:1560px;
 
 const search = locale => `<style>${font}
 body{margin:0;width:3840px;height:2560px;overflow:hidden;background:linear-gradient(${style.background[0]},${style.background[1]});
-  font-family:N,-apple-system,'Hiragino Sans','Apple SD Gothic Neo','PingFang TC',sans-serif;color:${style.text}}
+  font-family:N,system-ui,-apple-system,'Hiragino Sans','Apple SD Gothic Neo','PingFang TC',sans-serif;color:${style.text}}
 .dots{position:absolute;top:150px;width:100%;text-align:center}
 .dots i{display:inline-block;width:44px;height:44px;border-radius:50%;margin:0 18px}
 h1{position:absolute;top:240px;width:100%;margin:0;text-align:center;font-size:210px;font-weight:900;letter-spacing:-2px;white-space:nowrap}
