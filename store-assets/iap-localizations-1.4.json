@@ -1,0 +1,678 @@
+{
+  "unlock": {
+    "bn-BD": {
+      "name": "4 খেলোয়াড় ও বড় বোর্ড আনলক",
+      "description": "বড়/বিশাল, পেঁচা, 3–4 জন; পরিবারের জন্য একবার কেনা"
+    },
+    "cs": {
+      "name": "4 hráči + Velký/Obří",
+      "description": "Sova, 3–4 hráči; jeden nákup pro celou rodinu"
+    },
+    "da": {
+      "name": "4 spillere + Stort/Kæmpe",
+      "description": "Ugle, 3–4 spillere; ét køb til hele familien"
+    },
+    "en-AU": {
+      "name": "Unlock 4 Players & Big Boards",
+      "description": "Big & Huge boards, Owl, 3–4 players, for the family"
+    },
+    "en-CA": {
+      "name": "Unlock 4 Players & Big Boards",
+      "description": "Big & Huge boards, Owl, 3–4 players, for the family"
+    },
+    "fr-CA": {
+      "name": "Accès 4 joueurs, Grand/Géant",
+      "description": "Grand/Géant, Hibou, 3–4 joueurs, un achat par famille"
+    },
+    "kn-IN": {
+      "name": "4 ಆಟಗಾರರು + ದೊಡ್ಡ/ಭಾರಿ",
+      "description": "ಗೂಬೆ, 3–4 ಆಟಗಾರರು; ಇಡೀ ಕುಟುಂಬಕ್ಕೆ ಒಂದೇ ಖರೀದಿ"
+    },
+    "mr-IN": {
+      "name": "4 खेळाडू आणि मोठे बोर्ड अनलॉक",
+      "description": "मोठा/प्रचंड, घुबड, 3–4 खेळाडू; कुटुंबासाठी एकच खरेदी"
+    },
+    "no": {
+      "name": "4 spillere + Stort/Kjempe",
+      "description": "Ugle, 3–4 spillere; ett kjøp for hele familien"
+    },
+    "pt-PT": {
+      "name": "4 jogadores + Grande/Gigante",
+      "description": "Coruja, 3–4 jogadores; uma compra para toda a família"
+    },
+    "sv": {
+      "name": "4 spelare + Stor/Jättestor",
+      "description": "Uggla, 3–4 spelare; ett köp för hela familjen"
+    },
+    "ta-IN": {
+      "name": "4 பேர் + பெரிய/மிகப்பெரிய",
+      "description": "ஆந்தை, 3–4 பேர்; குடும்பத்துக்கு ஒரே வாங்குதல்"
+    },
+    "te-IN": {
+      "name": "4 ఆటగాళ్ళు + పెద్ద/భారీ",
+      "description": "గుడ్లగూబ, 3–4 ఆటగాళ్ళు; కుటుంబానికి ఒకే కొనుగోలు"
+    },
+    "uk": {
+      "name": "Доступ: 4 гравці, великі поля",
+      "description": "Велике/Величезне, Сова, 3–4 гравці; для всієї сім’ї"
+    },
+    "ca": {
+      "name": "4 jugadors + Gran/Enorme",
+      "description": "Mussol, 3–4 jugadors; una compra per a tota la família"
+    },
+    "el": {
+      "name": "4 παίκτες + Μεγάλο/Τεράστιο",
+      "description": "Κουκουβάγια, 3–4 παίκτες· μία αγορά για την οικογένεια"
+    },
+    "fi": {
+      "name": "4 pelaajaa + Iso/Valtava",
+      "description": "Pöllö, 3–4 pelaajaa; yksi osto koko perheelle"
+    },
+    "gu-IN": {
+      "name": "4 ખેલાડી અને મોટા બોર્ડ અનલૉક",
+      "description": "મોટું/વિશાળ, ઘુવડ, 3–4 ખેલાડી; આખા પરિવાર માટે એક ખરીદી"
+    },
+    "he": {
+      "name": "4 שחקנים + גדול/ענק",
+      "description": "גדול/ענק, ינשוף, 3–4 שחקנים; רכישה אחת לכל המשפחה"
+    },
+    "hr": {
+      "name": "4 igrača + Velika/Ogromna",
+      "description": "Sova, 3–4 igrača; jedna kupnja za cijelu obitelj"
+    },
+    "hu": {
+      "name": "4 játékos + Nagy/Óriási",
+      "description": "Bagoly, 3–4 játékos; egy vásárlás az egész családnak"
+    },
+    "ml-IN": {
+      "name": "4 കളിക്കാർ + വലിയ/ഭീമൻ",
+      "description": "മൂങ്ങ, 3–4 കളിക്കാർ; കുടുംബത്തിന് മുഴുവൻ ഒറ്റ വാങ്ങൽ"
+    },
+    "ms": {
+      "name": "4 Pemain, Papan Besar/Gergasi",
+      "description": "Burung Hantu, 3–4 pemain; sekali beli untuk sekeluarga"
+    },
+    "or-IN": {
+      "name": "4 ଖେଳାଳି ଓ ବଡ଼ ବୋର୍ଡ ଅନଲକ",
+      "description": "ବଡ଼/ବିଶାଳ, ପେଚା, 3–4 ଖେଳାଳି; ପରିବାର ପାଇଁ ଗୋଟିଏ କିଣା"
+    },
+    "pa-IN": {
+      "name": "4 ਖਿਡਾਰੀ ਅਤੇ ਵੱਡੇ ਬੋਰਡ ਅਨਲੌਕ",
+      "description": "ਵੱਡਾ/ਵਿਸ਼ਾਲ, ਉੱਲੂ, 3–4 ਖਿਡਾਰੀ; ਪੂਰੇ ਪਰਿਵਾਰ ਲਈ ਇੱਕ ਖਰੀਦ"
+    },
+    "ro": {
+      "name": "4 jucători + Mare/Uriașă",
+      "description": "Bufnița, 3–4 jucători; o achiziție pentru toată familia"
+    },
+    "sk": {
+      "name": "4 hráči + Veľká/Obrovská",
+      "description": "Sova, 3–4 hráči; jeden nákup pre celú rodinu"
+    },
+    "sl-SI": {
+      "name": "4 igralci + Velika/Ogromna",
+      "description": "Sova, 3–4 igralci; en nakup za vso družino"
+    },
+    "ur-PK": {
+      "name": "4 کھلاڑی اور بڑے بورڈ ان لاک",
+      "description": "بڑا/بہت بڑا، اُلّو، 3–4 کھلاڑی؛ گھرانے کے لیے ایک خرید"
+    }
+  },
+  "tipSmall": {
+    "de-DE": {
+      "name": "Kleines Trinkgeld",
+      "description": "Sag Danke und unterstütze das Spiel"
+    },
+    "fr-FR": {
+      "name": "Petit pourboire",
+      "description": "Dites merci et soutenez le jeu"
+    },
+    "pt-BR": {
+      "name": "Gorjeta pequena",
+      "description": "Agradeça e apoie o jogo"
+    },
+    "ja": {
+      "name": "ちいさなチップ",
+      "description": "ありがとうの気持ちでゲームを応援"
+    },
+    "es-ES": {
+      "name": "Propina pequeña",
+      "description": "Da las gracias y apoya el juego"
+    },
+    "it": {
+      "name": "Mancia piccola",
+      "description": "Di' grazie e sostieni il gioco"
+    },
+    "ko": {
+      "name": "작은 후원",
+      "description": "고마움을 전하고 게임을 응원해 주세요"
+    },
+    "zh-Hant": {
+      "name": "小額贊助",
+      "description": "表達謝意，支持這款遊戲"
+    },
+    "tr": {
+      "name": "Küçük bahşiş",
+      "description": "Teşekkür edin ve oyunu destekleyin"
+    },
+    "nl-NL": {
+      "name": "Kleine bijdrage",
+      "description": "Zeg dankjewel en steun het spel"
+    },
+    "pl": {
+      "name": "Mały napiwek",
+      "description": "Podziękuj i wesprzyj grę"
+    },
+    "hi": {
+      "name": "छोटी टिप",
+      "description": "धन्यवाद कहें और गेम का साथ दें"
+    },
+    "ru": {
+      "name": "Маленькие чаевые",
+      "description": "Скажите спасибо и поддержите игру"
+    },
+    "vi": {
+      "name": "Ủng hộ nhỏ",
+      "description": "Gửi lời cảm ơn và ủng hộ trò chơi"
+    },
+    "id": {
+      "name": "Tip kecil",
+      "description": "Ucapkan terima kasih dan dukung game ini"
+    },
+    "th": {
+      "name": "ทิปเล็ก",
+      "description": "ขอบคุณและสนับสนุนเกมนี้"
+    },
+    "ar-SA": {
+      "name": "إكرامية صغيرة",
+      "description": "قل شكرًا وادعم اللعبة"
+    },
+    "bn-BD": {
+      "name": "ছোট টিপ",
+      "description": "ধন্যবাদ জানাও আর গেমটির পাশে থাকো"
+    },
+    "cs": {
+      "name": "Malé spropitné",
+      "description": "Poděkujte a podpořte hru"
+    },
+    "da": {
+      "name": "Lille bidrag",
+      "description": "Sig tak og støt spillet"
+    },
+    "en-AU": {
+      "name": "Small Tip",
+      "description": "Say thanks and support the game"
+    },
+    "en-CA": {
+      "name": "Small Tip",
+      "description": "Say thanks and support the game"
+    },
+    "fr-CA": {
+      "name": "Petit pourboire",
+      "description": "Dites merci et soutenez le jeu"
+    },
+    "kn-IN": {
+      "name": "ಸಣ್ಣ ಟಿಪ್",
+      "description": "ಧನ್ಯವಾದ ಹೇಳಿ, ಆಟವನ್ನು ಬೆಂಬಲಿಸಿ"
+    },
+    "mr-IN": {
+      "name": "छोटी टिप",
+      "description": "धन्यवाद म्हणा आणि गेमला पाठिंबा द्या"
+    },
+    "no": {
+      "name": "Lite bidrag",
+      "description": "Si takk og støtt spillet"
+    },
+    "pt-PT": {
+      "name": "Gorjeta pequena",
+      "description": "Agradeça e apoie o jogo"
+    },
+    "sv": {
+      "name": "Litet bidrag",
+      "description": "Säg tack och stöd spelet"
+    },
+    "ta-IN": {
+      "name": "சிறிய டிப்",
+      "description": "நன்றி சொல்லி, விளையாட்டை ஆதரியுங்கள்"
+    },
+    "te-IN": {
+      "name": "చిన్న టిప్",
+      "description": "ధన్యవాదాలు చెప్పి, ఆటకు మద్దతు ఇవ్వండి"
+    },
+    "uk": {
+      "name": "Маленькі чайові",
+      "description": "Скажіть дякую й підтримайте гру"
+    },
+    "ca": {
+      "name": "Propina petita",
+      "description": "Digues gràcies i dona suport al joc"
+    },
+    "el": {
+      "name": "Μικρό κέρασμα",
+      "description": "Πείτε ευχαριστώ και στηρίξτε το παιχνίδι"
+    },
+    "fi": {
+      "name": "Pieni tippi",
+      "description": "Kiitä ja tue peliä"
+    },
+    "gu-IN": {
+      "name": "નાની ટિપ",
+      "description": "આભાર કહો અને ગેમને ટેકો આપો"
+    },
+    "he": {
+      "name": "טיפ קטן",
+      "description": "אמרו תודה ותמכו במשחק"
+    },
+    "hr": {
+      "name": "Mala napojnica",
+      "description": "Zahvalite i podržite igru"
+    },
+    "hu": {
+      "name": "Kis támogatás",
+      "description": "Mondj köszönetet, és támogasd a játékot"
+    },
+    "ml-IN": {
+      "name": "ചെറിയ ടിപ്പ്",
+      "description": "നന്ദി പറയൂ, ഗെയിമിനെ പിന്തുണയ്ക്കൂ"
+    },
+    "ms": {
+      "name": "Tip kecil",
+      "description": "Ucap terima kasih dan sokong permainan ini"
+    },
+    "or-IN": {
+      "name": "ଛୋଟ ଟିପ",
+      "description": "ଧନ୍ୟବାଦ କୁହ ଓ ଖେଳକୁ ସମର୍ଥନ କର"
+    },
+    "pa-IN": {
+      "name": "ਛੋਟੀ ਟਿਪ",
+      "description": "ਧੰਨਵਾਦ ਕਹੋ ਅਤੇ ਗੇਮ ਦਾ ਸਾਥ ਦਿਓ"
+    },
+    "ro": {
+      "name": "Contribuție mică",
+      "description": "Spune mulțumesc și susține jocul"
+    },
+    "sk": {
+      "name": "Malé prepitné",
+      "description": "Poďakujte a podporte hru"
+    },
+    "sl-SI": {
+      "name": "Majhna napitnina",
+      "description": "Recite hvala in podprite igro"
+    },
+    "ur-PK": {
+      "name": "چھوٹی ٹپ",
+      "description": "شکریہ کہیں اور گیم کا ساتھ دیں"
+    }
+  },
+  "tipMedium": {
+    "de-DE": {
+      "name": "Mittleres Trinkgeld",
+      "description": "Sag Danke und unterstütze das Spiel"
+    },
+    "fr-FR": {
+      "name": "Pourboire moyen",
+      "description": "Dites merci et soutenez le jeu"
+    },
+    "pt-BR": {
+      "name": "Gorjeta média",
+      "description": "Agradeça e apoie o jogo"
+    },
+    "ja": {
+      "name": "ふつうのチップ",
+      "description": "ありがとうの気持ちでゲームを応援"
+    },
+    "es-ES": {
+      "name": "Propina mediana",
+      "description": "Da las gracias y apoya el juego"
+    },
+    "it": {
+      "name": "Mancia media",
+      "description": "Di' grazie e sostieni il gioco"
+    },
+    "ko": {
+      "name": "보통 후원",
+      "description": "고마움을 전하고 게임을 응원해 주세요"
+    },
+    "zh-Hant": {
+      "name": "中額贊助",
+      "description": "表達謝意，支持這款遊戲"
+    },
+    "tr": {
+      "name": "Orta bahşiş",
+      "description": "Teşekkür edin ve oyunu destekleyin"
+    },
+    "nl-NL": {
+      "name": "Middelgrote bijdrage",
+      "description": "Zeg dankjewel en steun het spel"
+    },
+    "pl": {
+      "name": "Średni napiwek",
+      "description": "Podziękuj i wesprzyj grę"
+    },
+    "hi": {
+      "name": "मध्यम टिप",
+      "description": "धन्यवाद कहें और गेम का साथ दें"
+    },
+    "ru": {
+      "name": "Средние чаевые",
+      "description": "Скажите спасибо и поддержите игру"
+    },
+    "vi": {
+      "name": "Ủng hộ vừa",
+      "description": "Gửi lời cảm ơn và ủng hộ trò chơi"
+    },
+    "id": {
+      "name": "Tip sedang",
+      "description": "Ucapkan terima kasih dan dukung game ini"
+    },
+    "th": {
+      "name": "ทิปกลาง",
+      "description": "ขอบคุณและสนับสนุนเกมนี้"
+    },
+    "ar-SA": {
+      "name": "إكرامية متوسطة",
+      "description": "قل شكرًا وادعم اللعبة"
+    },
+    "bn-BD": {
+      "name": "মাঝারি টিপ",
+      "description": "ধন্যবাদ জানাও আর গেমটির পাশে থাকো"
+    },
+    "cs": {
+      "name": "Střední spropitné",
+      "description": "Poděkujte a podpořte hru"
+    },
+    "da": {
+      "name": "Mellemstort bidrag",
+      "description": "Sig tak og støt spillet"
+    },
+    "en-AU": {
+      "name": "Medium Tip",
+      "description": "Say thanks and support the game"
+    },
+    "en-CA": {
+      "name": "Medium Tip",
+      "description": "Say thanks and support the game"
+    },
+    "fr-CA": {
+      "name": "Pourboire moyen",
+      "description": "Dites merci et soutenez le jeu"
+    },
+    "kn-IN": {
+      "name": "ಮಧ್ಯಮ ಟಿಪ್",
+      "description": "ಧನ್ಯವಾದ ಹೇಳಿ, ಆಟವನ್ನು ಬೆಂಬಲಿಸಿ"
+    },
+    "mr-IN": {
+      "name": "मध्यम टिप",
+      "description": "धन्यवाद म्हणा आणि गेमला पाठिंबा द्या"
+    },
+    "no": {
+      "name": "Middels bidrag",
+      "description": "Si takk og støtt spillet"
+    },
+    "pt-PT": {
+      "name": "Gorjeta média",
+      "description": "Agradeça e apoie o jogo"
+    },
+    "sv": {
+      "name": "Mellanstort bidrag",
+      "description": "Säg tack och stöd spelet"
+    },
+    "ta-IN": {
+      "name": "நடுத்தர டிப்",
+      "description": "நன்றி சொல்லி, விளையாட்டை ஆதரியுங்கள்"
+    },
+    "te-IN": {
+      "name": "మధ్యస్థ టిప్",
+      "description": "ధన్యవాదాలు చెప్పి, ఆటకు మద్దతు ఇవ్వండి"
+    },
+    "uk": {
+      "name": "Середні чайові",
+      "description": "Скажіть дякую й підтримайте гру"
+    },
+    "ca": {
+      "name": "Propina mitjana",
+      "description": "Digues gràcies i dona suport al joc"
+    },
+    "el": {
+      "name": "Μεσαίο κέρασμα",
+      "description": "Πείτε ευχαριστώ και στηρίξτε το παιχνίδι"
+    },
+    "fi": {
+      "name": "Keskikokoinen tippi",
+      "description": "Kiitä ja tue peliä"
+    },
+    "gu-IN": {
+      "name": "મધ્યમ ટિપ",
+      "description": "આભાર કહો અને ગેમને ટેકો આપો"
+    },
+    "he": {
+      "name": "טיפ בינוני",
+      "description": "אמרו תודה ותמכו במשחק"
+    },
+    "hr": {
+      "name": "Srednja napojnica",
+      "description": "Zahvalite i podržite igru"
+    },
+    "hu": {
+      "name": "Közepes támogatás",
+      "description": "Mondj köszönetet, és támogasd a játékot"
+    },
+    "ml-IN": {
+      "name": "ഇടത്തരം ടിപ്പ്",
+      "description": "നന്ദി പറയൂ, ഗെയിമിനെ പിന്തുണയ്ക്കൂ"
+    },
+    "ms": {
+      "name": "Tip sederhana",
+      "description": "Ucap terima kasih dan sokong permainan ini"
+    },
+    "or-IN": {
+      "name": "ମଧ୍ୟମ ଟିପ",
+      "description": "ଧନ୍ୟବାଦ କୁହ ଓ ଖେଳକୁ ସମର୍ଥନ କର"
+    },
+    "pa-IN": {
+      "name": "ਦਰਮਿਆਨੀ ਟਿਪ",
+      "description": "ਧੰਨਵਾਦ ਕਹੋ ਅਤੇ ਗੇਮ ਦਾ ਸਾਥ ਦਿਓ"
+    },
+    "ro": {
+      "name": "Contribuție medie",
+      "description": "Spune mulțumesc și susține jocul"
+    },
+    "sk": {
+      "name": "Stredné prepitné",
+      "description": "Poďakujte a podporte hru"
+    },
+    "sl-SI": {
+      "name": "Srednja napitnina",
+      "description": "Recite hvala in podprite igro"
+    },
+    "ur-PK": {
+      "name": "درمیانی ٹپ",
+      "description": "شکریہ کہیں اور گیم کا ساتھ دیں"
+    }
+  },
+  "tipLarge": {
+    "de-DE": {
+      "name": "Großes Trinkgeld",
+      "description": "Sag Danke und unterstütze das Spiel"
+    },
+    "fr-FR": {
+      "name": "Gros pourboire",
+      "description": "Dites merci et soutenez le jeu"
+    },
+    "pt-BR": {
+      "name": "Gorjeta grande",
+      "description": "Agradeça e apoie o jogo"
+    },
+    "ja": {
+      "name": "おおきなチップ",
+      "description": "ありがとうの気持ちでゲームを応援"
+    },
+    "es-ES": {
+      "name": "Propina grande",
+      "description": "Da las gracias y apoya el juego"
+    },
+    "it": {
+      "name": "Mancia grande",
+      "description": "Di' grazie e sostieni il gioco"
+    },
+    "ko": {
+      "name": "큰 후원",
+      "description": "고마움을 전하고 게임을 응원해 주세요"
+    },
+    "zh-Hant": {
+      "name": "大額贊助",
+      "description": "表達謝意，支持這款遊戲"
+    },
+    "tr": {
+      "name": "Büyük bahşiş",
+      "description": "Teşekkür edin ve oyunu destekleyin"
+    },
+    "nl-NL": {
+      "name": "Grote bijdrage",
+      "description": "Zeg dankjewel en steun het spel"
+    },
+    "pl": {
+      "name": "Duży napiwek",
+      "description": "Podziękuj i wesprzyj grę"
+    },
+    "hi": {
+      "name": "बड़ी टिप",
+      "description": "धन्यवाद कहें और गेम का साथ दें"
+    },
+    "ru": {
+      "name": "Большие чаевые",
+      "description": "Скажите спасибо и поддержите игру"
+    },
+    "vi": {
+      "name": "Ủng hộ lớn",
+      "description": "Gửi lời cảm ơn và ủng hộ trò chơi"
+    },
+    "id": {
+      "name": "Tip besar",
+      "description": "Ucapkan terima kasih dan dukung game ini"
+    },
+    "th": {
+      "name": "ทิปใหญ่",
+      "description": "ขอบคุณและสนับสนุนเกมนี้"
+    },
+    "ar-SA": {
+      "name": "إكرامية كبيرة",
+      "description": "قل شكرًا وادعم اللعبة"
+    },
+    "bn-BD": {
+      "name": "বড় টিপ",
+      "description": "ধন্যবাদ জানাও আর গেমটির পাশে থাকো"
+    },
+    "cs": {
+      "name": "Velké spropitné",
+      "description": "Poděkujte a podpořte hru"
+    },
+    "da": {
+      "name": "Stort bidrag",
+      "description": "Sig tak og støt spillet"
+    },
+    "en-AU": {
+      "name": "Large Tip",
+      "description": "Say thanks and support the game"
+    },
+    "en-CA": {
+      "name": "Large Tip",
+      "description": "Say thanks and support the game"
+    },
+    "fr-CA": {
+      "name": "Gros pourboire",
+      "description": "Dites merci et soutenez le jeu"
+    },
+    "kn-IN": {
+      "name": "ದೊಡ್ಡ ಟಿಪ್",
+      "description": "ಧನ್ಯವಾದ ಹೇಳಿ, ಆಟವನ್ನು ಬೆಂಬಲಿಸಿ"
+    },
+    "mr-IN": {
+      "name": "मोठी टिप",
+      "description": "धन्यवाद म्हणा आणि गेमला पाठिंबा द्या"
+    },
+    "no": {
+      "name": "Stort bidrag",
+      "description": "Si takk og støtt spillet"
+    },
+    "pt-PT": {
+      "name": "Gorjeta grande",
+      "description": "Agradeça e apoie o jogo"
+    },
+    "sv": {
+      "name": "Stort bidrag",
+      "description": "Säg tack och stöd spelet"
+    },
+    "ta-IN": {
+      "name": "பெரிய டிப்",
+      "description": "நன்றி சொல்லி, விளையாட்டை ஆதரியுங்கள்"
+    },
+    "te-IN": {
+      "name": "పెద్ద టిప్",
+      "description": "ధన్యవాదాలు చెప్పి, ఆటకు మద్దతు ఇవ్వండి"
+    },
+    "uk": {
+      "name": "Великі чайові",
+      "description": "Скажіть дякую й підтримайте гру"
+    },
+    "ca": {
+      "name": "Propina gran",
+      "description": "Digues gràcies i dona suport al joc"
+    },
+    "el": {
+      "name": "Μεγάλο κέρασμα",
+      "description": "Πείτε ευχαριστώ και στηρίξτε το παιχνίδι"
+    },
+    "fi": {
+      "name": "Iso tippi",
+      "description": "Kiitä ja tue peliä"
+    },
+    "gu-IN": {
+      "name": "મોટી ટિપ",
+      "description": "આભાર કહો અને ગેમને ટેકો આપો"
+    },
+    "he": {
+      "name": "טיפ גדול",
+      "description": "אמרו תודה ותמכו במשחק"
+    },
+    "hr": {
+      "name": "Velika napojnica",
+      "description": "Zahvalite i podržite igru"
+    },
+    "hu": {
+      "name": "Nagy támogatás",
+      "description": "Mondj köszönetet, és támogasd a játékot"
+    },
+    "ml-IN": {
+      "name": "വലിയ ടിപ്പ്",
+      "description": "നന്ദി പറയൂ, ഗെയിമിനെ പിന്തുണയ്ക്കൂ"
+    },
+    "ms": {
+      "name": "Tip besar",
+      "description": "Ucap terima kasih dan sokong permainan ini"
+    },
+    "or-IN": {
+      "name": "ବଡ଼ ଟିପ",
+      "description": "ଧନ୍ୟବାଦ କୁହ ଓ ଖେଳକୁ ସମର୍ଥନ କର"
+    },
+    "pa-IN": {
+      "name": "ਵੱਡੀ ਟਿਪ",
+      "description": "ਧੰਨਵਾਦ ਕਹੋ ਅਤੇ ਗੇਮ ਦਾ ਸਾਥ ਦਿਓ"
+    },
+    "ro": {
+      "name": "Contribuție mare",
+      "description": "Spune mulțumesc și susține jocul"
+    },
+    "sk": {
+      "name": "Veľké prepitné",
+      "description": "Poďakujte a podporte hru"
+    },
+    "sl-SI": {
+      "name": "Velika napitnina",
+      "description": "Recite hvala in podprite igro"
+    },
+    "ur-PK": {
+      "name": "بڑی ٹپ",
+      "description": "شکریہ کہیں اور گیم کا ساتھ دیں"
+    }
+  }
+}
