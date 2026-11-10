@@ -20,11 +20,11 @@ import { useTheme } from '../src/theme';
 import { Backdrop } from '../src/ui/Backdrop';
 import { BoardGlyph, BoardMini } from '../src/ui/BoardMini';
 import { IconButton, ModeCard, OptionPill, QuestionGlyph } from '../src/ui/controls';
-import { shareMessage, shareUrl } from '../src/ui/GameOverSheet';
-import { shareText } from '../src/ui/shareText';
+import { resultMessage, shareMessage } from '../src/ui/GameOverSheet';
 import { joinNames, playerLabel } from '../src/ui/names';
 import { PlayersSheet } from '../src/ui/PlayersSheet';
 import { UnlockSheet } from '../src/ui/UnlockSheet';
+import { GetTheApp } from '../src/ui/GetTheApp';
 import { BOARD_SPECS, type AvatarId, type Difficulty, type PegColor } from '../src/engine/types';
 
 /**
@@ -232,7 +232,7 @@ export default function Home() {
           action={daily ? tr('share.short') : undefined}
           onPress={() =>
             daily
-              ? void shareMessage(shareText(daily.best, shareUrl()))
+              ? void shareMessage(resultMessage(daily.best))
               : go({ pathname: '/game', params: { mode: 'ai', daily: '1' } })
           }
           style={cardStyle}
@@ -331,6 +331,8 @@ export default function Home() {
             ))}
           </View>
         </View>
+
+        <GetTheApp />
       </ScrollView>
 
       {setup ? (

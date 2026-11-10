@@ -20,7 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { reportUrl } from '../src/online/config';
 import { useGame } from '../src/store/game';
-import { useRoom } from '../src/store/room';
+import { takeHostGame, useRoom } from '../src/store/room';
 import { maybeRequestReview, reviewDue } from '../src/store/reviewPrompt';
 import { hasStore } from '../src/store/storefront';
 import { dailyBoard, dailyNumber } from '../src/store/stats';
@@ -56,6 +56,8 @@ import {
 } from '../src/ui/feedback';
 import { TRAY_GAP, tableLayout } from '../src/ui/gameLayout';
 import { isolate, playerLabel } from '../src/ui/names';
+import { challengeBanner, parseChallenge } from '../src/ui/challenge';
+import { count } from '../src/store/analytics';
 import { AwayBar, BreakOverlay, seatName, useTurnCountdown } from '../src/ui/online';
 import { ReactButton, ReactionBubbles } from '../src/ui/reactions';
 import { MISSED_WARN, NUDGE_MS, TURN_MS } from '../src/online/protocol';
@@ -209,11 +211,19 @@ export default function GameScreen() {
   const padR = swap ? insets.left : insets.right;
   const win = useWindowDimensions();
   const reduced = useReduceMotion();
-  const params = useLocalSearchParams<{ mode?: string; daily?: string; room?: string }>();
+  const params = useLocalSearchParams<{ mode?: string; daily?: string; room?: string; d?: string; s?: string; r?: string; by?: string }>();
+  /** a "Beat my score" link (app/d/[n].tsx): board #d, and the score to beat */
+  const link = useMemo(
+    () =>
+      params.d != null
+        ? parseChallenge({ n: params.d, s: params.s, r: params.r, by: params.by }, dailyNumber(Date.now()))
+        : null,
+    [params.d, params.s, params.r, params.by],
+  );
   /** the mode asked for; `deal` decides what is actually played */
   const requested: GameMode = isMode(params.mode) ? params.mode : 'ai';
   /** Home's "Today's board": the first game here is the daily board */
-  const isDaily = params.daily === '1';
+  const isDaily = params.daily === '1' || link != null;
   /** an online game (?room=482913): the room server deals and referees it */
   const roomCode = typeof params.room === 'string' && params.room ? params.room : null;
   const online = roomCode != null;
@@ -291,9 +301,13 @@ export default function GameScreen() {
       if (daily) {
         // Classic (Big at weekends) vs Fox on the standard rules, never behind
         // the unlock, and seeded by the day: the same board and dice for everyone
-        const n = dailyNumber(Date.now());
-        start('ai', { ...s, boardSize: dailyBoard(n), difficulty: 'fox', bonusTurnOnMatch: true, kidMode: false }, n, n);
+        // a challenge link (/d/47) may be another day's board: that is an
+        // ordinary game in the stats, and leaves the streak alone
+        const today = dailyNumber(Date.now());
+        const n = link?.n ?? today;
+        start('ai', { ...s, boardSize: dailyBoard(n), difficulty: 'fox', bonusTurnOnMatch: true, kidMode: false }, n, n === today ? n : undefined);
         trial.current = [];
+        if (link?.challenge) count({ 'challenge.open': 1 });
         return;
       }
       const d = deal(requested, { ...s, ...once });
@@ -301,7 +315,7 @@ export default function GameScreen() {
       trial.current = d.tries;
       if (d.tries.length) s.set('triesUsed', withTries(s.triesUsed, d.tries));
     },
-    [requested, start],
+    [requested, start, link],
   );
 
   useEffect(() => {
@@ -412,12 +426,15 @@ export default function GameScreen() {
     else pause();
   }, [pause, online]);
 
-  /** online: the host deals the next game for everyone; with nobody left to
-   *  play against, the waiting room instead (invite someone, or the computer) */
+  /** online: the host deals the next game for everyone (a free host past
+   *  today's games: the unlock sheet); with nobody left to play against, the
+   *  waiting room instead (invite someone, or the computer) */
   const onlineRematch = useCallback(() => {
     const seats = useRoom.getState().room?.seats.length ?? 0;
-    if (seats >= 2) useRoom.getState().rematch();
-    else if (roomCode) router.replace({ pathname: '/room/[code]', params: { code: roomCode } });
+    if (seats >= 2) {
+      if (takeHostGame()) useRoom.getState().rematch();
+      else setUnlocking(true);
+    } else if (roomCode) router.replace({ pathname: '/room/[code]', params: { code: roomCode } });
   }, [roomCode, router]);
 
   /** Play again / Restart: a new seed, and the board running again. A game
@@ -428,10 +445,10 @@ export default function GameScreen() {
     setUnlocking(false);
     // a weekend daily is on the Big board for everyone; replaying it is not
     const g = useGame.getState();
-    const lockedDaily = g.daily != null && !!g.state && isLocked(useSettings.getState().unlocked, g.state.config.boardSize);
+    const lockedDaily = (g.daily != null || g.state?.config.seed === link?.n) && !!g.state && isLocked(useSettings.getState().unlocked, g.state.config.boardSize);
     if (trial.current.length || lockedDaily) dealNew();
     else rematch();
-  }, [rematch, dealNew]);
+  }, [rematch, dealNew, link]);
 
   /* ----------------------------------------------- upsell card */
 
@@ -664,6 +681,10 @@ export default function GameScreen() {
         ]
           .filter(Boolean)
           .join('\n');
+  /** the board a challenge link dealt (Play again deals a new seed, and drops it) */
+  const challenge = link?.challenge && view.config.seed === link.n ? link.challenge : null;
+  // "Ravi caught 8 pegs in 14 rolls. Beat it!" until the first roll
+  const note = onlineNote || (challenge && view.turn === 0 && !view.suddenDeath ? challengeBanner(challenge) : '');
 
   const trayCount = view.config.players.length;
   const stacked = L.mode === 'stacked';
@@ -817,6 +838,7 @@ export default function GameScreen() {
       <GameOverSheet
         state={view}
         daily={daily ?? undefined}
+        challenge={challenge ?? undefined}
         onRematch={online ? onlineRematch : restart}
         onHome={goHome}
         waitNote={
@@ -913,7 +935,7 @@ export default function GameScreen() {
       <AwayBar onBack={() => useRoom.getState().stepAway(false)} />
     ) : null}
 
-    {onlineNote ? (
+    {note ? (
       <View
         style={{
           position: 'absolute',
@@ -938,7 +960,7 @@ export default function GameScreen() {
             textAlign: 'center',
           }}
         >
-          {onlineNote}
+          {note}
         </Text>
       </View>
     ) : null}

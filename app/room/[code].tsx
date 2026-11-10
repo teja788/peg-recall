@@ -8,17 +8,17 @@
  */
 import { Avatar } from '@art';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Linking, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { Difficulty } from '../../src/engine/types';
-import { tr } from '../../src/i18n';
+import { tr, trn } from '../../src/i18n';
 import { HOST_LIMITS, inviteUrl, reportUrl } from '../../src/online/config';
 import { needsUnlock } from '../../src/online/limits';
 import { formatCode, normalizeCode, type SeatInfo } from '../../src/online/protocol';
 import { useGame } from '../../src/store/game';
-import { useRoom } from '../../src/store/room';
+import { hostGamesLeftToday, takeHostGame, useRoom } from '../../src/store/room';
 import { animalName, useSettings } from '../../src/store/settings';
 import { useTheme } from '../../src/theme';
 import { Chip } from '../../src/ui/controls';
@@ -26,6 +26,7 @@ import { shareMessage } from '../../src/ui/GameOverSheet';
 import { Card, Note, OnlineFrame, StatusLine, WideButton, endedText, errorText, seatName } from '../../src/ui/online';
 import { ReactButton, ReactionBubbles } from '../../src/ui/reactions';
 import { PillButton } from '../../src/ui/StatsCard';
+import { UnlockSheet } from '../../src/ui/UnlockSheet';
 
 const BOTS: Difficulty[] = ['bunny', 'fox', 'owl'];
 
@@ -42,6 +43,8 @@ export default function RoomScreen() {
   const error = useRoom((s) => s.error);
   const ended = useRoom((s) => s.ended);
   const unlocked = useSettings((s) => s.unlocked);
+  const hostedToday = useSettings((s) => s.hostedToday);
+  const [unlocking, setUnlocking] = useState(false);
   const playing = useGame((s) => s.remote != null && s.state != null);
   /** the game is on, but this device has no board for it (the browser's Back
    *  left the game screen): asking for the seat again brings the board, and
@@ -95,6 +98,8 @@ export default function RoomScreen() {
   const hostSeat = room?.seats.find((s) => s.id === room.host);
   const full = !!room && room.seats.length >= room.settings.maxSeats;
   const shown = code ? formatCode(code) : '';
+  /** free online games this host has left today (Infinity: no limit) */
+  const left = hostGamesLeftToday({ unlocked, hostedToday });
 
   const invite = () => {
     if (!code) return;
@@ -107,7 +112,12 @@ export default function RoomScreen() {
       title={tr('online.waiting')}
       onBack={home}
       action={mySeat ? <ReactButton /> : null}
-      overlay={<ReactionBubbles side="right" inset={16 + insets.right} top={insets.top + 68} />}
+      overlay={
+        <>
+          <ReactionBubbles side="right" inset={16 + insets.right} top={insets.top + 68} />
+          {unlocking ? <UnlockSheet onClose={() => setUnlocking(false)} /> : null}
+        </>
+      }
     >
       <StatusLine status={status} />
       {error ? <Note text={errorText(error)} /> : null}
@@ -170,11 +180,16 @@ export default function RoomScreen() {
               text={tr('online.start')}
               filled
               disabled={room.seats.length < 2}
-              onPress={() => useRoom.getState().start()}
+              onPress={() => (takeHostGame() ? useRoom.getState().start() : setUnlocking(true))}
             />
             {room.seats.length < 2 ? (
               <Text style={{ ...t.type.caption, color: t.c.onBackdropMuted, textAlign: 'center' }}>
                 {tr('online.needMore')}
+              </Text>
+            ) : null}
+            {left !== Infinity ? (
+              <Text style={{ ...t.type.caption, color: t.c.onBackdropMuted, textAlign: 'center' }}>
+                {left > 0 ? trn('online.freeLeft', left) : tr('online.freeNone')}
               </Text>
             ) : null}
           </>

@@ -61,8 +61,9 @@ export function headlineFor(winners: string[], suddenDeath: boolean): string {
 }
 
 /** `url`: where the message sends friends (the App Store unless told otherwise;
- *  the web game passes its own address, see `shareUrl`). */
-export function shareText(r: ShareResult, url: string = PLAY_URL): string {
+ *  the web game passes its own address, see `shareUrl`). `challenge`: the url
+ *  is a "Beat my score" link (./challenge.ts), so the last line says so. */
+export function shareText(r: ShareResult, url: string = PLAY_URL, challenge = false): string {
   const label = (p: ShareResult['players'][number]) => (p.ai ? COMPUTER : playerLabel(p));
   const headline = headlineFor(r.players.filter((p) => p.won).map(label), r.suddenDeath);
   const scores = [...r.players]
@@ -74,6 +75,6 @@ export function shareText(r: ShareResult, url: string = PLAY_URL): string {
     `🎯 ${r.daily != null ? tr('share.titleDaily', { n: r.daily }) : tr('share.title', { board: tr(`board.${r.board}`) })}`,
     `🏆 ${headline} ${scores}`,
     `${COLOR_ROW} ${tr('share.rolls', { pegs, n: r.rolls })}`,
-    `${tr('share.cta')} 👉 ${url}`,
+    `${tr(challenge ? 'share.ctaChallenge' : 'share.cta')} 👉 ${url}`,
   ].join('\n');
 }

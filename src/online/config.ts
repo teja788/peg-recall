@@ -30,12 +30,16 @@ export const HOST_LIMITS = process.env.EXPO_PUBLIC_HOST_LIMITS === 'on';
  *  opens the app instead where it can (later: universal links). Null when no
  *  web address is known: the invite then carries only the code. */
 export function inviteUrl(code: string): string | null {
-  let base = WEB_URL;
-  if (!base && Platform.OS === 'web') {
-    const origin = (globalThis as { location?: { origin?: string } }).location?.origin;
-    if (origin?.startsWith('https://')) base = origin;
-  }
+  const base = webUrl();
   return base ? `${base}/join/${code}` : null;
+}
+
+/** The web game's address, no trailing slash: the build's, else (in the web
+ *  game) the page's own https origin. '' when neither is known. */
+export function webUrl(): string {
+  if (WEB_URL || Platform.OS !== 'web') return WEB_URL;
+  const origin = (globalThis as { location?: { origin?: string } }).location?.origin;
+  return origin?.startsWith('https://') ? origin : '';
 }
 
 /** Where "Report a problem" writes to: the contact address on the website. */

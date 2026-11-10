@@ -23,14 +23,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { GameState, PlayerSpec } from '../engine/types';
 import { tr, trn } from '../i18n';
+import { webUrl } from '../online/config';
 import { count } from '../store/analytics';
 import { dailyMilestone, useStats } from '../store/stats';
 import { remindersSupported, turnOnReminders } from '../store/reminders';
 import { useSettings } from '../store/settings';
 import { useTheme } from '../theme';
 import { useReduceMotion } from './feedback';
+import { GetTheApp } from './GetTheApp';
 import { isolate, playerLabel } from './names';
-import { PLAY_URL, headlineFor, resultOf, shareText } from './shareText';
+import { type Challenge, challengeUrl, challengeVerdict } from './challenge';
+import { PLAY_URL, headlineFor, resultOf, shareText, type ShareResult } from './shareText';
 import { PillButton } from './StatsCard';
 
 export interface UpsellCardProps {
@@ -47,6 +50,8 @@ export interface GameOverSheetProps {
   state: GameState;
   /** the daily board's number, when this was it (the share says so) */
   daily?: number;
+  /** a "Beat my score" link's board: who won, and Send it back */
+  challenge?: Challenge;
   onRematch: () => void;
   onHome: () => void;
   /** at most one gentle card under the buttons (see `upsellCard`) */
@@ -76,6 +81,19 @@ export function shareUrl(): string {
   if (Platform.OS !== 'web') return PLAY_URL;
   const origin = (globalThis as { location?: { origin?: string } }).location?.origin;
   return origin?.startsWith('https://') ? `${origin}/` : PLAY_URL;
+}
+
+/**
+ * The words a shared result sends. A daily board's (`n`, by default the
+ * result's own) links to that same board with my score, "Beat my score", when
+ * the web game's address is known; anything else links as `shareUrl` says.
+ */
+export function resultMessage(r: ShareResult, n = r.daily): string {
+  const base = webUrl();
+  const me = r.players.find((p) => !p.ai);
+  if (n == null || !base || !me) return shareText(r, shareUrl());
+  const by = useSettings.getState().names[0];
+  return shareText(r, challengeUrl(base, { n, s: me.score, r: r.rolls, by }), true);
 }
 
 /**
@@ -222,7 +240,7 @@ function ReminderOffer() {
   );
 }
 
-export function GameOverSheet({ state, daily, onRematch, onHome, upsell, waitNote }: GameOverSheetProps) {
+export function GameOverSheet({ state, daily, challenge, onRematch, onHome, upsell, waitNote }: GameOverSheetProps) {
   const t = useTheme();
   const reduced = useReduceMotion();
   const insets = useSafeAreaInsets();
@@ -340,6 +358,11 @@ export function GameOverSheet({ state, daily, onRematch, onHome, upsell, waitNot
               </Text>
             ) : null}
             {daily != null ? <StreakMoment daily={daily} /> : null}
+            {challenge ? (
+              <Text style={{ ...t.type.body, color: t.c.text, fontWeight: '700', textAlign: 'center' }}>
+                {challengeVerdict(challenge, state.scores[state.config.players.find((p) => p.kind === 'human')?.id ?? ''] ?? 0)}
+              </Text>
+            ) : null}
           </View>
 
           <View style={{ gap: t.spacing.sm }}>
@@ -435,8 +458,11 @@ export function GameOverSheet({ state, daily, onRematch, onHome, upsell, waitNot
             )}
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={tr('share.button')}
-              onPress={() => void shareMessage(shareText({ ...resultOf(state), daily }, shareUrl()))}
+              accessibilityLabel={tr(challenge ? 'challenge.sendBack' : 'share.button')}
+              onPress={() => {
+                if (challenge) count({ 'challenge.share': 1 });
+                void shareMessage(resultMessage({ ...resultOf(state), daily }, challenge?.n ?? daily));
+              }}
               style={({ pressed }) => [
                 styles.btn,
                 {
@@ -447,7 +473,9 @@ export function GameOverSheet({ state, daily, onRematch, onHome, upsell, waitNot
                 },
               ]}
             >
-              <Text style={{ ...t.type.heading, color: t.c.accent }}>{tr('share.button')}</Text>
+              <Text style={{ ...t.type.heading, color: t.c.accent }}>
+                {tr(challenge ? 'challenge.sendBack' : 'share.button')}
+              </Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -466,6 +494,8 @@ export function GameOverSheet({ state, daily, onRematch, onHome, upsell, waitNot
               <Text style={{ ...t.type.heading, color: t.c.text }}>{tr('common.home')}</Text>
             </Pressable>
           </View>
+
+          <GetTheApp />
 
           {offerReminder ? <ReminderOffer /> : null}
 

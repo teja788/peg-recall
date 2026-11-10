@@ -142,6 +142,7 @@ test('a round trip through persistable + sanitize is lossless', () => {
     reminder: true,
     reminderAsked: true,
     lastDailyAt: 1_790_000_000_000,
+    hostedToday: { day: '2026-11-10', n: 2 },
   };
   assert.deepEqual(hydrated(JSON.stringify(persistable(tweaked))), tweaked);
 });
@@ -153,7 +154,7 @@ test('persistable writes only the stored fields, plus the schema version', () =>
     [...Object.keys(DEFAULT_SETTINGS), 'version'].sort(),
   );
   assert.equal(persistable(DEFAULT_SETTINGS).version, SETTINGS_VERSION);
-  assert.equal(SETTINGS_VERSION, 6);
+  assert.equal(SETTINGS_VERSION, 7);
 });
 
 /* ----------------------------------------------------------------- A18 */
@@ -203,9 +204,17 @@ test('A18: a v1 blob (no version, no names) hydrates with every field intact', (
     reminder: false,
     reminderAsked: false,
     lastDailyAt: 0,
+    hostedToday: { day: '', n: 0 },
     reactionsOn: true,
   });
   assert.equal(SETTINGS_KEY, 'pegrecall.settings.v1', 'no key migration');
+});
+
+test('hostedToday: only a YYYY-MM-DD day and a whole count >= 0 are kept', () => {
+  assert.deepEqual(sanitize({ hostedToday: { day: '2026-11-10', n: 3 } }).hostedToday, { day: '2026-11-10', n: 3 });
+  for (const bad of [null, 3, { day: 'today', n: 1 }, { day: '2026-11-10', n: -1 }, { day: '2026-11-10', n: 1.5 }]) {
+    assert.equal(sanitize({ hostedToday: bad }).hostedToday, undefined, JSON.stringify(bad));
+  }
 });
 
 test('A18: a v2 blob (names, no recentNames) loads with no chips', () => {
@@ -220,7 +229,7 @@ test('A18: a current blob round-trips and the version field is ignored on read',
   const blob = {
     ...persistable({ ...DEFAULT_SETTINGS, names: ['Ann', 'Bo', 'Cy', 'Dee'], recentNames: ['Ann', 'Dee'] }),
   };
-  assert.equal(blob.version, 6);
+  assert.equal(blob.version, 7);
   assert.deepEqual(hydrated(JSON.stringify(blob)).recentNames, ['Ann', 'Dee']);
   assert.equal('version' in sanitize(blob), false, 'version never leaks into Settings');
   assert.deepEqual(hydrated(JSON.stringify(blob)).names, ['Ann', 'Bo', 'Cy', 'Dee']);

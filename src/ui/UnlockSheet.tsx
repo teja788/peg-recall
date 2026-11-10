@@ -29,6 +29,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { tr } from '../i18n';
+import { onlineEnabled } from '../online/config';
 import { count } from '../store/analytics';
 import { buy, loadPrices, restore } from '../store/purchases';
 import { UNLOCK_ID, type BuyResult, type ProductId } from '../store/purchasesModel';
@@ -57,7 +58,13 @@ export function buyNote(r: Exclude<BuyResult, 'done'>): string {
   return tr(`buy.${r}`);
 }
 
-const PERKS = ['unlock.perkBoards', 'unlock.perkOwl', 'unlock.perk3p'] as const;
+/** Hosting is only a perk where there is online play to host. */
+const PERKS = [
+  'unlock.perkBoards',
+  'unlock.perkOwl',
+  'unlock.perk3p',
+  ...(onlineEnabled ? (['unlock.perkHost'] as const) : []),
+] as const;
 
 export function UnlockSheet({
   onClose,

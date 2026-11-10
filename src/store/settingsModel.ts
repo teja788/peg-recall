@@ -8,6 +8,7 @@
 
 import type { AvatarId, BoardSize, Difficulty } from '../engine/types';
 import { DICTS, everyLanguage, tr } from '../i18n';
+import type { Hosted } from '../online/limits';
 
 export type GameMode = 'ai' | '2p' | '3p' | '4p';
 
@@ -45,6 +46,9 @@ export interface Settings {
   /** When the last daily board was finished (ms; 0 = never): reminders come
    *  at that time of day on the next two days (see `reminderPlan`). */
   lastDailyAt: number;
+  /** Online games this device hosted on `day` (local YYYY-MM-DD): a free host
+   *  starts FREE_HOST_GAMES a day in the app (see `hostGamesLeft`). */
+  hostedToday: Hosted;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -65,6 +69,7 @@ export const DEFAULT_SETTINGS: Settings = {
   reminder: false,
   reminderAsked: false,
   lastDailyAt: 0,
+  hostedToday: { day: '', n: 0 },
 };
 
 /** Seats stored in `avatars` / `names` (the 4-player mode's count). */
@@ -81,8 +86,8 @@ export const SETTINGS_KEY = 'pegrecall.settings.v1';
 /** Schema version written into the stored blob (1.0 wrote none = version 1;
  *  2 added `names`, 3 added `recentNames`, 4 added `unlocked`, 5 added
  *  `triesUsed` and `moreOffered`, 6 added `reminder`, `reminderAsked` and
- *  `lastDailyAt`). */
-export const SETTINGS_VERSION = 6;
+ *  `lastDailyAt`, 7 added `hostedToday`). */
+export const SETTINGS_VERSION = 7;
 
 /* ------------------------------------------------------------ player names */
 
@@ -279,6 +284,17 @@ export function sanitize(raw: unknown): Partial<Settings> {
   if (typeof r.lastDailyAt === 'number' && Number.isFinite(r.lastDailyAt) && r.lastDailyAt >= 0) {
     out.lastDailyAt = r.lastDailyAt;
   }
+  const h = r.hostedToday as Record<string, unknown> | null;
+  if (
+    h &&
+    typeof h === 'object' &&
+    typeof h.day === 'string' &&
+    /^\d{4}-\d{2}-\d{2}$/.test(h.day) &&
+    Number.isInteger(h.n) &&
+    (h.n as number) >= 0
+  ) {
+    out.hostedToday = { day: h.day, n: h.n as number };
+  }
   if (Array.isArray(r.triesUsed)) {
     // unknown entries drop out; a used try is never forgotten for a bad neighbour
     out.triesUsed = LOCKABLES.filter((v) => (r.triesUsed as unknown[]).includes(v));
@@ -331,6 +347,7 @@ export function persistable(s: Settings): PersistedSettings {
     reminder: s.reminder,
     reminderAsked: s.reminderAsked,
     lastDailyAt: s.lastDailyAt,
+    hostedToday: s.hostedToday,
   };
 }
 
