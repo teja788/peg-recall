@@ -55,7 +55,7 @@ export const DEFAULT_SETTINGS: Settings = {
   reactionsOn: true,
   soundOn: true,
   showShapes: false,
-  boardSize: 'classic',
+  boardSize: 'small',
   difficulty: 'fox',
   bonusTurnOnMatch: true,
   kidMode: false,

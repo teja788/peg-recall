@@ -610,7 +610,7 @@ test('"Ready for more?" plays Big + Owl once, without storing them', () => {
   s = { ...s, triesUsed: withTries(s.triesUsed, tried.tries) };
   const next = deal('ai', s);
   assert.equal(next.settings.difficulty, 'bunny', 'a Bunny player is not moved to Fox');
-  assert.equal(next.settings.boardSize, 'classic');
+  assert.equal(next.settings.boardSize, 'small');
   assert.deepEqual(next.tries, []);
 });
 
