@@ -151,7 +151,6 @@ export const fr: Strings = {
   'daily.title': 'Plateau du jour #{n}',
   'daily.sub': 'Le même plateau pour tout le monde aujourd’hui',
   'daily.done': '{pegs} aujourd’hui · série {streak}',
-  'daily.weekend': 'Week-end : le grand plateau pour tout le monde',
   'daily.doneBest': '{pegs} aujourd’hui · série {streak} · record {best}',
   'daily.inARow.one': '{n} jour d’affilée !',
   'daily.inARow.other': '{n} jours d’affilée !',

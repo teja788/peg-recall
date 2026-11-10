@@ -153,7 +153,6 @@ export const th: Strings = {
   'daily.title': 'กระดานวันนี้ #{n}',
   'daily.sub': 'วันนี้ทุกคนเล่นกระดานเดียวกัน',
   'daily.done': 'วันนี้ {pegs} · ติดกัน {streak} วัน',
-  'daily.weekend': 'สุดสัปดาห์: กระดานใหญ่สำหรับทุกคน',
   'daily.doneBest': 'วันนี้ {pegs} · ติดกัน {streak} วัน · ดีสุด {best}',
   'daily.inARow.one': 'ติดกัน {n} วันแล้ว!',
   'daily.inARow.other': 'ติดกัน {n} วันแล้ว!',

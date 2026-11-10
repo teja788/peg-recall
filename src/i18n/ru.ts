@@ -161,7 +161,6 @@ export const ru: Strings = {
   'daily.title': 'Поле дня #{n}',
   'daily.sub': 'Сегодня у всех одно и то же поле',
   'daily.done': 'Сегодня {pegs} · серия {streak}',
-  'daily.weekend': 'Выходные: большое поле для всех',
   'daily.doneBest': 'Сегодня {pegs} · серия {streak} · рекорд {best}',
   'daily.inARow.one': '{n} день подряд!',
   'daily.inARow.few': '{n} дня подряд!',

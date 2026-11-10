@@ -150,7 +150,6 @@ export const de: Strings = {
   'daily.title': 'Brett des Tages #{n}',
   'daily.sub': 'Heute für alle dasselbe Brett',
   'daily.done': '{pegs} heute · Serie {streak}',
-  'daily.weekend': 'Wochenende: das große Brett für alle',
   'daily.doneBest': '{pegs} heute · Serie {streak} · Rekord {best}',
   'daily.inARow.one': '{n} Tag in Folge!',
   'daily.inARow.other': '{n} Tage in Folge!',

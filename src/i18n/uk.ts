@@ -403,7 +403,6 @@ export const uk: Strings = {
   'daily.title': 'Поле дня #{n}',
   'daily.sub': 'Сьогодні в усіх однакове поле',
   'daily.done': 'Сьогодні {pegs} · серія {streak}',
-  'daily.weekend': 'Вихідні: велике поле для всіх',
   'daily.doneBest': 'Сьогодні {pegs} · серія {streak} · рекорд {best}',
   'daily.inARow.one': '{n} день поспіль!',
   'daily.inARow.few': '{n} дні поспіль!',

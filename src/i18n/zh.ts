@@ -153,7 +153,6 @@ export const zh: Strings = {
   'daily.title': '今日棋盤 #{n}',
   'daily.sub': '今天大家玩同一個棋盤',
   'daily.done': '今天 {pegs} · 連續 {streak} 天',
-  'daily.weekend': '週末：大家都玩大棋盤',
   'daily.doneBest': '今天 {pegs} · 連續 {streak} 天 · 最佳 {best}',
   'daily.inARow.one': '連續 {n} 天！',
   'daily.inARow.other': '連續 {n} 天！',

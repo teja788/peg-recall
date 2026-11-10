@@ -151,7 +151,6 @@ export const nl: Strings = {
   'daily.title': 'Bord van de dag #{n}',
   'daily.sub': 'Vandaag hetzelfde bord voor iedereen',
   'daily.done': '{pegs} vandaag · reeks {streak}',
-  'daily.weekend': 'Weekend: het grote bord voor iedereen',
   'daily.doneBest': '{pegs} vandaag · reeks {streak} · record {best}',
   'daily.inARow.one': '{n} dag op rij!',
   'daily.inARow.other': '{n} dagen op rij!',

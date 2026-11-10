@@ -407,20 +407,16 @@ test('dailyNumber: one board per local day, a new one the next day', () => {
   assert.notEqual(colours(tomorrow), colours(morning), 'next day, another board');
 });
 
-test('dailyBoard: Big on Saturday and Sunday, Classic on weekdays', () => {
+test('dailyBoard: Small every day, weekends too', () => {
   const board = (y: number, m: number, d: number) => dailyBoard(dailyNumber(new Date(y, m, d, 12).getTime()));
-  assert.equal(board(2026, 9, 23), 'classic', 'Friday Oct 23');
-  assert.equal(board(2026, 9, 24), 'big', 'Saturday Oct 24');
-  assert.equal(board(2026, 9, 25), 'big', 'Sunday Oct 25');
-  assert.equal(board(2026, 9, 26), 'classic', 'Monday Oct 26');
-  assert.equal(board(2026, 8, 24), 'classic', 'launch day, a Thursday');
-  assert.equal(board(2027, 0, 2), 'big', 'a Saturday next year');
+  assert.equal(board(2026, 9, 23), 'small', 'Friday Oct 23');
+  assert.equal(board(2026, 9, 24), 'small', 'Saturday Oct 24');
 });
 
 test('a weekend daily on Big plays without the unlock; the normal Big board stays locked', () => {
   const locked = { ...DEFAULT_SETTINGS, unlocked: false, triesUsed: ['big' as const] };
   const sat = dailyNumber(new Date(2026, 9, 24, 9).getTime());
-  assert.equal(configFor('ai', { ...locked, boardSize: dailyBoard(sat), difficulty: 'fox' }, sat).boardSize, 'big');
+  assert.equal(configFor('ai', { ...locked, boardSize: 'big', difficulty: 'fox' }, sat).boardSize, 'big');
   assert.ok(isLocked(false, 'big'));
   assert.notEqual(deal('ai', { ...locked, boardSize: 'big' }).settings.boardSize, 'big', 'Big, try used: not dealt');
 });
