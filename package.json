@@ -11,7 +11,8 @@
     "build:web": "expo export -p web --clear && node scripts/web-finish.mjs",
     "smoke:web": "node scripts/web-smoke.mjs",
     "test:server": "npm --prefix server test",
-    "e2e:online": "node scripts/online-e2e.mjs"
+    "e2e:online": "node scripts/online-e2e.mjs",
+    "deploy:web": "SITE_URL=https://colorcatch.pages.dev EXPO_PUBLIC_WEB_URL=https://colorcatch.pages.dev EXPO_PUBLIC_ROOMS_URL=wss://color-catch-rooms.vivekananda-archive.workers.dev/ws EXPO_PUBLIC_COUNTS_URL=https://app-counts.vivekananda-archive.workers.dev/c npm run build:web && npx -y wrangler@4.149.0 pages deploy dist --project-name colorcatch --branch main"
   },
   "dependencies": {
     "@react-navigation/native": "^7.4.1",

@@ -16,6 +16,8 @@
  * Browser: as for web-smoke.mjs (PW_CHROMIUM for another binary,
  * PW_CHANNEL=chrome or msedge for an installed browser that plays the
  * game's AAC sounds). E2E_PLAY_MINUTES: how long the game may take (10).
+ * E2E_BASE=https://colorcatch.pages.dev plays on the live site and its room
+ * server instead, starting nothing locally (a check after each deploy).
  * Runs on macOS, Linux and Windows.
  */
 import { spawn, spawnSync } from 'node:child_process';
@@ -28,6 +30,8 @@ const DIST = path.resolve('dist');
 const SHOTS = path.resolve('web-smoke');
 const SERVER = path.resolve('server/dist/server.mjs');
 const PORT = 8787;
+/** the live web game, if testing the deployed site */
+const LIVE = (process.env.E2E_BASE ?? '').replace(/\/+$/, '');
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.m4a': 'audio/mp4', '.ttf': 'font/ttf' };
 
@@ -43,7 +47,7 @@ function serveDist() {
   return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve(server)));
 }
 
-for (const [file, hint] of [
+for (const [file, hint] of LIVE ? [] : [
   [path.join(DIST, 'index.html'), 'EXPO_PUBLIC_ROOMS_URL=ws://127.0.0.1:8787/ws npm run build:web'],
   [SERVER, 'npm --prefix server run build'],
 ]) {
@@ -56,7 +60,9 @@ fs.mkdirSync(SHOTS, { recursive: true });
 
 const onCloudflare = process.env.E2E_ROOMS === 'cloudflare';
 const windows = process.platform === 'win32';
-const rooms = onCloudflare
+const rooms = LIVE
+  ? null
+  : onCloudflare
   ? spawn('npx', ['wrangler', 'dev', '--port', String(PORT), '--ip', '127.0.0.1'], {
       cwd: path.resolve('server'),
       env: { ...process.env, WRANGLER_SEND_METRICS: 'false', CI: '1' },
@@ -67,14 +73,14 @@ const rooms = onCloudflare
       detached: !windows,
     })
   : spawn(process.execPath, [SERVER], { env: { ...process.env, PORT: String(PORT), HOST: '127.0.0.1' }, stdio: 'ignore' });
-rooms.on('error', (e) => {
+rooms?.on('error', (e) => {
   console.error(`the room server could not start: ${e.message}`);
   process.exit(1);
 });
 
 /** Stop the room server and everything it started. */
 function stopRooms() {
-  if (rooms.exitCode != null || rooms.pid == null) return;
+  if (!rooms || rooms.exitCode != null || rooms.pid == null) return;
   try {
     if (windows) spawnSync('taskkill', ['/pid', String(rooms.pid), '/T', '/F'], { stdio: 'ignore' });
     else if (onCloudflare) process.kill(-rooms.pid, 'SIGTERM');
@@ -95,14 +101,14 @@ async function serverUp() {
   }
   return false;
 }
-if (!(await serverUp())) {
+if (!LIVE && !(await serverUp())) {
   console.error('the room server did not start');
   stopRooms();
   process.exit(1);
 }
-console.log(`room server: ${onCloudflare ? 'Cloudflare (wrangler dev)' : 'Node'}`);
-const web = await serveDist();
-const base = `http://127.0.0.1:${web.address().port}`;
+console.log(`room server: ${LIVE ? `live (${LIVE})` : onCloudflare ? 'Cloudflare (wrangler dev)' : 'Node'}`);
+const web = LIVE ? null : await serveDist();
+const base = LIVE || `http://127.0.0.1:${web.address().port}`;
 const browser = await chromium.launch({
   headless: true,
   ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}),
@@ -211,7 +217,7 @@ try {
   check(false, `stopped: ${e instanceof Error ? e.message : e}`);
 } finally {
   await browser.close();
-  web.close();
+  web?.close();
   stopRooms();
 }
 

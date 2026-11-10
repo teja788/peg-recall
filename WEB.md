@@ -32,6 +32,18 @@ The smoke test needs the shared Playwright Chromium
 fail there (harmless); a branded browser plays them. Screenshots land in
 `web-smoke/` (not committed).
 
+## Live: https://colorcatch.pages.dev (Nov 10 2026)
+
+Deployed by upload, not Git: **`npm run deploy:web`** builds with the live
+addresses (site, room server, play counts) and uploads `dist` to the Pages
+project `colorcatch`. Never upload a plain `npm run build:web`: it has no room
+server, so the "Play online" card disappears. Then check the live site with
+`E2E_BASE=https://colorcatch.pages.dev PW_CHANNEL=chrome npm run e2e:online`.
+
+Don't use `wrangler pages project create` (wrangler 4.149+): it quietly turns
+the project into a Worker, writes `wrangler.jsonc` and rebuilds `dist` without
+the addresses. The project was created through the Cloudflare API instead.
+
 ## Cloudflare Pages: one-time setup (owner, ~10 minutes)
 
 1. Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** →
