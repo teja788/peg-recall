@@ -15,6 +15,7 @@ import { useReduceMotion } from './feedback';
 import { tr, trn } from '../i18n';
 import { animalName } from '../store/settingsModel';
 import { playerLabel } from './names';
+import { OWN_LAYER } from './ownLayer';
 
 /**
  * The tray text scales with Dynamic Type, but only so far: three trays share
@@ -105,7 +106,7 @@ function DropIn({ offset, reduced, children }: { offset: number; reduced: boolea
     opacity: Math.min(1, v.value),
     transform: [{ translateY: -6 * (1 - v.value) }, { scale: 0.7 + 0.3 * v.value }],
   }));
-  return <Animated.View style={[{ marginRight: offset }, style]}>{children}</Animated.View>;
+  return <Animated.View style={[{ marginRight: offset }, OWN_LAYER, style]}>{children}</Animated.View>;
 }
 
 /** The row of captured pegs standing in a player's tray. */
@@ -228,6 +229,7 @@ function PlayerTrayImpl({
           paddingHorizontal: px(compact ? COMPACT_PAD : dense ? DENSE_PAD : t.spacing.md),
           shadowColor: t.c.accent,
         },
+        OWN_LAYER,
         animated,
       ]}
     >

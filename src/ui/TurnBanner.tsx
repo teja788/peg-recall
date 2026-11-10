@@ -10,6 +10,7 @@ import Animated, {
 
 import { useTheme } from '../theme';
 import { useReduceMotion } from './feedback';
+import { OWN_LAYER } from './ownLayer';
 
 /**
  * Dynamic Type cap for the banner. It is one line in a pill between the trays
@@ -92,6 +93,7 @@ export function TurnBanner({
           shadowOffset: { width: 0, height: 3 },
           elevation: 2,
         },
+        OWN_LAYER,
         animated,
       ]}
       // Android reads this out by itself; iOS has no live regions, so the

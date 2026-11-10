@@ -28,6 +28,7 @@ import { tumbleMs } from '../store/game';
 import { useTheme } from '../theme';
 import { tr } from '../i18n';
 import { useReduceMotion } from './feedback';
+import { OWN_LAYER } from './ownLayer';
 
 /**
  * Height of the die art as a multiple of its width.
@@ -192,7 +193,7 @@ export function Die({
         opacity: canRoll || face ? 1 : 0.6,
       }}
     >
-      <Animated.View style={[{ width: size, height: h }, animated]}>
+      <Animated.View style={[{ width: size, height: h }, OWN_LAYER, animated]}>
         <WoodDie size={size} color={face} showShape={showShapes} theme={theme} />
       </Animated.View>
     </Pressable>

@@ -28,6 +28,7 @@ import Animated, {
 
 import type { PegColor } from '../engine/types';
 import { useReduceMotion } from './feedback';
+import { OWN_LAYER } from './ownLayer';
 
 /** Fraction of the peg's height it sinks into the hole before the reveal. */
 const SUNK = 0.34;
@@ -95,7 +96,7 @@ function Faces({
     <>
       {wood ? <PegDoll width={width} color={null} faceUp={false} theme={theme} /> : null}
       {coloured ? (
-        <Animated.View style={[StyleSheet.absoluteFill, colourStyle]}>
+        <Animated.View style={[StyleSheet.absoluteFill, OWN_LAYER, colourStyle]}>
           <PegDoll width={width} color={color} faceUp showShape={showShapes} theme={theme} />
         </Animated.View>
       ) : null}
@@ -219,7 +220,7 @@ function PegImpl({
   });
 
   return (
-    <Animated.View style={[{ width, height: boxH, pointerEvents: 'none' }, body]}>
+    <Animated.View style={[{ width, height: boxH, pointerEvents: 'none' }, OWN_LAYER, body]}>
       <Faces
         width={width}
         color={color}
@@ -359,11 +360,12 @@ function MovingPegImpl({
               borderRadius: shadowW / 2,
               backgroundColor: WOOD[theme].shadow,
             },
+            OWN_LAYER,
             shadowStyle,
           ]}
         />
       )}
-      <Animated.View style={[StyleSheet.absoluteFill, body]}>
+      <Animated.View style={[StyleSheet.absoluteFill, OWN_LAYER, body]}>
         {/* There is only ever one moving peg, and its cap is fading for most of
             the timeline, so it simply keeps both layers for the whole move. */}
         <Faces

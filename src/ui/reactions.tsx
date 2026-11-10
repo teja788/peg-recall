@@ -20,6 +20,7 @@ import { useTheme } from '../theme';
 import { Chip, IconButton } from './controls';
 import { useReduceMotion } from './feedback';
 import { seatName } from './online';
+import { OWN_LAYER } from './ownLayer';
 
 const SHOW_MS = 1900;
 const MAX_BUBBLES = 3;
@@ -211,6 +212,7 @@ function Bubble({ seat, id }: { seat: SeatInfo; id: ReactionId }) {
           shadowOffset: { width: 0, height: 2 },
           elevation: 3,
         },
+        OWN_LAYER,
         style,
       ]}
     >
