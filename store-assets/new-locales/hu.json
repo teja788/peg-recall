@@ -1,0 +1,35 @@
+{
+  "locale": "hu",
+  "uiFile": "hu",
+  "listing": {
+    "name": "Color Catch: Memóriajáték",
+    "nameFallback": "Color Catch: Színes memória",
+    "subtitle": "Család és barátok, felváltva",
+    "keywords": "társasjáték,páros,párosító,kocka,színek,bábuk,tábla,offline,2,játékos,nagyszülők",
+    "promotionalText": "Már magyarul! Játssz Nyuszi, Róka vagy Bagoly ellen, vagy felváltva 2–4 játékossal egy iPhone-on vagy iPaden. Bagoly, 3 és 4 játékos egyszeri vásárlással. Fiók nélkül.",
+    "description": "Fa bábus memóriajáték, amelyet a család és a barátok együtt játszhatnak, bármilyen korban. Nézd meg a színes bábukat, jegyezd meg, hol állnak, aztán dobj a kockával, és keresd meg a színt. Aki a legtöbb bábut gyűjti, nyer.\n\nSzínes bábuk állnak egy kerek fatáblán. Van néhány másodperced, hogy megnézd őket, aztán minden bábu sima fává változik. Dobj a kockával: kijön egy szín, és koppints arra a bábura, amelyikről azt hiszed, hogy olyan színű. Eltaláltad? A bábu a tálcádra kerül. Nem talált? Egy pillanatra mindenkinek megmutatja a színét, aztán újra elbújik – így az egész asztal tanul belőle. Ha kiürül a tábla, a legteltebb tálca nyer.\n\nEgy játék a Klasszikus táblán három-négy perc. Most játszol először? Koppints a ? jelre a kezdőlapon, és négy rövid lépésben megmutatjuk: Nézd, Dobj, Keresd, Nyerj.\n\nJÁTSSZ EGYEDÜL VAGY EGYÜTT\n- Játssz a gép ellen, három szinten. Nyuszi könnyű és sokat felejt, Róka a tábla nagyjából felét megjegyzi, Bagoly pedig szinte mindenre emlékszik.\n- Adjatok körbe egy iPhone-t vagy iPadet, 2–4 játékos. Nem kell második eszköz, nincs meghívás, nincs várakozás.\n- Írd be minden játékos nevét, vagy hagyd a billentyűzetet, és játssz állatként: róka, bagoly, medve, béka, nyuszi vagy cica. A korábban használt nevek egy koppintással visszajönnek, a Még egyszer pedig ugyanazokkal a játékosokkal indít.\n\nKI VEZET?\n- Győzelmek és lejátszott játékok minden játékosnak, név szerint, győzelmi aránnyal.\n- Az eredményed Nyuszi, Róka és Bagoly ellen, a mostani és a legjobb győzelmi sorozatoddal.\n- A statisztika az eszközödön marad, és bármikor törölheted.\n\nEGY TÁBLA, AMELY VELED NŐ\n- Kicsi (16 bábu) a nyugodt kezdéshez, Klasszikus (25), Nagy (36) és Óriási (40), ha igazi kihívásra vágysz.\n- A Gyerekmód több időt ad a tábla megnézésére, és a döntetlenből közös győzelem lesz. Egyébként a döntetlent egy pici táblán döntő kör dönti el.\n- Az extra kör találatnál alapból be van kapcsolva, ahogy az eredeti szabályokban – és kikapcsolhatod.\n- A tábla minden iPhone-on és iPaden kitölti a képernyőt.\n\nKÍMÉLI A SZEMET, MINDENKINEK\n- Hat élénk szín – piros, sárga, zöld, kék, lila és rózsaszín – egy meleg fatáblán.\n- Színtévesztő vagy, vagy nehezen különböztetsz meg két színt? Kapcsold be a Formák a bábukon beállítást, és minden szín saját formát kap – kör, háromszög, négyzet, csillag, szív, rombusz – a bábukon és a kockán is, így az egész játék játszható formák alapján.\n- Világos és sötét mód, Dinamikus szöveg, VoiceOver-címke minden bábun, felolvasott körökkel, dobásokkal és találatokkal, valamint a Mozgás csökkentése támogatása.\n- Nagy, csak koppintásos gombok. Nincs húzás, nincs hosszú nyomás.\n\nCSENDES, ELVBŐL\n- Nincs fiók, nincs regisztráció, nincs e-mail-cím.\n- Ingyen játszható a Kicsi és a Klasszikus táblán, Nyuszi és Róka ellen, 2 játékossal. Egyetlen opcionális alkalmazáson belüli vásárlás feloldja a Nagy és az Óriási táblát, a Bagoly ellenfelet, valamint a 3 és 4 játékosos játékot. Az opcionális támogatások a játékot segítik, és nem oldanak fel semmit. A vásárlások előtt egy gyors kérdés jön, csak felnőtteknek.\n- Nem gyűjtünk adatokat. A játékosnevek és a statisztika csak az eszközödön tárolódik. Nincs analitika, reklám vagy követés.\n- Teljesen offline is működik – repülőn, autóban, bárhol.\n- Halk kattanás és csilingelés találatnál, egy koppintással kikapcsolható.\n\niPhone-ra és iPadre készült. Korhatár: 4+.\n\nKérdések vagy ötletek: ravibitspilani@gmail.com",
+    "privacyPolicyUrl": "https://teja788.github.io/peg-recall/privacy.html",
+    "supportUrl": "https://teja788.github.io/peg-recall/support.html",
+    "marketingUrl": "https://teja788.github.io/peg-recall/"
+  },
+  "captions": {
+    "01-look": "Nézd. Jegyezd meg. Találd meg.",
+    "02-roll": "Dobj színt. Válassz bábut.",
+    "03-family": "Felváltva, az egész családdal",
+    "04-rivals": "Nyuszi, Róka vagy Bagoly?",
+    "05-sizes": "16-tól 40 bábuig",
+    "06-shapes": "Formák színtévesztőknek",
+    "07-win-dark": "Játssz bárhol, offline is"
+  },
+  "research": {
+    "topSuggestions": [
+      "memória (completions: memória, memello: memóriatréning, mosaic reveal: memóriajáték, memóriapalota)",
+      "társasjáték (társasjátékok, társasjáték, partynow: társasjátékok)",
+      "páros (páros játékok, párosító játék)",
+      "kocka (kockás játék, kockadobó, kocka póker, kockás játékok)",
+      "játékok (logikai játékok, ingyenes játékok …)",
+      "párkereső (exact completion, but it also means dating apps: avoided)"
+    ],
+    "chosenKeywordsWhy": "\"memória\" is the searched word and \"memóriajáték\" (the Hungarian word, not the trademark) leads the name. Keywords take the searched neighbours: társasjáték, páros/párosító (pair games), kocka (die games), plus offline, 2/játékos, színek, bábuk, tábla, nagyszülők. \"párkereső\" left out: in Hungarian it also means partner-finding (dating). \"család\", \"barátok\", \"felváltva\" are in the subtitle."
+  }
+}

@@ -208,7 +208,7 @@
     "cs": {
       "01-look": "Dívej se. Pamatuj si. Najdi.",
       "02-roll": "Hoď kostkou, najdi kolíček",
-      "03-family": "Na střídačku s\u00a0celou rodinou",
+      "03-family": "Na střídačku s celou rodinou",
       "04-rivals": "Zajíček, Liška, nebo Sova?",
       "05-sizes": "Od 16 do 40 kolíčků",
       "06-shapes": "Tvary pro barvoslepé",
@@ -321,6 +321,141 @@
       "05-sizes": "Від 16 до 40 фішок",
       "06-shapes": "Фігури для дальтоніків",
       "07-win-dark": "Грай будь-де, навіть офлайн"
+    },
+    "ca": {
+      "01-look": "Mira. Recorda. Troba-la.",
+      "02-roll": "Tira un color. Tria la fitxa.",
+      "03-family": "Per torns, en família",
+      "04-rivals": "Conill, Guineu o Mussol?",
+      "05-sizes": "De 16 a 40 fitxes",
+      "06-shapes": "Formes per a daltònics",
+      "07-win-dark": "Juga on vulguis, sense connexió"
+    },
+    "el": {
+      "01-look": "Κοίτα. Θυμήσου. Βρες το.",
+      "02-roll": "Ρίξε χρώμα. Διάλεξε πιόνι.",
+      "03-family": "Με τη σειρά, όλη η οικογένεια",
+      "04-rivals": "Κουνελάκι, Αλεπού ή Κουκουβάγια;",
+      "05-sizes": "Από 16 έως 40 πιόνια",
+      "06-shapes": "Σχήματα για αχρωματοψία",
+      "07-win-dark": "Παίξε παντού, και offline"
+    },
+    "fi": {
+      "01-look": "Katso. Muista. Löydä.",
+      "02-roll": "Heitä väri. Valitse nappula.",
+      "03-family": "Vuorotellen koko perheellä",
+      "04-rivals": "Pupu, Kettu vai Pöllö?",
+      "05-sizes": "16–40 nappulaa",
+      "06-shapes": "Muodot värisokeille",
+      "07-win-dark": "Pelaa missä vain, myös offline"
+    },
+    "gu-IN": {
+      "01-look": "જુઓ. યાદ રાખો. શોધો.",
+      "02-roll": "પાસો ફેંકો, સોગઠી પસંદ કરો",
+      "03-family": "આખા પરિવાર સાથે વારાફરતી",
+      "04-rivals": "સસલું, શિયાળ કે ઘુવડ?",
+      "05-sizes": "16 થી 40 સોગઠીઓ",
+      "06-shapes": "રંગઅંધ ખેલાડીઓ માટે આકાર",
+      "07-win-dark": "ગમે ત્યાં રમો, ઓફલાઇન પણ"
+    },
+    "he": {
+      "01-look": "מסתכלים. זוכרים. מוצאים.",
+      "02-roll": "מטילים צבע. בוחרים כלי.",
+      "03-family": "משחקים בתורות עם כל המשפחה",
+      "04-rivals": "ארנבון, שועל או ינשוף?",
+      "05-sizes": "מ-16 עד 40 כלים",
+      "06-shapes": "צורות לעיוורי צבעים",
+      "07-win-dark": "משחקים בכל מקום, גם בלי אינטרנט"
+    },
+    "hr": {
+      "01-look": "Gledaj. Zapamti. Pronađi.",
+      "02-roll": "Baci boju. Odaberi čepić.",
+      "03-family": "Igrajte redom s cijelom obitelji",
+      "04-rivals": "Zeko, Lisica ili Sova?",
+      "05-sizes": "Od 16 do 40 čepića",
+      "06-shapes": "Oblici za daltoniste",
+      "07-win-dark": "Igraj svugdje, i bez interneta"
+    },
+    "hu": {
+      "01-look": "Nézd. Jegyezd meg. Találd meg.",
+      "02-roll": "Dobj színt. Válassz bábut.",
+      "03-family": "Felváltva, az egész családdal",
+      "04-rivals": "Nyuszi, Róka vagy Bagoly?",
+      "05-sizes": "16-tól 40 bábuig",
+      "06-shapes": "Formák színtévesztőknek",
+      "07-win-dark": "Játssz bárhol, offline is"
+    },
+    "ml-IN": {
+      "01-look": "നോക്കൂ. ഓർക്കൂ. കണ്ടെത്തൂ.",
+      "02-roll": "പകിട എറിയൂ, കരു തൊടൂ",
+      "03-family": "കുടുംബത്തോടൊപ്പം കളിക്കൂ",
+      "04-rivals": "മുയൽ, കുറുക്കൻ, അതോ മൂങ്ങ?",
+      "05-sizes": "16 മുതൽ 40 കരുക്കൾ വരെ",
+      "06-shapes": "വർണ്ണാന്ധർക്ക് രൂപങ്ങൾ",
+      "07-win-dark": "എവിടെയും കളിക്കാം, ഓഫ്‌ലൈനിലും"
+    },
+    "ms": {
+      "01-look": "Lihat. Ingat. Cari.",
+      "02-roll": "Baling dadu. Pilih buahnya.",
+      "03-family": "Main bergilir sekeluarga",
+      "04-rivals": "Arnab, Rubah atau Burung Hantu?",
+      "05-sizes": "Dari 16 hingga 40 buah",
+      "06-shapes": "Bentuk untuk yang buta warna",
+      "07-win-dark": "Main di mana-mana, luar talian"
+    },
+    "or-IN": {
+      "01-look": "ଦେଖ। ମନେ ରଖ। ଖୋଜ।",
+      "02-roll": "ପଶା ପକାଅ, ଗୋଟି ବାଛ",
+      "03-family": "ପରିବାର ସହ ପାଳି କରି ଖେଳ",
+      "04-rivals": "ଠେକୁଆ, ବିଲୁଆ ନା ପେଚା?",
+      "05-sizes": "16 ରୁ 40ଟି ଗୋଟି",
+      "06-shapes": "ରଙ୍ଗ ଚିହ୍ନିବା କଷ୍ଟ? ଆକାର ଅଛି",
+      "07-win-dark": "ଯେଉଁଠି ବି ଖେଳ, ଅଫଲାଇନରେ ବି"
+    },
+    "pa-IN": {
+      "01-look": "ਦੇਖੋ। ਯਾਦ ਰੱਖੋ। ਲੱਭੋ।",
+      "02-roll": "ਪਾਸਾ ਸੁੱਟੋ, ਗੋਟੀ ਚੁਣੋ",
+      "03-family": "ਸਾਰੇ ਪਰਿਵਾਰ ਨਾਲ ਵਾਰੀ-ਵਾਰੀ",
+      "04-rivals": "ਖ਼ਰਗੋਸ਼, ਲੂੰਬੜੀ ਜਾਂ ਉੱਲੂ?",
+      "05-sizes": "16 ਤੋਂ 40 ਗੋਟੀਆਂ",
+      "06-shapes": "ਕਲਰ-ਬਲਾਈਂਡ ਲਈ ਆਕਾਰ",
+      "07-win-dark": "ਕਿਤੇ ਵੀ ਖੇਡੋ, ਔਫਲਾਈਨ ਵੀ"
+    },
+    "ro": {
+      "01-look": "Privește. Ține minte. Găsește.",
+      "02-roll": "Dai o culoare. Alegi piesa.",
+      "03-family": "Pe rând, cu toată familia",
+      "04-rivals": "Iepurașul, Vulpea sau Bufnița?",
+      "05-sizes": "De la 16 la 40 de piese",
+      "06-shapes": "Forme pentru daltoniști",
+      "07-win-dark": "Joacă oriunde, și offline"
+    },
+    "sk": {
+      "01-look": "Pozri sa. Zapamätaj si. Nájdi.",
+      "02-roll": "Hoď farbu. Vyber kolík.",
+      "03-family": "Striedajte sa s celou rodinou",
+      "04-rivals": "Zajko, Líška alebo Sova?",
+      "05-sizes": "Od 16 do 40 kolíkov",
+      "06-shapes": "Tvary pre farboslepých",
+      "07-win-dark": "Hraj kdekoľvek, aj offline"
+    },
+    "sl-SI": {
+      "01-look": "Poglej. Zapomni si. Poišči.",
+      "02-roll": "Vrzi barvo. Izberi količek.",
+      "03-family": "Igrajte po vrsti z vso družino",
+      "04-rivals": "Zajček, Lisica ali Sova?",
+      "05-sizes": "Od 16 do 40 količkov",
+      "06-shapes": "Oblike za barvno slepe",
+      "07-win-dark": "Igraj povsod, tudi brez spleta"
+    },
+    "ur-PK": {
+      "01-look": "دیکھو۔ یاد رکھو۔ ڈھونڈو۔",
+      "02-roll": "پانسہ پھینکو، گوٹی چنو",
+      "03-family": "پورے گھر کے ساتھ باری باری",
+      "04-rivals": "خرگوش، لومڑی یا اُلّو؟",
+      "05-sizes": "16 سے 40 گوٹیاں",
+      "06-shapes": "کلر بلائنڈ کے لیے شکلیں",
+      "07-win-dark": "کہیں بھی کھیلو، آف لائن بھی"
     }
   }
 }

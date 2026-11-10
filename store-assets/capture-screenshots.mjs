@@ -106,6 +106,21 @@ const NAMES = {
   nb: ['Nora', 'Jakob', 'Ingrid'],
   uk: ['Софія', 'Марко', 'Олена'],
   cs: ['Eliška', 'Jakub', 'Tereza'],
+  sl: ['Ema', 'Luka', 'Zala'],
+  hr: ['Mia', 'Luka', 'Ana'],
+  sk: ['Sofia', 'Jakub', 'Ema'],
+  ca: ['Júlia', 'Marc', 'Laia'],
+  ro: ['Ioana', 'Andrei', 'Maria'],
+  hu: ['Hanna', 'Bence', 'Zsófi'],
+  el: ['Μαρία', 'Γιώργος', 'Ελένη'],
+  fi: ['Aino', 'Eino', 'Helmi'],
+  he: ['נועה', 'איתי', 'מאיה'],
+  ml: ['ദിയ', 'അർജുൻ', 'മീര'],
+  or: ['ଅଦିତି', 'ଆଦିତ୍ୟ', 'ମୀରା'],
+  ms: ['Aisyah', 'Adam', 'Nur'],
+  gu: ['દિયા', 'આરવ', 'મીરા'],
+  pa: ['ਸਿਮਰਨ', 'ਅਰਜਨ', 'ਹਰਲੀਨ'],
+  ur: ['عائشہ', 'احمد', 'زینب'],
 }[LOCALE];
 
 /* ------------------------------------------------------------------ devices */

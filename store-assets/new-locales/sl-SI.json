@@ -1,0 +1,33 @@
+{
+  "locale": "sl-SI",
+  "uiFile": "sl",
+  "listing": {
+    "name": "Color Catch: Igra spomin",
+    "nameFallback": "Color Catch: Zapomni si barve",
+    "subtitle": "Za dva, družino in prijatelje",
+    "keywords": "igre,2,igralca,družabne,namizne,kocka,barve,količki,pari,offline,lesena,brez,interneta",
+    "promotionalText": "Zdaj v slovenščini! Igraj proti Zajčku, Lisici ali Sovi ali pa se 2 do 4 igralci izmenjujte na enem iPhonu ali iPadu. Sova, 3 in 4 igralci: enkratni nakup.",
+    "description": "Igra spomin z lesenimi količki, ki jo družine in prijatelji igrajo skupaj, v vseh starostih. Poglej barvne količke, zapomni si, kje stojijo, nato vrzi kocko in poišči barvo. Zmaga, kdor ima največ količkov.\n\nBarvni količki stojijo na okrugli leseni plošči. Nekaj sekund jih lahko gledaš, nato so vsi videti kot navaden les. Vrzi kocko, pokaže barvo, in tapni količek, ki ima po tvoje to barvo. Zadetek? Količek gre v tvojo skledico. Narobe? Za trenutek pokaže svojo barvo vsem, preden se spet skrije – tako se nekaj nauči vsa miza. Ko je plošča prazna, zmaga najbolj polna skledica.\n\nIgra na Klasični plošči traja tri do štiri minute. Prvič tukaj? Na začetnem zaslonu tapni ? za štiri kratke korake: Poglej, Vrzi, Poišči, Zmagaj.\n\nIGRAJ PROTI RAČUNALNIKU ALI SKUPAJ\n- Igraj proti računalniku na treh stopnjah. Zajček je lahek in veliko pozablja, Lisica si zapomni približno pol plošče, Sova pa skoraj vse.\n- En iPhone ali iPad si podajajte za 2 do 4 igralce. Brez druge naprave, brez vabil, brez čakanja.\n- Vpiši ime vsakega igralca ali preskoči tipkovnico in igraj kot živalca: lisica, sova, medo, žabica, zajček ali muca. Že uporabljena imena se vrnejo kot gumbi na en dotik, Igraj znova pa obdrži iste igralce.\n\nKDO VODI\n- Zmage in odigrane igre za vsakega igralca, po imenu, z deležem zmag.\n- Tvoj izid proti Zajčku, Lisici in Sovi, s trenutnim in najdaljšim nizom zmag.\n- Statistika ostane na tvoji napravi in jo lahko kadar koli ponastaviš.\n\nPLOŠČA, KI RASTE S TABO\n- Majhna (16 količkov) za mehak začetek, Klasična (25), Velika (36) in Ogromna (40), ko si želiš pravega izziva.\n- Otroški način da več časa za ogled plošče in izenačenje spremeni v skupno zmago. Sicer izenačenje razreši odločilni krog na čisto majhni plošči.\n- Dodatna poteza ob zadetku je na začetku vklopljena, kot v izvirnih pravilih – in jo lahko izklopiš.\n- Plošča zapolni zaslon na vsakem iPhonu in iPadu.\n\nPRIJAZNO DO OČI IN DO VSEH\n- Šest živih barv – rdeča, rumena, zelena, modra, vijolična in rožnata – na topli leseni plošči.\n- Barvna slepota ali težko ločiš dve barvi? Vklopi Oblike na količkih in vsaka barva dobi svojo obliko – krog, trikotnik, kvadrat, zvezdo, srce, romb – na količkih in na kocki, tako da lahko vso igro igraš po oblikah.\n- Svetli in temni način, Dynamic Type, oznake VoiceOver na vsakem količku z izgovorjenimi potezami, meti in zadetki ter podpora za Zmanjšaj gibanje.\n- Velike tarče, samo tapanje. Brez vlečenja, brez dolgih pritiskov.\n\nMIRNO IN TIHO\n- Brez računa, brez registracije, brez e-poštnega naslova.\n- Brezplačno igranje na Majhni in Klasični plošči, proti Zajčku in Lisici ter z 2 igralcema. En neobvezen nakup v aplikaciji odklene Veliko in Ogromno ploščo, Sovo ter igre s 3 in 4 igralci. Neobvezne napitnine podpirajo igro in ničesar ne odklenejo. Pred nakupi je kratko vprašanje samo za odrasle.\n- Ne zbiramo podatkov. Imena igralcev in statistika so shranjeni samo na tvoji napravi. Brez orodij za analitiko, oglase ali sledenje.\n- Deluje popolnoma brez povezave – na letalu, v avtu, kjer koli.\n- Mehki kliki in zvonček ob zadetku, izklop z enim dotikom.\n\nNarejeno za iPhone in iPad. Starostna ocena 4+.\n\nVprašanja ali ideje: ravibitspilani@gmail.com",
+    "privacyPolicyUrl": "https://teja788.github.io/peg-recall/privacy.html",
+    "supportUrl": "https://teja788.github.io/peg-recall/support.html",
+    "marketingUrl": "https://teja788.github.io/peg-recall/"
+  },
+  "captions": {
+    "01-look": "Poglej. Zapomni si. Poišči.",
+    "02-roll": "Vrzi barvo. Izberi količek.",
+    "03-family": "Igrajte po vrsti z vso družino",
+    "04-rivals": "Zajček, Lisica ali Sova?",
+    "05-sizes": "Od 16 do 40 količkov",
+    "06-shapes": "Oblike za barvno slepe",
+    "07-win-dark": "Igraj povsod, tudi brez spleta"
+  },
+  "research": {
+    "topSuggestions": [
+      "igre (si): igre za 2, igre, igre za otroke, slovenske igre, besedne igre, igre za dva",
+      "spomin: spomin, mesto spomina",
+      "igre za dva: igre za dva",
+      "družabne igre, namizne, igra spomin, otroške igre: no suggestions (very thin Slovenian store)"
+    ],
+    "chosenKeywordsWhy": "\"spomin\" is the Slovenian name of the classic memory card game (generic, not the memory® mark) and the only memory-game root Apple suggests, so the name is \"Igra spomin\". \"igre za 2\" / \"igre za dva\" are the strongest game suggestions: the subtitle starts \"Za dva\", and igre,2 in keywords cover both phrasings. \"igralca\" makes \"2 igralca\", \"družabne\"/\"namizne\" cover board/party games, then kocka, barve, količki, pari, lesena, offline, brez,interneta. Kids words left out on purpose (rejection risk), even though \"igre za otroke\" is suggested. Suggest data is sparse for SI."
+  }
+}

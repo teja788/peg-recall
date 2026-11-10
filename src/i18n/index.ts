@@ -9,30 +9,45 @@
 
 import { ar } from './ar';
 import { bn } from './bn';
+import { ca } from './ca';
 import { cs } from './cs';
 import { da } from './da';
 import { de } from './de';
+import { el } from './el';
 import { en } from './en';
 import { es } from './es';
+import { fi } from './fi';
 import { fr } from './fr';
+import { gu } from './gu';
+import { he } from './he';
 import { hi } from './hi';
+import { hr } from './hr';
+import { hu } from './hu';
 import { id } from './id';
 import { it } from './it';
 import { ja } from './ja';
 import { kn } from './kn';
 import { ko } from './ko';
+import { ml } from './ml';
 import { mr } from './mr';
+import { ms } from './ms';
 import { nb } from './nb';
 import { nl } from './nl';
+import { or } from './or';
+import { pa } from './pa';
 import { pl } from './pl';
 import { pt } from './pt';
+import { ro } from './ro';
 import { ru } from './ru';
+import { sk } from './sk';
+import { sl } from './sl';
 import { sv } from './sv';
 import { ta } from './ta';
 import { te } from './te';
 import { th } from './th';
 import { tr as trDict } from './tr';
 import { uk } from './uk';
+import { ur } from './ur';
 import { vi } from './vi';
 import { zh } from './zh';
 
@@ -47,6 +62,7 @@ export type Strings = Record<Key, string> & Partial<Record<`${PluralBase}.${'two
 export const DICTS = {
   en, de, fr, pt, ja, es, it, ko, zh, tr: trDict, nl, pl, hi, ru, vi, id, th, ar,
   te, ta, kn, bn, mr, sv, da, nb, uk, cs,
+  sl, hr, sk, ca, ro, hu, el, fi, he, ml, or, ms, gu, pa, ur,
 } satisfies Record<
   string,
   Strings
@@ -65,9 +81,9 @@ export function setLang(l: Lang): void {
   current = l;
 }
 
-/** Arabic reads right to left (the layout mirrors; see device.ts). */
+/** Arabic, Hebrew and Urdu read right to left (the layout mirrors; see device.ts). */
 export function isRtl(): boolean {
-  return current === 'ar';
+  return current === 'ar' || current === 'he' || current === 'ur';
 }
 
 /** A back ‹ / forward › chevron pointing the way the UI reads: flipped in
@@ -111,14 +127,14 @@ export function pluralCategory(l: Lang, n: number): PluralCategory {
     return c === 'one' || c === 'two' || c === 'few' || c === 'many' ? c : 'other';
   } catch {
     // no Intl.PluralRules (an older Hermes): the same rules for whole numbers
-    if (l === 'ja' || l === 'ko' || l === 'zh' || l === 'vi' || l === 'id' || l === 'th') return 'other';
+    if (l === 'ja' || l === 'ko' || l === 'zh' || l === 'vi' || l === 'id' || l === 'th' || l === 'ms') return 'other';
     const d = n % 10;
     const h = n % 100;
     if (l === 'pl') {
       if (n === 1) return 'one';
       return d >= 2 && d <= 4 && (h < 12 || h > 14) ? 'few' : 'many';
     }
-    if (l === 'cs') {
+    if (l === 'cs' || l === 'sk') {
       if (n === 1) return 'one';
       return n >= 2 && n <= 4 ? 'few' : 'other';
     }
@@ -126,12 +142,29 @@ export function pluralCategory(l: Lang, n: number): PluralCategory {
       if (d === 1 && h !== 11) return 'one';
       return d >= 2 && d <= 4 && (h < 12 || h > 14) ? 'few' : 'many';
     }
+    if (l === 'hr') {
+      if (d === 1 && h !== 11) return 'one';
+      return d >= 2 && d <= 4 && (h < 12 || h > 14) ? 'few' : 'other';
+    }
+    if (l === 'sl') {
+      if (h === 1) return 'one';
+      if (h === 2) return 'two';
+      return h === 3 || h === 4 ? 'few' : 'other';
+    }
+    if (l === 'ro') {
+      if (n === 1) return 'one';
+      return n === 0 || (h >= 1 && h <= 19) ? 'few' : 'other';
+    }
+    if (l === 'he') {
+      if (n === 1) return 'one';
+      return n === 2 ? 'two' : 'other';
+    }
     if (l === 'ar') {
       if (n === 1) return 'one';
       if (n === 2) return 'two';
       return h >= 3 && h <= 10 ? 'few' : h >= 11 ? 'many' : 'other';
     }
-    return n === 1 || ((l === 'fr' || l === 'pt' || l === 'hi' || l === 'bn' || l === 'kn') && n === 0) ? 'one' : 'other';
+    return n === 1 || ((l === 'fr' || l === 'pt' || l === 'hi' || l === 'bn' || l === 'kn' || l === 'gu' || l === 'pa') && n === 0) ? 'one' : 'other';
   }
 }
 

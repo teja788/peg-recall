@@ -1,0 +1,35 @@
+{
+  "locale": "ro",
+  "uiFile": "ro",
+  "listing": {
+    "name": "Color Catch: Joc de memorie",
+    "nameFallback": "Color Catch: Memorie și zaruri",
+    "subtitle": "Familie și prieteni, pe rând",
+    "keywords": "jocuri,societate,zaruri,perechi,2,jucatori,culori,piese,tabla,lemn,offline,fara,internet,bunici",
+    "promotionalText": "Acum în română! Joacă cu Iepurașul, Vulpea sau Bufnița ori pe rând, 2–4 jucători pe un iPhone sau iPad. Bufnița, 3 și 4 jucători vin cu achiziția unică. Fără cont.",
+    "description": "Jocul de memorie cu piese de lemn pe care familia și prietenii îl joacă împreună, la orice vârstă. Uită-te la piesele colorate, ține minte unde stă fiecare, apoi dă cu zarul și găsește culoarea. Câștigă cine are cele mai multe piese.\n\nPiesele colorate stau pe o tablă rotundă de lemn. Ai câteva secunde să te uiți, apoi toate piesele devin de lemn simplu. Dai cu zarul, iese o culoare, iar tu atingi piesa care crezi că are culoarea aceea. Ai nimerit? Piesa trece în tava ta. N-ai nimerit? Își arată culoarea tuturor o clipă, apoi se ascunde din nou – așa că toată masa află ceva. Când tabla e goală, câștigă tava cea mai plină.\n\nO partidă pe tabla Clasică durează trei sau patru minute. Ești nou aici? Atinge ? pe ecranul principal pentru patru pași scurți: Uită-te, Aruncă, Găsește, Câștigă.\n\nJOACĂ SINGUR SAU ÎMPREUNĂ\n- Joacă contra calculatorului, pe trei niveluri. Iepurașul e ușor și uită multe, Vulpea ține minte cam jumătate din tablă, iar Bufnița ține minte aproape tot.\n- Dați din mână în mână un iPhone sau un iPad, 2–4 jucători. Fără al doilea dispozitiv, fără invitații, fără așteptare.\n- Scrie numele fiecărui jucător sau sari peste tastatură și joacă drept animal: vulpe, bufniță, urs, broscuță, iepuraș sau pisică. Numele folosite înainte revin ca butoane la o atingere, iar Joacă din nou păstrează aceiași jucători.\n\nVEZI CINE CONDUCE\n- Victorii și partide jucate pentru fiecare jucător, pe nume, cu procentul de victorii.\n- Scorul tău cu Iepurașul, Vulpea și Bufnița, cu seria de victorii de acum și cea mai bună.\n- Statisticile rămân pe dispozitivul tău și le poți șterge oricând.\n\nO TABLĂ CARE CREȘTE ODATĂ CU TINE\n- Mică (16 piese) pentru un început liniștit, Clasică (25), Mare (36) și Uriașă (40) când vrei o provocare adevărată.\n- Modul copii dă mai mult timp de privit tabla și transformă egalitatea în victorie comună. Altfel, egalitatea se decide într-o rundă decisivă, pe o tablă mică-mică.\n- Tura bonus când nimerești e pornită de la început, exact ca în regulile originale – și o poți opri.\n- Tabla umple ecranul pe orice iPhone și iPad.\n\nPLĂCUT LA PRIVIT, PENTRU TOȚI\n- Șase culori vii – roșu, galben, verde, albastru, violet și roz – pe o tablă caldă de lemn.\n- Daltonist sau îți e greu să deosebești două culori? Pornește Forme pe piese și fiecare culoare primește forma ei – cerc, triunghi, pătrat, stea, inimă, romb – pe piese și pe zar, ca tot jocul să se poată juca după forme.\n- Mod luminos și întunecat, Text dinamic, etichete VoiceOver pe fiecare piesă, cu ture, aruncări și potriviri citite cu voce tare, plus suport pentru Reducere mișcare.\n- Zone mari de atins, doar atingeri. Fără tragere, fără apăsare lungă.\n\nLINIȘTIT, DIN PRINCIPIU\n- Fără cont, fără înregistrare, fără adresă de e-mail.\n- Gratuit pe tablele Mică și Clasică, cu Iepurașul și Vulpea, și pentru 2 jucători. O singură achiziție opțională în aplicație deblochează tablele Mare și Uriașă, Bufnița și jocurile cu 3 și 4 jucători. Contribuțiile opționale susțin jocul și nu deblochează nimic. Achizițiile sunt protejate de o întrebare rapidă doar pentru adulți.\n- Nu se colectează date. Numele jucătorilor și statisticile se salvează doar pe dispozitivul tău. Fără instrumente de analiză, reclame sau urmărire.\n- Merge complet offline – în avion, în mașină, oriunde.\n- Clicuri moi și un clinchet când nimerești, oprite cu o atingere.\n\nFăcut pentru iPhone și iPad. Clasificare 4+.\n\nÎntrebări sau idei: ravibitspilani@gmail.com",
+    "privacyPolicyUrl": "https://teja788.github.io/peg-recall/privacy.html",
+    "supportUrl": "https://teja788.github.io/peg-recall/support.html",
+    "marketingUrl": "https://teja788.github.io/peg-recall/"
+  },
+  "captions": {
+    "01-look": "Privește. Ține minte. Găsește.",
+    "02-roll": "Dai o culoare. Alegi piesa.",
+    "03-family": "Pe rând, cu toată familia",
+    "04-rivals": "Iepurașul, Vulpea sau Bufnița?",
+    "05-sizes": "De la 16 la 40 de piese",
+    "06-shapes": "Forme pentru daltoniști",
+    "07-win-dark": "Joacă oriunde, și offline"
+  },
+  "research": {
+    "topSuggestions": [
+      "joc de memorie / jocuri de memorie (both exact-match completions: searched, small)",
+      "jocuri de societate (exact completion: board/party games)",
+      "jocuri cu zaruri (exact completion)",
+      "jocuri de … (logica, cuvinte, cultura generala, copii): people type without diacritics",
+      "jocuri fara internet (seen in the Spain store's completions, typed by Romanian speakers)",
+      "perechi, joc de familie, jocuri pentru doi: no completions"
+    ],
+    "chosenKeywordsWhy": "\"joc de memorie\" is searched and leads the name. Keywords cover the other searched combos: jocuri + societate, jocuri + zaruri, jocuri + fara internet / offline; plus perechi, piese, tabla, lemn, culori, 2/jucatori, bunici. Written without diacritics (as people type them, and fewer bytes). \"joc\", \"de\", \"memorie\", \"familie\", \"prieteni\", \"pe\", \"rând\" are in the name/subtitle."
+  }
+}

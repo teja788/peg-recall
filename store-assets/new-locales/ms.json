@@ -1,0 +1,33 @@
+{
+  "locale": "ms",
+  "uiFile": "ms",
+  "listing": {
+    "name": "Color Catch: Game Ingatan",
+    "nameFallback": "Color Catch: Ingat Warna",
+    "subtitle": "Main Bersama Keluarga & Kawan",
+    "keywords": "permainan,dadu,papan,warna,offline,2,pemain,teka,padan,pasangan,buah,kayu,ingat,giliran,talian",
+    "promotionalText": "Kini dalam Bahasa Melayu! Lawan Arnab, Rubah atau Burung Hantu, atau main bergilir 2 hingga 4 orang pada satu iPhone atau iPad. Tiada akaun diperlukan.",
+    "description": "Permainan ingatan dengan buah kayu yang dimainkan bersama keluarga dan kawan, untuk semua peringkat umur. Lihat buah-buah berwarna, ingat di mana letaknya, kemudian baling dadu dan cari warna itu. Buah paling banyak menang.\n\nBuah berwarna berdiri di atas papan kayu yang bulat. Anda ada beberapa saat untuk melihat, kemudian setiap buah bertukar jadi kayu biasa. Baling dadu, dadu berhenti pada satu warna, dan ketik buah yang anda rasa warna itu. Betul? Buah itu masuk ke dulang anda. Salah? Buah itu tunjuk warnanya kepada semua orang seketika sebelum bersembunyi semula - jadi semua orang di meja belajar sesuatu. Apabila papan kosong, dulang paling penuh menang.\n\nSatu permainan Klasik mengambil masa tiga atau empat minit. Baru mula? Ketik ? di skrin Utama untuk empat langkah ringkas: Lihat, Baling, Cari, Menang.\n\nMAIN SENDIRI ATAU BERSAMA\n- Lawan komputer pada tiga tahap. Arnab mudah dan banyak lupa, Rubah ingat lebih kurang separuh papan, dan Burung Hantu ingat hampir semuanya.\n- Edarkan satu iPhone atau iPad untuk 2 hingga 4 pemain. Tiada peranti kedua, tiada jemputan, tiada menunggu.\n- Taip nama setiap pemain, atau langkau papan kekunci dan main sebagai haiwan - rubah, burung hantu, beruang, katak, arnab atau kucing. Nama yang pernah digunakan kembali sebagai butang sekali ketik, dan Main lagi mengekalkan pemain yang sama.\n\nLIHAT SIAPA DI DEPAN\n- Kemenangan dan jumlah permainan setiap pemain, mengikut nama, dengan kadar menang.\n- Rekod anda menentang Arnab, Rubah dan Burung Hantu, dengan rentetan kemenangan semasa dan terbaik.\n- Statistik kekal pada peranti anda, dan anda boleh set semula bila-bila masa.\n\nPAPAN YANG BERKEMBANG BERSAMA ANDA\n- Kecil (16 buah) untuk permulaan yang santai, Klasik (25), Besar (36), dan Gergasi (40) apabila anda mahukan cabaran sebenar.\n- Mod kanak-kanak memberi lebih masa untuk melihat papan dan menjadikan seri sebagai kemenangan bersama. Jika tidak, seri ditentukan pada papan kecil mati mengejut.\n- Giliran bonus bila betul hidup dari mula, sama seperti buku peraturan asal - dan anda boleh mematikannya.\n- Papan memenuhi skrin pada setiap iPhone dan iPad.\n\nSELESA DI MATA, DAN UNTUK SEMUA\n- Enam warna terang - merah, kuning, hijau, biru, ungu dan merah jambu - di atas papan kayu yang hangat.\n- Buta warna, atau sukar membezakan dua warna? Hidupkan Bentuk pada buah dan setiap warna ada bentuknya sendiri - bulatan, segi tiga, segi empat sama, bintang, hati, berlian - pada buah dan pada dadu, jadi seluruh permainan boleh dimainkan mengikut bentuk.\n- Mod cerah dan gelap, Dynamic Type, label VoiceOver pada setiap buah dengan giliran, balingan dan padanan yang disebut, serta sokongan Reduce Motion.\n- Sasaran besar, ketik sahaja. Tiada seret, tiada tekan lama.\n\nTENANG DAN SENYAP\n- Tiada akaun, tiada pendaftaran, tiada alamat e-mel.\n- Percuma dimainkan pada papan Kecil dan Klasik, menentang Arnab dan Rubah, dan dengan 2 pemain. Satu pembelian dalam aplikasi pilihan membuka papan Besar dan Gergasi, Burung Hantu, serta permainan 3 dan 4 pemain. Tip pilihan menyokong permainan ini dan tidak membuka apa-apa. Pembelian dilindungi soalan ringkas untuk orang dewasa sahaja.\n- Tiada data dikumpul. Nama pemain dan statistik disimpan pada peranti anda sahaja. Tiada kit analitik, iklan atau penjejakan.\n- Berfungsi sepenuhnya di luar talian - dalam kapal terbang, dalam kereta, di mana-mana.\n- Klik lembut dan bunyi loceng bila betul, matikan dengan satu ketik.\n\nDibina untuk iPhone dan iPad. Rating 4+.\n\nSoalan atau idea: ravibitspilani@gmail.com",
+    "privacyPolicyUrl": "https://teja788.github.io/peg-recall/privacy.html",
+    "supportUrl": "https://teja788.github.io/peg-recall/support.html",
+    "marketingUrl": "https://teja788.github.io/peg-recall/"
+  },
+  "captions": {
+    "01-look": "Lihat. Ingat. Cari.",
+    "02-roll": "Baling dadu. Pilih buahnya.",
+    "03-family": "Main bergilir sekeluarga",
+    "04-rivals": "Arnab, Rubah atau Burung Hantu?",
+    "05-sizes": "Dari 16 hingga 40 buah",
+    "06-shapes": "Bentuk untuk yang buta warna",
+    "07-win-dark": "Main di mana-mana, luar talian"
+  },
+  "research": {
+    "topSuggestions": [
+      "permainan (offline, seru, kanak kanak, teka teki, ular…)",
+      "dadu (dadu roll, dadu online, game dadu, pemutar dadu)",
+      "teka (teka teki, teka silang kata, teka kata)",
+      "permainan ingatan / game ingatan / permainan keluarga / permainan papan / game 2 pemain: no suggestions"
+    ],
+    "chosenKeywordsWhy": "Malaysian autocomplete is thin: no suggestions for any memory-game or family-game phrase, so the name uses the plain everyday \"game ingatan\" (memory game, as Malaysians say it; \"permainan ingatan\" would make the name 31 chars). \"permainan\" alone has strong demand (permainan offline is its top completion), so permainan+offline are in the field; \"dadu\" is a real search term (game dadu, from the name word \"game\"). The rest names what is on screen: papan, warna, buah, kayu, giliran, pemain/2, padan/pasangan (matching), teka (teka teki is a big seed), ingat (a different word from ingatan), talian (with offline-style \"luar talian\" phrasing in captions). No kanak-kanak (kids) words: they trip the Kids-category rule."
+  }
+}

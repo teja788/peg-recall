@@ -16,7 +16,7 @@ try {
   /* no locale info: stay in English */
 }
 
-// Arabic: on iOS the layout mirrors by itself (ar is in app.json's
+// Arabic, Hebrew and Urdu: on iOS the layout mirrors by itself (they are in app.json's
 // supportedLocales, so React Native's I18nManager.isRTL is set at launch). The
 // web needs the page told; boards stay left to right (direction: 'ltr').
 if (typeof document !== 'undefined') {

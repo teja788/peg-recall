@@ -56,7 +56,7 @@ test('{placeholders} match the English ones', () => {
       const source = DICTS.en[k.replace(/\.(two|few|many)$/, '.other') as Key];
       const expected = new Set(placeholders(source));
       // Arabic's one and two are words of their own (قطعة واحدة, قطعتان): no {n}
-      if (lang === 'ar' && /\.(one|two)$/.test(k)) expected.delete('n');
+      if ((lang === 'ar' || lang === 'he') && /\.(one|two)$/.test(k)) expected.delete('n');
       assert.deepEqual(new Set(placeholders(dict(lang)[k])), expected, `${lang} ${k}`);
     }
   }
@@ -91,11 +91,11 @@ test('numbers: Western digits in every language, Arabic included', () => {
 
 test('pickLang: first supported preferred locale, else English', () => {
   assert.equal(pickLang(['de-AT', 'en-US']), 'de');
-  assert.equal(pickLang(['fi-FI', 'fr-CA']), 'fr');
+  assert.equal(pickLang(['xx-XX', 'fr-CA']), 'fr');
   assert.equal(pickLang(['pt-PT']), 'pt');
   assert.equal(pickLang(['es_MX']), 'es');
   assert.equal(pickLang(['ja']), 'ja');
-  assert.equal(pickLang(['fi-FI', 'hu']), 'en');
+  assert.equal(pickLang(['xx-XX', 'eo']), 'en');
   assert.equal(pickLang([]), 'en');
   assert.equal(pickLang([null, undefined, '']), 'en');
   // Traditional Chinese for every Chinese locale, Simplified included
@@ -123,6 +123,9 @@ test('pickLang: first supported preferred locale, else English', () => {
   assert.equal(pickLang(['uk-UA']), 'uk');
   assert.equal(pickLang(['cs-CZ']), 'cs');
   assert.equal(pickLang(['ar-SA']), 'ar');
+  for (const [tag, l] of [['sl-SI', 'sl'], ['hr-HR', 'hr'], ['sk-SK', 'sk'], ['ca-ES', 'ca'], ['ro-RO', 'ro'], ['hu-HU', 'hu'], ['el-GR', 'el'], ['fi-FI', 'fi'], ['he-IL', 'he'], ['ml-IN', 'ml'], ['or-IN', 'or'], ['ms-MY', 'ms'], ['gu-IN', 'gu'], ['pa-IN', 'pa'], ['ur-PK', 'ur']]) {
+    assert.equal(pickLang([tag]), l, tag);
+  }
   assert.equal(pickLang(['ar-EG', 'en']), 'ar');
 });
 

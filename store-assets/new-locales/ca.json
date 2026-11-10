@@ -1,0 +1,34 @@
+{
+  "locale": "ca",
+  "uiFile": "ca",
+  "listing": {
+    "name": "Color Catch: Joc de memòria",
+    "nameFallback": "Color Catch: Memòria i daus",
+    "subtitle": "Família i amics, per torns",
+    "keywords": "jocs,parelles,2,jugadors,daus,fitxes,tauler,fusta,avis,sense,wifi,internet,pensar,català,taula",
+    "promotionalText": "Ara en català! Juga contra el Conill, la Guineu o el Mussol, o per torns de 2 a 4 jugadors en un iPhone o iPad. Mussol, 3 i 4 jugadors amb la compra única. Sense compte.",
+    "description": "El joc de memòria amb fitxes de fusta per jugar en família i amb amics, a qualsevol edat. Mira les fitxes de colors, recorda on és cada una, tira el dau i troba el color. Guanya qui reuneix més fitxes.\n\nLes fitxes de colors són dretes sobre un tauler rodó de fusta. Tens uns segons per mirar-les i després totes es tornen de fusta llisa. Tira el dau: surt un color, i toques la fitxa que creus que és d'aquell color. L'has encertat? La fitxa passa a la teva safata. T'has equivocat? Ensenya el seu color a tothom un moment abans d'amagar-se de nou, així que tota la taula aprèn alguna cosa. Quan el tauler queda buit, guanya la safata més plena.\n\nUna partida al tauler Clàssic dura tres o quatre minuts. És el primer cop? Toca el ? a la pantalla d'inici i veuràs quatre passos curts: Mira, Tira, Busca, Guanya.\n\nJUGA SOL O EN COMPANYIA\n- Juga contra l'ordinador en tres nivells. El Conill és fàcil i s'oblida de moltes coses, la Guineu recorda més o menys la meitat del tauler i el Mussol ho recorda gairebé tot.\n- De 2 a 4 jugadors amb un sol iPhone o iPad: us l'aneu passant per torns. Sense un segon aparell, sense invitacions, sense esperes.\n- Escriu el nom de cada jugador o juga sense teclat com un animal: guineu, mussol, ós, granota, conill o gat. Els noms que ja has fet servir tornen com a botons d'un sol toc, i Torna a jugar manté els mateixos jugadors.\n\nQUI VA GUANYANT?\n- Victòries i partides jugades de cada jugador, pel seu nom, amb el percentatge de victòries.\n- El teu marcador contra el Conill, la Guineu i el Mussol, amb la ratxa actual i la millor.\n- Les estadístiques es queden al teu aparell i les pots esborrar quan vulguis.\n\nUN TAULER QUE CREIX AMB TU\n- Petit (16 fitxes) per començar amb calma, Clàssic (25), Gran (36) i Enorme (40) quan vulguis un repte de debò.\n- El mode infantil dona més temps per mirar el tauler i converteix un empat en una victòria compartida. Si no, l'empat es decideix en un desempat en un tauler petitó.\n- El torn extra en encertar ve activat, com al reglament original, i el pots desactivar.\n- El tauler omple la pantalla en qualsevol iPhone o iPad.\n\nFÀCIL DE VEURE, PER A TOTHOM\n- Sis colors vius (vermell, groc, verd, blau, violeta i rosa) sobre un tauler càlid de fusta.\n- Ets daltònic o et costa distingir dos colors? Activa Formes a les fitxes i cada color porta la seva forma (cercle, triangle, quadrat, estrella, cor i rombe) a les fitxes i al dau, de manera que pots jugar tota la partida per formes.\n- Mode clar i fosc, text dinàmic, etiquetes de VoiceOver a cada fitxa amb avisos de torns, tirades i encerts, i compatibilitat amb Redueix el moviment.\n- Botons grans i només tocs: res d'arrossegar ni de mantenir premut.\n\nTRANQUIL PER DISSENY\n- Sense compte, sense registre, sense correu electrònic.\n- Gratis als taulers Petit i Clàssic, contra el Conill i la Guineu, i amb 2 jugadors. Una compra opcional dins l'app desbloqueja els taulers Gran i Enorme, el Mussol i les partides de 3 i 4 jugadors. Les propines opcionals donen suport al joc i no desbloquegen res. Abans de cada compra hi ha una pregunta ràpida només per a adults.\n- No recull cap dada. Els noms i les estadístiques es desen només al teu aparell. Sense eines d'anàlisi, publicitat ni seguiment.\n- Funciona del tot sense connexió: a l'avió, al cotxe, on sigui.\n- Clics suaus i una campaneta quan encertes; s'apaguen amb un toc.\n\nFet per a iPhone i iPad. Classificació 4+.\n\nPreguntes o idees: ravibitspilani@gmail.com",
+    "privacyPolicyUrl": "https://teja788.github.io/peg-recall/privacy.html",
+    "supportUrl": "https://teja788.github.io/peg-recall/support.html",
+    "marketingUrl": "https://teja788.github.io/peg-recall/"
+  },
+  "captions": {
+    "01-look": "Mira. Recorda. Troba-la.",
+    "02-roll": "Tira un color. Tria la fitxa.",
+    "03-family": "Per torns, en família",
+    "04-rivals": "Conill, Guineu o Mussol?",
+    "05-sizes": "De 16 a 40 fitxes",
+    "06-shapes": "Formes per a daltònics",
+    "07-win-dark": "Juga on vulguis, sense connexió"
+  },
+  "research": {
+    "storefront": "Spain (es). Apple indexes es-ES, ca and en-GB there, so these keywords add Catalan words on top of the es-ES ones (parejas, jugadores, dados, fichas, tablero, madera, sin conexión) rather than repeating them.",
+    "topSuggestions": [
+      "jocs (10 completions: jocs gratis, jocs sense wifi, jocs de pensar, jocs sense internet, jocs infantils)",
+      "en català (caça mots: jocs en català, l'hora en català): people add \"català\" to find Catalan apps",
+      "memòria (only Spanish completions: juegos memoria gratis, entrenar memoria)",
+      "joc de memòria, parelles, joc de taula, jocs per a dos: no completions (little Catalan-only volume)"
+    ],
+    "chosenKeywordsWhy": "Catalan search volume is small and mostly lands on \"jocs …\" phrases: jocs + sense/wifi/internet and jocs + pensar are real completions, and \"català\" is how people look for apps in Catalan. The rest are the game's own words (parelles, daus, fitxes, tauler, fusta, taula for \"joc de taula\", 2/jugadors, avis). \"joc\", \"de\", \"memòria\", \"família\", \"amics\", \"per\", \"torns\" are already in the name/subtitle; \"colors\" left out as too close to the brand word."
+  }
+}

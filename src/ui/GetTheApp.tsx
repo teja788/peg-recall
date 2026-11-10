@@ -9,6 +9,7 @@ import { Image, Linking, Platform, Text, View, useWindowDimensions } from 'react
 
 import { tr } from '../i18n';
 import { count } from '../store/analytics';
+import { hasStore } from '../store/storefront';
 import { useTheme } from '../theme';
 import { Card, WideButton } from './online';
 import { PLAY_URL } from './shareText';
@@ -18,7 +19,8 @@ const QR = require('../../assets/qr-appstore.png');
 export function GetTheApp() {
   const t = useTheme();
   const { width } = useWindowDimensions();
-  if (Platform.OS !== 'web') return null;
+  // the app, and `expo start --web` (screenshots, iPad checks), sell the unlock themselves
+  if (Platform.OS !== 'web' || hasStore) return null;
   const wide = width >= 700;
   const open = () => {
     count({ 'getapp.tap': 1 });

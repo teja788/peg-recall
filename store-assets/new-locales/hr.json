@@ -1,0 +1,33 @@
+{
+  "locale": "hr",
+  "uiFile": "hr",
+  "listing": {
+    "name": "Color Catch: Igra pamćenja",
+    "nameFallback": "Color Catch: Zapamti boje",
+    "subtitle": "Za dvoje, obitelj i prijatelje",
+    "keywords": "igre,u,parove,memorija,društvene,kocka,boje,čepići,bez,interneta,2,igrača,drvene,offline",
+    "promotionalText": "Sada na hrvatskom! Igraj protiv Zeke, Lisice ili Sove ili se izmjenjujte 2 do 4 igrača na jednom iPhoneu ili iPadu. Sova, 3 i 4 igrača: jednokratna kupnja.",
+    "description": "Igra pamćenja s drvenim čepićima koju obitelji i prijatelji igraju zajedno, u svakoj dobi. Pogledaj obojene čepiće, zapamti gdje stoje, zatim baci kocku i pronađi boju. Pobjeđuje tko ima najviše čepića.\n\nObojeni čepići stoje na okrugloj drvenoj ploči. Imaš nekoliko sekundi da ih pogledaš, a onda svi izgledaju kao obično drvo. Baci kocku, ona pokaže boju, a ti dodirni čepić za koji misliš da je te boje. Pogodak? Čepić ide u tvoju zdjelicu. Promašaj? Na tren svima pokaže svoju boju prije nego što se opet sakrije – tako cijeli stol nešto nauči. Kad je ploča prazna, pobjeđuje najpunija zdjelica.\n\nIgra na Klasičnoj ploči traje tri do četiri minute. Prvi put? Dodirni ? na početnom zaslonu za četiri kratka koraka: Gledaj, Baci, Pronađi, Pobijedi.\n\nIGRAJ PROTIV RAČUNALA ILI ZAJEDNO\n- Igraj protiv računala na tri razine. Zeko je lagan i puno zaboravlja, Lisica pamti otprilike pola ploče, a Sova gotovo sve.\n- Dodajte jedan iPhone ili iPad u krug za 2 do 4 igrača. Bez drugog uređaja, bez pozivnica, bez čekanja.\n- Upiši ime svakog igrača ili preskoči tipkovnicu i igraj kao životinja: lisica, sova, medo, žabica, zeko ili maca. Već korištena imena vraćaju se kao gumbi na jedan dodir, a Igraj ponovno zadržava iste igrače.\n\nTKO VODI\n- Pobjede i odigrane igre za svakog igrača, po imenu, s postotkom pobjeda.\n- Tvoj rezultat protiv Zeke, Lisice i Sove, s trenutnim i najboljim nizom pobjeda.\n- Statistika ostaje na tvom uređaju i možeš je poništiti kad god želiš.\n\nPLOČA KOJA RASTE S TOBOM\n- Mala (16 čepića) za lagan početak, Klasična (25), Velika (36) i Ogromna (40) kad želiš pravi izazov.\n- Dječji način daje više vremena za gledanje ploče, a neriješeno pretvara u zajedničku pobjedu. Inače neriješeno odlučuje raspucavanje na malenoj ploči.\n- Dodatni potez kod pogotka uključen je od početka, kao u izvornim pravilima – i možeš ga isključiti.\n- Ploča ispunjava zaslon na svakom iPhoneu i iPadu.\n\nUGODNO ZA OČI I ZA SVAKOGA\n- Šest jarkih boja – crvena, žuta, zelena, plava, ljubičasta i ružičasta – na toploj drvenoj ploči.\n- Daltonizam ili teško razlikuješ dvije boje? Uključi Oblike na čepićima i svaka boja dobiva svoj oblik – krug, trokut, kvadrat, zvijezdu, srce, romb – na čepićima i na kocki, pa se cijela igra može igrati po oblicima.\n- Svijetli i tamni način, Dynamic Type, VoiceOver oznake na svakom čepiću s izgovorenim potezima, bacanjima i pogocima te podrška za Smanjenje pokreta.\n- Velike površine za dodir, samo dodir. Bez povlačenja, bez dugih pritisaka.\n\nMIRNO I TIHO\n- Bez računa, bez registracije, bez adrese e-pošte.\n- Besplatno igranje na Maloj i Klasičnoj ploči, protiv Zeke i Lisice te s 2 igrača. Jedna neobavezna kupnja u aplikaciji otključava Veliku i Ogromnu ploču, Sovu te igre s 3 i 4 igrača. Neobavezne napojnice podržavaju igru i ništa ne otključavaju. Kupnje su zaštićene kratkim pitanjem samo za odrasle.\n- Ne prikupljamo podatke. Imena igrača i statistika spremaju se samo na tvom uređaju. Bez alata za analitiku, oglase ili praćenje.\n- Radi potpuno bez interneta – u avionu, u autu, bilo gdje.\n- Tihi klikovi i zvonce kod pogotka, isključuju se jednim dodirom.\n\nNapravljeno za iPhone i iPad. Dobna oznaka 4+.\n\nPitanja ili ideje: ravibitspilani@gmail.com",
+    "privacyPolicyUrl": "https://teja788.github.io/peg-recall/privacy.html",
+    "supportUrl": "https://teja788.github.io/peg-recall/support.html",
+    "marketingUrl": "https://teja788.github.io/peg-recall/"
+  },
+  "captions": {
+    "01-look": "Gledaj. Zapamti. Pronađi.",
+    "02-roll": "Baci boju. Odaberi čepić.",
+    "03-family": "Igrajte redom s cijelom obitelji",
+    "04-rivals": "Zeko, Lisica ili Sova?",
+    "05-sizes": "Od 16 do 40 čepića",
+    "06-shapes": "Oblici za daltoniste",
+    "07-win-dark": "Igraj svugdje, i bez interneta"
+  },
+  "research": {
+    "topSuggestions": [
+      "igre (hr): igre za dvoje, igre za djecu, igre bez interneta, igre, igre za djevojcice, igre za cure, igre u dvoje, igre za parove, igre kuhanja, igre za djecu besplatne",
+      "igre za dvoje: igre za dvoje, igre za dvoje online",
+      "memorija: memorija",
+      "društvene igre, igra pamćenja, pamćenje, dječje igre: no suggestions"
+    ],
+    "chosenKeywordsWhy": "\"igre za dvoje\" is the top game suggestion: the subtitle starts \"Za dvoje\" and \"igre\" is in keywords. \"u\" and \"parove\" cover \"igre u dvoje\" and \"igre za parove\"; \"bez,interneta\" covers \"igre bez interneta\" (also true: fully offline). \"memorija\" is the common Croatian name for the memory card game and has its own suggestion; it is a keyword only, never in name/subtitle (see the trademark note in the report). The name uses the generic \"Igra pamćenja\". društvene (board/party games), kocka, boje, čepići, 2,igrača, drvene, offline fill the rest. Kids words (\"za djecu\") left out on purpose."
+  }
+}

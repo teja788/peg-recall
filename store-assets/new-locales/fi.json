@@ -1,0 +1,34 @@
+{
+  "locale": "fi",
+  "uiFile": "fi",
+  "listing": {
+    "name": "Color Catch: Muistipeli",
+    "nameFallback": "Color Catch: Puinen muistipeli",
+    "subtitle": "Lautapeli koko perheelle",
+    "keywords": "kaksinpeli,noppa,värit,nappulat,pelit,kahdelle,2,pelaajaa,parit,perhepeli,offline,ystävät,puinen",
+    "promotionalText": "Nyt suomeksi! Pelaa Pupua, Kettua tai Pöllöä vastaan tai vuorotellen 2–4 pelaajan kesken yhdellä iPhonella tai iPadilla. Pöllö sekä 3 ja 4 pelaajaa kuuluvat kertaostoon.",
+    "description": "Puinen muistipeli, jota perheet ja ystävät pelaavat yhdessä, iästä riippumatta. Katso värikkäitä nappuloita, muista, missä ne ovat, heitä noppaa ja löydä väri. Eniten nappuloita kerännyt voittaa.\n\nVärikkäät nappulat seisovat pyöreällä puulaudalla. Saat katsoa muutaman sekunnin, sitten jokainen nappula muuttuu tavalliseksi puuksi. Heitä noppaa, se näyttää värin, ja napauta nappulaa, jonka uskot olevan sitä väriä. Osuma? Nappula siirtyy kulhoosi. Huti? Se näyttää värinsä kaikille hetken ja piiloutuu taas – niin koko pöytä oppii jotain. Kun lauta on tyhjä, eniten kerännyt voittaa.\n\nPeli Klassisella laudalla kestää kolmesta neljään minuuttia. Ensimmäistä kertaa? Napauta alkunäytön ?-merkkiä, niin saat neljä lyhyttä vaihetta: Katso, Heitä, Etsi, Voita.\n\nPELAA YKSIN TAI YHDESSÄ\n- Pelaa tietokonetta vastaan kolmella tasolla. Pupu on helppo ja unohtaa paljon, Kettu muistaa noin puolet laudasta ja Pöllö muistaa melkein kaiken.\n- Kierrätä yhtä iPhonea tai iPadia 2–4 pelaajan kesken. Ei toista laitetta, ei kutsuja, ei odottelua.\n- Kirjoita jokaisen pelaajan nimi tai ohita näppäimistö ja pelaa eläimenä: kettu, pöllö, karhu, sammakko, pupu tai kissa. Aiemmin käytetyt nimet palaavat yhden napautuksen painikkeiksi, ja Pelaa uudestaan pitää samat pelaajat.\n\nKUKA JOHTAA?\n- Voitot ja pelatut pelit jokaiselle pelaajalle nimellä ja voittoprosentilla.\n- Tuloksesi Pupua, Kettua ja Pöllöä vastaan, nykyinen ja paras voittoputki.\n- Tilastot pysyvät laitteellasi, ja voit nollata ne milloin vain.\n\nLAUTA, JOKA KASVAA KANSSASI\n- Pieni (16 nappulaa) rauhalliseen alkuun, Klassinen (25), Iso (36) ja Valtava (40), kun haluat kunnon haasteen.\n- Lapsitilassa lautaa saa katsoa pidempään, ja tasapeli on yhteinen voitto. Muuten tasapeli ratkaistaan ratkaisukierroksella pikkuruisella laudalla.\n- Lisävuoro osumasta on päällä alusta asti, suoraan alkuperäisistä säännöistä – ja voit laittaa sen pois.\n- Lauta täyttää näytön jokaisessa iPhonessa ja iPadissa.\n\nHELPPO SILMILLE JA KAIKILLE\n- Kuusi selkeää väriä – punainen, keltainen, vihreä, sininen, violetti ja pinkki – lämpimällä puulaudalla.\n- Värisokea, tai onko kahta väriä vaikea erottaa? Laita Muodot nappuloissa päälle, niin jokaisella värillä on oma muotonsa – ympyrä, kolmio, neliö, tähti, sydän, vinoneliö – nappuloissa ja nopassa, joten koko pelin voi pelata muotojen avulla.\n- Vaalea ja tumma tila, Dynaaminen teksti, VoiceOver-selitteet jokaisessa nappulassa, ääneen luetut vuorot, heitot ja osumat sekä Vähennä liikettä -tuki.\n- Isot kosketusalueet, pelkkä napautus. Ei vetämistä, ei pitkiä painalluksia.\n\nRAUHALLISTA JA HUOLETONTA\n- Ei tiliä, ei rekisteröitymistä, ei sähköpostiosoitetta.\n- Pelaa ilmaiseksi Pieni- ja Klassinen-laudoilla, Pupua ja Kettua vastaan ja kahden pelaajan kesken. Yksi vapaaehtoinen kertaosto sovelluksessa avaa Iso- ja Valtava-laudat, Pöllön sekä 3 ja 4 pelaajan pelit. Vapaaehtoiset tipit tukevat peliä eivätkä avaa mitään. Ostojen edessä on nopea kysymys vain aikuisille.\n- Tietoja ei kerätä. Pelaajien nimet ja tilastot tallennetaan vain laitteellesi. Ei analytiikka-, mainos- tai seurantatyökaluja.\n- Toimii täysin offline – lentokoneessa, autossa, missä vain.\n- Pehmeät napsahdukset ja kilahdus osumasta, pois yhdellä napautuksella.\n\nTehty iPhonelle ja iPadille. Ikäraja 4+.\n\nKysymyksiä tai ideoita: ravibitspilani@gmail.com",
+    "privacyPolicyUrl": "https://teja788.github.io/peg-recall/privacy.html",
+    "supportUrl": "https://teja788.github.io/peg-recall/support.html",
+    "marketingUrl": "https://teja788.github.io/peg-recall/"
+  },
+  "captions": {
+    "01-look": "Katso. Muista. Löydä.",
+    "02-roll": "Heitä väri. Valitse nappula.",
+    "03-family": "Vuorotellen koko perheellä",
+    "04-rivals": "Pupu, Kettu vai Pöllö?",
+    "05-sizes": "16–40 nappulaa",
+    "06-shapes": "Muodot värisokeille",
+    "07-win-dark": "Pelaa missä vain, myös offline"
+  },
+  "research": {
+    "topSuggestions": [
+      "muistipeli → \"muistipeli\" (top completion of \"muisti\" too), plus one app name",
+      "kaksinpeli → \"kaksinpeli\", \"kaksinpelit\"",
+      "lautapeli → itself; noppa → \"noppa\", \"noppaa\"",
+      "no suggestions for: kahden pelaajan, perhepeli, pelit kahdelle; \"parit\" only returns unrelated apps"
+    ],
+    "chosenKeywordsWhy": "muistipeli is the clear search term and anchors the name; lautapeli autocompletes and leads the subtitle (\"koko perheelle\" = for the whole family). kaksinpeli (two-player game) is searched, so it leads the keywords, then noppa, värit, nappulat, pelit/kahdelle/2/pelaajaa for two-player combos, parit (pairs), perhepeli, offline, ystävät and puinen (wooden). 99 bytes.",
+    "uncertain": "\"Dynaaminen teksti\" and \"Vähennä liikettä\" are my best guess at the iOS Finnish names. Huge board is \"Valtava\"; \"tipit\" for tips is colloquial but common."
+  }
+}
