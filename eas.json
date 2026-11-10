@@ -14,13 +14,19 @@
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview"
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_COUNTS_URL": "https://app-counts.vivekananda-archive.workers.dev/c"
+      }
     },
     "production": {
       "autoIncrement": true,
       "channel": "production",
       "ios": {
         "image": "macos-sequoia-15.6-xcode-26.2"
+      },
+      "env": {
+        "EXPO_PUBLIC_COUNTS_URL": "https://app-counts.vivekananda-archive.workers.dev/c"
       }
     }
   },
