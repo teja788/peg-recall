@@ -5,8 +5,8 @@ The same game in any browser, hosted on Cloudflare Pages. Plan and reasons:
 
 ## What the web game is
 
-- Free: Small and Classic boards, Bunny and Fox, 2 players, and the daily board (Small,
-  as in the app).
+- Free: Small and Classic boards, Bunny and Fox, 2 players, and the daily board
+  (Big at weekends, as in the app).
 - Locked items show a padlock and open a sheet that sends people to the App
   Store. Nothing can be bought on the web, and there are **no free tries**
   (browser storage can be cleared, so a try would never run out).

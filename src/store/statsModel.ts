@@ -31,7 +31,7 @@ export interface VsAiStats extends WinRecord {
   bestStreak: number;
 }
 
-/** The daily board (PLAN-v1.3 S2): Small, solo vs Fox, the same for everyone that day. */
+/** The daily board (PLAN-v1.3 S2): Classic (Big at weekends), solo vs Fox, the same for everyone that day. */
 export interface DailyStats {
   /** board number of the last daily board played (see `dailyNumber`) */
   n: number;
@@ -216,10 +216,11 @@ export function dailyNumber(now: number): number {
   return Math.max(0, Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - DAILY_EPOCH) / 86_400_000));
 }
 
-/** Board #n's board: Small every day (owner, Nov 10 2026; until then Classic,
- *  and Big at weekends). */
-export function dailyBoard(_n: number): BoardSize {
-  return 'small';
+/** Board #n's board: Big on a Saturday or Sunday (playable without the unlock,
+ *  for the daily game only), else Classic. #0, 2026-09-24, was a Thursday. */
+export function dailyBoard(n: number): BoardSize {
+  const weekday = (4 + n) % 7;
+  return weekday === 6 || weekday === 0 ? 'big' : 'classic';
 }
 
 /** The streak to celebrate on board #n's game-over: 3, 7, 14 or 30 days, only

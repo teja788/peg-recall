@@ -165,6 +165,7 @@ export const ar: Strings = {
   'daily.title': 'لوحة اليوم ⁦#{n}⁩',
   'daily.sub': 'اللوحة نفسها للجميع اليوم',
   'daily.done': 'اليوم: {pegs} · سلسلة {streak}',
+  'daily.weekend': 'عطلة نهاية الأسبوع: اللوحة الكبيرة للجميع',
   'daily.doneBest': 'اليوم: {pegs} · سلسلة {streak} · الأفضل {best}',
   'daily.inARow.one': 'يوم واحد على التوالي!',
   'daily.inARow.two': 'يومان على التوالي!',

@@ -152,6 +152,7 @@ export const vi: Strings = {
   'daily.title': 'Bàn hôm nay #{n}',
   'daily.sub': 'Hôm nay ai cũng chơi cùng một bàn',
   'daily.done': 'Hôm nay {pegs} · chuỗi {streak}',
+  'daily.weekend': 'Cuối tuần: bàn lớn cho mọi người',
   'daily.doneBest': 'Hôm nay {pegs} · chuỗi {streak} · cao nhất {best}',
   'daily.inARow.one': '{n} ngày liên tiếp!',
   'daily.inARow.other': '{n} ngày liên tiếp!',
