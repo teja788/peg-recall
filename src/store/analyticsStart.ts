@@ -13,14 +13,17 @@ import { AppState, Platform } from 'react-native';
 
 import { lang } from '../i18n';
 import { setCounts } from './analytics';
-import { createCounts } from './counts';
+import { createCounts, type Counts } from './counts';
 import { storage } from './storage';
 
 const URL = process.env.EXPO_PUBLIC_COUNTS_URL ?? '';
 
+let counts: Counts | null = null;
+
+/** Safe to call twice (React runs effects twice in development): one counter. */
 export function startAnalytics(): () => void {
   if (!URL) return () => {};
-  const counts = createCounts({
+  counts ??= createCounts({
     app: 'color-catch',
     url: URL,
     storage,
@@ -34,8 +37,9 @@ export function startAnalytics(): () => void {
     installedAt: async () =>
       Platform.OS === 'web' ? Date.now() : ((await Application.getInstallationTimeAsync())?.getTime() ?? null),
   });
-  setCounts(counts);
-  counts.foreground(true);
-  const sub = AppState.addEventListener('change', (s) => counts.foreground(s === 'active'));
+  const c = counts;
+  setCounts(c);
+  c.foreground(true);
+  const sub = AppState.addEventListener('change', (s) => c.foreground(s === 'active'));
   return () => sub.remove();
 }
