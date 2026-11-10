@@ -10,6 +10,7 @@ import { Text } from 'react-native';
 import { tr } from '../../src/i18n';
 import { onlineEnabled } from '../../src/online/config';
 import { formatCode, normalizeCode } from '../../src/online/protocol';
+import { isBadName } from '../../src/online/wordFilter';
 import { useRoom } from '../../src/store/room';
 import { useSettings } from '../../src/store/settings';
 import { useTheme } from '../../src/theme';
@@ -25,6 +26,8 @@ export default function JoinScreen() {
   const seat = useRoom((s) => s.seat);
   const roomCode = useRoom((s) => s.code);
   const hydrated = useSettings((s) => s.hydrated);
+  /** the word filter refuses this name: YouRow says so, and nothing is sent */
+  const badName = useSettings((s) => isBadName(s.names[0]));
   const [asked, setAsked] = useState(false);
 
   // already sitting in this room on this device: back to it
@@ -44,7 +47,7 @@ export default function JoinScreen() {
   }, [error]);
 
   const join = () => {
-    if (!code) return;
+    if (!code || badName) return;
     const s = useSettings.getState();
     useRoom.getState().clear();
     setAsked(true);
@@ -75,7 +78,7 @@ export default function JoinScreen() {
       <Card>
         <YouRow />
       </Card>
-      <WideButton text={tr('online.join')} filled disabled={asked || !hydrated} onPress={join} />
+      <WideButton text={tr('online.join')} filled disabled={asked || !hydrated || badName} onPress={join} />
     </OnlineFrame>
   );
 }

@@ -12,6 +12,7 @@ import { tr } from '../src/i18n';
 import { HOST_LIMITS, onlineEnabled } from '../src/online/config';
 import { needsUnlock } from '../src/online/limits';
 import { normalizeCode, type TimerMode } from '../src/online/protocol';
+import { isBadName } from '../src/online/wordFilter';
 import { useRoom } from '../src/store/room';
 import { BOARD_CYCLE, useSettings } from '../src/store/settings';
 import { useTheme } from '../src/theme';
@@ -29,6 +30,8 @@ export default function OnlineScreen() {
   const code = useRoom((s) => s.code);
   const seat = useRoom((s) => s.seat);
   const unlocked = useSettings((s) => s.unlocked);
+  /** the word filter refuses this name: YouRow says so, and nothing is sent */
+  const badName = useSettings((s) => isBadName(s.names[0]));
 
   const [board, setBoard] = useState<BoardSize>('small');
   const [seats, setSeats] = useState<2 | 3 | 4>(2);
@@ -59,6 +62,7 @@ export default function OnlineScreen() {
   };
 
   const create = () => {
+    if (badName) return;
     if (locked({ board, maxSeats: seats })) return setUnlocking(true);
     const s = useSettings.getState();
     const { name, avatar } = me();
@@ -70,7 +74,7 @@ export default function OnlineScreen() {
 
   const join = () => {
     const c = normalizeCode(codeText);
-    if (!c) return;
+    if (!c || badName) return;
     const { name, avatar } = me();
     fresh();
     useRoom.getState().join(c, name, avatar);
@@ -148,7 +152,7 @@ export default function OnlineScreen() {
         {tr(timer === 'relaxed' ? 'online.relaxedHint' : 'online.quickHint')}
       </Text>
 
-      <WideButton text={tr('online.create')} filled disabled={asked} onPress={create} />
+      <WideButton text={tr('online.create')} filled disabled={asked || badName} onPress={create} />
 
       <Text accessibilityRole="header" style={{ ...t.type.heading, color: t.c.onBackdrop, marginTop: t.spacing.lg }}>
         {tr('online.haveCode')}
@@ -178,7 +182,7 @@ export default function OnlineScreen() {
             minWidth: 0,
           }}
         />
-        <WideButton text={tr('online.join')} disabled={asked || !normalizeCode(codeText)} onPress={join} />
+        <WideButton text={tr('online.join')} disabled={asked || badName || !normalizeCode(codeText)} onPress={join} />
       </Card>
     </OnlineFrame>
   );

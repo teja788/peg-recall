@@ -425,6 +425,46 @@ test('F09: a removal on one home Wi-Fi does not lock out the rest of the family 
   assert.deepEqual(mum.errors, [], 'the host is still here from that address');
 });
 
+test('D11: the host removes a player mid-game: the computer finishes their seat; no coming back', () => {
+  const { hub, clock } = makeHub();
+  const { host, guests } = room(hub, 2);
+  const [gone, stays] = guests;
+  host.say({ type: 'start' });
+  clock.advance(10_000); // the reveal ends
+  for (const d of [host, ...guests]) d.read();
+  stays.say({ type: 'removeSeat', seat: 'p2' });
+  assert.deepEqual(stays.errors, ['notHost'], 'only the host removes');
+  host.say({ type: 'removeSeat', seat: 'p2' });
+  gone.read();
+  assert.equal(gone.ended, 'removed', 'they are told, as in the waiting room');
+  assert.deepEqual(host.room?.seats.map((s) => [s.id, s.online]), [['p1', true], ['p2', false], ['p3', true]]);
+  const seq = host.seq;
+  gone.say({ type: 'intent', action: { type: 'ROLL' } });
+  assert.equal(host.seq, seq, 'their moves no longer count');
+  // not back with the seat token, nor as someone new from the same address
+  const back = new Device(hub, 'web', gone.ip).hello();
+  back.say({ type: 'resume', code: host.code!, token: gone.token! });
+  back.say({ type: 'join', code: host.code!, name: 'Other', avatar: 'cat' });
+  assert.deepEqual(back.errors, ['notFound', 'removed']);
+  playOut(clock, [host, stays]);
+  assert.ok(host.actions.some((a) => a.by === 'p2' && a.standIn), 'the computer played their turns');
+  assert.equal(host.room?.status, 'over');
+  const later = new Device(hub, 'web', gone.ip).hello().say({ type: 'join', code: host.code!, avatar: 'cat' });
+  assert.deepEqual(later.errors, ['removed'], 'nor for the next game');
+});
+
+test('D11: a name the word filter refuses is dropped: the seat shows its animal', () => {
+  const { hub } = makeHub();
+  const host = new Device(hub, 'ios').hello();
+  host.say({ type: 'create', settings: SETTINGS, name: 'F.u.c.k', avatar: 'fox', unlocked: false });
+  new Device(hub, 'web', '10.0.1.1').hello().say({ type: 'join', code: host.code!, name: 'sh1t', avatar: 'owl' });
+  new Device(hub, 'web', '10.0.1.2').hello().say({ type: 'join', code: host.code!, name: 'Ashley', avatar: 'cat' });
+  host.read();
+  assert.deepEqual(host.room?.seats.map((s) => s.name), [undefined, undefined, 'Ashley']);
+  host.say({ type: 'start' });
+  assert.deepEqual(host.state?.config.players.map((p) => p.name), [undefined, undefined, 'Ashley']);
+});
+
 test('F04: the same seat in a second window: the first is told "replaced" and let go', () => {
   const { hub } = makeHub();
   const { host } = room(hub, 1);

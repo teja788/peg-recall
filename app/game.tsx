@@ -58,7 +58,7 @@ import { TRAY_GAP, tableLayout } from '../src/ui/gameLayout';
 import { isolate, playerLabel } from '../src/ui/names';
 import { challengeBanner, parseChallenge } from '../src/ui/challenge';
 import { count } from '../src/store/analytics';
-import { AwayBar, BreakOverlay, seatName, useTurnCountdown } from '../src/ui/online';
+import { AwayBar, BreakOverlay, RemoveSheet, seatName, useTurnCountdown } from '../src/ui/online';
 import { ReactButton, ReactionBubbles } from '../src/ui/reactions';
 import { MISSED_WARN, NUDGE_MS, TURN_MS } from '../src/online/protocol';
 import { tr, trn } from '../src/i18n';
@@ -235,6 +235,8 @@ export default function GameScreen() {
   const lastAt = useRoom((s) => s.lastAt);
   /** online: the room menu is up (the board does not stop for it) */
   const [menu, setMenu] = useState(false);
+  /** online: the host's "Remove a player" is up */
+  const [removing, setRemoving] = useState(false);
   const unlocked = useSettings((s) => s.unlocked);
 
   const hydrated = useSettings((s) => s.hydrated);
@@ -668,6 +670,11 @@ export default function GameScreen() {
   // never for an unlocked player (a purchase from the card hides it at once)
   const card = !online && !unlocked && upsell && upsell.key === overKey ? upsell.card : null;
   const hostSeat = roomInfo?.seats.find((x) => x.id === roomInfo.host);
+  /** the people the host can remove: everyone else who sat down as a person */
+  const others =
+    roomInfo && remote && roomInfo.host === remote.seat
+      ? roomInfo.seats.filter((x) => x.kind === 'human' && x.id !== remote.seat)
+      : [];
   const awaySeat = roomInfo?.seats.find((x) => x.kind === 'human' && (!x.online || x.away) && x.id !== remote?.seat);
   const missed = meSeat?.missed ?? 0;
   const onlineNote = !online || meSeat?.away
@@ -911,6 +918,17 @@ export default function GameScreen() {
               useRoom.getState().stepAway(!meSeat?.away);
             },
           },
+          ...(others.length > 0
+            ? [
+                {
+                  label: tr('online.removeMenu'),
+                  onPress: () => {
+                    setMenu(false);
+                    setRemoving(true);
+                  },
+                },
+              ]
+            : []),
           {
             label: tr('online.report'),
             onPress: () => void Linking.openURL(reportUrl(roomCode, remote?.seat ?? null)).catch(() => {}),
@@ -933,6 +951,17 @@ export default function GameScreen() {
 
     {online && meSeat?.away && !breakInfo && view.phase !== 'gameOver' ? (
       <AwayBar onBack={() => useRoom.getState().stepAway(false)} />
+    ) : null}
+
+    {removing && others.length > 0 && view.phase !== 'gameOver' ? (
+      <RemoveSheet
+        seats={others}
+        onClose={() => setRemoving(false)}
+        onRemove={(seat) => {
+          setRemoving(false);
+          useRoom.getState().removeSeat(seat);
+        }}
+      />
     ) : null}
 
     {note ? (

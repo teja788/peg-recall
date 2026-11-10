@@ -73,6 +73,14 @@ test('names are cleaned like the app cleans them; an empty one means "no name"',
     avatar: 'fox',
   });
   assert.equal(send({ type: 'join', code: '482913', avatar: 'fox', name: 42 }), null);
+  // D11: a name the word filter refuses is dropped, so the seat shows its animal
+  assert.deepEqual(send({ type: 'join', code: '482913', avatar: 'fox', name: 'sh1t' }), {
+    type: 'join',
+    code: '482913',
+    avatar: 'fox',
+  });
+  const created = send({ type: 'create', settings: SETTINGS, name: 'F u c k', avatar: 'fox', unlocked: false });
+  assert.equal(created && created.type === 'create' ? created.name : 'kept', undefined);
 });
 
 test('anything else is refused', () => {

@@ -23,6 +23,7 @@ import type {
 } from '../engine/types';
 import { BOARD_SPECS } from '../engine/types';
 import { cleanName } from '../store/settingsModel';
+import { isBadName } from './wordFilter';
 
 /** Bumped when a message changes shape. The server accepts this one only.
  *  2: breaks, step away, reactions, missed turns. */
@@ -222,11 +223,13 @@ function parseJson(raw: unknown): Obj | null {
   }
 }
 
-/** A typed name, cleaned like the app's own (`cleanName`); '' → no name. */
+/** A typed name, cleaned like the app's own (`cleanName`); '' → no name, and
+ *  so is a name the word filter refuses (D11): the seat shows its animal. */
 function nameOf(v: unknown): string | undefined | null {
   if (v === undefined) return undefined;
   if (typeof v !== 'string') return null;
-  return cleanName(v) || undefined;
+  const name = cleanName(v);
+  return name && !isBadName(name) ? name : undefined;
 }
 
 function settingsOf(v: unknown): RoomSettings | null {
