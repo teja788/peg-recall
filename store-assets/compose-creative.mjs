@@ -49,7 +49,7 @@ h1{position:absolute;top:240px;width:100%;margin:0;text-align:center;font-size:2
 img{height:1860px;border-radius:110px;border:22px solid #2B2622;box-shadow:0 40px 90px rgba(60,40,20,.28)}
 </style>
 <div class=dots>${style.dots.map(c => `<i style="background:${c}"></i>`).join('')}</div>
-<h1>${captions.captions[locale]['01-look']}</h1>
+<h1 dir="auto">${captions.captions[locale]['01-look']}</h1>
 <div class=row>${['01-look', '02-roll', '03-family'].map(s => `<img src="${b64(frame(locale, s))}">`).join('')}</div>`;
 
 const browser = await chromium.launch();
