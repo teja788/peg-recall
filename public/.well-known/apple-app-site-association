@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["9WU98AXT3W.com.raviteja.pegrecall"],
+        "components": [
+          { "/": "/join/*", "comment": "room invite links open the join screen" },
+          { "/": "/d/*", "comment": "beat-my-score links open that day's board" }
+        ]
+      }
+    ]
+  }
+}

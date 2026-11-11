@@ -15,6 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.raviteja.pegrecall",
+      "associatedDomains": ["applinks:colorcatch.pages.dev"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
